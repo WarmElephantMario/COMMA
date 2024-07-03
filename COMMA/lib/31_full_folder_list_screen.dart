@@ -6,8 +6,7 @@ class FullFolderListScreen extends StatefulWidget {
   final List<String> folders;
   final String title;
 
-  const FullFolderListScreen(
-      {super.key, required this.folders, required this.title});
+  const FullFolderListScreen({required this.folders, required this.title});
 
   @override
   _FullFolderListScreenState createState() => _FullFolderListScreenState();
@@ -25,7 +24,7 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
   }
 
   void _addFolder(BuildContext context) {
-    final TextEditingController folderNameController = TextEditingController();
+    final TextEditingController _folderNameController = TextEditingController();
     showDialog(
       context: context,
       builder: (context) {
@@ -35,7 +34,7 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
           ),
           content: TextField(
-            controller: folderNameController,
+            controller: _folderNameController,
             decoration: const InputDecoration(
               hintText: '폴더 이름',
               hintStyle: TextStyle(color: Color(0xFF364B45)),
@@ -44,25 +43,18 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
           actions: <Widget>[
             TextButton(
               child: const Text('취소',
-                  style: TextStyle(
-                      color: Color(0xFFFFA17A),
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16)),
+                  style: TextStyle(color: Color(0xFFFFA17A), fontWeight: FontWeight.w700, fontSize: 16)),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: const Text(
-                '만들기',
-                style: TextStyle(
-                    color: Color(0xFF545454),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700),
+              child: const Text('만들기',
+                style: TextStyle(color: Color(0xFF545454), fontSize: 16, fontWeight: FontWeight.w700),
               ),
               onPressed: () {
                 setState(() {
-                  folders.add(folderNameController.text);
+                  folders.add(_folderNameController.text);
                 });
                 Navigator.of(context).pop();
               },
@@ -74,29 +66,29 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
   }
 
   void _renameFolder(BuildContext context, int index) {
-    final TextEditingController folderNameController =
+    final TextEditingController _folderNameController =
         TextEditingController(text: folders[index]);
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('폴더 이름 바꾸기'),
+          title: Text('폴더 이름 바꾸기'),
           content: TextField(
-            controller: folderNameController,
-            decoration: const InputDecoration(hintText: '폴더 이름'),
+            controller: _folderNameController,
+            decoration: InputDecoration(hintText: '폴더 이름'),
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('취소', style: TextStyle(color: Colors.red)),
+              child: Text('취소', style: TextStyle(color: Colors.red)),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: const Text('저장'),
+              child: Text('저장'),
               onPressed: () {
                 setState(() {
-                  folders[index] = folderNameController.text;
+                  folders[index] = _folderNameController.text;
                 });
                 Navigator.of(context).pop();
               },
@@ -112,17 +104,17 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('폴더 삭제하기'),
-          content: const Text('정말로 삭제하시겠습니까?'),
+          title: Text('폴더 삭제하기'),
+          content: Text('정말로 삭제하시겠습니까?'),
           actions: <Widget>[
             TextButton(
-              child: const Text('취소', style: TextStyle(color: Colors.red)),
+              child: Text('취소', style: TextStyle(color: Colors.red)),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: const Text('삭제'),
+              child: Text('삭제'),
               onPressed: () {
                 setState(() {
                   folders.removeAt(index);
@@ -142,7 +134,7 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
       appBar: AppBar(
         title: Text(widget.title),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -151,20 +143,20 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
           Padding(
             padding: const EdgeInsets.only(right: 30),
             child: TextButton(
-              onPressed: () {
+              onPressed: (){
                 _addFolder(context);
-              },
+            },
               child: Row(
                 children: [
-                  const Text(
+                  Text(
                     '추가하기',
                     style: TextStyle(
                       color: Color(0xFF36AE92),
                       fontSize: 15,
                     ),
                   ),
-                  const SizedBox(width: 5),
-                  Image.asset('assets/add2.png'),
+                  SizedBox(width: 5),
+                  Image.asset('assets/add.png'),
                 ],
               ),
             ),
@@ -175,7 +167,7 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
         builder: (context, constraints) {
           return SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: folders.asMap().entries.map((entry) {
@@ -213,16 +205,13 @@ class FolderListItem extends StatelessWidget {
   final VoidCallback onDelete;
 
   const FolderListItem(
-      {super.key,
-      required this.folder,
-      required this.onRename,
-      required this.onDelete});
+      {required this.folder, required this.onRename, required this.onDelete});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 15),
-      padding: const EdgeInsets.all(12),
+      margin: EdgeInsets.only(bottom: 15),
+      padding: EdgeInsets.all(12),
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.green.withOpacity(0.05),
@@ -237,15 +226,15 @@ class FolderListItem extends StatelessWidget {
               color: Colors.green.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: const Center(
+            child: Center(
               child: Icon(Icons.folder_sharp, size: 22),
             ),
           ),
-          const SizedBox(width: 10),
+          SizedBox(width: 10),
           Expanded(
             child: Text(
               folder,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
@@ -253,7 +242,7 @@ class FolderListItem extends StatelessWidget {
           ),
           Row(
             children: [
-              const Text(
+              Text(
                 '0 files',
                 style: TextStyle(
                   color: Color(0xFF005A38),
@@ -263,7 +252,7 @@ class FolderListItem extends StatelessWidget {
                   height: 1.5,
                 ),
               ),
-              const SizedBox(width: 10),
+              SizedBox(width: 10),
               RenameDeletePopup(
                 onRename: onRename,
                 onDelete: onDelete,

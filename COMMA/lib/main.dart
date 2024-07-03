@@ -1,34 +1,9 @@
-// import 'package:flutter/material.dart';
-
-// import '1_Splash_green.dart';
-
-// void main() {
-//   runApp(const FigmaToCodeApp());
-// }
-
-// class FigmaToCodeApp extends StatelessWidget {
-//   const FigmaToCodeApp({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       theme: ThemeData.dark().copyWith(
-//         scaffoldBackgroundColor: const Color.fromRGBO(54, 174, 146, 1.0),
-//       ),
-//       home: Scaffold(
-//         body: SplashScreen(),
-
-//       ),
-//     );
-//   }
-// }
-
 import 'package:flutter/material.dart';
 import '32_home_screen.dart';
 import '30_folder_screen.dart';
-import '36_start_learning_screen.dart';
 import '33_mypage_screen.dart';
-import '34_profile_screen.dart';
+import '60prepare.dart';
+import '10_homepage_no_recent.dart';
 
 void main() => runApp(const MyApp());
 
@@ -57,10 +32,10 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
 
-  static const List<Widget> _widgetOptions = <Widget>[
-    HomeScreen(),
+  static final List<Widget> _widgetOptions = <Widget>[
+    HomePageNoRecent(),
     FolderScreen(),
-    StartLearningScreen(),
+    LearningPreparation(), // const 키워드를 제거
     MyPageScreen(),
   ];
 
@@ -77,27 +52,41 @@ class _MyHomePageState extends State<MyHomePage> {
         child: _widgetOptions.elementAt(_selectedIndex),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+            icon: ImageIcon(AssetImage('assets/navigation_bar/home.png')),
+            label: 'HOME',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.folder),
+            icon: ImageIcon(AssetImage('assets/navigation_bar/folder.png')),
             label: '폴더',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.school),
+            icon: ImageIcon(AssetImage('assets/navigation_bar/learningstart.png')),
             label: '학습 시작',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
+            icon: ImageIcon(AssetImage('assets/navigation_bar/mypage.png')),
             label: '마이페이지',
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.green[900],
+        selectedItemColor: Colors.teal,
         unselectedItemColor: Colors.black,
+        selectedIconTheme: IconThemeData(color: Colors.teal),
+        unselectedIconTheme: IconThemeData(color: Colors.black),
+        selectedLabelStyle: TextStyle(
+          color: Colors.teal,
+          fontSize: 9,
+          fontFamily: 'DM Sans',
+          fontWeight: FontWeight.bold,
+        ),
+        unselectedLabelStyle: TextStyle(
+          color: Colors.black,
+          fontSize: 9,
+          fontFamily: 'DM Sans',
+          fontWeight: FontWeight.bold,
+        ),
         showUnselectedLabels: true,
         onTap: _onItemTapped,
       ),

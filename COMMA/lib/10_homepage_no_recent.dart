@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+
 class HomePageNoRecent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -149,27 +150,6 @@ class HomePageNoRecent extends StatelessWidget {
             ],
           ),
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Color(0xFF36AE92),
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'HOME',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.folder),
-            label: '폴더',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.play_arrow),
-            label: '학습 시작',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: '마이페이지',
-          ),
-        ],
       ),
     );
   }
