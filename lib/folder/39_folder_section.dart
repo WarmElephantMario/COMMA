@@ -6,6 +6,7 @@ class FolderSection extends StatelessWidget {
   final VoidCallback onViewAllPressed;
 
   const FolderSection({
+    super.key,
     required this.sectionTitle,
     required this.onAddPressed,
     required this.onViewAllPressed,
@@ -20,7 +21,7 @@ class FolderSection extends StatelessWidget {
         children: [
           Text(
             sectionTitle,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.black,
               fontSize: 26,
               fontFamily: 'DM Sans',
@@ -33,15 +34,15 @@ class FolderSection extends StatelessWidget {
                 onPressed: onAddPressed,
                 child: Row(
                   children: [
-                    Text(
+                    const Text(
                       '추가하기',
                       style: TextStyle(
                         color: Color(0xFF36AE92),
                         fontSize: 15,
                       ),
                     ),
-                    SizedBox(width: 5),
-                    Image.asset('assets/add.png'),
+                    const SizedBox(width: 5),
+                    Image.asset('assets/add2.png'),
                   ],
                 ),
               ),
@@ -49,14 +50,14 @@ class FolderSection extends StatelessWidget {
                 onPressed: onViewAllPressed,
                 child: Row(
                   children: [
-                    Text(
+                    const Text(
                       '전체 보기',
                       style: TextStyle(
                         color: Color(0xFF36AE92),
                         fontSize: 15,
                       ),
                     ),
-                    SizedBox(width: 5.5),
+                    const SizedBox(width: 5.5),
                     Image.asset('assets/navigate.png'),
                   ],
                 ),
