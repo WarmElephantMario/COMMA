@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'popup_record.dart';
-import 'popup_colon.dart';
-import 'lecture_start.dart';
+import '64popup_record.dart';
+import '65popup_colon.dart';
+import '62lecture_start.dart';
 
 enum RecordingState { initial, recording, recorded }
 

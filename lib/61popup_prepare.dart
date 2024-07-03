@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'record.dart';
+import '63record.dart';
 
 class LearningDialog extends StatelessWidget {
   final BuildContext parentContext;

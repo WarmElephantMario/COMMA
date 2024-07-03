@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'record.dart'; // Import the record.dart file where RecordPage is defined
+import '63record.dart'; // Import the record.dart file where RecordPage is defined
 
 class LectureStartPage extends StatefulWidget {
   @override
