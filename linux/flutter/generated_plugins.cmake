@@ -3,7 +3,10 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+<<<<<<< HEAD
   file_selector_linux
+=======
+>>>>>>> 5bfb9b3 (Add comma_script folder)
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST

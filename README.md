@@ -1,6 +1,10 @@
+<<<<<<< HEAD
 
 # flutter_plugin
 
+=======
+# comma_script
+>>>>>>> 5bfb9b3 (Add comma_script folder)
 
 A new Flutter project.
 

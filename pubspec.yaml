@@ -1,6 +1,10 @@
+<<<<<<< HEAD
 
 name: flutter_plugin
 
+=======
+name: comma_script
+>>>>>>> 5bfb9b3 (Add comma_script folder)
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -32,8 +36,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+<<<<<<< HEAD
   image_picker: ^1.1.2
 
+=======
+>>>>>>> 5bfb9b3 (Add comma_script folder)
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -66,8 +73,12 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+<<<<<<< HEAD
     - ./assets/
 
+=======
+
+>>>>>>> 5bfb9b3 (Add comma_script folder)
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

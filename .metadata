@@ -34,7 +34,10 @@ migration:
       create_revision: 761747bfc538b5af34aa0d3fac380f1bc331ec49
       base_revision: 761747bfc538b5af34aa0d3fac380f1bc331ec49
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 5bfb9b3 (Add comma_script folder)
   # User provided section
 
   # List of Local paths (relative to this file) that should be
