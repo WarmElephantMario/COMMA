@@ -17,6 +17,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  buffer:
+    dependency: transitive
+    description:
+      name: buffer
+      sha256: "389da2ec2c16283c8787e0adaede82b1842102f8c8aae2f49003a766c5c6b3d1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.3"
   characters:
     dependency: transitive
     description:
@@ -41,7 +49,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.18.0"
-<<<<<<< HEAD
   cross_file:
     dependency: transitive
     description:
@@ -50,8 +57,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.3.4+1"
-=======
->>>>>>> 5bfb9b3 (Add comma_script folder)
+  crypto:
+    dependency: transitive
+    description:
+      name: crypto
+      sha256: ff625774173754681d66daaf4a448684fb04b78f902da9cb3d308c19cc5e8bab
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.3"
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -68,7 +81,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.1"
-<<<<<<< HEAD
   file_selector_linux:
     dependency: transitive
     description:
@@ -101,8 +113,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.9.3+1"
-=======
->>>>>>> 5bfb9b3 (Add comma_script folder)
   flutter:
     dependency: "direct main"
     description: flutter
@@ -116,7 +126,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
-<<<<<<< HEAD
+
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -125,14 +135,11 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.20"
-=======
->>>>>>> 5bfb9b3 (Add comma_script folder)
   flutter_test:
     dependency: "direct dev"
     description: flutter
     source: sdk
     version: "0.0.0"
-<<<<<<< HEAD
   flutter_web_plugins:
     dependency: transitive
     description: flutter
@@ -218,8 +225,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.1+1"
-=======
->>>>>>> 5bfb9b3 (Add comma_script folder)
+
   leak_tracker:
     dependency: transitive
     description:
@@ -252,6 +258,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.0"
+  logging:
+    dependency: transitive
+    description:
+      name: logging
+      sha256: "623a88c9594aa774443aa3eb2d41807a48486b5613e67599fb4c41c0ad47c340"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.0"
   matcher:
     dependency: transitive
     description:
@@ -276,7 +290,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.12.0"
-<<<<<<< HEAD
   mime:
     dependency: transitive
     description:
@@ -285,8 +298,23 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.5"
-=======
->>>>>>> 5bfb9b3 (Add comma_script folder)
+  mysql1:
+    dependency: "direct dev"
+    description:
+      name: mysql1
+      sha256: "75c685f3d35cffca00e7ec318b916dc9de91f25e6139829225a2b984955d1469"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.19.2"
+  mysql_client:
+    dependency: "direct dev"
+    description:
+      name: mysql_client
+      sha256: "6a0fdcbe3e0721c637f97ad24649be2f70dbce2b21ede8f962910e640f753fc2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.27"
+
   path:
     dependency: transitive
     description:
@@ -295,7 +323,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.9.0"
-<<<<<<< HEAD
   plugin_platform_interface:
     dependency: transitive
     description:
@@ -304,8 +331,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.8"
-=======
->>>>>>> 5bfb9b3 (Add comma_script folder)
+  pool:
+    dependency: transitive
+    description:
+      name: pool
+      sha256: "20fe868b6314b322ea036ba325e6fc0711a22948856475e2c2b6306e8ab39c2a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.5.1"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -359,7 +392,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.0"
-<<<<<<< HEAD
+  tuple:
+    dependency: transitive
+    description:
+      name: tuple
+      sha256: a97ce2013f240b2f3807bcbaf218765b6f301c3eff91092bcfa23a039e7dd151
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.2"
+
   typed_data:
     dependency: transitive
     description:
@@ -368,8 +409,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.2"
-=======
->>>>>>> 5bfb9b3 (Add comma_script folder)
+
   vector_math:
     dependency: transitive
     description:
@@ -386,7 +426,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "14.2.1"
-<<<<<<< HEAD
+
   web:
     dependency: transitive
     description:
@@ -398,8 +438,4 @@ packages:
 sdks:
   dart: ">=3.4.3 <4.0.0"
   flutter: ">=3.22.0"
-=======
-sdks:
-  dart: ">=3.4.3 <4.0.0"
-  flutter: ">=3.18.0-18.0.pre.54"
->>>>>>> 5bfb9b3 (Add comma_script folder)
+

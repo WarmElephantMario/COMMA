@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'folder/folder_files_screen.dart';
-import 'rename_delete_popup.dart';
+import 'folder/37_folder_files_screen.dart';
+import '35_rename_delete_popup.dart';
 
 class FullFolderListScreen extends StatefulWidget {
   final List<String> folders;

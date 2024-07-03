@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'change_password_page.dart';
+import '40_change_password_page.dart';
 
 class ConfirmPasswordPage extends StatelessWidget {
   final TextEditingController _passwordController = TextEditingController();

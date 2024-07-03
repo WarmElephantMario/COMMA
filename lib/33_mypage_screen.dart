@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'profile_screen.dart';
-import 'mypage/confirm_password_page.dart';
-import 'mypage/help_page.dart';
+import '34_profile_screen.dart';
+import 'mypage/41_confirm_password_page.dart';
+import 'mypage/42_help_page.dart';
 
 class MyPageScreen extends StatelessWidget {
   const MyPageScreen({super.key});
