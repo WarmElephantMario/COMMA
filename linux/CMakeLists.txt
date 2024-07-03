@@ -5,22 +5,16 @@ project(runner LANGUAGES CXX)
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
 <<<<<<< HEAD
-=======
-<<<<<<< HEAD
 set(BINARY_NAME "flutter_plugin")
 # The unique GTK application identifier for this application. See:
 # https://wiki.gnome.org/HowDoI/ChooseApplicationID
 set(APPLICATION_ID "com.example.flutter_plugin")
 =======
->>>>>>> 80dd8e0076664cb755496179f9460b252c3bc1c3
 set(BINARY_NAME "comma_script")
 # The unique GTK application identifier for this application. See:
 # https://wiki.gnome.org/HowDoI/ChooseApplicationID
 set(APPLICATION_ID "com.example.comma_script")
-<<<<<<< HEAD
-=======
 >>>>>>> 5bfb9b3 (Add comma_script folder)
->>>>>>> 80dd8e0076664cb755496179f9460b252c3bc1c3
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.
