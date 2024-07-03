@@ -24,11 +24,11 @@
 // }
 
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
-import 'folder_screen.dart';
-import 'start_learning_screen.dart';
-import 'mypage_screen.dart';
-import 'profile_screen.dart';
+import '32_home_screen.dart';
+import '30_folder_screen.dart';
+import '36_start_learning_screen.dart';
+import '33_mypage_screen.dart';
+import '34_profile_screen.dart';
 
 void main() => runApp(const MyApp());
 
