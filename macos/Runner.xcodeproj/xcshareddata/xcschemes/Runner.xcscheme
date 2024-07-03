@@ -16,14 +16,10 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "33CC10EC2044A3C60003C045"
 <<<<<<< HEAD
-               BuildableName = "comma_script.app"
-=======
-<<<<<<< HEAD
                BuildableName = "flutter_plugin.app"
 =======
                BuildableName = "comma_script.app"
 >>>>>>> 5bfb9b3 (Add comma_script folder)
->>>>>>> 80dd8e0076664cb755496179f9460b252c3bc1c3
                BlueprintName = "Runner"
                ReferencedContainer = "container:Runner.xcodeproj">
             </BuildableReference>
@@ -40,14 +36,10 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "33CC10EC2044A3C60003C045"
 <<<<<<< HEAD
-            BuildableName = "comma_script.app"
-=======
-<<<<<<< HEAD
             BuildableName = "flutter_plugin.app"
 =======
             BuildableName = "comma_script.app"
 >>>>>>> 5bfb9b3 (Add comma_script folder)
->>>>>>> 80dd8e0076664cb755496179f9460b252c3bc1c3
             BlueprintName = "Runner"
             ReferencedContainer = "container:Runner.xcodeproj">
          </BuildableReference>
@@ -82,14 +74,10 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "33CC10EC2044A3C60003C045"
 <<<<<<< HEAD
-            BuildableName = "comma_script.app"
-=======
-<<<<<<< HEAD
             BuildableName = "flutter_plugin.app"
 =======
             BuildableName = "comma_script.app"
 >>>>>>> 5bfb9b3 (Add comma_script folder)
->>>>>>> 80dd8e0076664cb755496179f9460b252c3bc1c3
             BlueprintName = "Runner"
             ReferencedContainer = "container:Runner.xcodeproj">
          </BuildableReference>
@@ -107,14 +95,10 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "33CC10EC2044A3C60003C045"
 <<<<<<< HEAD
-            BuildableName = "comma_script.app"
-=======
-<<<<<<< HEAD
             BuildableName = "flutter_plugin.app"
 =======
             BuildableName = "comma_script.app"
 >>>>>>> 5bfb9b3 (Add comma_script folder)
->>>>>>> 80dd8e0076664cb755496179f9460b252c3bc1c3
             BlueprintName = "Runner"
             ReferencedContainer = "container:Runner.xcodeproj">
          </BuildableReference>

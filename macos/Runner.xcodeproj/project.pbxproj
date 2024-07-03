@@ -65,14 +65,10 @@
 		333000ED22D3DE5D00554162 /* Warnings.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Warnings.xcconfig; sourceTree = "<group>"; };
 		335BBD1A22A9A15E00E9071D /* GeneratedPluginRegistrant.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeneratedPluginRegistrant.swift; sourceTree = "<group>"; };
 <<<<<<< HEAD
-		33CC10ED2044A3C60003C045 /* comma_script.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "comma_script.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-=======
-<<<<<<< HEAD
 		33CC10ED2044A3C60003C045 /* flutter_plugin.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "flutter_plugin.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 =======
 		33CC10ED2044A3C60003C045 /* comma_script.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "comma_script.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 >>>>>>> 5bfb9b3 (Add comma_script folder)
->>>>>>> 80dd8e0076664cb755496179f9460b252c3bc1c3
 		33CC10F02044A3C60003C045 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		33CC10F22044A3C60003C045 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = Runner/Assets.xcassets; sourceTree = "<group>"; };
 		33CC10F52044A3C60003C045 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
@@ -140,14 +136,10 @@
 			isa = PBXGroup;
 			children = (
 <<<<<<< HEAD
-				33CC10ED2044A3C60003C045 /* comma_script.app */,
-=======
-<<<<<<< HEAD
 				33CC10ED2044A3C60003C045 /* flutter_plugin.app */,
 =======
 				33CC10ED2044A3C60003C045 /* comma_script.app */,
 >>>>>>> 5bfb9b3 (Add comma_script folder)
->>>>>>> 80dd8e0076664cb755496179f9460b252c3bc1c3
 				331C80D5294CF71000263BE5 /* RunnerTests.xctest */,
 			);
 			name = Products;
@@ -234,14 +226,10 @@
 			name = Runner;
 			productName = Runner;
 <<<<<<< HEAD
-			productReference = 33CC10ED2044A3C60003C045 /* comma_script.app */;
-=======
-<<<<<<< HEAD
 			productReference = 33CC10ED2044A3C60003C045 /* flutter_plugin.app */;
 =======
 			productReference = 33CC10ED2044A3C60003C045 /* comma_script.app */;
 >>>>>>> 5bfb9b3 (Add comma_script folder)
->>>>>>> 80dd8e0076664cb755496179f9460b252c3bc1c3
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -410,22 +398,16 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 <<<<<<< HEAD
-=======
-<<<<<<< HEAD
 				PRODUCT_BUNDLE_IDENTIFIER = com.example.flutterPlugin.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/flutter_plugin.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/flutter_plugin";
 =======
->>>>>>> 80dd8e0076664cb755496179f9460b252c3bc1c3
 				PRODUCT_BUNDLE_IDENTIFIER = com.example.commaScript.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/comma_script.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/comma_script";
-<<<<<<< HEAD
-=======
 >>>>>>> 5bfb9b3 (Add comma_script folder)
->>>>>>> 80dd8e0076664cb755496179f9460b252c3bc1c3
 			};
 			name = Debug;
 		};
@@ -437,22 +419,16 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 <<<<<<< HEAD
-=======
-<<<<<<< HEAD
 				PRODUCT_BUNDLE_IDENTIFIER = com.example.flutterPlugin.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/flutter_plugin.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/flutter_plugin";
 =======
->>>>>>> 80dd8e0076664cb755496179f9460b252c3bc1c3
 				PRODUCT_BUNDLE_IDENTIFIER = com.example.commaScript.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/comma_script.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/comma_script";
-<<<<<<< HEAD
-=======
 >>>>>>> 5bfb9b3 (Add comma_script folder)
->>>>>>> 80dd8e0076664cb755496179f9460b252c3bc1c3
 			};
 			name = Release;
 		};
@@ -464,22 +440,16 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 <<<<<<< HEAD
-=======
-<<<<<<< HEAD
 				PRODUCT_BUNDLE_IDENTIFIER = com.example.flutterPlugin.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/flutter_plugin.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/flutter_plugin";
 =======
->>>>>>> 80dd8e0076664cb755496179f9460b252c3bc1c3
 				PRODUCT_BUNDLE_IDENTIFIER = com.example.commaScript.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/comma_script.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/comma_script";
-<<<<<<< HEAD
-=======
 >>>>>>> 5bfb9b3 (Add comma_script folder)
->>>>>>> 80dd8e0076664cb755496179f9460b252c3bc1c3
 			};
 			name = Profile;
 		};
