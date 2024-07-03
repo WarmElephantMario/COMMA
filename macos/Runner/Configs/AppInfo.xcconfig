@@ -6,16 +6,22 @@
 
 // The application's name. By default this is also the title of the Flutter window.
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
 PRODUCT_NAME = flutter_plugin
 
 // The application's bundle identifier
 PRODUCT_BUNDLE_IDENTIFIER = com.example.flutterPlugin
 =======
+>>>>>>> 80dd8e0076664cb755496179f9460b252c3bc1c3
 PRODUCT_NAME = comma_script
 
 // The application's bundle identifier
 PRODUCT_BUNDLE_IDENTIFIER = com.example.commaScript
+<<<<<<< HEAD
+=======
 >>>>>>> 5bfb9b3 (Add comma_script folder)
+>>>>>>> 80dd8e0076664cb755496179f9460b252c3bc1c3
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2024 com.example. All rights reserved.

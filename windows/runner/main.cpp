@@ -28,10 +28,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   Win32Window::Point origin(10, 10);
   Win32Window::Size size(1280, 720);
 <<<<<<< HEAD
+  if (!window.Create(L"comma_script", origin, size)) {
+=======
+<<<<<<< HEAD
   if (!window.Create(L"flutter_plugin", origin, size)) {
 =======
   if (!window.Create(L"comma_script", origin, size)) {
 >>>>>>> 5bfb9b3 (Add comma_script folder)
+>>>>>>> 80dd8e0076664cb755496179f9460b252c3bc1c3
     return EXIT_FAILURE;
   }
   window.SetQuitOnClose(true);

@@ -135,7 +135,11 @@ class _LearningPreparationState extends State<LearningPreparation> {
                 },
                 icon: _isIconVisible
                     ? ImageIcon(
+<<<<<<< HEAD
+                  AssetImage('/Users/bag-yena/StudioProjects/comma_script/lib/assets/Vector.png'),
+=======
                   AssetImage('assets/navigation_bar/home.png'),
+>>>>>>> 80dd8e0076664cb755496179f9460b252c3bc1c3
                   color: Colors.white,
                 )
                     : Container(), // 아이콘이 보이지 않도록 빈 컨테이너 사용
@@ -210,6 +214,21 @@ class _LearningPreparationState extends State<LearningPreparation> {
         },
         items: [
           BottomNavigationBarItem(
+<<<<<<< HEAD
+            icon: ImageIcon(AssetImage('/Users/bag-yena/StudioProjects/comma_script/lib/assets/navigation_bar/home.png')),
+            label: 'HOME',
+          ),
+          BottomNavigationBarItem(
+            icon: ImageIcon(AssetImage('/Users/bag-yena/StudioProjects/comma_script/lib/assets/navigation_bar/folder.png')),
+            label: '폴더',
+          ),
+          BottomNavigationBarItem(
+            icon: ImageIcon(AssetImage('/Users/bag-yena/StudioProjects/comma_script/lib/assets/navigation_bar/learningstart.png')),
+            label: '학습 시작',
+          ),
+          BottomNavigationBarItem(
+            icon: ImageIcon(AssetImage('/Users/bag-yena/StudioProjects/comma_script/lib/assets/navigation_bar/mypage.png')),
+=======
             icon: ImageIcon(AssetImage('assets/navigation_bar/home.png')),
             label: 'HOME',
           ),
@@ -223,6 +242,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
           ),
           BottomNavigationBarItem(
             icon: ImageIcon(AssetImage('assets/navigation_bar/mypage.png')),
+>>>>>>> 80dd8e0076664cb755496179f9460b252c3bc1c3
             label: '마이페이지',
           ),
         ],

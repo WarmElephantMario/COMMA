@@ -4,9 +4,12 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
   file_selector_linux
 =======
 >>>>>>> 5bfb9b3 (Add comma_script folder)
+>>>>>>> 80dd8e0076664cb755496179f9460b252c3bc1c3
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
