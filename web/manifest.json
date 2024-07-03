@@ -1,6 +1,8 @@
 {
+
     "name": "flutter_plugin",
     "short_name": "flutter_plugin",
+
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

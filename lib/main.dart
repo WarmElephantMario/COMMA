@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '1_Splash_green.dart';
 
 void main() {
@@ -16,6 +17,7 @@ class FigmaToCodeApp extends StatelessWidget {
       ),
       home: Scaffold(
         body: SplashScreen(),
+
       ),
     );
   }
