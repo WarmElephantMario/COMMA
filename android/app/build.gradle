@@ -24,7 +24,16 @@ if (flutterVersionName == null) {
 }
 
 android {
+<<<<<<< HEAD
     namespace = "com.example.comma_script"
+=======
+<<<<<<< HEAD
+    namespace = "com.example.flutter_plugin"
+
+=======
+    namespace = "com.example.comma_script"
+>>>>>>> 5bfb9b3 (Add comma_script folder)
+>>>>>>> 80dd8e0076664cb755496179f9460b252c3bc1c3
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -35,7 +44,17 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+<<<<<<< HEAD
         applicationId = "com.example.comma_script"
+=======
+<<<<<<< HEAD
+
+        applicationId = "com.example.flutter_plugin"
+
+=======
+        applicationId = "com.example.comma_script"
+>>>>>>> 5bfb9b3 (Add comma_script folder)
+>>>>>>> 80dd8e0076664cb755496179f9460b252c3bc1c3
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         minSdk = flutter.minSdkVersion

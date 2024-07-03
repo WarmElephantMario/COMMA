@@ -1,6 +1,18 @@
 {
+<<<<<<< HEAD
     "name": "comma_script",
     "short_name": "comma_script",
+=======
+<<<<<<< HEAD
+
+    "name": "flutter_plugin",
+    "short_name": "flutter_plugin",
+
+=======
+    "name": "comma_script",
+    "short_name": "comma_script",
+>>>>>>> 5bfb9b3 (Add comma_script folder)
+>>>>>>> 80dd8e0076664cb755496179f9460b252c3bc1c3
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

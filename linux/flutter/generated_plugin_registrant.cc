@@ -6,6 +6,20 @@
 
 #include "generated_plugin_registrant.h"
 
+<<<<<<< HEAD
 
 void fl_register_plugins(FlPluginRegistry* registry) {
+=======
+<<<<<<< HEAD
+#include <file_selector_linux/file_selector_plugin.h>
+
+void fl_register_plugins(FlPluginRegistry* registry) {
+  g_autoptr(FlPluginRegistrar) file_selector_linux_registrar =
+      fl_plugin_registry_get_registrar_for_plugin(registry, "FileSelectorPlugin");
+  file_selector_plugin_register_with_registrar(file_selector_linux_registrar);
+=======
+
+void fl_register_plugins(FlPluginRegistry* registry) {
+>>>>>>> 5bfb9b3 (Add comma_script folder)
+>>>>>>> 80dd8e0076664cb755496179f9460b252c3bc1c3
 }

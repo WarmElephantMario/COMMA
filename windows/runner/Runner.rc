@@ -90,12 +90,27 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+            VALUE "FileDescription", "flutter_plugin" "\0"
+            VALUE "FileVersion", VERSION_AS_STRING "\0"
+            VALUE "InternalName", "flutter_plugin" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2024 com.example. All rights reserved." "\0"
+            VALUE "OriginalFilename", "flutter_plugin.exe" "\0"
+            VALUE "ProductName", "flutter_plugin" "\0"
+=======
+>>>>>>> 80dd8e0076664cb755496179f9460b252c3bc1c3
             VALUE "FileDescription", "comma_script" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "comma_script" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2024 com.example. All rights reserved." "\0"
             VALUE "OriginalFilename", "comma_script.exe" "\0"
             VALUE "ProductName", "comma_script" "\0"
+<<<<<<< HEAD
+=======
+>>>>>>> 5bfb9b3 (Add comma_script folder)
+>>>>>>> 80dd8e0076664cb755496179f9460b252c3bc1c3
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

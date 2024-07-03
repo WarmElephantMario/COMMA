@@ -57,7 +57,11 @@ class _RecordPageState extends State<RecordPage> {
             ),
             Row(
               children: [
+<<<<<<< HEAD
                 ImageIcon(AssetImage('/Users/bag-yena/StudioProjects/comma_script/lib/assets/folder_search.png')),
+=======
+                ImageIcon(AssetImage('assets/folder_search.png')),
+>>>>>>> 80dd8e0076664cb755496179f9460b252c3bc1c3
                 const SizedBox(width: 8),
                 Text(
                   '폴더 분류 > 기본 폴더',
@@ -260,6 +264,7 @@ class _RecordPageState extends State<RecordPage> {
         },
         items: [
           BottomNavigationBarItem(
+<<<<<<< HEAD
             icon: ImageIcon(AssetImage('/Users/bag-yena/StudioProjects/comma_script/lib/assets/navigation_bar/home.png')),
             label: 'HOME',
           ),
@@ -273,6 +278,21 @@ class _RecordPageState extends State<RecordPage> {
           ),
           BottomNavigationBarItem(
             icon: ImageIcon(AssetImage('/Users/bag-yena/StudioProjects/comma_script/lib/assets/navigation_bar/mypage.png')),
+=======
+            icon: ImageIcon(AssetImage('assets/navigation_bar/home.png')),
+            label: 'HOME',
+          ),
+          BottomNavigationBarItem(
+            icon: ImageIcon(AssetImage('assets/navigation_bar/folder.png')),
+            label: '폴더',
+          ),
+          BottomNavigationBarItem(
+            icon: ImageIcon(AssetImage('assets/navigation_bar/learningstart.png')),
+            label: '학습 시작',
+          ),
+          BottomNavigationBarItem(
+            icon: ImageIcon(AssetImage('assets/navigation_bar/mypage.png')),
+>>>>>>> 80dd8e0076664cb755496179f9460b252c3bc1c3
             label: '마이페이지',
           ),
         ],
