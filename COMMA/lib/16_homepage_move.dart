@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
 import '14_homepage_search_result.dart';
+import 'model/user.dart';
 
-class MainPage extends StatelessWidget {
+class MainPage extends StatefulWidget {
+  final User userInfo;
+  const MainPage({Key? key, required this.userInfo}) : super(key: key);
+
+  @override
+  _MainPageState createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -30,7 +39,7 @@ class MainPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '안녕하세요, 이화연 님',
+                '안녕하세요, ${widget.userInfo.user_email} 님',
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: 24,
@@ -527,10 +536,10 @@ class _Checkbox1State extends State<Checkbox1> {
   }
 }
 
-void main() {
-  runApp(MaterialApp(
-    home: Scaffold(
-      body: MainPage(),
-    ),
-  ));
-}
+// void main() {
+//   runApp(MaterialApp(
+//     home: Scaffold(
+//       body: MainPage(),
+//     ),
+//   ));
+// }
