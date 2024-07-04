@@ -33,6 +33,7 @@ dependencies:
   flutter:
     sdk: flutter
   image_picker: ^1.1.2
+  get: ^4.6.1
 
 
 
@@ -47,6 +48,8 @@ dev_dependencies:
   mysql_client: ^0.0.27
   mysql1: ^0.19.2
   http: ^0.13.3
+  fluttertoast: ^8.0.9
+  shared_preferences: ^2.0.15
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
