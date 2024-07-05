@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import '64popup_record.dart';
 import '65popup_colon.dart';
 import '62lecture_start.dart';
+import '63record.dart'; 
+import '32_home_screen.dart';
+import '30_folder_screen.dart';
+import '33_mypage_screen.dart';
+import '60prepare.dart';
+import '10_homepage_no_recent.dart';
 
 enum RecordingState { initial, recording, recorded }
 
@@ -14,11 +20,29 @@ class _RecordPageState extends State<RecordPage> {
   int _currentIndex = 2; // 학습 시작 탭이 기본 선택되도록 설정
   RecordingState _recordingState = RecordingState.initial; // 녹음 상태를 나타내는 변수
 
+  static final List<Widget> _widgetOptions = <Widget>[
+    HomePageNoRecent(),
+    FolderScreen(),
+    LearningPreparation(),
+    MyPageScreen(),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _currentIndex = index;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => _widgetOptions[index]),
+      );
+    });
+  }
+
   void _stopRecording() {
     setState(() {
       _recordingState = RecordingState.recorded;
     });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -251,6 +275,45 @@ class _RecordPageState extends State<RecordPage> {
           ],
         ),
       ),
+            bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: _onItemTapped,
+        items: [
+          BottomNavigationBarItem(
+            icon: ImageIcon(AssetImage('assets/navigation_bar/home.png')),
+            label: 'HOME',
+          ),
+          BottomNavigationBarItem(
+            icon: ImageIcon(AssetImage('assets/navigation_bar/folder.png')),
+            label: '폴더',
+          ),
+          BottomNavigationBarItem(
+            icon: ImageIcon(AssetImage('assets/navigation_bar/learningstart.png')),
+            label: '학습 시작',
+          ),
+          BottomNavigationBarItem(
+            icon: ImageIcon(AssetImage('assets/navigation_bar/mypage.png')),
+            label: '마이페이지',
+          ),
+        ],
+        selectedItemColor: Colors.teal,
+        unselectedItemColor: Colors.black,
+        selectedIconTheme: IconThemeData(color: Colors.teal),
+        unselectedIconTheme: IconThemeData(color: Colors.black),
+        selectedLabelStyle: TextStyle(color: Colors.teal,
+          fontSize: 9, // 글씨 크기 설정
+          fontFamily: 'DM Sans', // 글씨체 설정
+          fontWeight: FontWeight.bold,
+        ), // 글씨 두께 설정),
+        unselectedLabelStyle: TextStyle(color: Colors.black,
+          fontSize: 9, // 글씨 크기 설정
+          fontFamily: 'DM Sans', // 글씨체 설정
+          fontWeight: FontWeight.bold,
+        ),
+        showUnselectedLabels: true, // 모든 텍스트 라벨을 항상 표시하도록 설정
+      ),
     );
   }
 }
+
+ 
