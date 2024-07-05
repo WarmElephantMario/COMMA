@@ -1,10 +1,44 @@
 import 'package:flutter/material.dart';
 import '14_homepage_search_result.dart';
+import 'api/api.dart';
+import 'model/user.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
-class MainPage extends StatelessWidget {
+class MainPage extends StatefulWidget {
+  final User userInfo;
+  const MainPage({Key? key, required this.userInfo}) : super(key: key);
+
+  @override
+  _MainPageState createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
+
+  List<dynamic> lectureFolders = [];
+
+  @override
+  void initState(){
+    super.initState();
+    fetchLectureFolders();
+  }
+
+  Future<void> fetchLectureFolders() async {
+    final response = await http.get(
+        Uri.parse(API.getAllFolders));
+    if (response.statusCode == 200) {
+      setState(() {
+        lectureFolders = jsonDecode(response.body)['folders'];
+      });
+    } else {
+      throw Exception('Failed to load lecture folders');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -30,7 +64,7 @@ class MainPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '안녕하세요, 이화연 님',
+                '안녕하세요, ${widget.userInfo.user_email} 님',
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: 24,
@@ -81,34 +115,36 @@ class MainPage extends StatelessWidget {
                 ],
               ),
               SizedBox(height: 8),
-              GestureDetector(
-                onTap: () {
-                  print('certain lecture is clicked');
-                },
-                child: LectureExample(
-                  lectureName: '정보통신공학',
-                  date: '2024/06/07',
-                ),
+
+              // Fetch된 데이터를 사용하여 LectureExample 위젯을 동적으로 생성
+              ...(
+                  lectureFolders.isEmpty
+                      ? [Text(
+                    '최근에 학습한 강의 자료가 없어요.',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 13,
+                      fontFamily: 'Raleway',
+                      fontWeight: FontWeight.w700,
+                      height: 1.5,
+                    ),
+                  )]
+                      : lectureFolders
+                      .take(3)  // 상위 3개의 폴더만 가져옴
+                      .map((folder) {
+                    return GestureDetector(
+                      onTap: () {
+                        print('Lecture ${folder['lecture_name']} is clicked');
+                      },
+                      child: LectureExample(
+                        lectureName: folder['lecture_name'],
+                        date: folder['lecture_date'],
+                      ),
+                    );
+                  }).toList()
               ),
-              GestureDetector(
-                onTap: () {
-                  print('certain lecture is clicked');
-                },
-                child: LectureExample(
-                  lectureName: '컴퓨터알고리즘',
-                  date: '2024/06/10',
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  print('certain lecture is clicked');
-                },
-                child: LectureExample(
-                  lectureName: '데이터베이스',
-                  date: '2024/06/15',
-                ),
-              ),
-              SizedBox(height: 32),
+
+          SizedBox(height: 32),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -287,7 +323,6 @@ class LectureExample extends StatelessWidget {
                       final RenderBox overlay = Overlay.of(context)
                           .context
                           .findRenderObject() as RenderBox;
-
                       final Offset buttonPosition =
                       button.localToGlobal(Offset.zero, ancestor: overlay);
                       final double left = buttonPosition.dx;
@@ -527,10 +562,10 @@ class _Checkbox1State extends State<Checkbox1> {
   }
 }
 
-void main() {
-  runApp(MaterialApp(
-    home: Scaffold(
-      body: MainPage(),
-    ),
-  ));
-}
+// void main() {
+//   runApp(MaterialApp(
+//     home: Scaffold(
+//       body: MainPage(),
+//     ),
+//   ));
+// }
