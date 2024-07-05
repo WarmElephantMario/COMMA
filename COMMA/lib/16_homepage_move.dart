@@ -7,7 +7,9 @@ import 'package:http/http.dart' as http;
 
 class MainPage extends StatefulWidget {
   final User userInfo;
+
   const MainPage({Key? key, required this.userInfo}) : super(key: key);
+
 
   @override
   _MainPageState createState() => _MainPageState();
@@ -15,17 +17,21 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
 
+
   List<dynamic> lectureFolders = [];
 
   @override
   void initState(){
+
     super.initState();
     fetchLectureFolders();
   }
 
   Future<void> fetchLectureFolders() async {
+
     final response = await http.get(
         Uri.parse(API.getAllFolders));
+
     if (response.statusCode == 200) {
       setState(() {
         lectureFolders = jsonDecode(response.body)['folders'];
@@ -43,16 +49,19 @@ class _MainPageState extends State<MainPage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.grey[200],
-        iconTheme: IconThemeData(
+        iconTheme: const IconThemeData(
           color: Color(0xFF36AE92),
         ),
         actions: [
           IconButton(
-            icon: Icon(
+            icon: const Icon(
               Icons.search_rounded,
             ),
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => SearchingScreen()));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const SearchingScreen()));
             },
           ),
         ],
@@ -65,7 +74,9 @@ class _MainPageState extends State<MainPage> {
             children: [
               Text(
                 '안녕하세요, ${widget.userInfo.user_email} 님',
+
                 style: TextStyle(
+
                   color: Colors.black,
                   fontSize: 24,
                   fontFamily: 'DM Sans',
@@ -73,11 +84,11 @@ class _MainPageState extends State<MainPage> {
                   height: 1.5,
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  const Text(
                     '최근에 학습한 강의 파일이에요.',
                     style: TextStyle(
                       color: Color(0xFF575757),
@@ -91,7 +102,7 @@ class _MainPageState extends State<MainPage> {
                     onTap: () {
                       print('view all button is clicked');
                     },
-                    child: Row(
+                    child: const Row(
                       children: [
                         Text(
                           '전체 보기',
@@ -114,6 +125,7 @@ class _MainPageState extends State<MainPage> {
                   ),
                 ],
               ),
+
               SizedBox(height: 8),
 
               // Fetch된 데이터를 사용하여 LectureExample 위젯을 동적으로 생성
@@ -145,10 +157,11 @@ class _MainPageState extends State<MainPage> {
               ),
 
           SizedBox(height: 32),
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  const Text(
                     '최근에 학습한 콜론 파일이에요.',
                     style: TextStyle(
                       color: Color(0xFF575757),
@@ -162,7 +175,7 @@ class _MainPageState extends State<MainPage> {
                     onTap: () {
                       print('view all2 button is clicked');
                     },
-                    child: Row(
+                    child: const Row(
                       children: [
                         Text(
                           '전체 보기',
@@ -185,12 +198,12 @@ class _MainPageState extends State<MainPage> {
                   ),
                 ],
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               GestureDetector(
                 onTap: () {
                   print('certain lecture is clicked');
                 },
-                child: LectureExample(
+                child: const LectureExample(
                   lectureName: '정보통신공학',
                   date: '2024/06/07',
                 ),
@@ -199,7 +212,7 @@ class _MainPageState extends State<MainPage> {
                 onTap: () {
                   print('certain lecture is clicked');
                 },
-                child: LectureExample(
+                child: const LectureExample(
                   lectureName: '컴퓨터알고리즘',
                   date: '2024/06/10',
                 ),
@@ -208,19 +221,19 @@ class _MainPageState extends State<MainPage> {
                 onTap: () {
                   print('certain lecture is clicked');
                 },
-                child: LectureExample(
+                child: const LectureExample(
                   lectureName: '데이터베이스',
                   date: '2024/06/15',
                 ),
               ),
-              SizedBox(height: 32),
+              const SizedBox(height: 32),
             ],
           ),
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Color(0xFF36AE92),
-        items: [
+        backgroundColor: const Color(0xFF36AE92),
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'HOME',
@@ -248,10 +261,10 @@ class LectureExample extends StatelessWidget {
   final String date;
 
   const LectureExample({
-    Key? key,
+    super.key,
     required this.lectureName,
     required this.date,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -261,7 +274,7 @@ class LectureExample extends StatelessWidget {
         width: double.infinity,
         height: 58,
         decoration: BoxDecoration(
-          color: Color(0xFFE9F3ED), // Background color
+          color: const Color(0xFFE9F3ED), // Background color
           borderRadius: BorderRadius.circular(10), // Rounded corners
         ),
         child: Row(
@@ -269,11 +282,11 @@ class LectureExample extends StatelessWidget {
             Container(
               width: 40,
               height: 40,
-              margin: EdgeInsets.all(8.0),
+              margin: const EdgeInsets.all(8.0),
               decoration: BoxDecoration(
-                color: Color(0xFF005A38), // Color of the square
+                color: const Color(0xFF005A38), // Color of the square
                 borderRadius:
-                BorderRadius.circular(8), // Rounded corners for the square
+                    BorderRadius.circular(8), // Rounded corners for the square
               ),
             ),
             Expanded(
@@ -285,7 +298,7 @@ class LectureExample extends StatelessWidget {
                   children: [
                     Text(
                       lectureName,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Color(0xFF1F1F39),
                         fontSize: 14,
                         fontFamily: 'Poppins',
@@ -293,10 +306,10 @@ class LectureExample extends StatelessWidget {
                         height: 1.2,
                       ),
                     ),
-                    Spacer(),
+                    const Spacer(),
                     Text(
                       date,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Color(0xFF005A38),
                         fontSize: 12,
                         fontFamily: 'DM Sans',
@@ -313,18 +326,18 @@ class LectureExample extends StatelessWidget {
                 return Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: GestureDetector(
-                    child: Icon(
+                    child: const Icon(
                       Icons.more_vert,
                       color: Color(0xFF36AE92), // Icon color
                     ),
                     onTap: () async {
                       final RenderBox button =
-                      context.findRenderObject() as RenderBox;
+                          context.findRenderObject() as RenderBox;
                       final RenderBox overlay = Overlay.of(context)
                           .context
                           .findRenderObject() as RenderBox;
                       final Offset buttonPosition =
-                      button.localToGlobal(Offset.zero, ancestor: overlay);
+                          button.localToGlobal(Offset.zero, ancestor: overlay);
                       final double left = buttonPosition.dx;
                       final double top = buttonPosition.dy + button.size.height;
 
@@ -333,7 +346,7 @@ class LectureExample extends StatelessWidget {
                         position: RelativeRect.fromLTRB(
                             left, top, left + button.size.width, top),
                         items: [
-                          PopupMenuItem<String>(
+                          const PopupMenuItem<String>(
                             value: 'delete',
                             child: Center(
                               child: Text(
@@ -352,7 +365,7 @@ class LectureExample extends StatelessWidget {
                             value: 'move',
                             child: Center(
                               child: GestureDetector(
-                                child: Text(
+                                child: const Text(
                                   '이동하기',
                                   style: TextStyle(
                                     color: Color.fromRGBO(84, 84, 84, 1),
@@ -368,7 +381,7 @@ class LectureExample extends StatelessWidget {
                               ),
                             ),
                           ),
-                          PopupMenuItem<String>(
+                          const PopupMenuItem<String>(
                             value: 'rename',
                             child: Center(
                               child: Text(
@@ -408,7 +421,7 @@ class LectureExample extends StatelessWidget {
 void _showQuickMenu(BuildContext context) {
   showModalBottomSheet(
     context: context,
-    shape: RoundedRectangleBorder(
+    shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(
         top: Radius.circular(20),
       ),
@@ -428,7 +441,7 @@ void _showQuickMenu(BuildContext context) {
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  child: Text(
+                  child: const Text(
                     '취소',
                     style: TextStyle(
                       color: Color.fromRGBO(84, 84, 84, 1),
@@ -437,7 +450,7 @@ void _showQuickMenu(BuildContext context) {
                     ),
                   ),
                 ),
-                Text(
+                const Text(
                   '다음으로 이동',
                   style: TextStyle(
                     color: Colors.black,
@@ -449,7 +462,7 @@ void _showQuickMenu(BuildContext context) {
                   onPressed: () {
                     // TODO: Implement the move action
                   },
-                  child: Text(
+                  child: const Text(
                     '이동',
                     style: TextStyle(
                       color: Color.fromRGBO(255, 161, 122, 1),
@@ -460,8 +473,8 @@ void _showQuickMenu(BuildContext context) {
                 ),
               ],
             ),
-            SizedBox(height: 2),
-            Center(
+            const SizedBox(height: 2),
+            const Center(
               child: Text(
                 '현재 위치 외 다른 폴더로 이동할 수 있어요.',
                 style: TextStyle(
@@ -473,24 +486,21 @@ void _showQuickMenu(BuildContext context) {
                 ),
               ),
             ),
-            SizedBox(height: 16),
-            Column(
+            const SizedBox(height: 16),
+            const Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 5),
-                  child:
-                  Checkbox1(label: '컴퓨터 알고리즘'),
+                  child: Checkbox1(label: '컴퓨터 알고리즘'),
                 ),
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 5),
-                  child:
-                  Checkbox1(label: '정보통신공학'),
+                  child: Checkbox1(label: '정보통신공학'),
                 ),
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 5),
-                  child:
-                  Checkbox1(label: '데이터베이스'),
+                  child: Checkbox1(label: '데이터베이스'),
                 ),
               ],
             ),
@@ -503,7 +513,7 @@ void _showQuickMenu(BuildContext context) {
 
 class Checkbox1 extends StatefulWidget {
   final String label;
-  Checkbox1({required this.label});
+  const Checkbox1({super.key, required this.label});
 
   @override
   _Checkbox1State createState() => _Checkbox1State();
@@ -520,7 +530,7 @@ class _Checkbox1State extends State<Checkbox1> {
         Container(
           width: size.width,
           height: 24,
-          padding: EdgeInsets.only(left: 18),
+          padding: const EdgeInsets.only(left: 18),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.start,
@@ -538,15 +548,19 @@ class _Checkbox1State extends State<Checkbox1> {
                   height: 18,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: isChecked ? Color(0xFF36AE92) : Colors.grey, width: 2),
-
+                    border: Border.all(
+                        color:
+                            isChecked ? const Color(0xFF36AE92) : Colors.grey,
+                        width: 2),
                   ),
                 ),
               ),
-              SizedBox(width: 8), // Add some spacing between the checkbox and the text
+              const SizedBox(
+                  width:
+                      8), // Add some spacing between the checkbox and the text
               Text(
                 widget.label,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Color(0xFF1F1F39),
                   fontSize: 15,
                   fontFamily: 'Poppins',

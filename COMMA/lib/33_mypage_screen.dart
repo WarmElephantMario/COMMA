@@ -6,7 +6,8 @@ import 'mypage/42_help_page.dart';
 class MyPageScreen extends StatelessWidget {
   const MyPageScreen({super.key});
 
-  void _showConfirmationDialog(BuildContext context, String title, String message, VoidCallback onConfirm) {
+  void _showConfirmationDialog(BuildContext context, String title,
+      String message, VoidCallback onConfirm) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -18,14 +19,22 @@ class MyPageScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('취소', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: Color(0xFFFFA17A))),
+              child: const Text('취소',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                      color: Color(0xFFFFA17A))),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 onConfirm();
               },
-              child: const Text('확인', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: Color(0xFF545454))),
+              child: const Text('확인',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                      color: Color(0xFF545454))),
             ),
           ],
         );
@@ -38,7 +47,7 @@ class MyPageScreen extends StatelessWidget {
       elevation: 0.5,
       child: ListTile(
         title: Text(title),
-        trailing: Icon(Icons.arrow_forward_ios),
+        trailing: const Icon(Icons.arrow_forward_ios),
         onTap: onTap,
       ),
     );
@@ -47,23 +56,29 @@ class MyPageScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         title: const Text(
           '마이페이지',
-          style: TextStyle(fontSize: 26, fontFamily: 'DM Sans', fontWeight: FontWeight.bold),
+          style: TextStyle(
+              fontSize: 26, fontFamily: 'DM Sans', fontWeight: FontWeight.bold),
         ),
       ),
       body: ListView(
         children: <Widget>[
-          SizedBox(height: 15),
+          const SizedBox(height: 15),
           _buildCard(context, '프로필 정보', () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen()));
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const ProfileScreen()));
           }),
           _buildCard(context, '비밀번호 변경', () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => ConfirmPasswordPage()));
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => ConfirmPasswordPage()));
           }),
           _buildCard(context, '도움말', () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => HelpPage()));
+            Navigator.push(
+                context, MaterialPageRoute(builder: (context) => HelpPage()));
           }),
           _buildCard(context, '로그아웃', () {
             _showConfirmationDialog(

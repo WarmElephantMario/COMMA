@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'components.dart';
 import '63record.dart'; 
-import '32_home_screen.dart';
 import '30_folder_screen.dart';
 import '33_mypage_screen.dart';
 import '60prepare.dart';
@@ -13,22 +12,11 @@ class LectureStartPage extends StatefulWidget {
 }
 
 class _LectureStartPageState extends State<LectureStartPage> {
-  int _currentIndex = 2; // 학습 시작 탭이 기본 선택되도록 설정
-
-  static final List<Widget> _widgetOptions = <Widget>[
-    HomePageNoRecent(),
-    FolderScreen(),
-    LearningPreparation(),
-    MyPageScreen(),
-  ];
+  int _currentIndex = 2; 
 
   void _onItemTapped(int index) {
     setState(() {
       _currentIndex = index;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => _widgetOptions[index]),
-      );
     });
   }
 
@@ -175,7 +163,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
           ],
         ),
       ),
-      bottomNavigationBar: buildBottomNavigationBar(_currentIndex, _onItemTapped),
+      bottomNavigationBar: buildBottomNavigationBar(context, _currentIndex, _onItemTapped),
     );
   }
 }

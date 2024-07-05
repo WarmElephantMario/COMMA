@@ -11,32 +11,13 @@ class _LearningPreparationState extends State<LearningPreparation> {
   bool _isMaterialEmbedded = false; // 강의 자료가 임베드되었는지 여부를 관리하는 변수
   bool _isIconVisible = true; // 아이콘이 보이는지 여부를 관리하는 변수
 
-  // void _showConfirmationDialog(BuildContext context, String title, String message, VoidCallback onConfirm) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: Text(title),
-  //         content: Text(message),
-  //         actions: <Widget>[
-  //           TextButton(
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //             },
-  //             child: const Text('취소', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: Color(0xFFFFA17A))),
-  //           ),
-  //           TextButton(
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //               onConfirm();
-  //             },
-  //             child: const Text('확인', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: Color(0xFF545454))),
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
+  int _selectedIndex = 2; // 학습 시작 탭이 기본 선택되도록 설정
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   Widget _buildRadioOption(String text, int value) {
     return Row(
@@ -188,6 +169,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
           _buildMaterialInfo(),
         ],
       ),
+    bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }

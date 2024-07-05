@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'components.dart';
-import '32_home_screen.dart';
-import '30_folder_screen.dart';
-import '33_mypage_screen.dart';
-import '60prepare.dart';
+// import '30_folder_screen.dart';
+// import '33_mypage_screen.dart';
+// import '60prepare.dart';
 import '10_homepage_no_recent.dart';
 
 
@@ -34,26 +33,18 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
 
-  static final List<Widget> _widgetOptions = <Widget>[
-    HomePageNoRecent(),
-    FolderScreen(),
-    LearningPreparation(),
-    MyPageScreen(),
-  ];
-
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
 
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: _widgetOptions.elementAt(_selectedIndex),
+        child: HomePageNoRecent(), // 초기 시작 화면
       ),
-      bottomNavigationBar: buildBottomNavigationBar(_selectedIndex, _onItemTapped), 
+      bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped), // Use the new function
     );
   }
 }
