@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import '64popup_record.dart';
-import '65popup_colon.dart';
 import '62lecture_start.dart';
-import '63record.dart'; 
-import '32_home_screen.dart';
 import '30_folder_screen.dart';
 import '33_mypage_screen.dart';
 import '60prepare.dart';
 import '10_homepage_no_recent.dart';
+import 'components.dart';
 
 enum RecordingState { initial, recording, recorded }
 

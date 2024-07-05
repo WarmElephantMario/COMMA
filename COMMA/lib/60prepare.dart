@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '61popup_prepare.dart'; // Import the dialog file
+import 'components.dart';
 
 class LearningPreparation extends StatefulWidget {
   @override
@@ -11,42 +11,32 @@ class _LearningPreparationState extends State<LearningPreparation> {
   bool _isMaterialEmbedded = false; // 강의 자료가 임베드되었는지 여부를 관리하는 변수
   bool _isIconVisible = true; // 아이콘이 보이는지 여부를 관리하는 변수
 
-  void _showLearningDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return LearningDialog(this.context); // Pass the parent context
-      },
-    );
-  }
-
-  void _showConfirmationDialog(BuildContext context, String title, String message, VoidCallback onConfirm) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title),
-          content: Text(message),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('취소', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: Color(0xFFFFA17A))),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                onConfirm();
-              },
-              child: const Text('확인', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: Color(0xFF545454))),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  // void _showConfirmationDialog(BuildContext context, String title, String message, VoidCallback onConfirm) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         title: Text(title),
+  //         content: Text(message),
+  //         actions: <Widget>[
+  //           TextButton(
+  //             onPressed: () {
+  //               Navigator.of(context).pop();
+  //             },
+  //             child: const Text('취소', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: Color(0xFFFFA17A))),
+  //           ),
+  //           TextButton(
+  //             onPressed: () {
+  //               Navigator.of(context).pop();
+  //               onConfirm();
+  //             },
+  //             child: const Text('확인', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: Color(0xFF545454))),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 
   Widget _buildRadioOption(String text, int value) {
     return Row(
@@ -164,7 +154,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
               onPressed: () {
                 setState(() {
                   if (_isMaterialEmbedded) {
-                    _showLearningDialog(); // 버튼 클릭 시 팝업 창 표시
+                    showLearningDialog(context); // 버튼 클릭 시 팝업 창 표시
                   } else {
                     _isMaterialEmbedded = true; // 버튼 클릭 시 상태 업데이트
                     _isIconVisible = false; // 아이콘 숨기기
