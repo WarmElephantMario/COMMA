@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'components.dart';
 import 'folder/37_folder_files_screen.dart';
 import 'folder/39_folder_section.dart';
 import 'folder/38_folder_list.dart';
@@ -17,6 +18,13 @@ class _FolderScreenState extends State<FolderScreen> {
   List<Map<String, dynamic>> lectureFolders = [];
   List<Map<String, dynamic>> colonFolders = [];
 
+  int _selectedIndex = 1; // 학습 시작 탭이 기본 선택되도록 설정
+
+  void _onItemTapped(int index){
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
   @override
   void initState() {
     super.initState();
@@ -99,206 +107,6 @@ class _FolderScreenState extends State<FolderScreen> {
     }
   }
 
-  void _showAddFolderDialog(BuildContext context, String folderType) {
-    final TextEditingController folderNameController = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text(
-            '새 폴더 만들기',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-          ),
-          content: TextField(
-            controller: folderNameController,
-            decoration: const InputDecoration(
-              hintText: '폴더 이름',
-              hintStyle: TextStyle(color: Color(0xFF364B45)),
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('취소',
-                  style: TextStyle(
-                      color: Color(0xFFFFA17A),
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16)),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text(
-                '만들기',
-                style: TextStyle(
-                    color: Color(0xFF545454),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700),
-              ),
-              onPressed: () {
-                _addFolder(folderNameController.text, folderType);
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showRenameFolderDialog(BuildContext context, int index,
-      List<Map<String, dynamic>> folderList, String folderType) {
-    final TextEditingController folderNameController =
-        TextEditingController(text: folderList[index]['folder_name']);
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text(
-            '폴더 이름 바꾸기',
-            style: TextStyle(
-                color: Color(0xFF545454),
-                fontWeight: FontWeight.w800,
-                fontSize: 20),
-          ),
-          content: TextField(
-            controller: folderNameController,
-            decoration: const InputDecoration(hintText: '폴더 이름'),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('취소',
-                  style: TextStyle(
-                    color: Color(0xFFFFA17A),
-                    fontWeight: FontWeight.w700,
-                  )),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text(
-                '저장',
-                style: TextStyle(
-                    color: Color(0xFF545454), fontWeight: FontWeight.w700),
-              ),
-              onPressed: () async {
-                await _renameFolder(folderType, folderList[index]['id'],
-                    folderNameController.text);
-                setState(() {
-                  folderList[index]['folder_name'] = folderNameController.text;
-                });
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showDeleteFolderDialog(BuildContext context, int index,
-      List<Map<String, dynamic>> folderList, String folderType) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(
-            '정말 \'${folderList[index]['folder_name']}\' 을(를) 삭제하시겠습니까?',
-            style: const TextStyle(
-                color: Color(0xFF545454),
-                fontWeight: FontWeight.w800,
-                fontSize: 15),
-          ),
-          content: const Text(
-            '폴더를 삭제하면 다시 복구할 수 없습니다.',
-            style: TextStyle(
-              color: Color(0xFF245B3A),
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('취소',
-                  style: TextStyle(
-                      color: Color(0xFFFFA17A), fontWeight: FontWeight.w700)),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text(
-                '삭제',
-                style: TextStyle(
-                    color: Color(0xFF545454), fontWeight: FontWeight.w700),
-              ),
-              onPressed: () async {
-                await _deleteFolder(folderType, folderList[index]['id']);
-                setState(() {
-                  folderList.removeAt(index);
-                });
-                Navigator.of(context).pop();
-                _showDeletionConfirmation(context);
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showDeletionConfirmation(BuildContext context) {
-    final overlay = Overlay.of(context);
-    OverlayEntry? overlayEntry;
-
-    overlayEntry = OverlayEntry(
-      builder: (context) => Positioned(
-        top: 40.0,
-        left: 80,
-        right: 80,
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8.0),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 10.0,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: ListTile(
-                title: const Text(
-                  '삭제되었습니다.',
-                  style: TextStyle(
-                      color: Color(0xFF545454), fontWeight: FontWeight.w800),
-                ),
-                trailing: TextButton(
-                  child: const Text(
-                    '확인',
-                    style: TextStyle(
-                        color: Color(0xFFFFA17A), fontWeight: FontWeight.w700),
-                  ),
-                  onPressed: () {
-                    if (overlayEntry != null) {
-                      overlayEntry.remove();
-                    }
-                  },
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    overlay.insert(overlayEntry);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -314,7 +122,7 @@ class _FolderScreenState extends State<FolderScreen> {
                   FolderSection(
                     sectionTitle: '강의폴더',
                     onAddPressed: () {
-                      _showAddFolderDialog(context, 'lecture');
+                      showAddFolderDialog(context, 'lecture');
                     },
                     onViewAllPressed: () {
                       Navigator.push(
@@ -342,16 +150,16 @@ class _FolderScreenState extends State<FolderScreen> {
                         ),
                       );
                     },
-                    onRename: (index) => _showRenameFolderDialog(
+                    onRename: (index) => showRenameFolderDialog(
                         context, index, lectureFolders, 'lecture'),
-                    onDelete: (index) => _showDeleteFolderDialog(
+                    onDelete: (index) => showDeleteFolderDialog(
                         context, index, lectureFolders, 'lecture'),
                   ),
                   const SizedBox(height: 20),
                   FolderSection(
                     sectionTitle: '콜론폴더',
                     onAddPressed: () {
-                      _showAddFolderDialog(context, 'colon');
+                      showAddFolderDialog(context, 'colon');
                     },
                     onViewAllPressed: () {
                       Navigator.push(
@@ -379,9 +187,9 @@ class _FolderScreenState extends State<FolderScreen> {
                         ),
                       );
                     },
-                    onRename: (index) => _showRenameFolderDialog(
+                    onRename: (index) => showRenameFolderDialog(
                         context, index, colonFolders, 'colon'),
-                    onDelete: (index) => _showDeleteFolderDialog(
+                    onDelete: (index) => showDeleteFolderDialog(
                         context, index, colonFolders, 'colon'),
                   ),
                 ],
@@ -390,6 +198,7 @@ class _FolderScreenState extends State<FolderScreen> {
           );
         },
       ),
+      bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }

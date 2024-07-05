@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'components.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'folder/37_folder_files_screen.dart';
@@ -20,6 +21,14 @@ class FullFolderListScreen extends StatefulWidget {
 
 class _FullFolderListScreenState extends State<FullFolderListScreen> {
   late List<Map<String, dynamic>> folders;
+
+  int _selectedIndex = 1; 
+
+  void _onItemTapped(int index){
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
   void initState() {
@@ -273,6 +282,7 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
           );
         },
       ),
+      bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }
