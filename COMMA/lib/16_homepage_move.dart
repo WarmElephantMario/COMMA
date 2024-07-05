@@ -7,23 +7,31 @@ import 'package:http/http.dart' as http;
 
 class MainPage extends StatefulWidget {
   final User userInfo;
-  const MainPage({super.key, required this.userInfo});
+
+  const MainPage({Key? key, required this.userInfo}) : super(key: key);
+
 
   @override
   _MainPageState createState() => _MainPageState();
 }
 
 class _MainPageState extends State<MainPage> {
+
+
   List<dynamic> lectureFolders = [];
 
   @override
-  void initState() {
+  void initState(){
+
     super.initState();
     fetchLectureFolders();
   }
 
   Future<void> fetchLectureFolders() async {
-    final response = await http.get(Uri.parse(API.getAllFolders));
+
+    final response = await http.get(
+        Uri.parse(API.getAllFolders));
+
     if (response.statusCode == 200) {
       setState(() {
         lectureFolders = jsonDecode(response.body)['folders'];
@@ -66,7 +74,9 @@ class _MainPageState extends State<MainPage> {
             children: [
               Text(
                 '안녕하세요, ${widget.userInfo.user_email} 님',
-                style: const TextStyle(
+
+                style: TextStyle(
+
                   color: Colors.black,
                   fontSize: 24,
                   fontFamily: 'DM Sans',
@@ -115,37 +125,39 @@ class _MainPageState extends State<MainPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+
+              SizedBox(height: 8),
 
               // Fetch된 데이터를 사용하여 LectureExample 위젯을 동적으로 생성
-              ...(lectureFolders.isEmpty
-                  ? [
-                      const Text(
-                        '최근에 학습한 강의 자료가 없어요.',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 13,
-                          fontFamily: 'Raleway',
-                          fontWeight: FontWeight.w700,
-                          height: 1.5,
-                        ),
-                      )
-                    ]
-                  : lectureFolders
-                      .take(3) // 상위 3개의 폴더만 가져옴
+              ...(
+                  lectureFolders.isEmpty
+                      ? [Text(
+                    '최근에 학습한 강의 자료가 없어요.',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 13,
+                      fontFamily: 'Raleway',
+                      fontWeight: FontWeight.w700,
+                      height: 1.5,
+                    ),
+                  )]
+                      : lectureFolders
+                      .take(3)  // 상위 3개의 폴더만 가져옴
                       .map((folder) {
-                      return GestureDetector(
-                        onTap: () {
-                          print('Lecture ${folder['lecture_name']} is clicked');
-                        },
-                        child: LectureExample(
-                          lectureName: folder['lecture_name'],
-                          date: folder['lecture_date'],
-                        ),
-                      );
-                    }).toList()),
+                    return GestureDetector(
+                      onTap: () {
+                        print('Lecture ${folder['lecture_name']} is clicked');
+                      },
+                      child: LectureExample(
+                        lectureName: folder['lecture_name'],
+                        date: folder['lecture_date'],
+                      ),
+                    );
+                  }).toList()
+              ),
 
-              const SizedBox(height: 32),
+          SizedBox(height: 32),
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
