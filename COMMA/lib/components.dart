@@ -1,12 +1,31 @@
 import 'package:flutter/material.dart';
 import '66colon.dart';
 import '62lecture_start.dart';
+import '30_folder_screen.dart';
+import '33_mypage_screen.dart';
+import '60prepare.dart';
+import '10_homepage_no_recent.dart';
 
 //내비게이션 바
-BottomNavigationBar buildBottomNavigationBar(int currentIndex, Function(int) onItemTapped) {
+BottomNavigationBar buildBottomNavigationBar(BuildContext context, int currentIndex, Function(int) onItemTapped) {
+  final List<Widget> widgetOptions = <Widget>[
+    HomePageNoRecent(),
+    FolderScreen(),
+    LearningPreparation(),
+    MyPageScreen(),
+  ];
+
+  void handleItemTap(int index) {
+    onItemTapped(index);
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => widgetOptions[index]),
+    );
+  }
+
   return BottomNavigationBar(
     currentIndex: currentIndex,
-    onTap: onItemTapped,
+    onTap: handleItemTap,
     items: [
       BottomNavigationBarItem(
         icon: ImageIcon(AssetImage('assets/navigation_bar/home.png')),
