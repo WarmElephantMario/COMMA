@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '63record.dart';
+import '62lecture_start.dart';
 
 class LearningDialog extends StatelessWidget {
   final BuildContext parentContext;
@@ -8,12 +8,12 @@ class LearningDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Navigate to RecordPage after 3 seconds
+    // Navigate to RLectureStartPage after 3 seconds
     Future.delayed(Duration(seconds: 3), () {
       Navigator.of(context).pop(); // Close the dialog
       Navigator.push(
         parentContext,
-        MaterialPageRoute(builder: (context) => RecordPage()),
+        MaterialPageRoute(builder: (context) => LectureStartPage()),
       );
     });
 

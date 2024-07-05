@@ -35,7 +35,7 @@ class _MyHomePageState extends State<MyHomePage> {
   static final List<Widget> _widgetOptions = <Widget>[
     HomePageNoRecent(),
     FolderScreen(),
-    LearningPreparation(), // const 키워드를 제거
+    LearningPreparation(),
     MyPageScreen(),
   ];
 
