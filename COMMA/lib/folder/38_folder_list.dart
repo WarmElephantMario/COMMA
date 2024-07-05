@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import '../35_rename_delete_popup.dart';
 
 class FolderList extends StatelessWidget {
-  final List<String> folders;
-  final Function(String) onFolderTap;
+  final List<Map<String, dynamic>> folders;
+  final Function(Map<String, dynamic>) onFolderTap;
   final Function(int) onRename;
   final Function(int) onDelete;
 
   const FolderList({
+    super.key,
     required this.folders,
     required this.onFolderTap,
     required this.onRename,
@@ -19,7 +20,7 @@ class FolderList extends StatelessWidget {
     return Column(
       children: folders.asMap().entries.map((entry) {
         int index = entry.key;
-        String folder = entry.value;
+        Map<String, dynamic> folder = entry.value;
         return GestureDetector(
           onTap: () => onFolderTap(folder),
           child: FolderListItem(
@@ -34,11 +35,12 @@ class FolderList extends StatelessWidget {
 }
 
 class FolderListItem extends StatelessWidget {
-  final String folder;
+  final Map<String, dynamic> folder;
   final VoidCallback onRename;
   final VoidCallback onDelete;
 
   const FolderListItem({
+    super.key,
     required this.folder,
     required this.onRename,
     required this.onDelete,
@@ -47,8 +49,8 @@ class FolderListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(bottom: 15),
-      padding: EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 15),
+      padding: const EdgeInsets.all(12),
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.green.withOpacity(0.05),
@@ -63,15 +65,15 @@ class FolderListItem extends StatelessWidget {
               color: Colors.green.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: Center(
+            child: const Center(
               child: Icon(Icons.folder_sharp, size: 22),
             ),
           ),
-          SizedBox(width: 10),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
-              folder,
-              style: TextStyle(
+              folder['folder_name'],
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
@@ -79,7 +81,7 @@ class FolderListItem extends StatelessWidget {
           ),
           Row(
             children: [
-              Text(
+              const Text(
                 '0 files',
                 style: TextStyle(
                   color: Color(0xFF005A38),
@@ -89,7 +91,7 @@ class FolderListItem extends StatelessWidget {
                   height: 1.5,
                 ),
               ),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               RenameDeletePopup(
                 onRename: onRename,
                 onDelete: onDelete,
