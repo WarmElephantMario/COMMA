@@ -127,8 +127,8 @@ class _LearningPreparationState extends State<LearningPreparation> {
             ),
           ),
           const SizedBox(height: 30),
-          _buildRadioOption('대체텍스트 생성', 0),
-          _buildRadioOption('실시간 자막 생성', 1),
+          Checkbox1(label: '대체텍스트 생성'),
+          Checkbox1(label: '실시간 자막 생성'),
           const SizedBox(height: 20),
           Center(
             child: ElevatedButton.icon(

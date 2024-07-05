@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'components.dart';
-// import '30_folder_screen.dart';
-// import '33_mypage_screen.dart';
-// import '60prepare.dart';
 import '10_homepage_no_recent.dart';
 
 
