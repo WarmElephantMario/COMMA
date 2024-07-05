@@ -3,9 +3,10 @@ import 'package:flutter_plugin/11_homepage_recent.dart';
 import 'package:flutter_plugin/16_homepage_move.dart';
 import 'components.dart';
 import 'model/user.dart';
-
-
-
+import '30_folder_screen.dart';
+import '33_mypage_screen.dart';
+import '60prepare.dart';
+import '10_homepage_no_recent.dart';
 
 void main() => runApp(const MyApp());
 
@@ -32,16 +33,31 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  int _selectedIndex = 0;
+
+  static final List<Widget> _widgetOptions = <Widget>[
+    HomePageNoRecent(),
+    FolderScreen(),
+    LearningPreparation(), // const 키워드를 제거
+    MyPageScreen(),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: MainPage(userInfo : User(1, 'example@example.com', '010-1234-5678', 'password123')), // 초기 시작 화면
+        child: _widgetOptions.elementAt(_selectedIndex),
       ),
+      bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }
-
-
 // import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
 // import '1_Splash_green.dart';

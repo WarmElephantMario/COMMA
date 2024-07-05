@@ -15,5 +15,6 @@
     "firebase-admin": "^12.2.0",
     "mysql": "^2.18.1"
   },
+  "devDependencies": {},
   "description": ""
 }
