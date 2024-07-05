@@ -1,6 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_plugin/user/user_pref.dart';
+import 'package:get/get.dart';
 import '16_homepage_move.dart';
+import 'package:http/http.dart' as http;
+import 'package:fluttertoast/fluttertoast.dart';
+
+import 'api/api.dart';
+import 'model/user.dart';
+
 
 
 class FigmaToCodeApp9 extends StatelessWidget {
@@ -24,7 +34,65 @@ class FigmaToCodeApp9 extends StatelessWidget {
   }
 }
 
-class SigninPage extends StatelessWidget {
+
+class SigninPage extends StatefulWidget {
+  @override
+  _SigninPageState createState() => _SigninPageState();
+}
+
+class _SigninPageState extends State<SigninPage> {
+  final _formKey = GlobalKey<FormState>();
+
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<User?> userLogin() async {
+    try{
+      var res = await http.post(
+          Uri.parse(API.login),
+          body: {
+            'user_email' : emailController.text.trim(),
+            'user_password' : passwordController.text.trim()
+          });
+
+      if(res.statusCode == 200){
+        var resLogin = jsonDecode(res.body);
+
+        if(resLogin['success'] == true){
+
+          Fluttertoast.showToast(msg: 'login successfully');
+          User userInfo = User.fromJson(resLogin['userData']);
+
+          print("Login success");
+          // await RememberUser.saveRememberUserInfo(userInfo);
+          // Get.to(MainScreen());
+
+          setState(() {
+            emailController.clear();
+            passwordController.clear();
+          });
+          return userInfo;
+
+        }else{
+          Fluttertoast.showToast(msg: 'Please check your email and password.');
+          return null;
+        }
+      }
+    }catch(e){
+      print(e.toString());
+      Fluttertoast.showToast(msg: e.toString());
+      return null;
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -59,27 +127,42 @@ class SigninPage extends StatelessWidget {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-
               SizedBox(height: size.height * 0.050),
-
-              InputButton(
-                label: 'Email address',
-                keyboardType: TextInputType.emailAddress,
-              ),
-              SizedBox(height: size.height * 0.025),
-              InputButton(
-                label: 'Password',
-                obscureText: true,
+              Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    InputButton(
+                      label: 'Email address',
+                      keyboardType: TextInputType.emailAddress,
+                      controller: emailController,
+                    ),
+                    SizedBox(height: size.height * 0.025),
+                    InputButton(
+                      label: 'Password',
+                      obscureText: true,
+                      controller: passwordController,
+                    ),
+                  ],
+                ),
               ),
               SizedBox(height: size.height * 0.020),
               Checkbox1(label: '자동 로그인'),
               SizedBox(height: size.height * 0.060),
-
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: size.width * 0.05),
                 child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => MainPage()));
+                  onTap: () async {
+                    if (_formKey.currentState!.validate()) {
+                      User? userInfo = await userLogin();
+                      if (userInfo != null){
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => MainPage(userInfo: userInfo)),
+                        );
+                      }
+                    }
                   },
                   child: Container(
                     width: size.width * 0.9,
@@ -120,12 +203,14 @@ class InputButton extends StatelessWidget {
   final String label;
   final TextInputType keyboardType;
   final bool obscureText;
+  final TextEditingController controller;
 
   const InputButton({
     Key? key,
     required this.label,
     this.keyboardType = TextInputType.text,
     this.obscureText = false,
+    required this.controller,
   }) : super(key: key);
 
   @override
@@ -160,6 +245,7 @@ class InputButton extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.only(right: 20.0),
                 child: TextFormField(
+                  controller: controller,
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: '${label}',
@@ -173,6 +259,12 @@ class InputButton extends StatelessWidget {
                   ),
                   keyboardType: keyboardType,
                   obscureText: obscureText,
+                  validator: (value) { // Validator 추가
+                    if (value == null || value.isEmpty) {
+                      return '{$label} field cannot be empty';
+                    }
+                    return null;
+                  },
                   onChanged: (value) {
                     // Handle input changes if needed
                   },
@@ -182,67 +274,6 @@ class InputButton extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class Checkbox1 extends StatefulWidget {
-  final String label;
-  Checkbox1({required this.label});
-
-  @override
-  _Checkbox1State createState() => _Checkbox1State();
-}
-
-class _Checkbox1State extends State<Checkbox1> {
-  bool isChecked = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    return Column(
-      children: [
-        Container(
-          width: size.width,
-          height: 24,
-          padding: EdgeInsets.only(left: 18),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    isChecked = !isChecked;
-                  });
-                  print('checkbox is clicked');
-                },
-                child: Container(
-                  width: 18,
-                  height: 18,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: isChecked ? Color(0xFF36AE92) : Colors.grey, width: 2),
-
-                  ),
-                ),
-              ),
-              SizedBox(width: 8), // Add some spacing between the checkbox and the text
-              Text(
-                widget.label,
-                style: TextStyle(
-                  color: Color(0xFF1F1F39),
-                  fontSize: 15,
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w700,
-                  height: 1.2,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }
