@@ -1,5 +1,15 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_plugin/api/api.dart';
+import 'package:flutter_plugin/model/user.dart';
+import 'package:get/get.dart';
 import '6_verification.dart';
+import 'package:http/http.dart' as http;
+import 'package:fluttertoast/fluttertoast.dart';
+import '9_signin.dart';
+
+
 
 class FigmaToCodeApp extends StatelessWidget {
   const FigmaToCodeApp({super.key});
@@ -22,7 +32,91 @@ class FigmaToCodeApp extends StatelessWidget {
   }
 }
 
-class SignUpPage extends StatelessWidget {
+class SignUpPage extends StatefulWidget {
+  @override
+  _SignUpPageState createState() => _SignUpPageState();
+}
+
+class _SignUpPageState extends State<SignUpPage> {
+  final _formKey = GlobalKey<FormState>();
+
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  Future<bool> checkUserPhone() async {
+    try {
+      var response = await http.post(
+          Uri.parse(API.validatePhone),
+          body: {
+            'user_phone': phoneController.text.trim()
+          }
+      );
+
+      if (response.statusCode == 200) {
+        var responseBody = jsonDecode(response.body);
+
+        if (responseBody['existPhone'] == true) {
+          Fluttertoast.showToast(msg: "This phone number is already in use.");
+          return false;
+        } else {
+          print('validation success');
+          saveInfo();
+          return true;
+        }
+      }
+    } catch (e) {
+      print(e.toString());
+      Fluttertoast.showToast(msg: e.toString());
+      return false;
+    }
+    return false;
+  }
+
+
+
+saveInfo() async{
+    User userModel = User(
+    1,
+    emailController.text.trim(),
+    phoneController.text.trim(),
+    passwordController.text.trim()
+    );
+
+    try{
+      var res = await http.post(Uri.parse(API.signup),
+      body: userModel.toJson()
+      );
+
+      if(res.statusCode == 200){
+        var resSignup = jsonDecode(res.body);
+        if(resSignup['success'] == true){
+          Fluttertoast.showToast(msg: 'Signup successfully');
+          setState(() {
+            emailController.clear();
+            passwordController.clear();
+            phoneController.clear();
+          });
+
+        }else{
+          Fluttertoast.showToast(msg: 'Error occurred. Please try again.');
+        }
+      }
+    }catch(e){
+      print(e.toString());
+      Fluttertoast.showToast(msg: e.toString());
+    }
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    phoneController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -35,7 +129,7 @@ class SignUpPage extends StatelessWidget {
         children: [
           Column(
             children: [
-              SizedBox(height: size.height * 0.17), // 높이를 화면 높이의 10%로 설정
+              SizedBox(height: size.height * 0.17), // 높이를 화면 높이의 17%로 설정
               Text(
                 '계정 생성하기',
                 textAlign: TextAlign.center,
@@ -57,33 +151,38 @@ class SignUpPage extends StatelessWidget {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-
               SizedBox(height: size.height * 0.050),
 
-              InputButton(
-                label: 'Email address',
-                keyboardType: TextInputType.emailAddress,
+              Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    InputButton(
+                      label: 'Email address',
+                      keyboardType: TextInputType.emailAddress,
+                      controller: emailController,
+                    ),
+                    SizedBox(height: size.height * 0.035),
+                    InputButton(
+                      label: 'Password',
+                      obscureText: true,
+                      controller: passwordController,
+                    ),
+                    SizedBox(height: size.height * 0.035),
+                    InputButton(
+                      label: 'Phone number',
+                      keyboardType: TextInputType.phone,
+                      controller: phoneController,
+                    ),
+                  ],
+                ),
               ),
-              SizedBox(height: size.height * 0.035),
-              InputButton(
-                label: 'Phone number',
-                keyboardType: TextInputType.phone,
-              ),
-              SizedBox(height: size.height * 0.035),
-              InputButton(
-                label: 'Password',
-                obscureText: true,
-              ),
+
               SizedBox(height: size.height * 0.060),
 
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: size.width * 0.05),
-                child: GestureDetector(
-                  onTap: () {
-                    print('인증코드 전송하기 버튼이 클릭되었습니다.');
-                    // 이곳에 클릭 이벤트 발생 시 실행할 코드를 추가할 수 있습니다.
-                  },
-                  child: Container(
+                child: Container(
                     width: size.width * 0.9,
                     height: size.height * 0.065,
                     decoration: ShapeDecoration(
@@ -96,10 +195,18 @@ class SignUpPage extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                                context, 
-                                MaterialPageRoute(builder: (context) => Verification_screen()));
+                          onTap: () async {
+                            if (_formKey.currentState!.validate()) {
+                              bool isPhoneValid = await checkUserPhone();
+                              if (isPhoneValid) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => Verification_screen()),
+                                );
+                              }else{
+                                print("인증 실패함");
+                              }
+                            }
                           },
                           child: Text(
                             '인증코드 전송하기',
@@ -121,7 +228,6 @@ class SignUpPage extends StatelessWidget {
                       ],
                     ),
                   ),
-                ),
               ),
 
               SizedBox(
@@ -144,8 +250,10 @@ class SignUpPage extends StatelessWidget {
                   SizedBox(width: 20),
                   GestureDetector(
                     onTap: () {
-                      // TODO: 로그인 화면으로 네비게이션 코드 추가
-                      print('로그인 버튼이 클릭되었습니다.');
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => FigmaToCodeApp9()),
+                      );
                     },
                     child: Text(
                       '로그인',
@@ -175,7 +283,7 @@ class SignUpPage extends StatelessWidget {
                   SizedBox(width: 20),
                   GestureDetector(
                     onTap: () {
-                      // TODO: 로그인 화면으로 네비게이션 코드 추가
+                      // 비밀번호 찾기 화면 추가로 구현해야 함
                       print('비밀번호 찾기 버튼이 클릭되었습니다.');
                     },
                     child: Text(
@@ -201,12 +309,14 @@ class InputButton extends StatelessWidget {
   final String label;
   final TextInputType keyboardType;
   final bool obscureText;
+  final TextEditingController controller;
 
   const InputButton({
     Key? key,
     required this.label,
     this.keyboardType = TextInputType.text,
     this.obscureText = false,
+    required this.controller,
   }) : super(key: key);
 
   @override
@@ -241,6 +351,7 @@ class InputButton extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.only(right: 20.0),
                 child: TextFormField(
+                  controller: controller,
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: '${label}',
@@ -254,6 +365,12 @@ class InputButton extends StatelessWidget {
                   ),
                   keyboardType: keyboardType,
                   obscureText: obscureText,
+                  validator: (value) { // Validator 추가
+                    if (value == null || value.isEmpty) {
+                      return '{$label} field cannot be empty';
+                    }
+                    return null;
+                  },
                   onChanged: (value) {
                     // Handle input changes if needed
                   },
