@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'components.dart';
 import '63record.dart'; 
 import '32_home_screen.dart';
 import '30_folder_screen.dart';
@@ -29,99 +30,6 @@ class _LectureStartPageState extends State<LectureStartPage> {
         MaterialPageRoute(builder: (context) => _widgetOptions[index]),
       );
     });
-  }
-
-  void _showQuickMenu(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(20),
-        ),
-      ),
-      backgroundColor: Colors.white,
-      builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text(
-                      '취소',
-                      style: TextStyle(
-                        color: Color.fromRGBO(84, 84, 84, 1),
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Text(
-                    '다음으로 이동',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      // TODO: Implement the move action
-                    },
-                    child: Text(
-                      '이동',
-                      style: TextStyle(
-                        color: Color.fromRGBO(255, 161, 122, 1),
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 2),
-              Center(
-                child: Text(
-                  '현재 위치 외 다른 폴더로 이동할 수 있어요.',
-                  style: TextStyle(
-                    color: Color(0xFF575757),
-                    fontSize: 13,
-                    fontFamily: 'Raleway',
-                    fontWeight: FontWeight.w500,
-                    height: 1.5,
-                  ),
-                ),
-              ),
-              SizedBox(height: 16),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 5),
-                    child: Checkbox1(label: '컴퓨터 알고리즘'),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 5),
-                    child: Checkbox1(label: '정보통신공학'),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 5),
-                    child: Checkbox1(label: '데이터베이스'),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
-    );
   }
 
   @override
@@ -199,7 +107,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
             SizedBox(height: 15),
             GestureDetector(
               onTap: () {
-                _showQuickMenu(context);
+                showQuickMenu(context);
               },
               child: Row(
                 children: [
@@ -267,43 +175,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: _onItemTapped,
-        items: [
-          BottomNavigationBarItem(
-            icon: ImageIcon(AssetImage('assets/navigation_bar/home.png')),
-            label: 'HOME',
-          ),
-          BottomNavigationBarItem(
-            icon: ImageIcon(AssetImage('assets/navigation_bar/folder.png')),
-            label: '폴더',
-          ),
-          BottomNavigationBarItem(
-            icon: ImageIcon(AssetImage('assets/navigation_bar/learningstart.png')),
-            label: '학습 시작',
-          ),
-          BottomNavigationBarItem(
-            icon: ImageIcon(AssetImage('assets/navigation_bar/mypage.png')),
-            label: '마이페이지',
-          ),
-        ],
-        selectedItemColor: Colors.teal,
-        unselectedItemColor: Colors.black,
-        selectedIconTheme: IconThemeData(color: Colors.teal),
-        unselectedIconTheme: IconThemeData(color: Colors.black),
-        selectedLabelStyle: TextStyle(color: Colors.teal,
-          fontSize: 9, // 글씨 크기 설정
-          fontFamily: 'DM Sans', // 글씨체 설정
-          fontWeight: FontWeight.bold,
-        ), // 글씨 두께 설정),
-        unselectedLabelStyle: TextStyle(color: Colors.black,
-          fontSize: 9, // 글씨 크기 설정
-          fontFamily: 'DM Sans', // 글씨체 설정
-          fontWeight: FontWeight.bold,
-        ),
-        showUnselectedLabels: true, // 모든 텍스트 라벨을 항상 표시하도록 설정
-      ),
+      bottomNavigationBar: buildBottomNavigationBar(_currentIndex, _onItemTapped),
     );
   }
 }
