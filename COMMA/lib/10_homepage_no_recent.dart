@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 
-
 class HomePageNoRecent extends StatelessWidget {
+  const HomePageNoRecent({super.key});
+
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    // final size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.grey[200],
-        iconTheme: IconThemeData(
+        iconTheme: const IconThemeData(
           color: Color(0xFF36AE92),
         ),
         actions: [
           IconButton(
-            icon: Icon(
+            icon: const Icon(
               Icons.search_rounded,
             ),
             onPressed: () {
@@ -29,7 +30,7 @@ class HomePageNoRecent extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 '안녕하세요, 이화연 님',
                 style: TextStyle(
                   color: Colors.black,
@@ -39,11 +40,11 @@ class HomePageNoRecent extends StatelessWidget {
                   height: 1.5,
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  const Text(
                     '최근에 학습한 강의 파일이에요.',
                     style: TextStyle(
                       color: Color(0xFF575757),
@@ -57,7 +58,7 @@ class HomePageNoRecent extends StatelessWidget {
                     onTap: () {
                       print('view all button is clicked');
                     },
-                    child: Row(
+                    child: const Row(
                       children: [
                         Text(
                           '전체 보기',
@@ -80,8 +81,8 @@ class HomePageNoRecent extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 20),
-              Text(
+              const SizedBox(height: 20),
+              const Text(
                 '  최근에 학습한 강의 자료가 없어요.',
                 style: TextStyle(
                   color: Colors.black,
@@ -91,12 +92,12 @@ class HomePageNoRecent extends StatelessWidget {
                   height: 1.5,
                 ),
               ),
-              SizedBox(height: 10),
-              SizedBox(height: 32),
+              const SizedBox(height: 10),
+              const SizedBox(height: 32),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  const Text(
                     '최근에 학습한 콜론 파일이에요.',
                     style: TextStyle(
                       color: Color(0xFF575757),
@@ -110,7 +111,7 @@ class HomePageNoRecent extends StatelessWidget {
                     onTap: () {
                       print('view all2 button is clicked');
                     },
-                    child: Row(
+                    child: const Row(
                       children: [
                         Text(
                           '전체 보기',
@@ -133,9 +134,8 @@ class HomePageNoRecent extends StatelessWidget {
                   ),
                 ],
               ),
-
-              SizedBox(height: 20),
-              Text(
+              const SizedBox(height: 20),
+              const Text(
                 '  최근 조회한 콜론이 없어요.',
                 style: TextStyle(
                   color: Colors.black,
@@ -145,8 +145,7 @@ class HomePageNoRecent extends StatelessWidget {
                   height: 1.5,
                 ),
               ),
-              SizedBox(height: 10),
-
+              const SizedBox(height: 10),
             ],
           ),
         ),
@@ -156,7 +155,7 @@ class HomePageNoRecent extends StatelessWidget {
 }
 
 void main() {
-  runApp(MaterialApp(
+  runApp(const MaterialApp(
     home: Scaffold(
       body: HomePageNoRecent(),
     ),

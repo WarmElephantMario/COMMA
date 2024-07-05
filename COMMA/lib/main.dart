@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '32_home_screen.dart';
 import '30_folder_screen.dart';
 import '33_mypage_screen.dart';
 import '60prepare.dart';
@@ -33,10 +32,10 @@ class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
 
   static final List<Widget> _widgetOptions = <Widget>[
-    HomePageNoRecent(),
-    FolderScreen(),
+    const HomePageNoRecent(),
+    const FolderScreen(),
     LearningPreparation(), // const 키워드를 제거
-    MyPageScreen(),
+    const MyPageScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -52,7 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: _widgetOptions.elementAt(_selectedIndex),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: [
+        items: const [
           BottomNavigationBarItem(
             icon: ImageIcon(AssetImage('assets/navigation_bar/home.png')),
             label: 'HOME',
@@ -62,7 +61,8 @@ class _MyHomePageState extends State<MyHomePage> {
             label: '폴더',
           ),
           BottomNavigationBarItem(
-            icon: ImageIcon(AssetImage('assets/navigation_bar/learningstart.png')),
+            icon: ImageIcon(
+                AssetImage('assets/navigation_bar/learningstart.png')),
             label: '학습 시작',
           ),
           BottomNavigationBarItem(
@@ -73,15 +73,15 @@ class _MyHomePageState extends State<MyHomePage> {
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.teal,
         unselectedItemColor: Colors.black,
-        selectedIconTheme: IconThemeData(color: Colors.teal),
-        unselectedIconTheme: IconThemeData(color: Colors.black),
-        selectedLabelStyle: TextStyle(
+        selectedIconTheme: const IconThemeData(color: Colors.teal),
+        unselectedIconTheme: const IconThemeData(color: Colors.black),
+        selectedLabelStyle: const TextStyle(
           color: Colors.teal,
           fontSize: 9,
           fontFamily: 'DM Sans',
           fontWeight: FontWeight.bold,
         ),
-        unselectedLabelStyle: TextStyle(
+        unselectedLabelStyle: const TextStyle(
           color: Colors.black,
           fontSize: 9,
           fontFamily: 'DM Sans',
