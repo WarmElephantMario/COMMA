@@ -11,8 +11,8 @@ import '9_signin.dart';
 
 
 
-class FigmaToCodeApp extends StatelessWidget {
-  const FigmaToCodeApp({super.key});
+class FigmaToCodeApp5 extends StatelessWidget {
+  const FigmaToCodeApp5({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +47,7 @@ class _SignUpPageState extends State<SignUpPage> {
   Future<bool> checkUserPhone() async {
     try {
       var response = await http.post(
-          Uri.parse('http://172.30.96.5:3000/api/validate_phone'),
+          Uri.parse('${API.baseUrl}/api/validate_phone'),
           headers: {
             'Content-Type': 'application/json',
           },
@@ -87,7 +87,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
     try {
       var res = await http.post(
-        Uri.parse('http://172.30.96.5:3000/api/signup_info'),
+        Uri.parse('${API.baseUrl}/api/signup_info'),
         headers: {
           'Content-Type': 'application/json',
         },
