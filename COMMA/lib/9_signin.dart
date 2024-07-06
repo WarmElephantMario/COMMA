@@ -56,17 +56,21 @@ class _SigninPageState extends State<SigninPage> {
   Future<User?> userLogin() async {
     try{
       var res = await http.post(
-          Uri.parse(API.login),
-          body: {
-            'user_email' : emailController.text.trim(),
-            'user_password' : passwordController.text.trim()
-          });
+          Uri.parse('http://172.30.96.5:3000/api/login'),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+          'user_email': emailController.text.trim(),
+          'user_password': passwordController.text.trim(),
+          }),
+      );
 
       if(res.statusCode == 200){
         var resLogin = jsonDecode(res.body);
+        print(resLogin);
 
         if(resLogin['success'] == true){
-
           Fluttertoast.showToast(msg: 'login successfully');
           User userInfo = User.fromJson(resLogin['userData']);
 
