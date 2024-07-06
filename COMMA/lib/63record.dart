@@ -44,7 +44,14 @@ class _RecordPageState extends State<RecordPage> {
                 TextButton(
                   onPressed: () {
                     if (_recordingState == RecordingState.recording) {
-                      showStopRecordingDialog(context, _stopRecording); // 팝업 창 표시
+                      showConfirmationDialog(
+                        context,
+                        "정말 녹음을 종료하시겠습니까?", // 다이얼로그 제목
+                        "녹음을 종료하면 다시 시작할 수 없습니다.", // 다이얼로그 내용
+                        () {
+                          _stopRecording(); // 녹음을 종료상태
+                        },
+                      );
                     } else {
                       Navigator.pushReplacement(
                         context,
@@ -132,7 +139,14 @@ class _RecordPageState extends State<RecordPage> {
                       ClickButton(
                         text: '녹음종료',
                         onPressed: () {
-                          showStopRecordingDialog(context, _stopRecording); // 팝업 창 표시
+                          showConfirmationDialog(
+                            context,
+                            "정말 녹음을 종료하시겠습니까?", // 다이얼로그 제목
+                            "녹음을 종료하면 다시 시작할 수 없습니다.", // 다이얼로그 내용
+                            () {
+                              _stopRecording(); // 녹음을 종료하는 함수 호출
+                            },
+                          );
                         },
                         width: MediaQuery.of(context).size.width * 0.3, // 원하는 너비 설정
                         height: 40.0, // 원하는 높이 설정

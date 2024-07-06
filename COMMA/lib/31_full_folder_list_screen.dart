@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'folder/37_folder_files_screen.dart';
 
-
 class FullFolderListScreen extends StatefulWidget {
   final List<Map<String, dynamic>> folders;
   final String title;
@@ -21,10 +20,11 @@ class FullFolderListScreen extends StatefulWidget {
 
 class _FullFolderListScreenState extends State<FullFolderListScreen> {
   late List<Map<String, dynamic>> folders;
+  late List<Map<String, dynamic>> colonFolders;
 
-  int _selectedIndex = 1; 
+  int _selectedIndex = 1;
 
-  void _onItemTapped(int index){
+  void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
@@ -34,6 +34,7 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
   void initState() {
     super.initState();
     folders = widget.folders;
+    colonFolders = folders.where((folder) => folder['type'] == 'colon').toList();
   }
 
   Future<void> _addFolder(String folderName) async {
@@ -53,6 +54,9 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
         final Map<String, dynamic> newFolder = jsonDecode(response.body);
         setState(() {
           folders.add(newFolder);
+          if (folderType == 'colon') {
+            colonFolders.add(newFolder);
+          }
         });
       }
     } catch (e) {
@@ -95,7 +99,6 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
       throw Exception('Failed to delete folder');
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -160,8 +163,27 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
                     },
                     child: FolderListItem(
                       folder: folder,
-                      onRename: () => showRenameFolderDialog(context, index, folders, _renameFolder, setState),
-                      onDelete: () => showDeleteFolderDialog(context, index, folders, _deleteFolder, setState),
+                      onRename: () => showRenameDialog(
+                        context,
+                        index,
+                        folders,
+                        _renameFolder,
+                        setState,
+                        "폴더 이름 바꾸기", // 다이얼로그 제목
+                        "폴더 이름", // 텍스트 필드 힌트 텍스트
+                        "folder_name", // 변경할 항목 타입
+                      ),
+                      onDelete: () => showConfirmationDialog(
+                        context,
+                        "정말 폴더를 삭제하시겠습니까?", // 다이얼로그 제목
+                        "폴더를 삭제하면 다시 복구할 수 없습니다.", // 다이얼로그 내용
+                        () async {
+                          await _deleteFolder(colonFolders[index]['id']);
+                          setState(() {
+                            colonFolders.removeAt(index);
+                          });
+                        },
+                      ),
                     ),
                   );
                 }).toList(),
@@ -175,72 +197,3 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
   }
 }
 
-class FolderListItem extends StatelessWidget {
-  final Map<String, dynamic> folder;
-  final VoidCallback onRename;
-  final VoidCallback onDelete;
-
-  const FolderListItem({
-    super.key,
-    required this.folder,
-    required this.onRename,
-    required this.onDelete,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 15),
-      padding: const EdgeInsets.all(12),
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.green.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 25,
-            height: 25,
-            decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: const Center(
-              child: Icon(Icons.folder_sharp, size: 22),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              folder['folder_name'],
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          Row(
-            children: [
-              const Text(
-                '0 files',
-                style: TextStyle(
-                  color: Color(0xFF005A38),
-                  fontSize: 12,
-                  fontFamily: 'DM Sans',
-                  fontWeight: FontWeight.w500,
-                  height: 1.5,
-                ),
-              ),
-              const SizedBox(width: 10),
-              RenameDeletePopup(
-                onRename: onRename,
-                onDelete: onDelete,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
