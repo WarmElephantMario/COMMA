@@ -6,13 +6,15 @@ import '30_folder_screen.dart';
 import '33_mypage_screen.dart';
 import '60prepare.dart';
 import 'model/user.dart';
+import '11_homepage_recent.dart';
 
 //NAVIGATION BAR 
 BottomNavigationBar buildBottomNavigationBar(BuildContext context, int currentIndex, Function(int) onItemTapped) {
   final List<Widget> widgetOptions = <Widget>[
+    HomePageRecent(),
     //추후 수정 필요 
     //MainPage()
-    MainPage(userInfo : User(1, 'example@example.com', '010-1234-5678', 'password123')),
+    //MainPage(userInfo : User(1, 'example@example.com', '010-1234-5678', 'password123')),
     FolderScreen(),
     LearningPreparation(),
     MyPageScreen(),
