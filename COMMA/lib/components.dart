@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_plugin/main.dart';
 import 'package:flutter_plugin/16_homepage_move.dart';
 import '66colon.dart';
 import '62lecture_start.dart';
@@ -8,11 +7,11 @@ import '33_mypage_screen.dart';
 import '60prepare.dart';
 import 'model/user.dart';
 
-
-
-//NAVIGATION BAR
+//NAVIGATION BAR 
 BottomNavigationBar buildBottomNavigationBar(BuildContext context, int currentIndex, Function(int) onItemTapped) {
   final List<Widget> widgetOptions = <Widget>[
+    //추후 수정 필요 
+    //MainPage()
     MainPage(userInfo : User(1, 'example@example.com', '010-1234-5678', 'password123')),
     FolderScreen(),
     LearningPreparation(),
@@ -163,14 +162,15 @@ void showQuickMenu(BuildContext context) {
   }
 
 
-// CONFIRM ALEART 2 - record stop
-void showStopRecordingDialog(BuildContext context, VoidCallback onConfirm) {
+// CONFIRM ALEART 1,2
+void showConfirmationDialog(
+    BuildContext context, String title, String content, VoidCallback onConfirm) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
         title: Text(
-          '정말 녹음을 종료하시겠습니까?',
+          title,
           style: TextStyle(
             color: Color(0xFF545454),
             fontSize: 14,
@@ -180,7 +180,7 @@ void showStopRecordingDialog(BuildContext context, VoidCallback onConfirm) {
           textAlign: TextAlign.center,
         ),
         content: Text(
-          '녹음을 종료하면 다시 시작할 수 없습니다.',
+          content,
           style: TextStyle(
             color: Color(0xFF245B3A),
             fontSize: 11,
@@ -231,6 +231,7 @@ void showStopRecordingDialog(BuildContext context, VoidCallback onConfirm) {
     },
   );
 }
+
 
 // Colon alarm
 void showColonCreatedDialog(BuildContext context) {
@@ -394,175 +395,9 @@ void showLearningDialog(BuildContext context) {
   );
 }
 
-//checkbox
-class Checkbox1 extends StatefulWidget {
-  final String label;
-  const Checkbox1({super.key, required this.label});
-
-  @override
-  _Checkbox1State createState() => _Checkbox1State();
-}
-
-class _Checkbox1State extends State<Checkbox1> {
-  bool isChecked = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    return Column(
-      children: [
-        Container(
-          width: size.width,
-          height: 24,
-          padding: const EdgeInsets.only(left: 18),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    isChecked = !isChecked;
-                  });
-                  print('checkbox is clicked');
-                },
-                child: Container(
-                  width: 18,
-                  height: 18,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                        color:
-                            isChecked ? const Color(0xFF36AE92) : Colors.grey,
-                        width: 2),
-                  ),
-                ),
-              ),
-              const SizedBox(
-                  width:
-                      8), // Add some spacing between the checkbox and the text
-              Text(
-                widget.label,
-                style: const TextStyle(
-                  color: Color(0xFF1F1F39),
-                  fontSize: 15,
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w700,
-                  height: 1.2,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-//rename 비동기 실행 함수 
-  // void showRenameFolderDialog(BuildContext context, int index,
-  //     List<Map<String, dynamic>> folderList, String folderType) {
-  //   final TextEditingController folderNameController =
-  //       TextEditingController(text: folderList[index]['folder_name']);
-  //   showDialog(
-  //     context: context,
-  //     builder: (context) {
-  //       return AlertDialog(
-  //         title: const Text(
-  //           '폴더 이름 바꾸기',
-  //           style: TextStyle(
-  //               color: Color(0xFF545454),
-  //               fontWeight: FontWeight.w800,
-  //               fontSize: 20),
-  //         ),
-  //         content: TextField(
-  //           controller: folderNameController,
-  //           decoration: const InputDecoration(hintText: '폴더 이름'),
-  //         ),
-  //         actions: <Widget>[
-  //           TextButton(
-  //             child: const Text('취소',
-  //                 style: TextStyle(
-  //                   color: Color(0xFFFFA17A),
-  //                   fontWeight: FontWeight.w700,
-  //                 )),
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //             },
-  //           ),
-  //           TextButton(
-  //             child: const Text(
-  //               '저장',
-  //               style: TextStyle(
-  //                   color: Color(0xFF545454), fontWeight: FontWeight.w700),
-  //             ),
-  //             onPressed: () async {
-  //               // await _renameFolder(folderType, folderList[index]['id'],
-  //               //     folderNameController.text);
-  //               // setState(() {
-  //               //   folderList[index]['folder_name'] = folderNameController.text;
-  //               // });
-  //               Navigator.of(context).pop();
-  //             },
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
-
-//CONFIRM ALEART 1 - 폴더삭제 비동기 실행 함수
-  // void showDeleteFolderDialog(BuildContext context, int index,
-  //     List<Map<String, dynamic>> folderList, String folderType) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (context) {
-  //       return AlertDialog(
-  //         title: Text(
-  //           '정말 \'${folderList[index]['folder_name']}\' 을(를) 삭제하시겠습니까?',
-  //           style: const TextStyle(
-  //               color: Color(0xFF545454),
-  //               fontWeight: FontWeight.w800,
-  //               fontSize: 15),
-  //         ),
-  //         content: const Text(
-  //           '폴더를 삭제하면 다시 복구할 수 없습니다.',
-  //           style: TextStyle(
-  //             color: Color(0xFF245B3A),
-  //           ),
-  //         ),
-  //         actions: <Widget>[
-  //           TextButton(
-  //             child: const Text('취소',
-  //                 style: TextStyle(
-  //                     color: Color(0xFFFFA17A), fontWeight: FontWeight.w700)),
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //             },
-  //           ),
-  //           TextButton(
-  //             child: const Text(
-  //               '삭제',
-  //               style: TextStyle(
-  //                   color: Color(0xFF545454), fontWeight: FontWeight.w700),
-  //             ),
-  //             onPressed: () async {
-  //               //await _deleteFolder(folderType, folderList[index]['id']);
-  //               // setState(() {
-  //               //   folderList.removeAt(index);
-  //               // });
-  //               Navigator.of(context).pop();
-  //               showDeletionConfirmation(context);
-  //             },
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
-
+//alarm
 //delete alarm
-  void showDeletionConfirmation(BuildContext context) {
+  void showDeleteAlarmDialog(BuildContext context) {
     final overlay = Overlay.of(context);
     OverlayEntry? overlayEntry;
 
@@ -615,62 +450,78 @@ class _Checkbox1State extends State<Checkbox1> {
     overlay.insert(overlayEntry);
   }
 
-//수정필요
-//moved alarm 
-  void showmovedConfirmation(BuildContext context) {
-    final overlay = Overlay.of(context);
-    OverlayEntry? overlayEntry;
+//moved alarm & move cancel alarm
+ void showAlarmDialog(BuildContext context, String message) {
+  final overlay = Overlay.of(context);
+  OverlayEntry? overlayEntry;
 
-    overlayEntry = OverlayEntry(
-      builder: (context) => Positioned(
-        top: 40.0,
-        left: 80,
-        right: 80,
-        child: Material(
-          color: Colors.transparent,
+  overlayEntry = OverlayEntry(
+    builder: (context) => Positioned(
+      top: 40.0,
+      left: 80,
+      right: 80,
+      child: Material(
+        color: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8.0),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 10.0,
-                    offset: Offset(0, 2),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8.0),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 10.0,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            child: ListTile(
+              title: Text(
+                message,
+                style: TextStyle(
+                    color: Color(0xFF545454), fontWeight: FontWeight.w800),
+              ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextButton(
+                    child: Text(
+                      '취소',
+                      style: TextStyle(
+                          color: Color(0xFFFFA17A), fontWeight: FontWeight.w700),
+                    ),
+                    onPressed: () {
+                      if (overlayEntry != null) {
+                        overlayEntry.remove();
+                      }
+                    },
+                  ),
+                  TextButton(
+                    child: Text(
+                      '확인',
+                      style: TextStyle(
+                          color: Color(0xFFFFA17A), fontWeight: FontWeight.w700),
+                    ),
+                    onPressed: () {
+                      if (overlayEntry != null) {
+                        overlayEntry.remove();
+                      }
+                    },
                   ),
                 ],
-              ),
-              child: ListTile(
-                title: const Text(
-                  '이동되었습니다.',
-                  style: TextStyle(
-                      color: Color(0xFF545454), fontWeight: FontWeight.w800),
-                ),
-                trailing: TextButton(
-                  child: const Text(
-                    '확인',
-                    style: TextStyle(
-                        color: Color(0xFFFFA17A), fontWeight: FontWeight.w700),
-                  ),
-                  onPressed: () {
-                    if (overlayEntry != null) {
-                      overlayEntry.remove();
-                    }
-                  },
-                ),
               ),
             ),
           ),
         ),
       ),
-    );
+    ),
+  );
 
-    overlay.insert(overlayEntry);
-  }
+  overlay.insert(overlayEntry);
+}
 
-//hamburger
+//hamburger 
 Future<void> showCustomMenu(BuildContext context, VoidCallback onRename, VoidCallback onDelete, VoidCallback onMove) async {
   final RenderBox button = context.findRenderObject() as RenderBox;
   final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
@@ -745,9 +596,8 @@ Future<void> showCustomMenu(BuildContext context, VoidCallback onRename, VoidCal
 }
 
 
-//37 
-
-void showConfirmationDialog(BuildContext context, String title,String message, VoidCallback onConfirm) {
+//로그아웃, 회원탈퇴
+void showMypageDialog(BuildContext context, String title,String message, VoidCallback onConfirm) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -782,7 +632,196 @@ void showConfirmationDialog(BuildContext context, String title,String message, V
     );
   }
 
-  //lecture
+// 이름 바꾸기 : 폴더 파일 
+Future<void> showRenameDialog(
+  BuildContext context,
+  int index,
+  List<Map<String, dynamic>> items,
+  Function renameItem,
+  Function setState,
+  String title,
+  String hintText,
+  String itemType // 'file_name' 또는 'folder_name'
+) async {
+  final TextEditingController nameController = TextEditingController(text: items[index][itemType]);
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text(title),
+        content: TextField(
+          controller: nameController,
+          decoration: InputDecoration(hintText: hintText),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('취소', style: TextStyle(color: Colors.red)),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          TextButton(
+            child: const Text('저장'),
+            onPressed: () async {
+              await renameItem(items[index]['id'], nameController.text);
+              setState(() {
+                items[index][itemType] = nameController.text;
+              });
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+//폴더 만들기 
+Future<void> showAddFolderDialog(BuildContext context, Function addFolder) async {
+  final TextEditingController folderNameController = TextEditingController();
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text(
+          '새 폴더 만들기',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+        ),
+        content: TextField(
+          controller: folderNameController,
+          decoration: const InputDecoration(
+            hintText: '폴더 이름',
+            hintStyle: TextStyle(color: Color(0xFF364B45)),
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('취소',
+                style: TextStyle(
+                    color: Color(0xFFFFA17A),
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16)),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          TextButton(
+            child: const Text(
+              '만들기',
+              style: TextStyle(
+                  color: Color(0xFF545454),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700),
+            ),
+            onPressed: () async {
+              await addFolder(folderNameController.text);
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+//CONFIRM ALEART 3
+Future<void> showDeleteFolderDialog(BuildContext context, int index, List<Map<String, dynamic>> folders, Function deleteFolder, Function setState) async {
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text('폴더 삭제하기'),
+        content: const Text('정말로 삭제하시겠습니까?'),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('취소', style: TextStyle(color: Colors.red)),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          TextButton(
+            child: const Text('삭제'),
+            onPressed: () async {
+              await deleteFolder(folders[index]['id']);
+              setState(() {
+                folders.removeAt(index);
+              });
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+//checkbox
+class Checkbox1 extends StatefulWidget {
+  final String label;
+  const Checkbox1({super.key, required this.label});
+
+  @override
+  _Checkbox1State createState() => _Checkbox1State();
+}
+
+class _Checkbox1State extends State<Checkbox1> {
+  bool isChecked = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    return Column(
+      children: [
+        Container(
+          width: size.width,
+          height: 24,
+          padding: const EdgeInsets.only(left: 18),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    isChecked = !isChecked;
+                  });
+                  print('checkbox is clicked');
+                },
+                child: Container(
+                  width: 18,
+                  height: 18,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                        color:
+                            isChecked ? const Color(0xFF36AE92) : Colors.grey,
+                        width: 2),
+                  ),
+                ),
+              ),
+              const SizedBox(
+                  width:
+                      8), // Add some spacing between the checkbox and the text
+              Text(
+                widget.label,
+                style: const TextStyle(
+                  color: Color(0xFF1F1F39),
+                  fontSize: 15,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w700,
+                  height: 1.2,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+//lecture 
 class LectureExample extends StatelessWidget {
   final String lectureName;
   final String date;
@@ -941,7 +980,7 @@ class LectureExample extends StatelessWidget {
   }
 }
 
-//RenameDeletePopup
+//RenameDeletePopup 이름바꾸기
 class RenameDeletePopup extends StatelessWidget {
   final VoidCallback onRename;
   final VoidCallback onDelete;
@@ -973,193 +1012,6 @@ class RenameDeletePopup extends StatelessWidget {
       ],
     );
   }
-}
-
-//파일 이름 바꾸기
-void renameFile(BuildContext context, List<Map<String, dynamic>> files, int index, Function setState) {
-  final TextEditingController fileNameController = TextEditingController(text: files[index]['file_name']);
-  showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: const Text(
-          '파일 이름 바꾸기',
-          style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              color: Color(0xFF545454)),
-        ),
-        content: TextField(
-          controller: fileNameController,
-          decoration: const InputDecoration(hintText: '파일 이름'),
-        ),
-        actions: <Widget>[
-          TextButton(
-            child: const Text('취소',
-                style: TextStyle(
-                    color: Color(0xFFFFA17A), fontWeight: FontWeight.w700)),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          TextButton(
-            child: const Text(
-              '저장',
-              style: TextStyle(
-                  color: Color(0xFF545454), fontWeight: FontWeight.w700),
-            ),
-            onPressed: () {
-              setState(() {
-                files[index]['file_name'] = fileNameController.text;
-              });
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      );
-    },
-  );
-}
-
-void deleteFile(BuildContext context, List<Map<String, dynamic>> files, int index, Function setState, Function showDeletionConfirmation) {
-  showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: const Text('파일 삭제하기'),
-        content: const Text('정말로 삭제하시겠습니까?'),
-        actions: <Widget>[
-          TextButton(
-            child: const Text('취소', style: TextStyle(color: Colors.red)),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          TextButton(
-            child: const Text('삭제'),
-            onPressed: () {
-              setState(() {
-                files.removeAt(index);
-              });
-              Navigator.of(context).pop();
-              showDeletionConfirmation(context);
-            },
-          ),
-        ],
-      );
-    },
-  );
-}
-//31
-Future<void> showAddFolderDialog(BuildContext context, Function addFolder) async {
-  final TextEditingController folderNameController = TextEditingController();
-  showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: const Text(
-          '새 폴더 만들기',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-        ),
-        content: TextField(
-          controller: folderNameController,
-          decoration: const InputDecoration(
-            hintText: '폴더 이름',
-            hintStyle: TextStyle(color: Color(0xFF364B45)),
-          ),
-        ),
-        actions: <Widget>[
-          TextButton(
-            child: const Text('취소',
-                style: TextStyle(
-                    color: Color(0xFFFFA17A),
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16)),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          TextButton(
-            child: const Text(
-              '만들기',
-              style: TextStyle(
-                  color: Color(0xFF545454),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700),
-            ),
-            onPressed: () async {
-              await addFolder(folderNameController.text);
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      );
-    },
-  );
-}
-
-Future<void> showRenameFolderDialog(BuildContext context, int index, List<Map<String, dynamic>> folders, Function renameFolder, Function setState) async {
-  final TextEditingController folderNameController = TextEditingController(text: folders[index]['folder_name']);
-  showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: const Text('폴더 이름 바꾸기'),
-        content: TextField(
-          controller: folderNameController,
-          decoration: const InputDecoration(hintText: '폴더 이름'),
-        ),
-        actions: <Widget>[
-          TextButton(
-            child: const Text('취소', style: TextStyle(color: Colors.red)),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          TextButton(
-            child: const Text('저장'),
-            onPressed: () async {
-              await renameFolder(folders[index]['id'], folderNameController.text);
-              setState(() {
-                folders[index]['folder_name'] = folderNameController.text;
-              });
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      );
-    },
-  );
-}
-
-Future<void> showDeleteFolderDialog(BuildContext context, int index, List<Map<String, dynamic>> folders, Function deleteFolder, Function setState) async {
-  showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: const Text('폴더 삭제하기'),
-        content: const Text('정말로 삭제하시겠습니까?'),
-        actions: <Widget>[
-          TextButton(
-            child: const Text('취소', style: TextStyle(color: Colors.red)),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          TextButton(
-            child: const Text('삭제'),
-            onPressed: () async {
-              await deleteFolder(folders[index]['id']);
-              setState(() {
-                folders.removeAt(index);
-              });
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      );
-    },
-  );
 }
 
 class InputButton extends StatelessWidget {
@@ -1241,6 +1093,7 @@ class InputButton extends StatelessWidget {
   }
 }
 
+//ClickButton 
 class ClickButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
@@ -1310,6 +1163,77 @@ class ClickButton extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+//FolderListItem 
+class FolderListItem extends StatelessWidget {
+  final Map<String, dynamic> folder;
+  final VoidCallback onRename;
+  final VoidCallback onDelete;
+
+  const FolderListItem({
+    super.key,
+    required this.folder,
+    required this.onRename,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 15),
+      padding: const EdgeInsets.all(12),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.green.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 25,
+            height: 25,
+            decoration: BoxDecoration(
+              color: Colors.green.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Center(
+              child: Icon(Icons.folder_sharp, size: 22),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              folder['folder_name'],
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          Row(
+            children: [
+              const Text(
+                '0 files',
+                style: TextStyle(
+                  color: Color(0xFF005A38),
+                  fontSize: 12,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.w500,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(width: 10),
+              RenameDeletePopup(
+                onRename: onRename,
+                onDelete: onDelete,
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

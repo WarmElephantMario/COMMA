@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_plugin/components.dart';
+import 'package:flutter_plugin/30_folder_screen.dart';
 import 'package:intl/intl.dart';
+
 
 
 class FolderFilesScreen extends StatefulWidget {
@@ -52,6 +54,23 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
     }
   }
 
+  //showRenameDialog 때문에 임의로 만듦 
+  //수정필요
+  Future<void> _renameFile(String folderType, int id, String newName) async {
+    final url = Uri.parse(
+        'http://localhost:3000/api/${folderType == 'lecture' ? 'lecture' : 'colon'}-folders/$id');
+    try {
+      final response = await http.put(url,
+          body: jsonEncode({'folder_name': newName}),
+          headers: {'Content-Type': 'application/json'});
+      if (response.statusCode != 200) {
+        throw Exception('Failed to rename folder');
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -90,8 +109,29 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
                   Map<String, dynamic> file = entry.value;
                   return FileListItem(
                     file: file,
-                    onRename: () => renameFile(context, files, index, setState),
-                    onDelete: () => deleteFile(context, files, index, setState, showDeletionConfirmation),
+                    onRename: () => showRenameDialog(
+                      context,
+                      index,
+                      files,
+                      _renameFile,
+                      setState,
+                      "파일 이름 바꾸기", // 다이얼로그 제목
+                      "파일 이름", // 텍스트 필드 힌트 텍스트
+                      "file_name" // 변경할 항목 타입
+                    ),
+
+
+                    onDelete: () => showConfirmationDialog(
+                      context,
+                      "정말 파일을 삭제하시겠습니까?",
+                      "파일을 삭제하면 다시 복구할 수 없습니다.",
+                      () {
+                        // 파일 삭제 로직 추가
+                        setState(() {
+                          files.removeAt(index);
+                        });
+                      }
+                    ),
                   );
                 }).toList(),
               ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'components.dart';
+import 'components.dart';  // components.dart 파일에서 정의한 위젯들 임포트
 import 'folder/37_folder_files_screen.dart';
 import 'folder/39_folder_section.dart';
 import 'folder/38_folder_list.dart';
@@ -20,11 +20,12 @@ class _FolderScreenState extends State<FolderScreen> {
 
   int _selectedIndex = 1; // 학습 시작 탭이 기본 선택되도록 설정
 
-  void _onItemTapped(int index){
+  void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
+
   @override
   void initState() {
     super.initState();
@@ -107,6 +108,43 @@ class _FolderScreenState extends State<FolderScreen> {
     }
   }
 
+  // 폴더 삭제 다이얼로그 함수 추가
+  Future<void> showDeleteFolderDialog(
+    BuildContext context,
+    int index,
+    List<Map<String, dynamic>> folders,
+    Function deleteFolder,
+    Function setState
+  ) async {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('폴더 삭제하기'),
+          content: const Text('정말로 폴더를 삭제하시겠습니까? 폴더를 삭제하면 다시 복구할 수 없습니다.'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('취소', style: TextStyle(color: Colors.red)),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('삭제'),
+              onPressed: () async {
+                await deleteFolder(folders[index]['id']);
+                setState(() {
+                  folders.removeAt(index);
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -121,7 +159,7 @@ class _FolderScreenState extends State<FolderScreen> {
                 children: [
                   FolderSection(
                     sectionTitle: '강의폴더',
-                    onAddPressed: () async{
+                    onAddPressed: () async {
                       await showAddFolderDialog(context, _addFolder);
                     },
                     onViewAllPressed: () {
@@ -150,16 +188,29 @@ class _FolderScreenState extends State<FolderScreen> {
                         ),
                       );
                     },
-                    onRename: (index) => showRenameFolderDialog(
-                        context, index, lectureFolders, _renameFolder, setState),
+                    onRename: (index) => showRenameDialog(
+                      context,
+                      index,
+                      lectureFolders,
+                      _renameFolder,
+                      setState,
+                      "폴더 이름 바꾸기", // 다이얼로그 제목
+                      "폴더 이름", // 텍스트 필드 힌트 텍스트
+                      "folder_name" // 변경할 항목 타입
+                    ),
                     onDelete: (index) => showDeleteFolderDialog(
-                        context, index, lectureFolders, _deleteFolder, setState),
+                      context,
+                      index,
+                      lectureFolders,
+                      _deleteFolder,
+                      setState,
+                    ),
                   ),
                   const SizedBox(height: 20),
                   FolderSection(
                     sectionTitle: '콜론폴더',
                     onAddPressed: () async {
-                      await showAddFolderDialog(context,_addFolder);
+                      await showAddFolderDialog(context, _addFolder);
                     },
                     onViewAllPressed: () {
                       Navigator.push(
@@ -187,10 +238,23 @@ class _FolderScreenState extends State<FolderScreen> {
                         ),
                       );
                     },
-                    onRename: (index) => showRenameFolderDialog(
-                        context, index, colonFolders, _renameFolder,setState),
+                    onRename: (index) => showRenameDialog(
+                      context,
+                      index,
+                      colonFolders,
+                      _renameFolder,
+                      setState,
+                      "폴더 이름 바꾸기", // 다이얼로그 제목
+                      "폴더 이름", // 텍스트 필드 힌트 텍스트
+                      "folder_name" // 변경할 항목 타입
+                    ),
                     onDelete: (index) => showDeleteFolderDialog(
-                        context, index, colonFolders, _deleteFolder,setState),
+                      context,
+                      index,
+                      colonFolders,
+                      _deleteFolder,
+                      setState,
+                    ),
                   ),
                 ],
               ),
