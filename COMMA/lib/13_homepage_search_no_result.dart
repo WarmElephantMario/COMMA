@@ -1,11 +1,24 @@
 import 'package:flutter/material.dart';
+import 'components.dart';
 
-class HomePageNoRecent extends StatelessWidget {
+class HomePageNoRecent extends StatefulWidget {
   const HomePageNoRecent({super.key});
 
   @override
+  _HomePageNoRecentState createState() => _HomePageNoRecentState();
+}
+
+class _HomePageNoRecentState extends State<HomePageNoRecent> {
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // final size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -70,6 +83,7 @@ class HomePageNoRecent extends StatelessWidget {
           ),
         ),
       ),
+      bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }

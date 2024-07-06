@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'components.dart';
 import '8_verification3.dart';
 
 // class FigmaToCodeApp extends StatelessWidget {
@@ -15,55 +16,6 @@ import '8_verification3.dart';
 //   }
 // }
 
-class ClickButton extends StatelessWidget {
-  final String text;
-  final VoidCallback onPressed;
-
-  const ClickButton({Key? key, required this.text, required this.onPressed})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: size.width * 0.05),
-      child: GestureDetector(
-        onTap: onPressed,
-        child: Container(
-          width: size.width * 0.9,
-          height: size.height * 0.065,
-          decoration: ShapeDecoration(
-            color: Color.fromRGBO(54, 174, 146, 1.0),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                text,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontFamily: 'DM Sans',
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              SizedBox(width: 8),
-              Icon(
-                Icons.arrow_forward,
-                color: Colors.white,
-                size: 18,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 class Verification_write_screen extends StatelessWidget {
   @override
@@ -132,6 +84,7 @@ class Information extends StatelessWidget {
               InputButton(
                 label: '인증코드를 입력해주세요',
                 keyboardType: TextInputType.emailAddress,
+                controller: TextEditingController(),
               ),
               SizedBox(height: size.height * 0.07),
 
@@ -175,76 +128,6 @@ class Information extends StatelessWidget {
                 ],
               ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class InputButton extends StatelessWidget {
-  final String label;
-  final TextInputType keyboardType;
-  final bool obscureText;
-
-  const InputButton({
-    Key? key,
-    required this.label,
-    this.keyboardType = TextInputType.text,
-    this.obscureText = false,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    return Container(
-      padding: EdgeInsets.only(left: size.width * 0.05),
-      width: size.width,
-      height: 50,
-      child: Stack(
-        children: [
-          Positioned(
-            right: size.width * 0.05,
-            left: 0,
-            top: 0,
-            child: Container(
-              width: 335,
-              height: 50,
-              decoration: ShapeDecoration(
-                color: Colors.white,
-                shape: RoundedRectangleBorder(
-                  side: BorderSide(width: 1, color: Color(0xFF9FACBD)),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-            ),
-          ),
-          Positioned.fill(
-            left: 20,
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: Padding(
-                padding: const EdgeInsets.only(right: 20.0),
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: '${label}',
-                    hintStyle: TextStyle(color: Color(0xFF36AE92)),
-                  ),
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 14,
-                    fontFamily: 'DM Sans',
-                    fontWeight: FontWeight.w500,
-                  ),
-                  keyboardType: keyboardType,
-                  obscureText: obscureText,
-                  onChanged: (value) {
-                    // Handle input changes if needed
-                  },
-                ),
-              ),
-            ),
           ),
         ],
       ),

@@ -1,9 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_plugin/components.dart';
 
-class ChangePasswordPage extends StatelessWidget {
+class ChangePasswordPage extends StatefulWidget {
+  const ChangePasswordPage({super.key});
+
+  @override
+  _ChangePasswordPageState createState() => _ChangePasswordPageState();
+}
+
+class _ChangePasswordPageState extends State<ChangePasswordPage> {
   final TextEditingController _newPasswordController = TextEditingController();
+  int _selectedIndex = 3;
 
-  ChangePasswordPage({super.key});
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,21 +51,20 @@ class ChangePasswordPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
+            ClickButton(
+              text: '확인',
               onPressed: () {
                 // Here, update the password
                 // Provide feedback to the user
               },
-              style: ElevatedButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                textStyle: const TextStyle(fontSize: 18),
-              ),
-              child: const Text('확인'),
+              width: MediaQuery.of(context).size.width * 0.5, // 원하는 너비 설정
+              height: 50.0, // 원하는 높이 설정
+
             ),
           ],
         ),
       ),
+      bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }

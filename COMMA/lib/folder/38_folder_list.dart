@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../35_rename_delete_popup.dart';
+import 'package:flutter_plugin/components.dart';
 
 class FolderList extends StatelessWidget {
   final List<Map<String, dynamic>> folders;

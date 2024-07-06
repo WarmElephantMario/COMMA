@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_plugin/11_homepage_recent.dart';
+import 'package:flutter_plugin/16_homepage_move.dart';
 import 'components.dart';
-import '10_homepage_no_recent.dart';
+import 'model/user.dart';
+
+
 
 
 void main() => runApp(const MyApp());
@@ -28,20 +32,11 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _selectedIndex = 0;
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: HomePageNoRecent(), // 초기 시작 화면
+        child: MainPage(userInfo : User(1, 'example@example.com', '010-1234-5678', 'password123')), // 초기 시작 화면
       ),
-      bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped), // Use the new function
     );
   }
 }

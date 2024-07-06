@@ -121,8 +121,8 @@ class _FolderScreenState extends State<FolderScreen> {
                 children: [
                   FolderSection(
                     sectionTitle: '강의폴더',
-                    onAddPressed: () {
-                      showAddFolderDialog(context, 'lecture');
+                    onAddPressed: () async{
+                      await showAddFolderDialog(context, _addFolder);
                     },
                     onViewAllPressed: () {
                       Navigator.push(
@@ -151,15 +151,15 @@ class _FolderScreenState extends State<FolderScreen> {
                       );
                     },
                     onRename: (index) => showRenameFolderDialog(
-                        context, index, lectureFolders, 'lecture'),
+                        context, index, lectureFolders, _renameFolder, setState),
                     onDelete: (index) => showDeleteFolderDialog(
-                        context, index, lectureFolders, 'lecture'),
+                        context, index, lectureFolders, _deleteFolder, setState),
                   ),
                   const SizedBox(height: 20),
                   FolderSection(
                     sectionTitle: '콜론폴더',
-                    onAddPressed: () {
-                      showAddFolderDialog(context, 'colon');
+                    onAddPressed: () async {
+                      await showAddFolderDialog(context,_addFolder);
                     },
                     onViewAllPressed: () {
                       Navigator.push(
@@ -188,9 +188,9 @@ class _FolderScreenState extends State<FolderScreen> {
                       );
                     },
                     onRename: (index) => showRenameFolderDialog(
-                        context, index, colonFolders, 'colon'),
+                        context, index, colonFolders, _renameFolder,setState),
                     onDelete: (index) => showDeleteFolderDialog(
-                        context, index, colonFolders, 'colon'),
+                        context, index, colonFolders, _deleteFolder,setState),
                   ),
                 ],
               ),
