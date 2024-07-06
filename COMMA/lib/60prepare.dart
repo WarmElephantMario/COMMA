@@ -131,45 +131,32 @@ class _LearningPreparationState extends State<LearningPreparation> {
           Checkbox1(label: '실시간 자막 생성'),
           const SizedBox(height: 20),
           Center(
-            child: ElevatedButton.icon(
-              onPressed: () {
-                setState(() {
-                  if (_isMaterialEmbedded) {
-                    showLearningDialog(context); // 버튼 클릭 시 팝업 창 표시
-                  } else {
-                    _isMaterialEmbedded = true; // 버튼 클릭 시 상태 업데이트
-                    _isIconVisible = false; // 아이콘 숨기기
-                  }
-                });
-              },
-              icon: _isIconVisible
-                  ? ImageIcon(
-                      AssetImage('assets/Vector.png'),
-                      color: Colors.white,
-                    )
-                  : Container(), // 아이콘이 보이지 않도록 빈 컨테이너 사용
-              label: Text(
-                _isMaterialEmbedded ? '강의 자료 학습 시작하기' : '강의 자료를 임베드하세요',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontFamily: 'DM Sans',
-                  fontWeight: FontWeight.bold,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ClickButton(
+                  text: _isMaterialEmbedded ? '강의 자료 학습 시작하기' : '강의 자료를 임베드하세요',
+                  onPressed: () {
+                    setState(() {
+                      if (_isMaterialEmbedded) {
+                        showLearningDialog(context); // 버튼 클릭 시 팝업 창 표시
+                      } else {
+                        _isMaterialEmbedded = true; // 버튼 클릭 시 상태 업데이트
+                        _isIconVisible = false; // 아이콘 숨기기
+                      }
+                    });
+                  },
+                  width: MediaQuery.of(context).size.width * 0.5, // 원하는 너비 설정
+                  height: 50.0, // 원하는 높이 설정
+                  iconPath: _isIconVisible ? 'assets/Vector.png' : null,
                 ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0XFF36AE92),
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
+              ],
             ),
           ),
           _buildMaterialInfo(),
         ],
       ),
-    bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
+      bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }

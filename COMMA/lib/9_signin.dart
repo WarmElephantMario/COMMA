@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_plugin/user/user_pref.dart';
 import 'package:get/get.dart';
 import '16_homepage_move.dart';
+import 'components.dart';
 import 'package:http/http.dart' as http;
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -192,85 +193,6 @@ class _SigninPageState extends State<SigninPage> {
                 ),
               ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class InputButton extends StatelessWidget {
-  final String label;
-  final TextInputType keyboardType;
-  final bool obscureText;
-  final TextEditingController controller;
-
-  const InputButton({
-    Key? key,
-    required this.label,
-    this.keyboardType = TextInputType.text,
-    this.obscureText = false,
-    required this.controller,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    return Container(
-      padding: EdgeInsets.only(left: size.width * 0.05),
-      width: size.width,
-      height: 50,
-      child: Stack(
-        children: [
-          Positioned(
-            right: size.width * 0.05,
-            left: 0,
-            top: 0,
-            child: Container(
-              width: 335,
-              height: 50,
-              decoration: ShapeDecoration(
-                color: Colors.white,
-                shape: RoundedRectangleBorder(
-                  side: BorderSide(width: 1, color: Color(0xFF9FACBD)),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-            ),
-          ),
-          Positioned.fill(
-            left: 20,
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: Padding(
-                padding: const EdgeInsets.only(right: 20.0),
-                child: TextFormField(
-                  controller: controller,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: '${label}',
-                    hintStyle: TextStyle(color: Color(0xFF36AE92)),
-                  ),
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 14,
-                    fontFamily: 'DM Sans',
-                    fontWeight: FontWeight.w500,
-                  ),
-                  keyboardType: keyboardType,
-                  obscureText: obscureText,
-                  validator: (value) { // Validator 추가
-                    if (value == null || value.isEmpty) {
-                      return '{$label} field cannot be empty';
-                    }
-                    return null;
-                  },
-                  onChanged: (value) {
-                    // Handle input changes if needed
-                  },
-                ),
-              ),
-            ),
           ),
         ],
       ),

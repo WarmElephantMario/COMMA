@@ -3,7 +3,7 @@ import 'components.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'folder/37_folder_files_screen.dart';
-import '35_rename_delete_popup.dart';
+
 
 class FullFolderListScreen extends StatefulWidget {
   final List<Map<String, dynamic>> folders;
@@ -96,118 +96,6 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
     }
   }
 
-  void _showAddFolderDialog(BuildContext context) {
-    final TextEditingController folderNameController = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text(
-            '새 폴더 만들기',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-          ),
-          content: TextField(
-            controller: folderNameController,
-            decoration: const InputDecoration(
-              hintText: '폴더 이름',
-              hintStyle: TextStyle(color: Color(0xFF364B45)),
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('취소',
-                  style: TextStyle(
-                      color: Color(0xFFFFA17A),
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16)),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text(
-                '만들기',
-                style: TextStyle(
-                    color: Color(0xFF545454),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700),
-              ),
-              onPressed: () async {
-                await _addFolder(folderNameController.text);
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showRenameFolderDialog(BuildContext context, int index) {
-    final TextEditingController folderNameController =
-        TextEditingController(text: folders[index]['folder_name']);
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('폴더 이름 바꾸기'),
-          content: TextField(
-            controller: folderNameController,
-            decoration: const InputDecoration(hintText: '폴더 이름'),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('취소', style: TextStyle(color: Colors.red)),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('저장'),
-              onPressed: () async {
-                await _renameFolder(
-                    folders[index]['id'], folderNameController.text);
-                setState(() {
-                  folders[index]['folder_name'] = folderNameController.text;
-                });
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showDeleteFolderDialog(BuildContext context, int index) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('폴더 삭제하기'),
-          content: const Text('정말로 삭제하시겠습니까?'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('취소', style: TextStyle(color: Colors.red)),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('삭제'),
-              onPressed: () async {
-                await _deleteFolder(folders[index]['id']);
-                setState(() {
-                  folders.removeAt(index);
-                });
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -226,7 +114,7 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
             padding: const EdgeInsets.only(right: 30),
             child: TextButton(
               onPressed: () {
-                _showAddFolderDialog(context);
+                showAddFolderDialog(context, _addFolder);
               },
               child: Row(
                 children: [
@@ -272,8 +160,8 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
                     },
                     child: FolderListItem(
                       folder: folder,
-                      onRename: () => _showRenameFolderDialog(context, index),
-                      onDelete: () => _showDeleteFolderDialog(context, index),
+                      onRename: () => showRenameFolderDialog(context, index, folders, _renameFolder, setState),
+                      onDelete: () => showDeleteFolderDialog(context, index, folders, _deleteFolder, setState),
                     ),
                   );
                 }).toList(),

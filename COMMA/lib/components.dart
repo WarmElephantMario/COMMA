@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_plugin/main.dart';
+import 'package:flutter_plugin/16_homepage_move.dart';
 import '66colon.dart';
 import '62lecture_start.dart';
 import '30_folder_screen.dart';
 import '33_mypage_screen.dart';
 import '60prepare.dart';
-import '10_homepage_no_recent.dart';
+import 'model/user.dart';
+
+
 
 //NAVIGATION BAR
 BottomNavigationBar buildBottomNavigationBar(BuildContext context, int currentIndex, Function(int) onItemTapped) {
   final List<Widget> widgetOptions = <Widget>[
-    HomePageNoRecent(),
+    MainPage(userInfo : User(1, 'example@example.com', '010-1234-5678', 'password123')),
     FolderScreen(),
     LearningPreparation(),
     MyPageScreen(),
@@ -324,7 +328,7 @@ void showLearningDialog(BuildContext context) {
     barrierDismissible: false,
     builder: (BuildContext context) {
       // Navigate to LectureStartPage after 3 seconds
-      Future.delayed(Duration(seconds: 3), () {
+      Future.delayed(Duration(seconds: 1), () {
         Navigator.of(context).pop(); // Close the dialog
         Navigator.push(
           context,
@@ -455,155 +459,107 @@ class _Checkbox1State extends State<Checkbox1> {
     );
   }
 }
-//AddFolder
-void showAddFolderDialog(BuildContext context, String folderType) {
-    final TextEditingController folderNameController = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text(
-            '새 폴더 만들기',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-          ),
-          content: TextField(
-            controller: folderNameController,
-            decoration: const InputDecoration(
-              hintText: '폴더 이름',
-              hintStyle: TextStyle(color: Color(0xFF364B45)),
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('취소',
-                  style: TextStyle(
-                      color: Color(0xFFFFA17A),
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16)),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text(
-                '만들기',
-                style: TextStyle(
-                    color: Color(0xFF545454),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700),
-              ),
-              onPressed: () {
-                //_addFolder(folderNameController.text, folderType);
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+//rename 비동기 실행 함수 
+  // void showRenameFolderDialog(BuildContext context, int index,
+  //     List<Map<String, dynamic>> folderList, String folderType) {
+  //   final TextEditingController folderNameController =
+  //       TextEditingController(text: folderList[index]['folder_name']);
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) {
+  //       return AlertDialog(
+  //         title: const Text(
+  //           '폴더 이름 바꾸기',
+  //           style: TextStyle(
+  //               color: Color(0xFF545454),
+  //               fontWeight: FontWeight.w800,
+  //               fontSize: 20),
+  //         ),
+  //         content: TextField(
+  //           controller: folderNameController,
+  //           decoration: const InputDecoration(hintText: '폴더 이름'),
+  //         ),
+  //         actions: <Widget>[
+  //           TextButton(
+  //             child: const Text('취소',
+  //                 style: TextStyle(
+  //                   color: Color(0xFFFFA17A),
+  //                   fontWeight: FontWeight.w700,
+  //                 )),
+  //             onPressed: () {
+  //               Navigator.of(context).pop();
+  //             },
+  //           ),
+  //           TextButton(
+  //             child: const Text(
+  //               '저장',
+  //               style: TextStyle(
+  //                   color: Color(0xFF545454), fontWeight: FontWeight.w700),
+  //             ),
+  //             onPressed: () async {
+  //               // await _renameFolder(folderType, folderList[index]['id'],
+  //               //     folderNameController.text);
+  //               // setState(() {
+  //               //   folderList[index]['folder_name'] = folderNameController.text;
+  //               // });
+  //               Navigator.of(context).pop();
+  //             },
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 
-//rename
-  void showRenameFolderDialog(BuildContext context, int index,
-      List<Map<String, dynamic>> folderList, String folderType) {
-    final TextEditingController folderNameController =
-        TextEditingController(text: folderList[index]['folder_name']);
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text(
-            '폴더 이름 바꾸기',
-            style: TextStyle(
-                color: Color(0xFF545454),
-                fontWeight: FontWeight.w800,
-                fontSize: 20),
-          ),
-          content: TextField(
-            controller: folderNameController,
-            decoration: const InputDecoration(hintText: '폴더 이름'),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('취소',
-                  style: TextStyle(
-                    color: Color(0xFFFFA17A),
-                    fontWeight: FontWeight.w700,
-                  )),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text(
-                '저장',
-                style: TextStyle(
-                    color: Color(0xFF545454), fontWeight: FontWeight.w700),
-              ),
-              onPressed: () async {
-                // await _renameFolder(folderType, folderList[index]['id'],
-                //     folderNameController.text);
-                // setState(() {
-                //   folderList[index]['folder_name'] = folderNameController.text;
-                // });
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-//CONFIRM ALEART 1 - 폴더삭제
-  void showDeleteFolderDialog(BuildContext context, int index,
-      List<Map<String, dynamic>> folderList, String folderType) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(
-            '정말 \'${folderList[index]['folder_name']}\' 을(를) 삭제하시겠습니까?',
-            style: const TextStyle(
-                color: Color(0xFF545454),
-                fontWeight: FontWeight.w800,
-                fontSize: 15),
-          ),
-          content: const Text(
-            '폴더를 삭제하면 다시 복구할 수 없습니다.',
-            style: TextStyle(
-              color: Color(0xFF245B3A),
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('취소',
-                  style: TextStyle(
-                      color: Color(0xFFFFA17A), fontWeight: FontWeight.w700)),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text(
-                '삭제',
-                style: TextStyle(
-                    color: Color(0xFF545454), fontWeight: FontWeight.w700),
-              ),
-              onPressed: () async {
-                //await _deleteFolder(folderType, folderList[index]['id']);
-                // setState(() {
-                //   folderList.removeAt(index);
-                // });
-                Navigator.of(context).pop();
-                showDeletionConfirmation(context);
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+//CONFIRM ALEART 1 - 폴더삭제 비동기 실행 함수
+  // void showDeleteFolderDialog(BuildContext context, int index,
+  //     List<Map<String, dynamic>> folderList, String folderType) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) {
+  //       return AlertDialog(
+  //         title: Text(
+  //           '정말 \'${folderList[index]['folder_name']}\' 을(를) 삭제하시겠습니까?',
+  //           style: const TextStyle(
+  //               color: Color(0xFF545454),
+  //               fontWeight: FontWeight.w800,
+  //               fontSize: 15),
+  //         ),
+  //         content: const Text(
+  //           '폴더를 삭제하면 다시 복구할 수 없습니다.',
+  //           style: TextStyle(
+  //             color: Color(0xFF245B3A),
+  //           ),
+  //         ),
+  //         actions: <Widget>[
+  //           TextButton(
+  //             child: const Text('취소',
+  //                 style: TextStyle(
+  //                     color: Color(0xFFFFA17A), fontWeight: FontWeight.w700)),
+  //             onPressed: () {
+  //               Navigator.of(context).pop();
+  //             },
+  //           ),
+  //           TextButton(
+  //             child: const Text(
+  //               '삭제',
+  //               style: TextStyle(
+  //                   color: Color(0xFF545454), fontWeight: FontWeight.w700),
+  //             ),
+  //             onPressed: () async {
+  //               //await _deleteFolder(folderType, folderList[index]['id']);
+  //               // setState(() {
+  //               //   folderList.removeAt(index);
+  //               // });
+  //               Navigator.of(context).pop();
+  //               showDeletionConfirmation(context);
+  //             },
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 
 //delete alarm
   void showDeletionConfirmation(BuildContext context) {
@@ -787,4 +743,574 @@ Future<void> showCustomMenu(BuildContext context, VoidCallback onRename, VoidCal
     }
   });
 }
-  
+
+
+//37 
+
+void showConfirmationDialog(BuildContext context, String title,String message, VoidCallback onConfirm) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('취소',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                      color: Color(0xFFFFA17A))),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                onConfirm();
+              },
+              child: const Text('확인',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                      color: Color(0xFF545454))),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  //lecture
+class LectureExample extends StatelessWidget {
+  final String lectureName;
+  final String date;
+
+  const LectureExample({
+    super.key,
+    required this.lectureName,
+    required this.date,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Container(
+        width: double.infinity,
+        height: 58,
+        decoration: BoxDecoration(
+          color: const Color(0xFFE9F3ED), // Background color
+          borderRadius: BorderRadius.circular(10), // Rounded corners
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              margin: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: const Color(0xFF005A38), // Color of the square
+                borderRadius:
+                    BorderRadius.circular(8), // Rounded corners for the square
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Row(
+                  // crossAxisAlignment: CrossAxisAlignment.start,
+                  // mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      lectureName,
+                      style: const TextStyle(
+                        color: Color(0xFF1F1F39),
+                        fontSize: 14,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w700,
+                        height: 1.2,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      date,
+                      style: const TextStyle(
+                        color: Color(0xFF005A38),
+                        fontSize: 12,
+                        fontFamily: 'DM Sans',
+                        fontWeight: FontWeight.w500,
+                        height: 1.2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Builder(
+              builder: (BuildContext context) {
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: GestureDetector(
+                    child: const Icon(
+                      Icons.more_vert,
+                      color: Color(0xFF36AE92), // Icon color
+                    ),
+                    onTap: () async {
+                      final RenderBox button =
+                          context.findRenderObject() as RenderBox;
+                      final RenderBox overlay = Overlay.of(context)
+                          .context
+                          .findRenderObject() as RenderBox;
+
+                      final Offset buttonPosition =
+                          button.localToGlobal(Offset.zero, ancestor: overlay);
+                      final double left = buttonPosition.dx;
+                      final double top = buttonPosition.dy + button.size.height;
+
+                      await showMenu<String>(
+                        context: context,
+                        position: RelativeRect.fromLTRB(
+                            left, top, left + button.size.width, top),
+                        items: [
+                          const PopupMenuItem<String>(
+                            value: 'delete',
+                            child: Center(
+                              child: Text(
+                                '삭제하기',
+                                style: TextStyle(
+                                  color: Color.fromRGBO(255, 161, 122, 1),
+                                  fontSize: 14,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w700,
+                                  height: 1.2,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const PopupMenuItem<String>(
+                            value: 'move',
+                            child: Center(
+                              child: Text(
+                                '이동하기',
+                                style: TextStyle(
+                                  color: Color.fromRGBO(84, 84, 84, 1),
+                                  fontSize: 14,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w700,
+                                  height: 1.2,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const PopupMenuItem<String>(
+                            value: 'rename',
+                            child: Center(
+                              child: Text(
+                                '이름 바꾸기',
+                                style: TextStyle(
+                                  color: Color.fromRGBO(84, 84, 84, 1),
+                                  fontSize: 14,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w700,
+                                  height: 1.2,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        color: Colors.white,
+                      ).then((value) {
+                        if (value != null) {
+                          print(value);
+                        }
+                      });
+                    },
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+//RenameDeletePopup
+class RenameDeletePopup extends StatelessWidget {
+  final VoidCallback onRename;
+  final VoidCallback onDelete;
+
+  const RenameDeletePopup({
+    required this.onRename,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<String>(
+      onSelected: (value) {
+        if (value == 'rename') {
+          onRename();
+        } else if (value == 'delete') {
+          onDelete();
+        }
+      },
+      itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+        const PopupMenuItem<String>(
+          value: 'rename',
+          child: Text('이름 바꾸기'),
+        ),
+        const PopupMenuItem<String>(
+          value: 'delete',
+          child: Text('삭제하기'),
+        ),
+      ],
+    );
+  }
+}
+
+//파일 이름 바꾸기
+void renameFile(BuildContext context, List<Map<String, dynamic>> files, int index, Function setState) {
+  final TextEditingController fileNameController = TextEditingController(text: files[index]['file_name']);
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text(
+          '파일 이름 바꾸기',
+          style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF545454)),
+        ),
+        content: TextField(
+          controller: fileNameController,
+          decoration: const InputDecoration(hintText: '파일 이름'),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('취소',
+                style: TextStyle(
+                    color: Color(0xFFFFA17A), fontWeight: FontWeight.w700)),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          TextButton(
+            child: const Text(
+              '저장',
+              style: TextStyle(
+                  color: Color(0xFF545454), fontWeight: FontWeight.w700),
+            ),
+            onPressed: () {
+              setState(() {
+                files[index]['file_name'] = fileNameController.text;
+              });
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+void deleteFile(BuildContext context, List<Map<String, dynamic>> files, int index, Function setState, Function showDeletionConfirmation) {
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text('파일 삭제하기'),
+        content: const Text('정말로 삭제하시겠습니까?'),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('취소', style: TextStyle(color: Colors.red)),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          TextButton(
+            child: const Text('삭제'),
+            onPressed: () {
+              setState(() {
+                files.removeAt(index);
+              });
+              Navigator.of(context).pop();
+              showDeletionConfirmation(context);
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+//31
+Future<void> showAddFolderDialog(BuildContext context, Function addFolder) async {
+  final TextEditingController folderNameController = TextEditingController();
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text(
+          '새 폴더 만들기',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+        ),
+        content: TextField(
+          controller: folderNameController,
+          decoration: const InputDecoration(
+            hintText: '폴더 이름',
+            hintStyle: TextStyle(color: Color(0xFF364B45)),
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('취소',
+                style: TextStyle(
+                    color: Color(0xFFFFA17A),
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16)),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          TextButton(
+            child: const Text(
+              '만들기',
+              style: TextStyle(
+                  color: Color(0xFF545454),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700),
+            ),
+            onPressed: () async {
+              await addFolder(folderNameController.text);
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+Future<void> showRenameFolderDialog(BuildContext context, int index, List<Map<String, dynamic>> folders, Function renameFolder, Function setState) async {
+  final TextEditingController folderNameController = TextEditingController(text: folders[index]['folder_name']);
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text('폴더 이름 바꾸기'),
+        content: TextField(
+          controller: folderNameController,
+          decoration: const InputDecoration(hintText: '폴더 이름'),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('취소', style: TextStyle(color: Colors.red)),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          TextButton(
+            child: const Text('저장'),
+            onPressed: () async {
+              await renameFolder(folders[index]['id'], folderNameController.text);
+              setState(() {
+                folders[index]['folder_name'] = folderNameController.text;
+              });
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+Future<void> showDeleteFolderDialog(BuildContext context, int index, List<Map<String, dynamic>> folders, Function deleteFolder, Function setState) async {
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text('폴더 삭제하기'),
+        content: const Text('정말로 삭제하시겠습니까?'),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('취소', style: TextStyle(color: Colors.red)),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          TextButton(
+            child: const Text('삭제'),
+            onPressed: () async {
+              await deleteFolder(folders[index]['id']);
+              setState(() {
+                folders.removeAt(index);
+              });
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+class InputButton extends StatelessWidget {
+  final String label;
+  final TextInputType keyboardType;
+  final bool obscureText;
+  final TextEditingController controller;
+
+  const InputButton({
+    Key? key,
+    required this.label,
+    this.keyboardType = TextInputType.text,
+    this.obscureText = false,
+    required this.controller,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    return Container(
+      padding: EdgeInsets.only(left: size.width * 0.05),
+      width: size.width,
+      height: 50,
+      child: Stack(
+        children: [
+          Positioned(
+            right: size.width * 0.05,
+            left: 0,
+            top: 0,
+            child: Container(
+              width: 335,
+              height: 50,
+              decoration: ShapeDecoration(
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                  side: BorderSide(width: 1, color: Color(0xFF9FACBD)),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ),
+          ),
+          Positioned.fill(
+            left: 20,
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 20.0),
+                child: TextFormField(
+                  controller: controller,
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: '${label}',
+                    hintStyle: TextStyle(color: Color(0xFF36AE92)),
+                  ),
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 14,
+                    fontFamily: 'DM Sans',
+                    fontWeight: FontWeight.w500,
+                  ),
+                  keyboardType: keyboardType,
+                  obscureText: obscureText,
+                  validator: (value) { // Validator 추가
+                    if (value == null || value.isEmpty) {
+                      return '{$label} field cannot be empty';
+                    }
+                    return null;
+                  },
+                  onChanged: (value) {
+                    // Handle input changes if needed
+                  },
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ClickButton extends StatelessWidget {
+  final String text;
+  final VoidCallback onPressed;
+  final double width;
+  final double height;
+  final String? iconPath;
+  final IconData? iconData;
+  final Color? iconColor;
+  final Color backgroundColor;
+
+  const ClickButton({
+    Key? key,
+    required this.text,
+    required this.onPressed,
+    this.width = double.infinity,
+    this.height = 50.0,
+    this.iconPath,
+    this.iconData,
+    this.iconColor,
+    this.backgroundColor = const Color.fromRGBO(54, 174, 146, 1.0), // 기본 배경색 설정
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: GestureDetector(
+        onTap: onPressed,
+        child: Container(
+          width: width,
+          height: height,
+          decoration: ShapeDecoration(
+            color: backgroundColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (iconPath != null)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: ImageIcon(
+                    AssetImage(iconPath!),
+                    color: Colors.white,
+                  ),
+                )
+              else if (iconData != null)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: Icon(
+                    iconData,
+                    color: iconColor ?? Colors.white,
+                  ),
+                ),
+              Text(
+                text,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
