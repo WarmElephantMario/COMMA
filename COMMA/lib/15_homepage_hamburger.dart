@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 
 class HomePageNoRecent extends StatelessWidget {
+  const HomePageNoRecent({super.key});
+
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    // final size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.grey[200],
-        iconTheme: IconThemeData(color: Color(0xFF36AE92),),
+        iconTheme: const IconThemeData(
+          color: Color(0xFF36AE92),
+        ),
         actions: [
           IconButton(
-            icon: Icon(
+            icon: const Icon(
               Icons.search_rounded,
             ),
             onPressed: () {
@@ -26,7 +30,7 @@ class HomePageNoRecent extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 '안녕하세요, 이화연 님',
                 style: TextStyle(
                   color: Colors.black,
@@ -36,11 +40,11 @@ class HomePageNoRecent extends StatelessWidget {
                   height: 1.5,
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  const Text(
                     '최근에 학습한 강의 파일이에요.',
                     style: TextStyle(
                       color: Color(0xFF575757),
@@ -54,7 +58,7 @@ class HomePageNoRecent extends StatelessWidget {
                     onTap: () {
                       print('view all button is clicked');
                     },
-                    child: Row(
+                    child: const Row(
                       children: [
                         Text(
                           '전체 보기',
@@ -77,12 +81,12 @@ class HomePageNoRecent extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               GestureDetector(
                 onTap: () {
                   print('certain lecture is clicked');
                 },
-                child: LectureExample(
+                child: const LectureExample(
                   lectureName: '정보통신공학',
                   date: '2024/06/07',
                 ),
@@ -91,7 +95,7 @@ class HomePageNoRecent extends StatelessWidget {
                 onTap: () {
                   print('certain lecture is clicked');
                 },
-                child: LectureExample(
+                child: const LectureExample(
                   lectureName: '컴퓨터알고리즘',
                   date: '2024/06/10',
                 ),
@@ -100,16 +104,16 @@ class HomePageNoRecent extends StatelessWidget {
                 onTap: () {
                   print('certain lecture is clicked');
                 },
-                child: LectureExample(
+                child: const LectureExample(
                   lectureName: '데이터베이스',
                   date: '2024/06/15',
                 ),
               ),
-              SizedBox(height: 32),
+              const SizedBox(height: 32),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  const Text(
                     '최근에 학습한 콜론 파일이에요.',
                     style: TextStyle(
                       color: Color(0xFF575757),
@@ -123,7 +127,7 @@ class HomePageNoRecent extends StatelessWidget {
                     onTap: () {
                       print('view all2 button is clicked');
                     },
-                    child: Row(
+                    child: const Row(
                       children: [
                         Text(
                           '전체 보기',
@@ -146,13 +150,12 @@ class HomePageNoRecent extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 8),
-
+              const SizedBox(height: 8),
               GestureDetector(
                 onTap: () {
                   print('certain lecture is clicked');
                 },
-                child: LectureExample(
+                child: const LectureExample(
                   lectureName: '정보통신공학',
                   date: '2024/06/07',
                 ),
@@ -161,7 +164,7 @@ class HomePageNoRecent extends StatelessWidget {
                 onTap: () {
                   print('certain lecture is clicked');
                 },
-                child: LectureExample(
+                child: const LectureExample(
                   lectureName: '컴퓨터알고리즘',
                   date: '2024/06/10',
                 ),
@@ -170,20 +173,19 @@ class HomePageNoRecent extends StatelessWidget {
                 onTap: () {
                   print('certain lecture is clicked');
                 },
-                child: LectureExample(
+                child: const LectureExample(
                   lectureName: '데이터베이스',
                   date: '2024/06/15',
                 ),
               ),
-
-              SizedBox(height: 32),
+              const SizedBox(height: 32),
             ],
           ),
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Color(0xFF36AE92),
-        items: [
+        backgroundColor: const Color(0xFF36AE92),
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'HOME',
@@ -211,10 +213,10 @@ class LectureExample extends StatelessWidget {
   final String date;
 
   const LectureExample({
-    Key? key,
+    super.key,
     required this.lectureName,
     required this.date,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -224,7 +226,7 @@ class LectureExample extends StatelessWidget {
         width: double.infinity,
         height: 58,
         decoration: BoxDecoration(
-          color: Color(0xFFE9F3ED), // Background color
+          color: const Color(0xFFE9F3ED), // Background color
           borderRadius: BorderRadius.circular(10), // Rounded corners
         ),
         child: Row(
@@ -232,11 +234,11 @@ class LectureExample extends StatelessWidget {
             Container(
               width: 40,
               height: 40,
-              margin: EdgeInsets.all(8.0),
+              margin: const EdgeInsets.all(8.0),
               decoration: BoxDecoration(
-                color: Color(0xFF005A38), // Color of the square
+                color: const Color(0xFF005A38), // Color of the square
                 borderRadius:
-                BorderRadius.circular(8), // Rounded corners for the square
+                    BorderRadius.circular(8), // Rounded corners for the square
               ),
             ),
             Expanded(
@@ -248,7 +250,7 @@ class LectureExample extends StatelessWidget {
                   children: [
                     Text(
                       lectureName,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Color(0xFF1F1F39),
                         fontSize: 14,
                         fontFamily: 'Poppins',
@@ -256,10 +258,10 @@ class LectureExample extends StatelessWidget {
                         height: 1.2,
                       ),
                     ),
-                    Spacer(),
+                    const Spacer(),
                     Text(
                       date,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Color(0xFF005A38),
                         fontSize: 12,
                         fontFamily: 'DM Sans',
@@ -276,23 +278,28 @@ class LectureExample extends StatelessWidget {
                 return Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: GestureDetector(
-                    child: Icon(
+                    child: const Icon(
                       Icons.more_vert,
                       color: Color(0xFF36AE92), // Icon color
                     ),
                     onTap: () async {
-                      final RenderBox button = context.findRenderObject() as RenderBox;
-                      final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+                      final RenderBox button =
+                          context.findRenderObject() as RenderBox;
+                      final RenderBox overlay = Overlay.of(context)
+                          .context
+                          .findRenderObject() as RenderBox;
 
-                      final Offset buttonPosition = button.localToGlobal(Offset.zero, ancestor: overlay);
+                      final Offset buttonPosition =
+                          button.localToGlobal(Offset.zero, ancestor: overlay);
                       final double left = buttonPosition.dx;
                       final double top = buttonPosition.dy + button.size.height;
 
                       await showMenu<String>(
                         context: context,
-                        position: RelativeRect.fromLTRB(left, top, left + button.size.width, top),
+                        position: RelativeRect.fromLTRB(
+                            left, top, left + button.size.width, top),
                         items: [
-                          PopupMenuItem<String>(
+                          const PopupMenuItem<String>(
                             value: 'delete',
                             child: Center(
                               child: Text(
@@ -307,10 +314,10 @@ class LectureExample extends StatelessWidget {
                               ),
                             ),
                           ),
-                          PopupMenuItem<String>(
+                          const PopupMenuItem<String>(
                             value: 'move',
                             child: Center(
-                              child : Text(
+                              child: Text(
                                 '이동하기',
                                 style: TextStyle(
                                   color: Color.fromRGBO(84, 84, 84, 1),
@@ -322,18 +329,19 @@ class LectureExample extends StatelessWidget {
                               ),
                             ),
                           ),
-                          PopupMenuItem<String>(
+                          const PopupMenuItem<String>(
                             value: 'rename',
-                            child: Center(child: Text(
-                              '이름 바꾸기',
-                              style: TextStyle(
-                                color: Color.fromRGBO(84, 84, 84, 1),
-                                fontSize: 14,
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w700,
-                                height: 1.2,
+                            child: Center(
+                              child: Text(
+                                '이름 바꾸기',
+                                style: TextStyle(
+                                  color: Color.fromRGBO(84, 84, 84, 1),
+                                  fontSize: 14,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w700,
+                                  height: 1.2,
+                                ),
                               ),
-                            ),
                             ),
                           ),
                         ],
@@ -348,8 +356,8 @@ class LectureExample extends StatelessWidget {
                       });
                     },
                   ),
-                );      },
-
+                );
+              },
             ),
           ],
         ),
@@ -358,9 +366,8 @@ class LectureExample extends StatelessWidget {
   }
 }
 
-
 void main() {
-  runApp(MaterialApp(
+  runApp(const MaterialApp(
     home: Scaffold(
       body: HomePageNoRecent(),
     ),

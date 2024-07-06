@@ -47,12 +47,16 @@ class _SignUpPageState extends State<SignUpPage> {
   Future<bool> checkUserPhone() async {
     try {
       var response = await http.post(
-          Uri.parse(API.validatePhone),
-          body: {
-            'user_phone': phoneController.text.trim()
-          }
+          Uri.parse('http://172.30.96.5:3000/api/validate_phone'),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        body: jsonEncode({
+          'user_phone': phoneController.text.trim()
+        }),
       );
 
+      print(response.statusCode);
       if (response.statusCode == 200) {
         var responseBody = jsonDecode(response.body);
 
@@ -73,36 +77,37 @@ class _SignUpPageState extends State<SignUpPage> {
     return false;
   }
 
-
-
-saveInfo() async{
+  Future<void> saveInfo() async {
     User userModel = User(
-    1,
-    emailController.text.trim(),
-    phoneController.text.trim(),
-    passwordController.text.trim()
+      1,
+      emailController.text.trim(),
+      phoneController.text.trim(),
+      passwordController.text.trim(),
     );
 
-    try{
-      var res = await http.post(Uri.parse(API.signup),
-      body: userModel.toJson()
+    try {
+      var res = await http.post(
+        Uri.parse('http://172.30.96.5:3000/api/signup_info'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(userModel.toJson()),
       );
 
-      if(res.statusCode == 200){
+      if (res.statusCode == 200) {
         var resSignup = jsonDecode(res.body);
-        if(resSignup['success'] == true){
+        if (resSignup['success'] == true) {
           Fluttertoast.showToast(msg: 'Signup successfully');
           setState(() {
             emailController.clear();
             passwordController.clear();
             phoneController.clear();
           });
-
-        }else{
+        } else {
           Fluttertoast.showToast(msg: 'Error occurred. Please try again.');
         }
       }
-    }catch(e){
+    } catch (e) {
       print(e.toString());
       Fluttertoast.showToast(msg: e.toString());
     }

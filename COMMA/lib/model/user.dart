@@ -7,7 +7,7 @@ class User{
   User(this.user_id, this.user_email, this.user_phone, this.user_password);
 
   factory User.fromJson(Map<String, dynamic> json) => User(
-      int.parse(json['user_id']),
+      json['user_id'],
       json['user_email'],
       json['user_phone'],
       json['user_password'],
