@@ -76,6 +76,7 @@ class _MainPageState extends State<MainPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
+                //추후에 수정 필요
                 '안녕하세요, 이화연 님',
                 // '안녕하세요, ${widget.userInfo.user_email} 님',
                 style: const TextStyle(
