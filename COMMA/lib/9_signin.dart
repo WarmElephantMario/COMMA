@@ -8,7 +8,7 @@ import '16_homepage_move.dart';
 import 'package:http/http.dart' as http;
 import 'package:fluttertoast/fluttertoast.dart';
 
-import 'api/api.dart';
+import './api/api.dart';
 import 'model/user.dart';
 
 
@@ -56,7 +56,7 @@ class _SigninPageState extends State<SigninPage> {
   Future<User?> userLogin() async {
     try{
       var res = await http.post(
-          Uri.parse('http://172.30.96.5:3000/api/login'),
+          Uri.parse('${API.baseUrl}/api/login'),
           headers: {
             'Content-Type': 'application/json',
           },
