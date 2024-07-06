@@ -3,6 +3,8 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
 class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
+
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
 }
@@ -16,28 +18,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final ImagePicker _picker = ImagePicker();
 
   void _showEditNameDialog() {
-    final TextEditingController _nameController = TextEditingController(text: name);
+    final TextEditingController nameController =
+        TextEditingController(text: name);
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('이름 바꾸기'),
+          title: const Text('이름 바꾸기'),
           content: TextField(
-            controller: _nameController,
-            decoration: InputDecoration(hintText: '새 이름을 입력하세요'),
+            controller: nameController,
+            decoration: const InputDecoration(hintText: '새 이름을 입력하세요'),
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('취소', style: TextStyle(color: Colors.red)),
+              child: const Text('취소', style: TextStyle(color: Colors.red)),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('저장'),
+              child: const Text('저장'),
               onPressed: () {
                 setState(() {
-                  name = _nameController.text;
+                  name = nameController.text;
                 });
                 Navigator.of(context).pop();
               },
@@ -61,13 +64,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: EdgeInsets.only(bottom: 16.0),
-        padding: EdgeInsets.all(12.0),
+        margin: const EdgeInsets.only(bottom: 16.0),
+        padding: const EdgeInsets.all(12.0),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12.0),
-          boxShadow: [
-            BoxShadow(color: Colors.black12, blurRadius: 6.0, offset: Offset(0, 2)),
+          boxShadow: const [
+            BoxShadow(
+                color: Colors.black12, blurRadius: 6.0, offset: Offset(0, 2)),
           ],
         ),
         child: Row(
@@ -75,11 +79,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             Text(
               label,
-              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold, color: Colors.black54),
+              style: const TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black54),
             ),
             Text(
               value,
-              style: TextStyle(fontSize: 16.0, color: Colors.black),
+              style: const TextStyle(fontSize: 16.0, color: Colors.black),
             ),
           ],
         ),
@@ -91,14 +98,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('프로필 정보'),
+        backgroundColor: Colors.white,
+        title: const Text('프로필 정보'),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
       ),
+      backgroundColor: Colors.white,
       body: LayoutBuilder(
         builder: (context, constraints) {
           return SingleChildScrollView(
@@ -110,8 +119,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: [
                       CircleAvatar(
                         radius: 50,
-                        backgroundImage:
-                            _image != null ? FileImage(_image!) : AssetImage('assets/profile.jpg') as ImageProvider,
+                        backgroundImage: _image != null
+                            ? FileImage(_image!)
+                            : const AssetImage('assets/profile.jpg')
+                                as ImageProvider,
                       ),
                       Positioned(
                         bottom: 0,
@@ -121,17 +132,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: Container(
                             width: 30,
                             height: 30,
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               color: Colors.white,
                               shape: BoxShape.circle,
                             ),
-                            child: Icon(Icons.camera_alt, color: Colors.black),
+                            child: const Icon(Icons.camera_alt,
+                                color: Colors.black),
                           ),
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   _buildProfileItem('이름', name, _showEditNameDialog),
                   _buildProfileItem('이메일', email, null),
                   _buildProfileItem('전화번호', phoneNumber, null),

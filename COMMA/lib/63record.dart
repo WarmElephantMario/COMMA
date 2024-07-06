@@ -6,12 +6,14 @@ import '62lecture_start.dart';
 enum RecordingState { initial, recording, recorded }
 
 class RecordPage extends StatefulWidget {
+  const RecordPage({super.key});
+
   @override
   _RecordPageState createState() => _RecordPageState();
 }
 
 class _RecordPageState extends State<RecordPage> {
-  int _currentIndex = 2; // 학습 시작 탭이 기본 선택되도록 설정
+  // int _currentIndex = 2; // 학습 시작 탭이 기본 선택되도록 설정
   RecordingState _recordingState = RecordingState.initial; // 녹음 상태를 나타내는 변수
 
   void _stopRecording() {
@@ -37,17 +39,19 @@ class _RecordPageState extends State<RecordPage> {
                 TextButton(
                   onPressed: () {
                     if (_recordingState == RecordingState.recording) {
-                      showStopRecordingDialog(context, _stopRecording); // 팝업 창 표시
+                      showStopRecordingDialog(
+                          context, _stopRecording); // 팝업 창 표시
                     } else {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (context) => LectureStartPage()),
+                        MaterialPageRoute(
+                            builder: (context) => const LectureStartPage()),
                       );
                     }
                   },
                   child: Text(
                     _recordingState == RecordingState.initial ? '취소' : '종료',
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Color(0xFFFFA17A),
                       fontSize: 16,
                     ),
@@ -55,10 +59,10 @@ class _RecordPageState extends State<RecordPage> {
                 ),
               ],
             ),
-            Row(
+            const Row(
               children: [
                 ImageIcon(AssetImage('assets/folder_search.png')),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 Text(
                   '폴더 분류 > 기본 폴더',
                   style: TextStyle(
@@ -70,7 +74,7 @@ class _RecordPageState extends State<RecordPage> {
               ],
             ),
             const SizedBox(height: 5),
-            Text(
+            const Text(
               '새로운 노트',
               style: TextStyle(
                 color: Color(0xFF414141),
@@ -80,7 +84,7 @@ class _RecordPageState extends State<RecordPage> {
               ),
             ),
             const SizedBox(height: 5),
-            Text(
+            const Text(
               '강의 자료: Ch01. What is Algorithm?',
               style: TextStyle(
                 color: Color(0xFF575757),
@@ -88,11 +92,12 @@ class _RecordPageState extends State<RecordPage> {
                 fontFamily: 'DM Sans',
               ),
             ),
-            if (_recordingState == RecordingState.recorded) // 녹음 종료됨일 때 날짜와 시간 표시
-              Column(
+            if (_recordingState ==
+                RecordingState.recorded) // 녹음 종료됨일 때 날짜와 시간 표시
+              const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 5),
+                  SizedBox(height: 5),
                   Text(
                     '2024/06/07 오후 2:30',
                     style: TextStyle(
@@ -113,8 +118,8 @@ class _RecordPageState extends State<RecordPage> {
                         _recordingState = RecordingState.recording; // 녹음 상태 변경
                       });
                     },
-                    icon: Icon(Icons.mic, color: Colors.white),
-                    label: Text(
+                    icon: const Icon(Icons.mic, color: Colors.white),
+                    label: const Text(
                       '녹음',
                       style: TextStyle(
                         color: Colors.white,
@@ -123,8 +128,9 @@ class _RecordPageState extends State<RecordPage> {
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0XFF36AE92),
-                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      backgroundColor: const Color(0XFF36AE92),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -136,10 +142,11 @@ class _RecordPageState extends State<RecordPage> {
                     children: [
                       ElevatedButton.icon(
                         onPressed: () {
-                          showStopRecordingDialog(context, _stopRecording); // 팝업 창 표시
+                          showStopRecordingDialog(
+                              context, _stopRecording); // 팝업 창 표시
                         },
-                        icon: Icon(Icons.mic, color: Colors.white),
-                        label: Text(
+                        icon: const Icon(Icons.mic, color: Colors.white),
+                        label: const Text(
                           '녹음종료',
                           style: TextStyle(
                             color: Colors.white,
@@ -148,21 +155,24 @@ class _RecordPageState extends State<RecordPage> {
                           ),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0XFF36AE92),
-                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          backgroundColor: const Color(0XFF36AE92),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
                       ),
                       const SizedBox(width: 10), // 버튼과 텍스트 사이의 간격 추가
-                      Column( // 텍스트를 아래로 내리기 위해 Column 사용
+                      const Column(
+                        // 텍스트를 아래로 내리기 위해 Column 사용
                         children: [
-                          const SizedBox(height: 10), // 텍스트를 아래로 내리는 간격
+                          SizedBox(height: 10), // 텍스트를 아래로 내리는 간격
                           Row(
                             children: [
-                              Icon(Icons.fiber_manual_record, color: Color(0xFFFFA17A)),
-                              const SizedBox(width: 4), // 아이콘과 텍스트 사이의 간격 추가
+                              Icon(Icons.fiber_manual_record,
+                                  color: Color(0xFFFFA17A)),
+                              SizedBox(width: 4), // 아이콘과 텍스트 사이의 간격 추가
                               Text(
                                 '녹음중',
                                 style: TextStyle(
@@ -178,59 +188,61 @@ class _RecordPageState extends State<RecordPage> {
                     ],
                   )
                 else if (_recordingState == RecordingState.recorded)
-                    Row(
-                      children: [
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            setState(() {
-                              // 녹음 종료 버튼 눌렀을때 처리할 로직
-                            });
-                          },
-                          icon: Icon(Icons.mic_off, color: Colors.white),
-                          label: Text(
-                            '녹음종료됨',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontFamily: 'DM Sans',
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF9FACBD),
-                            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
+                  Row(
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            // 녹음 종료 버튼 눌렀을때 처리할 로직
+                          });
+                        },
+                        icon: const Icon(Icons.mic_off, color: Colors.white),
+                        label: const Text(
+                          '녹음종료됨',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontFamily: 'DM Sans',
                           ),
                         ),
-                        const SizedBox(width: 10),
-                        ElevatedButton(
-                          onPressed: () {
-                            showColonCreatedDialog(context); // 콜론 생성하기 버튼 기능 추가
-                          },
-                          child: Text(
-                            '콜론(:) 생성하기',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontFamily: 'DM Sans',
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0XFF36AE92),
-                            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF9FACBD),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(width: 10),
+                      ElevatedButton(
+                        onPressed: () {
+                          showColonCreatedDialog(context); // 콜론 생성하기 버튼 기능 추가
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0XFF36AE92),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: const Text(
+                          '콜론(:) 생성하기',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontFamily: 'DM Sans',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
               ],
             ),
             const SizedBox(height: 20),
             if (_recordingState == RecordingState.recording) // 녹음 중일 때 표시될 텍스트
-              Text(
+              const Text(
                 '네 여러분 안녕하세요\n그래서 지난번에 공부한 Time Complexity 관련된 공식을 모두 공부해 오셨겠지요?\n다시 한 번 설명하지만 알고리즘에 있어서 Time complexity는 개발자라면 꼭 필수적으로 고려할 줄 알아야 하는 문제라고 했었음',
                 style: TextStyle(
                   color: Color(0xFF414141),
@@ -239,7 +251,7 @@ class _RecordPageState extends State<RecordPage> {
                 ),
               ),
             if (_recordingState == RecordingState.recorded) // 녹음 종료됨일 때 표시될 텍스트
-              Text(
+              const Text(
                 '네 여러분 안녕하세요\n그래서 지난번에 공부한 Time Complexity 관련된 공식을 모두 공부해 오셨겠지요?\n다시 한 번 설명하지만 알고리즘에 있어서 Time complexity는 개발자라면 꼭 필수적으로 고려할 줄 알아야 하는 문제라고 했었음',
                 style: TextStyle(
                   color: Color(0xFF414141),
@@ -247,7 +259,7 @@ class _RecordPageState extends State<RecordPage> {
                   fontFamily: 'DM Sans',
                 ),
               ),
-            Spacer(),
+            const Spacer(),
           ],
         ),
       ),
