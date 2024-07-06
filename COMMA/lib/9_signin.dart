@@ -9,7 +9,7 @@ import 'components.dart';
 import 'package:http/http.dart' as http;
 import 'package:fluttertoast/fluttertoast.dart';
 
-import 'api/api.dart';
+import './api/api.dart';
 import 'model/user.dart';
 
 
@@ -57,17 +57,21 @@ class _SigninPageState extends State<SigninPage> {
   Future<User?> userLogin() async {
     try{
       var res = await http.post(
-          Uri.parse(API.login),
-          body: {
-            'user_email' : emailController.text.trim(),
-            'user_password' : passwordController.text.trim()
-          });
+          Uri.parse('${API.baseUrl}/api/login'),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+          'user_email': emailController.text.trim(),
+          'user_password': passwordController.text.trim(),
+          }),
+      );
 
       if(res.statusCode == 200){
         var resLogin = jsonDecode(res.body);
+        print(resLogin);
 
         if(resLogin['success'] == true){
-
           Fluttertoast.showToast(msg: 'login successfully');
           User userInfo = User.fromJson(resLogin['userData']);
 
