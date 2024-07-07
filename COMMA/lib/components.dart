@@ -11,8 +11,8 @@ import '11_homepage_recent.dart';
 //NAVIGATION BAR 
 BottomNavigationBar buildBottomNavigationBar(BuildContext context, int currentIndex, Function(int) onItemTapped) {
   final List<Widget> widgetOptions = <Widget>[
-    // MainPage(userInfo: userInfo),
-    MainPage(userInfo : User(1, 'example@example.com', '010-1234-5678', 'password123')),
+    MainPage(userInfo: userInfo),
+    //MainPage(userInfo : User(1, 'example@example.com', '010-1234-5678', 'password123')),
     FolderScreen(),
     LearningPreparation(),
     MyPageScreen(),

@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MainPage(userInfo : User(1, 'example@example.com', '010-1234-5678', 'password123')),
+      home: SplashScreen(),
     );
   }
 }
