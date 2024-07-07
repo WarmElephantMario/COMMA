@@ -46,6 +46,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
@@ -62,7 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
 // class FigmaToCodeApp extends StatelessWidget {
 //   const FigmaToCodeApp({super.key});
-
+//
 //   @override
 //   Widget build(BuildContext context) {
 //     return GetMaterialApp(
