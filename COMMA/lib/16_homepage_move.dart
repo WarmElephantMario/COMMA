@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'components.dart';
+import 'package:flutter_plugin/12_homepage_search.dart';
+import 'components.dart'; // component.dart 파일을 불러옵니다.
 import '14_homepage_search_result.dart';
 import 'api/api.dart';
 import 'model/user.dart';
@@ -9,30 +10,65 @@ import 'package:http/http.dart' as http;
 class MainPage extends StatefulWidget {
   final User userInfo;
 
-  const MainPage({Key? key, required this.userInfo}) : super(key: key);
+  const MainPage({super.key, required this.userInfo});
 
+  @override
   _MainPageState createState() => _MainPageState();
 }
 
 class _MainPageState extends State<MainPage> {
-  List<dynamic> lectureFolders = [];
+  List<Map<String, dynamic>> lectureFiles = [];
+  List<Map<String, dynamic>> colonFiles = [];
+  List<Map<String, dynamic>> folders = [];
   int _selectedIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    fetchLectureFolders();
+    fetchLectureFiles();
+    fetchColonFiles();
   }
 
-  Future<void> fetchLectureFolders() async {
-    final response = await http.get(Uri.parse(API.getAllFolders));
+  Future<void> fetchLectureFiles() async {
+    final response =
+        await http.get(Uri.parse('${API.baseUrl}/api/getLectureFiles'));
 
     if (response.statusCode == 200) {
       setState(() {
-        lectureFolders = jsonDecode(response.body)['folders'];
+        lectureFiles =
+            List<Map<String, dynamic>>.from(jsonDecode(response.body)['files']);
       });
     } else {
-      throw Exception('Failed to load lecture folders');
+      throw Exception('Failed to load lecture files');
+    }
+  }
+
+  Future<void> fetchColonFiles() async {
+    final response =
+        await http.get(Uri.parse('${API.baseUrl}/api/getColonFiles'));
+
+    if (response.statusCode == 200) {
+      setState(() {
+        colonFiles =
+            List<Map<String, dynamic>>.from(jsonDecode(response.body)['files']);
+      });
+    } else {
+      throw Exception('Failed to load colon files');
+    }
+  }
+
+  Future<void> fetchOtherFolders(String fileType, int currentFolderId) async {
+    final response = await http.get(Uri.parse(
+        '${API.baseUrl}/api/getOtherFolders/$fileType/$currentFolderId'));
+
+    if (response.statusCode == 200) {
+      setState(() {
+        folders = List<Map<String, dynamic>>.from(jsonDecode(response.body));
+        folders.removeWhere((folder) => folder['id'] == currentFolderId);
+        print('Fetched folders: $folders');
+      });
+    } else {
+      throw Exception('Failed to load folders');
     }
   }
 
@@ -40,6 +76,99 @@ class _MainPageState extends State<MainPage> {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  Future<void> renameItem(int fileId, String newName, String fileType) async {
+    try {
+      final response = await http.put(
+        Uri.parse('${API.baseUrl}/api/$fileType-files/$fileId'),
+        body: jsonEncode({'file_name': newName}),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          if (fileType == 'lecture') {
+            lectureFiles = lectureFiles.map((file) {
+              if (file['id'] == fileId) {
+                return {...file, 'file_name': newName};
+              }
+              return file;
+            }).toList();
+          } else {
+            colonFiles = colonFiles.map((file) {
+              if (file['id'] == fileId) {
+                return {...file, 'file_name': newName};
+              }
+              return file;
+            }).toList();
+          }
+        });
+      } else {
+        throw Exception('Failed to rename file');
+      }
+    } catch (error) {
+      print('Error renaming file: $error');
+      rethrow;
+    }
+  }
+
+  Future<void> deleteItem(int fileId, String fileType) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('${API.baseUrl}/api/$fileType-files/$fileId'),
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          if (fileType == 'lecture') {
+            lectureFiles.removeWhere((file) => file['id'] == fileId);
+          } else {
+            colonFiles.removeWhere((file) => file['id'] == fileId);
+          }
+        });
+      } else {
+        throw Exception('Failed to delete file');
+      }
+    } catch (error) {
+      print('Error deleting file: $error');
+      rethrow;
+    }
+  }
+
+  Future<void> moveItem(int fileId, int newFolderId, String fileType) async {
+    try {
+      final response = await http.put(
+        Uri.parse('${API.baseUrl}/api/$fileType-files/move/$fileId'),
+        body: jsonEncode({'folder_id': newFolderId}),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          if (fileType == 'lecture') {
+            lectureFiles = lectureFiles.map((file) {
+              if (file['id'] == fileId) {
+                return {...file, 'folder_id': newFolderId};
+              }
+              return file;
+            }).toList();
+          } else {
+            colonFiles = colonFiles.map((file) {
+              if (file['id'] == fileId) {
+                return {...file, 'folder_id': newFolderId};
+              }
+              return file;
+            }).toList();
+          }
+        });
+      } else {
+        throw Exception('Failed to move file');
+      }
+    } catch (error) {
+      print('Error moving file: $error');
+      rethrow;
+    }
   }
 
   @override
@@ -62,7 +191,7 @@ class _MainPageState extends State<MainPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const SearchingScreen(),
+                  builder: (context) => const MainToSearchPage(),
                 ),
               );
             },
@@ -76,7 +205,6 @@ class _MainPageState extends State<MainPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                //'안녕하세요, 이화연 님',
                 '안녕하세요, ${widget.userInfo.user_email} 님',
                 style: const TextStyle(
                   color: Colors.black,
@@ -128,34 +256,60 @@ class _MainPageState extends State<MainPage> {
                 ],
               ),
               const SizedBox(height: 8),
-              // Fetch된 데이터를 사용하여 LectureExample 위젯을 동적으로 생성
-              ...(
-                lectureFolders.isEmpty
-                    ? [
-                        const Text(
-                          '최근에 학습한 강의 자료가 없어요.',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 13,
-                            fontFamily: 'Raleway',
-                            fontWeight: FontWeight.w700,
-                            height: 1.5,
+              ...(lectureFiles.isEmpty
+                  ? [
+                      const Text(
+                        '최근에 학습한 강의 자료가 없어요.',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 13,
+                          fontFamily: 'Raleway',
+                          fontWeight: FontWeight.w700,
+                          height: 1.5,
+                        ),
+                      )
+                    ]
+                  : lectureFiles.take(3).map((file) {
+                      return GestureDetector(
+                        onTap: () {
+                          print(
+                              'Lecture ${file['file_name'] ?? "N/A"} is clicked');
+                        },
+                        child: LectureExample(
+                          lectureName: file['file_name'] ?? 'Unknown',
+                          date: file['created_at'] ?? 'Unknown',
+                          onRename: () => showRenameDialog(
+                            context,
+                            lectureFiles.indexOf(file),
+                            lectureFiles,
+                            (id, name) => renameItem(id, name, 'lecture'),
+                            setState,
+                            '이름 바꾸기',
+                            'file_name',
                           ),
-                        )
-                      ]
-                    : lectureFolders.take(3) // 상위 3개의 폴더만 가져옴
-                        .map((folder) {
-                        return GestureDetector(
-                          onTap: () {
-                            print('Lecture ${folder['lecture_name']} is clicked');
+                          onDelete: () async {
+                            await deleteItem(file['id'], 'lecture');
+                            setState(() {
+                              lectureFiles.remove(file);
+                            });
                           },
-                          child: LectureExample(
-                            lectureName: folder['lecture_name'],
-                            date: folder['lecture_date'],
-                          ),
-                        );
-                      }).toList()
-              ),
+                          onMove: () async {
+                            await fetchOtherFolders(
+                                'lecture', file['folder_id']);
+                            showQuickMenu(
+                                context,
+                                file['id'],
+                                'lecture',
+                                file['folder_id'],
+                                moveItem,
+                                () => fetchOtherFolders(
+                                    'lecture', file['folder_id']),
+                                folders,
+                                setState);
+                          },
+                        ),
+                      );
+                    }).toList()),
               const SizedBox(height: 32),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -198,40 +352,66 @@ class _MainPageState extends State<MainPage> {
                 ],
               ),
               const SizedBox(height: 8),
-              GestureDetector(
-                onTap: () {
-                  print('certain lecture is clicked');
-                },
-                child: const LectureExample(
-                  lectureName: '정보통신공학',
-                  date: '2024/06/07',
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  print('certain lecture is clicked');
-                },
-                child: const LectureExample(
-                  lectureName: '컴퓨터알고리즘',
-                  date: '2024/06/10',
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  print('certain lecture is clicked');
-                },
-                child: const LectureExample(
-                  lectureName: '데이터베이스',
-                  date: '2024/06/15',
-                ),
-              ),
+              ...(colonFiles.isEmpty
+                  ? [
+                      const Text(
+                        '최근에 학습한 콜론 자료가 없어요.',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 13,
+                          fontFamily: 'Raleway',
+                          fontWeight: FontWeight.w700,
+                          height: 1.5,
+                        ),
+                      )
+                    ]
+                  : colonFiles.take(3).map((file) {
+                      return GestureDetector(
+                        onTap: () {
+                          print(
+                              'Colon ${file['file_name'] ?? "N/A"} is clicked');
+                        },
+                        child: LectureExample(
+                          lectureName: file['file_name'] ?? 'Unknown',
+                          date: file['created_at'] ?? 'Unknown',
+                          onRename: () => showRenameDialog(
+                            context,
+                            colonFiles.indexOf(file),
+                            colonFiles,
+                            (id, name) => renameItem(id, name, 'colon'),
+                            setState,
+                            '이름 바꾸기',
+                            'file_name',
+                          ),
+                          onDelete: () async {
+                            await deleteItem(file['id'], 'colon');
+                            setState(() {
+                              colonFiles.remove(file);
+                            });
+                          },
+                          onMove: () async {
+                            await fetchOtherFolders('colon', file['folder_id']);
+                            showQuickMenu(
+                                context,
+                                file['id'],
+                                'colon',
+                                file['folder_id'],
+                                moveItem,
+                                () => fetchOtherFolders(
+                                    'colon', file['folder_id']),
+                                folders,
+                                setState);
+                          },
+                        ),
+                      );
+                    }).toList()),
               const SizedBox(height: 32),
             ],
           ),
         ),
       ),
-      bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
+      bottomNavigationBar:
+          buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }
-
