@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '61popup_prepare.dart'; // Import the dialog file
+import 'components.dart';
 
 class LearningPreparation extends StatefulWidget {
   @override
@@ -11,41 +11,12 @@ class _LearningPreparationState extends State<LearningPreparation> {
   bool _isMaterialEmbedded = false; // 강의 자료가 임베드되었는지 여부를 관리하는 변수
   bool _isIconVisible = true; // 아이콘이 보이는지 여부를 관리하는 변수
 
-  void _showLearningDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return LearningDialog(this.context); // Pass the parent context
-      },
-    );
-  }
+  int _selectedIndex = 2; // 학습 시작 탭이 기본 선택되도록 설정
 
-  void _showConfirmationDialog(BuildContext context, String title, String message, VoidCallback onConfirm) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title),
-          content: Text(message),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('취소', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: Color(0xFFFFA17A))),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                onConfirm();
-              },
-              child: const Text('확인', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: Color(0xFF545454))),
-            ),
-          ],
-        );
-      },
-    );
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 
   Widget _buildRadioOption(String text, int value) {
@@ -156,48 +127,36 @@ class _LearningPreparationState extends State<LearningPreparation> {
             ),
           ),
           const SizedBox(height: 30),
-          _buildRadioOption('대체텍스트 생성', 0),
-          _buildRadioOption('실시간 자막 생성', 1),
+          Checkbox1(label: '대체텍스트 생성'),
+          Checkbox1(label: '실시간 자막 생성'),
           const SizedBox(height: 20),
           Center(
-            child: ElevatedButton.icon(
-              onPressed: () {
-                setState(() {
-                  if (_isMaterialEmbedded) {
-                    _showLearningDialog(); // 버튼 클릭 시 팝업 창 표시
-                  } else {
-                    _isMaterialEmbedded = true; // 버튼 클릭 시 상태 업데이트
-                    _isIconVisible = false; // 아이콘 숨기기
-                  }
-                });
-              },
-              icon: _isIconVisible
-                  ? ImageIcon(
-                      AssetImage('assets/Vector.png'),
-                      color: Colors.white,
-                    )
-                  : Container(), // 아이콘이 보이지 않도록 빈 컨테이너 사용
-              label: Text(
-                _isMaterialEmbedded ? '강의 자료 학습 시작하기' : '강의 자료를 임베드하세요',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontFamily: 'DM Sans',
-                  fontWeight: FontWeight.bold,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ClickButton(
+                  text: _isMaterialEmbedded ? '강의 자료 학습 시작하기' : '강의 자료를 임베드하세요',
+                  onPressed: () {
+                    setState(() {
+                      if (_isMaterialEmbedded) {
+                        showLearningDialog(context); // 버튼 클릭 시 팝업 창 표시
+                      } else {
+                        _isMaterialEmbedded = true; // 버튼 클릭 시 상태 업데이트
+                        _isIconVisible = false; // 아이콘 숨기기
+                      }
+                    });
+                  },
+                  width: MediaQuery.of(context).size.width * 0.5, // 원하는 너비 설정
+                  height: 50.0, // 원하는 높이 설정
+                  iconPath: _isIconVisible ? 'assets/Vector.png' : null,
                 ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0XFF36AE92),
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
+              ],
             ),
           ),
           _buildMaterialInfo(),
         ],
       ),
+      bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }
