@@ -12,8 +12,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import './api/api.dart';
 import 'model/user.dart';
 
-
-
 class FigmaToCodeApp9 extends StatelessWidget {
   const FigmaToCodeApp9({super.key});
 
@@ -25,8 +23,8 @@ class FigmaToCodeApp9 extends StatelessWidget {
       ),
       home: Scaffold(
         body: ListView(
-          padding: EdgeInsets.only(top: 0), // 여기서 top을 0으로 설정하여 상단 패딩을 제거
-          children: [
+          padding: const EdgeInsets.only(top: 0), // 여기서 top을 0으로 설정하여 상단 패딩을 제거
+          children: const [
             SigninPage(),
           ],
         ),
@@ -35,8 +33,9 @@ class FigmaToCodeApp9 extends StatelessWidget {
   }
 }
 
-
 class SigninPage extends StatefulWidget {
+  const SigninPage({super.key});
+
   @override
   _SigninPageState createState() => _SigninPageState();
 }
@@ -55,23 +54,23 @@ class _SigninPageState extends State<SigninPage> {
   }
 
   Future<User?> userLogin() async {
-    try{
+    try {
       var res = await http.post(
-          Uri.parse('${API.baseUrl}/api/login'),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: jsonEncode({
+        Uri.parse('${API.baseUrl}/api/login'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
           'user_email': emailController.text.trim(),
           'user_password': passwordController.text.trim(),
-          }),
+        }),
       );
 
-      if(res.statusCode == 200){
+      if (res.statusCode == 200) {
         var resLogin = jsonDecode(res.body);
         print(resLogin);
 
-        if(resLogin['success'] == true){
+        if (resLogin['success'] == true) {
           Fluttertoast.showToast(msg: 'login successfully');
           User userInfo = User.fromJson(resLogin['userData']);
 
@@ -84,13 +83,12 @@ class _SigninPageState extends State<SigninPage> {
             passwordController.clear();
           });
           return userInfo;
-
-        }else{
+        } else {
           Fluttertoast.showToast(msg: 'Please check your email and password.');
           return null;
         }
       }
-    }catch(e){
+    } catch (e) {
       print(e.toString());
       Fluttertoast.showToast(msg: e.toString());
       return null;
@@ -111,7 +109,7 @@ class _SigninPageState extends State<SigninPage> {
           Column(
             children: [
               SizedBox(height: size.height * 0.17), // 높이를 화면 높이의 10%로 설정
-              Text(
+              const Text(
                 '로그인',
                 textAlign: TextAlign.center,
                 style: TextStyle(
@@ -122,7 +120,7 @@ class _SigninPageState extends State<SigninPage> {
                 ),
               ),
               SizedBox(height: size.height * 0.02),
-              Text(
+              const Text(
                 '로그인하고 오늘도\nCOMMA와 함께 힘차게 공부해요!',
                 textAlign: TextAlign.center,
                 style: TextStyle(
@@ -152,7 +150,10 @@ class _SigninPageState extends State<SigninPage> {
                 ),
               ),
               SizedBox(height: size.height * 0.020),
-              Checkbox1(label: '자동 로그인'),
+              Checkbox2(
+                label: '자동 로그인',
+                onChanged: (bool value) {},
+              ),
               SizedBox(height: size.height * 0.060),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: size.width * 0.05),
@@ -160,11 +161,12 @@ class _SigninPageState extends State<SigninPage> {
                   onTap: () async {
                     if (_formKey.currentState!.validate()) {
                       User? userInfo = await userLogin();
-                      if (userInfo != null){
+                      if (userInfo != null) {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => MainPage(userInfo: userInfo)),
+                              builder: (context) =>
+                                  MainPage(userInfo: userInfo)),
                         );
                       }
                     }
@@ -173,12 +175,12 @@ class _SigninPageState extends State<SigninPage> {
                     width: size.width * 0.9,
                     height: size.height * 0.065,
                     decoration: ShapeDecoration(
-                      color: Color.fromRGBO(54, 174, 146, 1.0),
+                      color: const Color.fromRGBO(54, 174, 146, 1.0),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: Row(
+                    child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
