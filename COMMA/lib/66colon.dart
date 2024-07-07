@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '60prepare.dart';
+import 'components.dart'; // ClickButton 임포트
 
 class ColonPage extends StatefulWidget {
   const ColonPage({super.key});
@@ -9,7 +10,7 @@ class ColonPage extends StatefulWidget {
 }
 
 class _ColonPageState extends State<ColonPage> {
-  // int _currentIndex = 2; // 학습 시작 탭이 기본 선택되도록 설정
+  int _currentIndex = 2; // 학습 시작 탭이 기본 선택되도록 설정
 
   @override
   Widget build(BuildContext context) {
@@ -89,24 +90,11 @@ class _ColonPageState extends State<ColonPage> {
             const SizedBox(height: 20), // 강의 자료 밑에 여유 공간 추가
             Row(
               children: [
-                ElevatedButton(
+                ClickButton(
+                  text: '콜론(:) 다운하기',
                   onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0XFF36AE92),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: const Text(
-                    '콜론(:) 다운하기',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontFamily: 'DM Sans',
-                    ),
-                  ),
+                  width: MediaQuery.of(context).size.width * 0.3, // 원하는 너비 설정
+                  height: 40.0, // 원하는 높이 설정
                 ),
               ],
             ),

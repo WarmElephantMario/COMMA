@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
-import '63record.dart'; // Import the record.dart file where RecordPage is defined
+import 'components.dart';
+import '63record.dart'; 
 
 class LectureStartPage extends StatefulWidget {
-  const LectureStartPage({super.key});
-
   @override
   _LectureStartPageState createState() => _LectureStartPageState();
 }
 
 class _LectureStartPageState extends State<LectureStartPage> {
-  // int _currentIndex = 2; // 학습 시작 탭이 기본 선택되도록 설정
+  int _selectedIndex = 2; 
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +28,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 15),
-            const Text(
+            Text(
               '오늘의 학습 시작하기',
               style: TextStyle(
                 color: Color(0xFF414141),
@@ -34,7 +39,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
               ),
             ),
             const SizedBox(height: 30),
-            const Text(
+            Text(
               '업로드 한 강의 자료의 AI 학습이 완료되었어요!\n학습을 시작하려면 강의실에 입장하세요',
               style: TextStyle(
                 color: Color(0xFF575757),
@@ -44,14 +49,14 @@ class _LectureStartPageState extends State<LectureStartPage> {
                 height: 1.2,
               ),
             ),
-            const SizedBox(height: 30),
+            SizedBox(height: 30),
             Container(
               decoration: BoxDecoration(
                 color: Colors.teal.shade50,
                 borderRadius: BorderRadius.circular(8),
               ),
-              padding: const EdgeInsets.all(8),
-              child: const Row(
+              padding: EdgeInsets.all(8),
+              child: Row(
                 children: [
                   Icon(Icons.picture_as_pdf, color: Colors.red, size: 40),
                   SizedBox(width: 15),
@@ -83,29 +88,34 @@ class _LectureStartPageState extends State<LectureStartPage> {
                 ],
               ),
             ),
-            const SizedBox(height: 15),
-            Row(
-              children: [
-                Image.asset('assets/folder_search.png'),
-                const SizedBox(width: 8),
-                const Text(
-                  '폴더 분류 > 기본 폴더',
-                  style: TextStyle(
-                    color: Color(0xFF575757),
-                    fontSize: 12,
-                    fontFamily: 'DM Sans',
-                    fontWeight: FontWeight.w500,
-                    height: 1.2,
+            SizedBox(height: 15),
+            GestureDetector(
+              onTap: () {
+                showQuickMenu(context);
+              },
+              child: Row(
+                children: [
+                  Image.asset('assets/folder_search.png'),
+                  SizedBox(width: 8),
+                  Text(
+                    '폴더 분류 > 기본 폴더',
+                    style: TextStyle(
+                      color: Color(0xFF575757),
+                      fontSize: 12,
+                      fontFamily: 'DM Sans',
+                      fontWeight: FontWeight.w500,
+                      height: 1.2,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
             Row(
               children: [
                 Image.asset('assets/text.png'),
-                const SizedBox(width: 8),
-                const Text(
+                SizedBox(width: 8),
+                Text(
                   '새로운 노트',
                   style: TextStyle(
                     color: Color(0xFF575757),
@@ -117,39 +127,29 @@ class _LectureStartPageState extends State<LectureStartPage> {
                 ),
               ],
             ),
-            const SizedBox(height: 100),
+            SizedBox(height: 100),
             Center(
-              child: ElevatedButton(
+              child: ClickButton(
+                text: '강의실 입장하기',
                 onPressed: () {
-                  // Navigate to RecordPage
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const RecordPage()),
+                    MaterialPageRoute(builder: (context) => RecordPage()),
                   );
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0XFF36AE92),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 70, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12), // 모서리 설정
-                  ),
-                ),
-                child: const Text(
-                  '강의실 입장하기',
-                  style: TextStyle(
-                    color: Color(0XFFFFFFFF), // 글씨 색을 흰색으로 설정
-                    fontSize: 14,
-                    fontFamily: 'DM Sans',
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                width: MediaQuery.of(context).size.width * 0.5, // 원하는 너비 설정
+                height: 50.0, // 원하는 높이 설정
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
           ],
         ),
       ),
+      bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }
+
+
+
+

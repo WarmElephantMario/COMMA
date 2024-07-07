@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '7_verification2.dart';
+import 'components.dart';
 
 // class FigmaToCodeApp extends StatelessWidget {
 //   const FigmaToCodeApp({super.key});
@@ -15,54 +16,6 @@ import '7_verification2.dart';
 //   }
 // }
 
-class ClickButton extends StatelessWidget {
-  final String text;
-  final VoidCallback onPressed;
-
-  const ClickButton({Key? key, required this.text, required this.onPressed}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: size.width * 0.05),
-      child: GestureDetector(
-        onTap: onPressed,
-        child: Container(
-          width: size.width * 0.9,
-          height: size.height * 0.065,
-          decoration: ShapeDecoration(
-            color: Color.fromRGBO(54, 174, 146, 1.0),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                text,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontFamily: 'DM Sans',
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              SizedBox(width: 8),
-              Icon(
-                Icons.arrow_forward,
-                color: Colors.white,
-                size: 18,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 class Verification_screen extends StatelessWidget {
   @override
