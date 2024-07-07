@@ -62,7 +62,8 @@ class _MyPageScreenState extends State<MyPageScreen> {
             showConfirmationDialog(
               context,
               '로그아웃',
-              '정말 로그아웃 하시겠습니까?',
+              '로그아웃 하시겠어요?',
+              
               () {
                 // TODO: 로그아웃처리 후 처음시작화면으로 이동
               },
@@ -72,7 +73,8 @@ class _MyPageScreenState extends State<MyPageScreen> {
             showConfirmationDialog(
               context,
               '회원탈퇴',
-              '정말 회원탈퇴 하시겠습니까?',
+              '회원탈퇴 하시겠어요?',
+              
               () {
                 // TODO: 회원탈퇴처리 후 처음시작화면으로 이동
               },

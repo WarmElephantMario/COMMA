@@ -169,13 +169,12 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
                         folders,
                         _renameFolder,
                         setState,
-                        "폴더 이름 바꾸기", // 다이얼로그 제목
-                        "폴더 이름", // 텍스트 필드 힌트 텍스트
+                        "폴더 이름 바꾸기", // 다이얼로그 제목 
                         "folder_name", // 변경할 항목 타입
                       ),
                       onDelete: () => showConfirmationDialog(
                         context,
-                        "정말 폴더를 삭제하시겠습니까?", // 다이얼로그 제목
+                        "정말로 폴더 '${colonFolders[index]['name']}'을(를) 삭제하시겠습니까?", // 다이얼로그 제목
                         "폴더를 삭제하면 다시 복구할 수 없습니다.", // 다이얼로그 내용
                         () async {
                           await _deleteFolder(colonFolders[index]['id']);
@@ -196,4 +195,3 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
     );
   }
 }
-
