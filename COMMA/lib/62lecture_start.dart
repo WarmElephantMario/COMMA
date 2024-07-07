@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'components.dart';
-import '63record.dart'; 
+import '63record.dart';
 
 class LectureStartPage extends StatefulWidget {
+  const LectureStartPage({super.key});
+
   @override
   _LectureStartPageState createState() => _LectureStartPageState();
 }
 
 class _LectureStartPageState extends State<LectureStartPage> {
-  int _selectedIndex = 2; 
+  int _selectedIndex = 2;
 
   void _onItemTapped(int index) {
     setState(() {
@@ -28,7 +30,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 15),
-            Text(
+            const Text(
               '오늘의 학습 시작하기',
               style: TextStyle(
                 color: Color(0xFF414141),
@@ -39,7 +41,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
               ),
             ),
             const SizedBox(height: 30),
-            Text(
+            const Text(
               '업로드 한 강의 자료의 AI 학습이 완료되었어요!\n학습을 시작하려면 강의실에 입장하세요',
               style: TextStyle(
                 color: Color(0xFF575757),
@@ -49,14 +51,14 @@ class _LectureStartPageState extends State<LectureStartPage> {
                 height: 1.2,
               ),
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             Container(
               decoration: BoxDecoration(
                 color: Colors.teal.shade50,
                 borderRadius: BorderRadius.circular(8),
               ),
-              padding: EdgeInsets.all(8),
-              child: Row(
+              padding: const EdgeInsets.all(8),
+              child: const Row(
                 children: [
                   Icon(Icons.picture_as_pdf, color: Colors.red, size: 40),
                   SizedBox(width: 15),
@@ -88,16 +90,16 @@ class _LectureStartPageState extends State<LectureStartPage> {
                 ],
               ),
             ),
-            SizedBox(height: 15),
+            const SizedBox(height: 15),
             GestureDetector(
               onTap: () {
-                showQuickMenu(context);
+                // showQuickMenu(context);
               },
               child: Row(
                 children: [
                   Image.asset('assets/folder_search.png'),
-                  SizedBox(width: 8),
-                  Text(
+                  const SizedBox(width: 8),
+                  const Text(
                     '폴더 분류 > 기본 폴더',
                     style: TextStyle(
                       color: Color(0xFF575757),
@@ -110,12 +112,12 @@ class _LectureStartPageState extends State<LectureStartPage> {
                 ],
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Row(
               children: [
                 Image.asset('assets/text.png'),
-                SizedBox(width: 8),
-                Text(
+                const SizedBox(width: 8),
+                const Text(
                   '새로운 노트',
                   style: TextStyle(
                     color: Color(0xFF575757),
@@ -127,29 +129,26 @@ class _LectureStartPageState extends State<LectureStartPage> {
                 ),
               ],
             ),
-            SizedBox(height: 100),
+            const SizedBox(height: 100),
             Center(
               child: ClickButton(
                 text: '강의실 입장하기',
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => RecordPage()),
+                    MaterialPageRoute(builder: (context) => const RecordPage()),
                   );
                 },
                 width: MediaQuery.of(context).size.width * 0.5, // 원하는 너비 설정
                 height: 50.0, // 원하는 높이 설정
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
           ],
         ),
       ),
-      bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
+      bottomNavigationBar:
+          buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }
-
-
-
-
