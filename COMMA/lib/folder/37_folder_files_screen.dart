@@ -116,11 +116,8 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
                       _renameFile,
                       setState,
                       "파일 이름 바꾸기", // 다이얼로그 제목
-                      "파일 이름", // 텍스트 필드 힌트 텍스트
                       "file_name" // 변경할 항목 타입
                     ),
-
-
                     onDelete: () => showConfirmationDialog(
                       context,
                       "정말 파일을 삭제하시겠습니까?",
