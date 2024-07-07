@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import '64popup_record.dart';
-import '65popup_colon.dart';
+import 'components.dart';
 import '62lecture_start.dart';
 
 enum RecordingState { initial, recording, recorded }
@@ -13,8 +12,14 @@ class RecordPage extends StatefulWidget {
 }
 
 class _RecordPageState extends State<RecordPage> {
-  // int _currentIndex = 2; // 학습 시작 탭이 기본 선택되도록 설정
   RecordingState _recordingState = RecordingState.initial; // 녹음 상태를 나타내는 변수
+  int _selectedIndex = 2; // 학습 시작 탭이 기본 선택되도록 설정
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   void _stopRecording() {
     setState(() {
@@ -39,13 +44,18 @@ class _RecordPageState extends State<RecordPage> {
                 TextButton(
                   onPressed: () {
                     if (_recordingState == RecordingState.recording) {
-                      showStopRecordingDialog(
-                          context, _stopRecording); // 팝업 창 표시
+                      showConfirmationDialog(
+                        context,
+                        "정말 녹음을 종료하시겠습니까?", // 다이얼로그 제목
+                        "녹음을 종료하면 다시 시작할 수 없습니다.", // 다이얼로그 내용
+                        () {
+                          _stopRecording(); // 녹음을 종료상태
+                        },
+                      );
                     } else {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(
-                            builder: (context) => const LectureStartPage()),
+                        MaterialPageRoute(builder: (context) => LectureStartPage()),
                       );
                     }
                   },
@@ -92,8 +102,7 @@ class _RecordPageState extends State<RecordPage> {
                 fontFamily: 'DM Sans',
               ),
             ),
-            if (_recordingState ==
-                RecordingState.recorded) // 녹음 종료됨일 때 날짜와 시간 표시
+            if (_recordingState == RecordingState.recorded) // 녹음 종료됨일 때 날짜와 시간 표시
               const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -112,56 +121,36 @@ class _RecordPageState extends State<RecordPage> {
             Row(
               children: [
                 if (_recordingState == RecordingState.initial)
-                  ElevatedButton.icon(
+                  ClickButton(
+                    text: '녹음',
                     onPressed: () {
                       setState(() {
                         _recordingState = RecordingState.recording; // 녹음 상태 변경
                       });
                     },
-                    icon: const Icon(Icons.mic, color: Colors.white),
-                    label: const Text(
-                      '녹음',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontFamily: 'DM Sans',
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0XFF36AE92),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
+                    width: MediaQuery.of(context).size.width * 0.25, // 원하는 너비 설정
+                    height: 40.0, // 원하는 높이 설정
+                    iconData: Icons.mic,
                   )
                 else if (_recordingState == RecordingState.recording)
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ElevatedButton.icon(
+                      ClickButton(
+                        text: '녹음종료',
                         onPressed: () {
-                          showStopRecordingDialog(
-                              context, _stopRecording); // 팝업 창 표시
+                          showConfirmationDialog(
+                            context,
+                            "정말 녹음을 종료하시겠습니까?", // 다이얼로그 제목
+                            "녹음을 종료하면 다시 시작할 수 없습니다.", // 다이얼로그 내용
+                            () {
+                              _stopRecording(); // 녹음을 종료하는 함수 호출
+                            },
+                          );
                         },
-                        icon: const Icon(Icons.mic, color: Colors.white),
-                        label: const Text(
-                          '녹음종료',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontFamily: 'DM Sans',
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0XFF36AE92),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
+                        width: MediaQuery.of(context).size.width * 0.3, // 원하는 너비 설정
+                        height: 40.0, // 원하는 높이 설정
+                        iconData: Icons.mic,
                       ),
                       const SizedBox(width: 10), // 버튼과 텍스트 사이의 간격 추가
                       const Column(
@@ -170,8 +159,7 @@ class _RecordPageState extends State<RecordPage> {
                           SizedBox(height: 10), // 텍스트를 아래로 내리는 간격
                           Row(
                             children: [
-                              Icon(Icons.fiber_manual_record,
-                                  color: Color(0xFFFFA17A)),
+                              Icon(Icons.fiber_manual_record, color: Color(0xFFFFA17A)),
                               SizedBox(width: 4), // 아이콘과 텍스트 사이의 간격 추가
                               Text(
                                 '녹음중',
@@ -190,51 +178,25 @@ class _RecordPageState extends State<RecordPage> {
                 else if (_recordingState == RecordingState.recorded)
                   Row(
                     children: [
-                      ElevatedButton.icon(
+                      ClickButton(
+                        text: '녹음종료됨',
                         onPressed: () {
-                          setState(() {
-                            // 녹음 종료 버튼 눌렀을때 처리할 로직
-                          });
+                          // 녹음 종료 버튼 눌렀을때 처리할 로직
                         },
-                        icon: const Icon(Icons.mic_off, color: Colors.white),
-                        label: const Text(
-                          '녹음종료됨',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontFamily: 'DM Sans',
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF9FACBD),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
+                        width: MediaQuery.of(context).size.width * 0.3, // 원하는 너비 설정
+                        height: 40.0, // 원하는 높이 설정
+                        iconData: Icons.mic_off,
+                        iconColor: Colors.white,
+                        backgroundColor: const Color(0xFF9FACBD), // 배경색 설정
                       ),
-                      const SizedBox(width: 10),
-                      ElevatedButton(
+                      const SizedBox(width: 2), // 두 버튼 사이의 간격을 줄임
+                      ClickButton(
+                        text: '콜론(:) 생성하기',
                         onPressed: () {
                           showColonCreatedDialog(context); // 콜론 생성하기 버튼 기능 추가
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0XFF36AE92),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 15),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child: const Text(
-                          '콜론(:) 생성하기',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontFamily: 'DM Sans',
-                          ),
-                        ),
+                        width: MediaQuery.of(context).size.width * 0.3, // 원하는 너비 설정
+                        height: 40.0, // 원하는 높이 설정
                       ),
                     ],
                   ),
@@ -263,6 +225,7 @@ class _RecordPageState extends State<RecordPage> {
           ],
         ),
       ),
+      bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }

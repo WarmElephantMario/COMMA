@@ -1,10 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_plugin/components.dart'; 
 import '40_change_password_page.dart';
 
-class ConfirmPasswordPage extends StatelessWidget {
-  final TextEditingController _passwordController = TextEditingController();
+class ConfirmPasswordPage extends StatefulWidget {
+  const ConfirmPasswordPage({super.key});
 
-  ConfirmPasswordPage({super.key});
+  @override
+  _ConfirmPasswordPageState createState() => _ConfirmPasswordPageState();
+}
+
+class _ConfirmPasswordPageState extends State<ConfirmPasswordPage> {
+  final TextEditingController _passwordController = TextEditingController();
+  int _selectedIndex = 3;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +59,8 @@ class ConfirmPasswordPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 50),
-              TextButton(
+              ClickButton(
+                text: '확인',
                 onPressed: () {
                   // TODO : 비밀번호 확인 로직 구현
                   // 비밀번호가 일치할 시에만 변경 페이지로 이동
@@ -56,22 +70,15 @@ class ConfirmPasswordPage extends StatelessWidget {
                         builder: (context) => ChangePasswordPage()),
                   );
                 },
-                style: TextButton.styleFrom(
-                  maximumSize: const Size(240, 55),
-                  minimumSize: const Size(240, 55),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                  backgroundColor: const Color(0xFF167F71),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                  textStyle: const TextStyle(fontSize: 18),
-                ),
-                child: const Text('확인', style: TextStyle(color: Colors.white)),
+                width: MediaQuery.of(context).size.width * 0.5, // 원하는 너비 설정
+                height: 50.0, // 원하는 높이 설정
+            
               ),
             ],
           ),
         ),
       ),
+      bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }

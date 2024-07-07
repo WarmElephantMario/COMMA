@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import '../35_rename_delete_popup.dart';
-import 'package:intl/intl.dart'; // 이 라인을 추가합니다.
+import 'package:flutter_plugin/components.dart';
+import 'package:flutter_plugin/30_folder_screen.dart';
+import 'package:intl/intl.dart';
+
+
 
 class FolderFilesScreen extends StatefulWidget {
   final String folderName;
@@ -22,6 +25,7 @@ class FolderFilesScreen extends StatefulWidget {
 
 class _FolderFilesScreenState extends State<FolderFilesScreen> {
   List<Map<String, dynamic>> files = [];
+  int _selectedIndex = 0;
 
   @override
   void initState() {
@@ -50,139 +54,33 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
     }
   }
 
+  //showRenameDialog 때문에 임의로 만듦 
+  //수정필요
+  Future<void> _renameFile(String folderType, int id, String newName) async {
+    final url = Uri.parse(
+        'http://localhost:3000/api/${folderType == 'lecture' ? 'lecture' : 'colon'}-folders/$id');
+    try {
+      final response = await http.put(url,
+          body: jsonEncode({'folder_name': newName}),
+          headers: {'Content-Type': 'application/json'});
+      if (response.statusCode != 200) {
+        throw Exception('Failed to rename folder');
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   String formatDateTime(String dateTime) {
     if (dateTime.isEmpty) return 'Unknown';
     final DateTime parsedDateTime = DateTime.parse(dateTime);
     return DateFormat('yyyy/MM/dd HH:mm').format(parsedDateTime);
-  }
-
-  void _renameFile(BuildContext context, int index) {
-    final TextEditingController fileNameController =
-        TextEditingController(text: files[index]['file_name']);
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text(
-            '파일 이름 바꾸기',
-            style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF545454)),
-          ),
-          content: TextField(
-            controller: fileNameController,
-            decoration: const InputDecoration(hintText: '파일 이름'),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('취소',
-                  style: TextStyle(
-                      color: Color(0xFFFFA17A), fontWeight: FontWeight.w700)),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text(
-                '저장',
-                style: TextStyle(
-                    color: Color(0xFF545454), fontWeight: FontWeight.w700),
-              ),
-              onPressed: () {
-                setState(() {
-                  files[index]['file_name'] = fileNameController.text;
-                });
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _deleteFile(BuildContext context, int index) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('파일 삭제하기'),
-          content: const Text('정말로 삭제하시겠습니까?'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('취소', style: TextStyle(color: Colors.red)),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('삭제'),
-              onPressed: () {
-                setState(() {
-                  files.removeAt(index);
-                });
-                Navigator.of(context).pop();
-                _showDeletionConfirmation(context);
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showDeletionConfirmation(BuildContext context) {
-    final overlay = Overlay.of(context);
-    OverlayEntry? overlayEntry;
-
-    overlayEntry = OverlayEntry(
-      builder: (context) => Positioned(
-        top: 40.0,
-        left: 80,
-        right: 80,
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8.0),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 10.0,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: ListTile(
-                title: const Text(
-                  '삭제되었습니다.',
-                  style: TextStyle(
-                      color: Color(0xFF545454), fontWeight: FontWeight.w800),
-                ),
-                trailing: TextButton(
-                  child: const Text(
-                    '확인',
-                    style: TextStyle(
-                        color: Color(0xFFFFA17A), fontWeight: FontWeight.w700),
-                  ),
-                  onPressed: () {
-                    if (overlayEntry != null) {
-                      overlayEntry.remove();
-                    }
-                  },
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    overlay.insert(overlayEntry);
   }
 
   @override
@@ -211,8 +109,29 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
                   Map<String, dynamic> file = entry.value;
                   return FileListItem(
                     file: file,
-                    onRename: () => _renameFile(context, index),
-                    onDelete: () => _deleteFile(context, index),
+                    onRename: () => showRenameDialog(
+                      context,
+                      index,
+                      files,
+                      _renameFile,
+                      setState,
+                      "파일 이름 바꾸기", // 다이얼로그 제목
+                      "파일 이름", // 텍스트 필드 힌트 텍스트
+                      "file_name" // 변경할 항목 타입
+                    ),
+
+
+                    onDelete: () => showConfirmationDialog(
+                      context,
+                      "정말 파일을 삭제하시겠습니까?",
+                      "파일을 삭제하면 다시 복구할 수 없습니다.",
+                      () {
+                        // 파일 삭제 로직 추가
+                        setState(() {
+                          files.removeAt(index);
+                        });
+                      }
+                    ),
                   );
                 }).toList(),
               ),
@@ -220,6 +139,7 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
           );
         },
       ),
+      bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }
