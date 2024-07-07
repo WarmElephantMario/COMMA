@@ -207,7 +207,7 @@ class _FolderScreenState extends State<FolderScreen> {
                     onRename: (index) => showRenameDialog(
                       context,
                       index,
-                      lectureFolders,
+                      colonFolders,
                       _renameFolder,
                       setState,
                       "폴더 이름 바꾸기", // 다이얼로그 제목
