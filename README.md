@@ -1,24 +1,60 @@
 # 수정 및 변경 사항
 
-### 1. component.dart 수정
-- component.dart의 Checkbox1 → Checkbox2 수정<br>
-- (Checkbox1 위젯 쓰인 9_signi.dart 도 일부 수정)<br><br>
+### 1. 수정
+- 메인페이지, 폴더페이지를 유저랑 연결시킴(로그인한 유저의 폴더와 파일만 뜸)<br>
+- provider 패키지 새로 설치(전역 상태로 사용자 정보를 관리)<br>
+- 회원가입하면 자동으로 강의폴더에는 '기본 폴더', 콜론폴더에는 '기본 폴더 (:)' 가 생성되도록 수정<br>
+- 콜론폴더 새로 추가할 때 폴더명 뒤에 (:) 붙도록 수정<br><br>
 
-### 2. 메인페이지, 검색페이지, 서버 수정
-- 16_homepage_move.dart 수정 (MainPage)<br>
-- 12_hompage_search.dart 수정 (MainToSearch)<br>
-- index.js 수정 (서버)<br><br>
+**메인페이지**<br>
+- 파일 전체보기 완료(디자인은 수정 필요)<br>
+- 파일 생성시간 표시가 데이터베이스랑 똑같도록 변경<br><br>
 
-### 3. 주석처리
-- 11_homepage_recent.dart 주석 처리<br>
-- 14_homepage_search_result.dart 주석처리<br>
-- 15_homepage_hamburger.dart 주석처리<br><br>
+**바뀐 데이터베이스 테이블 구조**<br>
+```sql
+CREATE TABLE User_Table(
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_email VARCHAR(255),
+    user_phone VARCHAR(255),
+    user_password VARCHAR(32) NOT NULL
+);
 
-### 4. 수정 및 완료한 기능
-- 삭제하기, 이름바꾸기, 파일 검색 완료
-- 이동하기 : 이동하기 창은 뜨고 그 안에 체크박스 안 뜸 (콘솔에 Fetched folders : 선택한 파일이 속한 폴더 제외한 다른 폴더 목록 은 잘 뜸)
-- 검색에 '검색' 버튼 추가<br>
+CREATE TABLE LectureFolders (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    folder_name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    user_id INT,
+    FOREIGN KEY (user_id) REFERENCES User_Table(user_id) ON DELETE CASCADE
+);
 
-### 5. TODO
-- 전체보기 기능 구현 필요
-- 유저 및 폴더/파일 연결<br>
+CREATE TABLE ColonFolders (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    folder_name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    user_id INT,
+    FOREIGN KEY (user_id) REFERENCES User_Table(user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE LectureFiles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    folder_id INT,
+    file_name VARCHAR(255),
+    file_url VARCHAR(255),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (folder_id) REFERENCES LectureFolders(id) ON DELETE CASCADE
+);
+
+CREATE TABLE ColonFiles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    folder_id INT,
+    file_name VARCHAR(255),
+    file_url VARCHAR(255),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (folder_id) REFERENCES ColonFolders(id) ON DELETE CASCADE
+);
+```
+
+### 2. TODO
+- 유저 정보랑 마이페이지 연결 필요<br>
+- 디자인 수정 필요(현재 실행시켰을 때 내 노트북에서는 네비게이션바는 검정색으로, 기본 글자는 흐린 회색으로 보임, 새로 만든 페이지도 디자인 수정 필요)<br>
+- 로그인 후 뒤로가기 버튼을 누르면 다시 로그인창으로 돌아가버림 해결 필요할 듯

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import '5_Signup.dart';
 
-
 class Onboarding3 extends StatelessWidget {
+  const Onboarding3({super.key});
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -16,7 +17,7 @@ class Onboarding3 extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(height: size.height * 0.20),
-          Text(
+          const Text(
             'AI가 만드는 대체 학습 자료 콜론(:)',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -27,7 +28,7 @@ class Onboarding3 extends StatelessWidget {
             ),
           ),
           SizedBox(height: size.height * 0.02),
-          Text(
+          const Text(
             '수업 후에도 편하게 복습할 수 있도록,\nAI가 학습자 맞춤형 대체 학습 자료를 만들어 드려요.',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -38,7 +39,7 @@ class Onboarding3 extends StatelessWidget {
             ),
           ),
           SizedBox(height: size.height * 0.08),
-          Container(
+          SizedBox(
             width: size.width,
             height: size.height * 0.3,
             child: Image.asset('assets/onboarding_3.png'),
