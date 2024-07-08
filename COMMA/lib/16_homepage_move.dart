@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_plugin/12_homepage_search.dart';
-import 'components.dart'; // component.dart 파일을 불러옵니다.
+import 'components.dart'; 
 import '14_homepage_search_result.dart';
 import 'api/api.dart';
 import 'model/user.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '63record.dart';
+import '66colon.dart';
 
 class MainPage extends StatefulWidget {
   final User userInfo;
 
-  const MainPage({super.key, required this.userInfo});
+
+  const MainPage({
+    super.key, 
+    required this.userInfo,
+    
+    });
 
   @override
   _MainPageState createState() => _MainPageState();
@@ -171,6 +178,7 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -274,6 +282,20 @@ class _MainPageState extends State<MainPage> {
                         onTap: () {
                           print(
                               'Lecture ${file['file_name'] ?? "N/A"} is clicked');
+                              print('File details: $file');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => RecordPage(
+                                selectedFolderId: file['folder_id'].toString(),
+                                noteName: file['file_name'] ?? 'Unknown',
+                                fileUrl: file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
+                                folderName: file['folder_name'],
+                                recordingState: RecordingState.recorded,
+                                lectureName: file['lecture_name'] ?? 'Unknown Lecture',
+                              ),
+                            ),
+                          );
                         },
                         child: LectureExample(
                           lectureName: file['file_name'] ?? 'Unknown',
@@ -368,8 +390,21 @@ class _MainPageState extends State<MainPage> {
                   : colonFiles.take(3).map((file) {
                       return GestureDetector(
                         onTap: () {
-                          print(
-                              'Colon ${file['file_name'] ?? "N/A"} is clicked');
+                          print('Colon ${file['file_name'] ?? "N/A"} is clicked');
+                          print('Colon file clicked: ${file['file_name']}');
+                          print('File details: $file');
+
+                               Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ColonPage(
+                                    folderName: file['folder_name'],
+                                    noteName: file['file_name'],
+                                    lectureName: file['lecture_name'],
+                                    createdAt: file['created_at'].toString(),
+                                  ),
+                                ),
+                              );
                         },
                         child: LectureExample(
                           lectureName: file['file_name'] ?? 'Unknown',
@@ -410,8 +445,10 @@ class _MainPageState extends State<MainPage> {
           ),
         ),
       ),
-      bottomNavigationBar:
-          buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
+      bottomNavigationBar:buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }
+
+
+

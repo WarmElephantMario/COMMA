@@ -1,22 +1,51 @@
 import 'package:flutter/material.dart';
 import '60prepare.dart';
-import 'components.dart'; // ClickButton 임포트
+import 'components.dart'; 
+import 'package:intl/intl.dart';
 
 class ColonPage extends StatefulWidget {
-  const ColonPage({super.key});
+  final String folderName; // 폴더 이름 추가
+  final String noteName; // 노트 이름 추가
+  final String lectureName; // 강의 자료 이름 추가
+  final dynamic createdAt; // 생성 날짜 및 시간 추가
+
+  const ColonPage({
+    super.key, 
+    required this.folderName, 
+    required this.noteName, 
+    required this.lectureName, 
+    required this.createdAt});
 
   @override
   _ColonPageState createState() => _ColonPageState();
 }
 
 class _ColonPageState extends State<ColonPage> {
-  final int _currentIndex = 2; // 학습 시작 탭이 기본 선택되도록 설정
+
+  int _selectedIndex = 2; // 학습 시작 탭이 기본 선택되도록 설정
+  //late String formattedDate;
+  
+  void initState() {
+    super.initState();
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+  String _formatDate(dynamic createdAt) {
+      DateTime dateTime = DateTime.parse(createdAt);
+      return DateFormat('yyyy/MM/dd hh:mm a').format(dateTime);
+    }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white, 
       appBar: AppBar(
-        toolbarHeight: 0, // Hide the AppBar
+        toolbarHeight: 0, 
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -44,13 +73,13 @@ class _ColonPageState extends State<ColonPage> {
                 ),
               ],
             ),
-            const Row(
+            Row(
               children: [
-                ImageIcon(AssetImage('assets/folder_search.png')),
-                SizedBox(width: 8),
+                const ImageIcon(AssetImage('assets/folder_search.png')),
+                const SizedBox(width: 8),
                 Text(
-                  '폴더 분류 > 기본 폴더',
-                  style: TextStyle(
+                  '폴더 분류 > ${widget.folderName}', // 폴더 이름 사용
+                  style: const TextStyle(
                     color: Color(0xFF575757),
                     fontSize: 12,
                     fontFamily: 'DM Sans',
@@ -59,9 +88,9 @@ class _ColonPageState extends State<ColonPage> {
               ],
             ),
             const SizedBox(height: 5),
-            const Text(
-              '새로운 노트',
-              style: TextStyle(
+            Text(
+              widget.noteName, // 노트 이름 사용
+              style: const TextStyle(
                 color: Color(0xFF414141),
                 fontSize: 20,
                 fontFamily: 'DM Sans',
@@ -69,8 +98,8 @@ class _ColonPageState extends State<ColonPage> {
               ),
             ),
             const SizedBox(height: 5),
-            const Text(
-              '강의 자료: Ch01. What is Algorithm?',
+            Text(
+              '강의 자료 : ${widget.lectureName}',
               style: TextStyle(
                 color: Color(0xFF575757),
                 fontSize: 12,
@@ -78,23 +107,22 @@ class _ColonPageState extends State<ColonPage> {
               ),
             ),
             const SizedBox(height: 5), // 추가된 날짜와 시간을 위한 공간
-            const Text(
-              '2024/06/07 오후 2:30',
-              style: TextStyle(
+            Text(
+              _formatDate(widget.createdAt), // 데이터베이스에서 가져온 생성 날짜 및 시간 사용
+              style: const TextStyle(
                 color: Color(0xFF575757),
                 fontSize: 12,
                 fontFamily: 'DM Sans',
               ),
             ),
-
             const SizedBox(height: 20), // 강의 자료 밑에 여유 공간 추가
             Row(
               children: [
                 ClickButton(
                   text: '콜론(:) 다운하기',
                   onPressed: () {},
-                  width: MediaQuery.of(context).size.width * 0.3, // 원하는 너비 설정
-                  height: 40.0, // 원하는 높이 설정
+                  width: MediaQuery.of(context).size.width * 0.3, 
+                  height: 40.0, 
                 ),
               ],
             ),
@@ -111,6 +139,7 @@ class _ColonPageState extends State<ColonPage> {
           ],
         ),
       ),
+      bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }

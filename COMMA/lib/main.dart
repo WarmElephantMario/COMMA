@@ -1,28 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_plugin/11_homepage_recent.dart';
-import 'package:flutter_plugin/16_homepage_move.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:file_picker/file_picker.dart';
+import 'dart:io' show Platform, File;
 import 'components.dart';
-import 'model/user.dart';
-import '30_folder_screen.dart';
-import '33_mypage_screen.dart';
 import '60prepare.dart';
-import '10_homepage_no_recent.dart';
-import '1_Splash_green.dart';
-import '5_Signup.dart';
+import 'firebase_options.dart';
 
-void main() => runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+    print("Initializing MaterialApp with theme: ${ThemeData(
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      )}");
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: SplashScreen(),
+      home: LearningPreparation()
     );
   }
 }
