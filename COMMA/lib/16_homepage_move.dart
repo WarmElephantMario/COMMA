@@ -283,19 +283,19 @@ class _MainPageState extends State<MainPage> {
                           print(
                               'Lecture ${file['file_name'] ?? "N/A"} is clicked');
                               print('File details: $file');
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => RecordPage(
-                                selectedFolderId: file['folder_id'].toString(),
-                                noteName: file['file_name'] ?? 'Unknown',
-                                fileUrl: file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
-                                folderName: file['folder_name'],
-                                recordingState: RecordingState.recorded,
-                                lectureName: file['lecture_name'] ?? 'Unknown Lecture',
-                              ),
-                            ),
-                          );
+                          // Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //     builder: (context) => RecordPage(
+                          //       selectedFolderId: file['folder_id'].toString(),
+                          //       noteName: file['file_name'] ?? 'Unknown',
+                          //       fileUrl: file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
+                          //       folderName: file['folder_name'],
+                          //       recordingState: RecordingState.recorded,
+                          //       lectureName: file['lecture_name'] ?? 'Unknown Lecture',
+                          //     ),
+                          //   ),
+                          // );
                         },
                         child: LectureExample(
                           lectureName: file['file_name'] ?? 'Unknown',

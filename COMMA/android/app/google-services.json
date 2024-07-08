@@ -1,21 +1,40 @@
 {
   "project_info": {
-    "project_number": "409878736117",
-    "project_id": "comma-188ee",
-    "storage_bucket": "comma-188ee.appspot.com"
+    "project_number": "559384641747",
+    "project_id": "comma-9018a",
+    "storage_bucket": "comma-9018a.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:409878736117:android:d0d9d1de311af53cc6e9bc",
+        "mobilesdk_app_id": "1:559384641747:android:f89163da9a7b7b422bd426",
         "android_client_info": {
-          "package_name": "com.wem.comma"
+          "package_name": "com.comma.app"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCdxE8kQda5DBlqHB51AqZkJeynCSeti9I"
+          "current_key": "AIzaSyCJKoJP8f0BWFQ9zoVfCic_tchszB6Y_B4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:559384641747:android:bae996c6904e595c2bd426",
+        "android_client_info": {
+          "package_name": "com.comma.myapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJKoJP8f0BWFQ9zoVfCic_tchszB6Y_B4"
         }
       ],
       "services": {
