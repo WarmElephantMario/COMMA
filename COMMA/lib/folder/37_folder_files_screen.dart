@@ -180,10 +180,11 @@ class FileListItem extends StatelessWidget {
     required this.onDelete,
   });
 
-  String formatDateTime(String dateTime) {
+  String formatDateTimeToKorean(String dateTime) {
     if (dateTime.isEmpty) return 'Unknown';
-    final DateTime parsedDateTime = DateTime.parse(dateTime);
-    return DateFormat('yyyy/MM/dd HH:mm').format(parsedDateTime);
+    final DateTime utcDateTime = DateTime.parse(dateTime);
+    final DateTime koreanDateTime = utcDateTime.add(const Duration(hours: 9));
+    return DateFormat('yyyy/MM/dd HH:mm').format(koreanDateTime);
   }
 
   @override
@@ -228,7 +229,7 @@ class FileListItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                formatDateTime(file['created_at'] ?? ''),
+                formatDateTimeToKorean(file['created_at'] ?? ''),
                 style: const TextStyle(
                   fontSize: 12,
                   color: Color(0xFF6C7A89),
