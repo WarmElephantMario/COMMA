@@ -1,6 +1,6 @@
 # 수정 및 변경 사항
-<br>
-firebase 연동
+
+### firebase 연동
 - firebase 계정 : warmelephantmario@gmail.com<br>
 - 강의자료 업로드시 firebase storage의 uploads 파일에 저장<br>
 - $ firebase login<br>
