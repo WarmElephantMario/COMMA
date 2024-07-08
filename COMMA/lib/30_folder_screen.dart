@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'components.dart';  // components.dart 파일에서 정의한 위젯들 임포트
+import 'components.dart'; // components.dart 파일에서 정의한 위젯들 임포트
 import 'folder/37_folder_files_screen.dart';
 import 'folder/39_folder_section.dart';
 import 'folder/38_folder_list.dart';
 import '31_full_folder_list_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'model/user_provider.dart';
+import 'package:provider/provider.dart';
 
 class FolderScreen extends StatefulWidget {
   const FolderScreen({super.key});
@@ -33,50 +35,63 @@ class _FolderScreenState extends State<FolderScreen> {
   }
 
   Future<void> fetchFolders() async {
-    try {
-      final lectureResponse = await http
-          .get(Uri.parse('http://localhost:3000/api/lecture-folders'));
-      final colonResponse =
-          await http.get(Uri.parse('http://localhost:3000/api/colon-folders'));
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userId = userProvider.user?.user_id;
 
-      if (lectureResponse.statusCode == 200 &&
-          colonResponse.statusCode == 200) {
-        setState(() {
-          lectureFolders =
-              List<Map<String, dynamic>>.from(jsonDecode(lectureResponse.body));
-          colonFolders =
-              List<Map<String, dynamic>>.from(jsonDecode(colonResponse.body));
-        });
-      } else {
-        throw Exception('Failed to load folders');
+    if (userId != null) {
+      try {
+        final lectureResponse = await http.get(
+          Uri.parse(
+              'http://localhost:3000/api/lecture-folders?user_id=$userId'),
+        );
+        final colonResponse = await http.get(
+          Uri.parse('http://localhost:3000/api/colon-folders?user_id=$userId'),
+        );
+
+        if (lectureResponse.statusCode == 200 &&
+            colonResponse.statusCode == 200) {
+          setState(() {
+            lectureFolders = List<Map<String, dynamic>>.from(
+                jsonDecode(lectureResponse.body));
+            colonFolders =
+                List<Map<String, dynamic>>.from(jsonDecode(colonResponse.body));
+          });
+        } else {
+          throw Exception('Failed to load folders');
+        }
+      } catch (e) {
+        print(e);
+        // 오류 처리 로직 추가 가능
       }
-    } catch (e) {
-      print(e);
-      // 오류 처리 로직 추가 가능
     }
   }
 
   Future<void> _addFolder(String folderName, String folderType) async {
-    final url = Uri.parse(
-        'http://localhost:3000/api/${folderType == 'lecture' ? 'lecture' : 'colon'}-folders');
-    try {
-      final response = await http.post(url,
-          body: jsonEncode({'folder_name': folderName}),
-          headers: {'Content-Type': 'application/json'});
-      if (response.statusCode == 200) {
-        final newFolder = jsonDecode(response.body);
-        setState(() {
-          if (folderType == 'lecture') {
-            lectureFolders.add(newFolder);
-          } else {
-            colonFolders.add(newFolder);
-          }
-        });
-      } else {
-        throw Exception('Failed to add folder');
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userId = userProvider.user?.user_id;
+
+    if (userId != null) {
+      final url = Uri.parse(
+          'http://localhost:3000/api/${folderType == 'lecture' ? 'lecture' : 'colon'}-folders');
+      try {
+        final response = await http.post(url,
+            body: jsonEncode({'folder_name': folderName, 'user_id': userId}),
+            headers: {'Content-Type': 'application/json'});
+        if (response.statusCode == 200) {
+          final newFolder = jsonDecode(response.body);
+          setState(() {
+            if (folderType == 'lecture') {
+              lectureFolders.add(newFolder);
+            } else {
+              colonFolders.add(newFolder);
+            }
+          });
+        } else {
+          throw Exception('Failed to add folder');
+        }
+      } catch (e) {
+        print(e);
       }
-    } catch (e) {
-      print(e);
     }
   }
 
@@ -123,14 +138,14 @@ class _FolderScreenState extends State<FolderScreen> {
                   FolderSection(
                     sectionTitle: '강의폴더',
                     onAddPressed: () async {
-                      await showAddFolderDialog(context, _addFolder);
+                      await showAddFolderDialog(context,
+                          (folderName) => _addFolder(folderName, 'lecture'));
                     },
                     onViewAllPressed: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => FullFolderListScreen(
-                            folders: lectureFolders,
+                          builder: (context) => const FullFolderListScreen(
                             title: '강의폴더',
                           ),
                         ),
@@ -152,20 +167,21 @@ class _FolderScreenState extends State<FolderScreen> {
                       );
                     },
                     onRename: (index) => showRenameDialog(
-                      context,
-                      index,
-                      lectureFolders,
-                      _renameFolder,
-                      setState,
-                      "폴더 이름 바꾸기", // 다이얼로그 제목
-                      "folder_name" // 변경할 항목 타입
-                    ),
+                        context,
+                        index,
+                        lectureFolders,
+                        _renameFolder,
+                        setState,
+                        "폴더 이름 바꾸기", // 다이얼로그 제목
+                        "folder_name" // 변경할 항목 타입
+                        ),
                     onDelete: (index) => showConfirmationDialog(
                       context,
                       "정말로 폴더 '${lectureFolders[index]['folder_name']}'을(를) 삭제하시겠습니까?", // 다이얼로그 제목
                       "폴더를 삭제하면 다시 복구할 수 없습니다.", // 다이얼로그 내용
                       () async {
-                        await _deleteFolder('lecture', lectureFolders[index]['id']);
+                        await _deleteFolder(
+                            'lecture', lectureFolders[index]['id']);
                         setState(() {
                           lectureFolders.removeAt(index);
                         });
@@ -176,14 +192,14 @@ class _FolderScreenState extends State<FolderScreen> {
                   FolderSection(
                     sectionTitle: '콜론폴더',
                     onAddPressed: () async {
-                      await showAddFolderDialog(context, _addFolder);
+                      await showAddFolderDialog(context,
+                          (folderName) => _addFolder(folderName, 'colon'));
                     },
                     onViewAllPressed: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => FullFolderListScreen(
-                            folders: colonFolders,
+                          builder: (context) => const FullFolderListScreen(
                             title: '콜론폴더',
                           ),
                         ),
@@ -205,14 +221,14 @@ class _FolderScreenState extends State<FolderScreen> {
                       );
                     },
                     onRename: (index) => showRenameDialog(
-                      context,
-                      index,
-                      colonFolders,
-                      _renameFolder,
-                      setState,
-                      "폴더 이름 바꾸기", // 다이얼로그 제목
-                      "folder_name" // 변경할 항목 타입
-                    ),
+                        context,
+                        index,
+                        colonFolders,
+                        _renameFolder,
+                        setState,
+                        "폴더 이름 바꾸기", // 다이얼로그 제목
+                        "folder_name" // 변경할 항목 타입
+                        ),
                     onDelete: (index) => showConfirmationDialog(
                       context,
                       "정말로 폴더 '${colonFolders[index]['folder_name']}'을(를) 삭제하시겠습니까?", // 다이얼로그 제목
@@ -231,7 +247,8 @@ class _FolderScreenState extends State<FolderScreen> {
           );
         },
       ),
-      bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
+      bottomNavigationBar:
+          buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }

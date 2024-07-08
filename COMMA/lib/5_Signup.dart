@@ -3,14 +3,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_plugin/api/api.dart';
 import 'package:flutter_plugin/model/user.dart';
-import 'package:get/get.dart';
 import '6_verification.dart';
 import 'package:http/http.dart' as http;
 import 'package:fluttertoast/fluttertoast.dart';
 import '9_signin.dart';
 import 'components.dart';
-
-
 
 class FigmaToCodeApp5 extends StatelessWidget {
   const FigmaToCodeApp5({super.key});
@@ -23,8 +20,8 @@ class FigmaToCodeApp5 extends StatelessWidget {
       ),
       home: Scaffold(
         body: ListView(
-          padding: EdgeInsets.only(top: 0), // 여기서 top을 0으로 설정하여 상단 패딩을 제거
-          children: [
+          padding: const EdgeInsets.only(top: 0), // 여기서 top을 0으로 설정하여 상단 패딩을 제거
+          children: const [
             SignUpPage(),
           ],
         ),
@@ -34,6 +31,8 @@ class FigmaToCodeApp5 extends StatelessWidget {
 }
 
 class SignUpPage extends StatefulWidget {
+  const SignUpPage({super.key});
+
   @override
   _SignUpPageState createState() => _SignUpPageState();
 }
@@ -48,13 +47,11 @@ class _SignUpPageState extends State<SignUpPage> {
   Future<bool> checkUserPhone() async {
     try {
       var response = await http.post(
-          Uri.parse('${API.baseUrl}/api/validate_phone'),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        body: jsonEncode({
-          'user_phone': phoneController.text.trim()
-        }),
+        Uri.parse('${API.baseUrl}/api/validate_phone'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'user_phone': phoneController.text.trim()}),
       );
 
       print(response.statusCode);
@@ -122,7 +119,6 @@ class _SignUpPageState extends State<SignUpPage> {
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -136,7 +132,7 @@ class _SignUpPageState extends State<SignUpPage> {
           Column(
             children: [
               SizedBox(height: size.height * 0.17), // 높이를 화면 높이의 17%로 설정
-              Text(
+              const Text(
                 '계정 생성하기',
                 textAlign: TextAlign.center,
                 style: TextStyle(
@@ -147,7 +143,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
               ),
               SizedBox(height: size.height * 0.02),
-              Text(
+              const Text(
                 '계정 생성을 위해 필요한 정보를\n정확히 입력해 주세요.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
@@ -189,61 +185,63 @@ class _SignUpPageState extends State<SignUpPage> {
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: size.width * 0.05),
                 child: Container(
-                    width: size.width * 0.9,
-                    height: size.height * 0.065,
-                    decoration: ShapeDecoration(
-                      color: Color.fromRGBO(54, 174, 146, 1.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        GestureDetector(
-                          onTap: () async {
-                            if (_formKey.currentState!.validate()) {
-                              bool isPhoneValid = await checkUserPhone();
-                              if (isPhoneValid) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => Verification_screen()),
-                                );
-                              }else{
-                                print("인증 실패함");
-                              }
-                            }
-                          },
-                          child: Text(
-                            '인증코드 전송하기',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontFamily: 'DM Sans',
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        Icon(
-                          Icons.arrow_forward,
-                          color: Colors.white,
-                          size: 18,
-                        ),
-                      ],
+                  width: size.width * 0.9,
+                  height: size.height * 0.065,
+                  decoration: ShapeDecoration(
+                    color: const Color.fromRGBO(54, 174, 146, 1.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: () async {
+                          if (_formKey.currentState!.validate()) {
+                            bool isPhoneValid = await checkUserPhone();
+                            if (isPhoneValid) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const Verification_screen()),
+                              );
+                            } else {
+                              print("인증 실패함");
+                            }
+                          }
+                        },
+                        child: const Text(
+                          '인증코드 전송하기',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontFamily: 'DM Sans',
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Icon(
+                        Icons.arrow_forward,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                    ],
+                  ),
+                ),
               ),
 
-              SizedBox(
+              const SizedBox(
                 height: 120,
               ),
 
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
+                  const Text(
                     '이미 계정이 있으신가요?',
                     style: TextStyle(
                       color: Color(0xFF36AE92),
@@ -253,15 +251,16 @@ class _SignUpPageState extends State<SignUpPage> {
                       height: 0.11,
                     ),
                   ),
-                  SizedBox(width: 20),
+                  const SizedBox(width: 20),
                   GestureDetector(
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => FigmaToCodeApp9()),
+                        MaterialPageRoute(
+                            builder: (context) => const SigninPage()),
                       );
                     },
-                    child: Text(
+                    child: const Text(
                       '로그인',
                       style: TextStyle(
                         color: Colors.black,
@@ -272,11 +271,11 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                 ],
               ),
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
+                  const Text(
                     '비밀번호를 잊으셨나요?',
                     style: TextStyle(
                       color: Color(0xFF36AE92),
@@ -286,13 +285,13 @@ class _SignUpPageState extends State<SignUpPage> {
                       height: 0.11,
                     ),
                   ),
-                  SizedBox(width: 20),
+                  const SizedBox(width: 20),
                   GestureDetector(
                     onTap: () {
                       // 비밀번호 찾기 화면 추가로 구현해야 함
                       print('비밀번호 찾기 버튼이 클릭되었습니다.');
                     },
-                    child: Text(
+                    child: const Text(
                       '비밀번호 찾기',
                       style: TextStyle(
                         color: Colors.black,

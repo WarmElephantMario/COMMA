@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_plugin/components.dart';
+import '../components.dart';
 
 class FolderList extends StatelessWidget {
   final List<Map<String, dynamic>> folders;
@@ -25,6 +26,7 @@ class FolderList extends StatelessWidget {
           onTap: () => onFolderTap(folder),
           child: FolderListItem(
             folder: folder,
+            fileCount: folder['file_count'] ?? 0, // 파일 개수 전달
             onRename: () => onRename(index),
             onDelete: () => onDelete(index),
           ),
