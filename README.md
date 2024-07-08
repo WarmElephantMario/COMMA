@@ -39,6 +39,7 @@
 - LectureFiles의 lecture_name 추가 <br>
 - ColonFiles의 lecture_name 추가 <br>
 
+'''
 CREATE TABLE LectureFolders (
     id INT AUTO_INCREMENT PRIMARY KEY,
     folder_name VARCHAR(255) NOT NULL,
@@ -70,4 +71,4 @@ CREATE TABLE ColonFiles (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (folder_id) REFERENCES ColonFolders(id) ON DELETE CASCADE
 );
-
+'''
