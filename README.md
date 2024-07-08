@@ -5,7 +5,7 @@ firebase 연동
 - 강의자료 업로드시 firebase storage의 uploads 파일에 저장<br>
 - $ firebase login<br>
 - 참고: 
-- [https://velog.io/@qazws78941/Flutter-%ED%8C%8C%EC%9D%B4%EC%96%B4%EB%B2%A0%EC%9D%B4%EC%8A%A4-%EC%97%B0%EB%8F%99](URL) <br><br>
+[https://velog.io/@qazws78941/Flutter-%ED%8C%8C%EC%9D%B4%EC%96%B4%EB%B2%A0%EC%9D%B4%EC%8A%A4-%EC%97%B0%EB%8F%99](URL) <br><br>
 
 ### 1. 주석처리
 16_homepage_move.dart 화면 연결 수정<br>
