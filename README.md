@@ -8,7 +8,7 @@
 ### 2. 수정 및 추가
 - 37_folder_files_screen.dart 수정<br>
 - components.dart 수정<br>
-- index.js 수정 : 파일목록 가져오기(서버)<br>
+- index.js 수정 (서버)<br>
 - 60prepare.dart 수정<br>
 - 62lecture_start.dart 수정<br>
 - 63record.dart 수정<br>
