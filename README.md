@@ -13,7 +13,7 @@
 - 62lecture_start.dart 수정<br>
 - 63record.dart 수정<br>
 - 66colon.dart 수정<br>
-- fire.base.json 추가<br>
+- fire.base.json 추가<br><br>
 
 ### 3.완료한 기능
 내비게이션바 배경색 흰색<br><br>
@@ -32,14 +32,12 @@
 ### 4. TODO
 - showquickmenu 체크박스2 디자인 수정<br>
 - created_at 시간 포맷함수 수정<br>
-- 16_homepage_move.dart 화면 연결 수정<br>
+- 16_homepage_move.dart 화면 연결 수정<br><br>
 
 ### 5. 데이터베이스 수정
 강의자료(업로드한 파일이름)를 강의파일및 콜론파일에 표기해야해서 추가<br>
 - LectureFiles의 lecture_name 추가 <br>
-- ColonFiles의 lecture_name 추가 <br>
-
-<br><br>
+- ColonFiles의 lecture_name 추가 <br><br>
 ```
 CREATE TABLE LectureFolders (
     id INT AUTO_INCREMENT PRIMARY KEY,
