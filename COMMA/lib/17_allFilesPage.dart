@@ -41,9 +41,11 @@ class _AllFilesPageState extends State<AllFilesPage> {
     }
   }
 
-  String formatDate(String dateString) {
-    DateTime dateTime = DateTime.parse(dateString);
-    return DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime);
+  String formatDateTimeToKorean(String dateTime) {
+    if (dateTime.isEmpty) return 'Unknown';
+    final DateTime utcDateTime = DateTime.parse(dateTime);
+    final DateTime koreanDateTime = utcDateTime.add(const Duration(hours: 9));
+    return DateFormat('yyyy/MM/dd HH:mm').format(koreanDateTime);
   }
 
   @override
@@ -60,7 +62,7 @@ class _AllFilesPageState extends State<AllFilesPage> {
                 final file = files[index];
                 return ListTile(
                   title: Text(file['file_name']),
-                  subtitle: Text(formatDate(file['created_at'])),
+                  subtitle: Text(formatDateTimeToKorean(file['created_at'])),
                   onTap: () {
                     // 파일을 클릭했을 때의 동작
                     print('File ${file['file_name']} is clicked');
