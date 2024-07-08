@@ -6,18 +6,18 @@ import '30_folder_screen.dart';
 import '33_mypage_screen.dart';
 import '60prepare.dart';
 import 'model/user.dart';
-import '11_homepage_recent.dart';
+import '63record.dart';
+import '66colon.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-//NAVIGATION BAR
 BottomNavigationBar buildBottomNavigationBar(
     BuildContext context, int currentIndex, Function(int) onItemTapped) {
   final List<Widget> widgetOptions = <Widget>[
-    // MainPage(userInfo: userInfo),
-    MainPage(
-        userInfo:
-            User(1, 'example@example.com', '010-1234-5678', 'password123')),
-    const FolderScreen(),
-    const LearningPreparation(),
+    // MainPage(userInfo: userInfo, fileManager: fileManager),
+    MainPage(userInfo: User(1, 'example@example.com', '010-1234-5678', 'password123')),
+    FolderScreen(),
+    LearningPreparation(),
     MyPageScreen(),
   ];
 
@@ -31,7 +31,9 @@ BottomNavigationBar buildBottomNavigationBar(
 
   return BottomNavigationBar(
     currentIndex: currentIndex,
+    showUnselectedLabels: true, // 모든 텍스트 라벨을 항상 표시하도록 설정
     backgroundColor: Colors.white,
+    type: BottomNavigationBarType.fixed, // 추가된 부분
     onTap: handleItemTap,
     items: const [
       BottomNavigationBarItem(
@@ -67,103 +69,156 @@ BottomNavigationBar buildBottomNavigationBar(
       fontFamily: 'DM Sans', // 글씨체 설정
       fontWeight: FontWeight.bold,
     ),
-    showUnselectedLabels: true, // 모든 텍스트 라벨을 항상 표시하도록 설정
   );
 }
 
-// File Move Quick Action
-// void showQuickMenu(BuildContext context) {
-//   showModalBottomSheet(
-//     context: context,
-//     shape: const RoundedRectangleBorder(
-//       borderRadius: BorderRadius.vertical(
-//         top: Radius.circular(20),
-//       ),
-//     ),
-//     backgroundColor: Colors.white,
-//     builder: (BuildContext context) {
-//       return Padding(
-//         padding: const EdgeInsets.all(16.0),
-//         child: Column(
-//           mainAxisSize: MainAxisSize.min,
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             Row(
-//               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//               children: [
-//                 TextButton(
-//                   onPressed: () {
-//                     Navigator.pop(context);
-//                   },
-//                   child: const Text(
-//                     '취소',
-//                     style: TextStyle(
-//                       color: Color.fromRGBO(84, 84, 84, 1),
-//                       fontSize: 16,
-//                       fontWeight: FontWeight.bold,
-//                     ),
-//                   ),
-//                 ),
-//                 const Text(
-//                   '다음으로 이동',
-//                   style: TextStyle(
-//                     color: Colors.black,
-//                     fontSize: 16,
-//                     fontWeight: FontWeight.bold,
-//                   ),
-//                 ),
-//                 TextButton(
-//                   onPressed: () {
-//                     // TODO: Implement the move action
-//                   },
-//                   child: const Text(
-//                     '이동',
-//                     style: TextStyle(
-//                       color: Color.fromRGBO(255, 161, 122, 1),
-//                       fontSize: 16,
-//                       fontWeight: FontWeight.bold,
-//                     ),
-//                   ),
-//                 ),
-//               ],
-//             ),
-//             const SizedBox(height: 2),
-//             const Center(
-//               child: Text(
-//                 '현재 위치 외 다른 폴더로 이동할 수 있어요.',
-//                 style: TextStyle(
-//                   color: Color(0xFF575757),
-//                   fontSize: 13,
-//                   fontFamily: 'Raleway',
-//                   fontWeight: FontWeight.w500,
-//                   height: 1.5,
-//                 ),
-//               ),
-//             ),
-//             const SizedBox(height: 16),
-//             const Column(
-//               mainAxisAlignment: MainAxisAlignment.start,
-//               children: [
-//                 Padding(
-//                   padding: EdgeInsets.symmetric(vertical: 5),
-//                   child: Checkbox1(label: '컴퓨터 알고리즘'),
-//                 ),
-//                 Padding(
-//                   padding: EdgeInsets.symmetric(vertical: 5),
-//                   child: Checkbox1(label: '정보통신공학'),
-//                 ),
-//                 Padding(
-//                   padding: EdgeInsets.symmetric(vertical: 5),
-//                   child: Checkbox1(label: '데이터베이스'),
-//                 ),
-//               ],
-//             ),
-//           ],
-//         ),
-//       );
-//     },
-//   );
-// }
+
+  Future<List<Map<String, String>>> fetchFolders() async {
+    final response = await http.get(Uri.parse('http://localhost:3000/api/lecture-folders'));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> folderList = json.decode(response.body);
+      return folderList.map((folder) {
+        return {
+          'id': folder['id'].toString(),
+          'name': folder['folder_name'].toString(),
+        };
+      }).toList();
+    } else {
+      throw Exception('Failed to load folders');
+    }
+  }
+
+//showQuickMenu 함수
+void showQuickMenu(
+    BuildContext context,
+    int fileId,
+    String fileType,
+    int currentFolderId,
+    Future<void> Function(int, int, String) moveItem,
+    Future<void> Function() fetchOtherFolders,
+    List<Map<String, dynamic>> folders,
+    Function(VoidCallback) updateState) async {
+  // folders 상태 초기화 및 폴더 목록 가져오기
+  updateState(() {
+    folders.clear();
+  });
+
+  await fetchOtherFolders();
+
+  // 폴더 목록에 selected 속성 추가
+  updateState(() {
+    folders = folders.map((folder) {
+      return {
+        ...folder,
+        'selected': false,
+      };
+    }).toList();
+  });
+
+  showModalBottomSheet(
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(20),
+      ),
+    ),
+    backgroundColor: Colors.white,
+    builder: (BuildContext context) {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text(
+                        '취소',
+                        style: TextStyle(
+                          color: Color.fromRGBO(84, 84, 84, 1),
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const Text(
+                      '다음으로 이동',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        final selectedFolder = folders.firstWhere(
+                            (folder) => folder['selected'] == true,
+                            orElse: () => {});
+                        final selectedFolderId = selectedFolder['id'];
+                        await moveItem(fileId, selectedFolderId, fileType);
+                        Navigator.pop(context);
+                      },
+                      child: const Text(
+                        '이동',
+                        style: TextStyle(
+                          color: Color.fromRGBO(255, 161, 122, 1),
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                const Center(
+                  child: Text(
+                    '현재 위치 외 다른 폴더로 이동할 수 있어요.',
+                    style: TextStyle(
+                      color: Color(0xFF575757),
+                      fontSize: 13,
+                      fontFamily: 'Raleway',
+                      fontWeight: FontWeight.w500,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: folders.map((folder) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 5),
+                      child: Checkbox2(
+                        label: folder['folder_name'],
+                        isSelected: folder['selected'] ?? false,
+                        onChanged: (bool isSelected) {
+                          setState(() {
+                            for (var f in folders) {
+                              f['selected'] = false;
+                            }
+                            folder['selected'] = isSelected;
+                          });
+                        },
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    },
+  );
+}
 
 // CONFIRM ALEART 1,2
 void showConfirmationDialog(
@@ -176,6 +231,7 @@ void showConfirmationDialog(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
+        backgroundColor: Colors.white,
         title: Text(
           title,
           style: const TextStyle(
@@ -240,12 +296,13 @@ void showConfirmationDialog(
 }
 
 // Colon alarm
-void showColonCreatedDialog(BuildContext context) {
+void showColonCreatedDialog(BuildContext context, String folderName, String noteName,String lectureName) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: const Column(
+        backgroundColor: Colors.white,
+        title: Column(
           children: [
             Text(
               '콜론이 생성되었습니다.',
@@ -257,9 +314,9 @@ void showColonCreatedDialog(BuildContext context) {
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Text(
-              '폴더 이름: 기본폴더(:)',
+              '폴더 이름: $folderName(:)', // 기본폴더 대신 folderName 사용
               style: TextStyle(
                 color: Color(0xFF245B3A),
                 fontSize: 14,
@@ -268,7 +325,7 @@ void showColonCreatedDialog(BuildContext context) {
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Text(
               '으로 이동하시겠습니까?',
               style: TextStyle(
@@ -290,7 +347,7 @@ void showColonCreatedDialog(BuildContext context) {
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: const Text(
+                  child: Text(
                     '취소',
                     style: TextStyle(
                       color: Color(0xFFFFA17A),
@@ -300,17 +357,32 @@ void showColonCreatedDialog(BuildContext context) {
                     ),
                   ),
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: 16),
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const ColonPage()),
-                    );
+                    createColonFolder(folderName + "(:)", noteName, '',lectureName).then((_) async {
+                      // Fetch the created_at value after creating the folder and file
+                      var fetchUrl = 'http://localhost:3000/api/get-colon-file?folderName=${folderName + "(:)"}';
+                      var fetchResponse = await http.get(Uri.parse(fetchUrl));
+
+                      if (fetchResponse.statusCode == 200) {
+                        var data = jsonDecode(fetchResponse.body);
+                        String createdAt = data['created_at'];
+
+                        // Navigate to ColonPage with created_at and noteName
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ColonPage(folderName: folderName, noteName: noteName,lectureName: lectureName,createdAt: createdAt),
+                          ),
+                        );
+                      } else {
+                        print('Failed to fetch colon file details: ${fetchResponse.statusCode}');
+                      }
+                    });
                   },
-                  child: const Text(
+                  child: Text(
                     '확인',
                     style: TextStyle(
                       color: Color(0xFF545454),
@@ -329,22 +401,54 @@ void showColonCreatedDialog(BuildContext context) {
   );
 }
 
+
+Future<void> createColonFolder(String folderName, String noteName, String fileUrl,String lectureName) async {
+  var url = 'http://localhost:3000/api/create-colon-folder';
+
+  var body = {
+    'folderName': folderName,
+    'noteName': noteName, // noteName 추가
+    'fileUrl': '', // 빈 문자열
+    'lectureName': lectureName,
+  };
+
+  try {
+    var response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 200) {
+      print('Folder and file created successfully');
+    } else {
+      print('Failed to create folder and file: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Error during HTTP request: $e');
+  }
+}
+
+
 // Learning - 강의 자료 학습중 팝업
-void showLearningDialog(BuildContext context) {
+void showLearningDialog(BuildContext context, String fileName, String fileURL) {
   showDialog(
     context: context,
     barrierDismissible: false,
     builder: (BuildContext context) {
-      // Navigate to LectureStartPage after 3 seconds
-      Future.delayed(const Duration(seconds: 1), () {
+      // Navigate to LectureStartPage after 1 second
+      Future.delayed(Duration(seconds: 1), () {
         Navigator.of(context).pop(); // Close the dialog
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const LectureStartPage()),
+          MaterialPageRoute(
+            builder: (context) => LectureStartPage(fileName: fileName, fileURL: fileURL),
+          ),
         );
       });
 
       return AlertDialog(
+        backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8.0),
         ),
@@ -401,6 +505,8 @@ void showLearningDialog(BuildContext context) {
     },
   );
 }
+
+
 
 //alarm
 //delete alarm
@@ -745,7 +851,7 @@ Future<void> showAddFolderDialog(
   );
 }
 
-//checkbox
+// // checkbox
 // class Checkbox1 extends StatefulWidget {
 //   final String label;
 //   const Checkbox1({super.key, required this.label});
@@ -864,137 +970,6 @@ class _Checkbox2State extends State<Checkbox2> {
   }
 }
 
-// showQuickMenu 함수
-void showQuickMenu(
-    BuildContext context,
-    int fileId,
-    String fileType,
-    int currentFolderId,
-    Future<void> Function(int, int, String) moveItem,
-    Future<void> Function() fetchOtherFolders,
-    List<Map<String, dynamic>> folders,
-    Function(VoidCallback) updateState) async {
-  // folders 상태 초기화 및 폴더 목록 가져오기
-  updateState(() {
-    folders.clear();
-  });
-
-  await fetchOtherFolders();
-
-  // 폴더 목록에 selected 속성 추가
-  updateState(() {
-    folders = folders.map((folder) {
-      return {
-        ...folder,
-        'selected': false,
-      };
-    }).toList();
-  });
-
-  showModalBottomSheet(
-    context: context,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(20),
-      ),
-    ),
-    backgroundColor: Colors.white,
-    builder: (BuildContext context) {
-      return StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text(
-                        '취소',
-                        style: TextStyle(
-                          color: Color.fromRGBO(84, 84, 84, 1),
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    const Text(
-                      '다음으로 이동',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () async {
-                        final selectedFolder = folders.firstWhere(
-                            (folder) => folder['selected'] == true,
-                            orElse: () => {});
-                        final selectedFolderId = selectedFolder['id'];
-                        await moveItem(fileId, selectedFolderId, fileType);
-                        Navigator.pop(context);
-                      },
-                      child: const Text(
-                        '이동',
-                        style: TextStyle(
-                          color: Color.fromRGBO(255, 161, 122, 1),
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 2),
-                const Center(
-                  child: Text(
-                    '현재 위치 외 다른 폴더로 이동할 수 있어요.',
-                    style: TextStyle(
-                      color: Color(0xFF575757),
-                      fontSize: 13,
-                      fontFamily: 'Raleway',
-                      fontWeight: FontWeight.w500,
-                      height: 1.5,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: folders.map((folder) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 5),
-                      child: Checkbox2(
-                        label: folder['folder_name'],
-                        isSelected: folder['selected'] ?? false,
-                        onChanged: (bool isSelected) {
-                          setState(() {
-                            for (var f in folders) {
-                              f['selected'] = false;
-                            }
-                            folder['selected'] = isSelected;
-                          });
-                        },
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ],
-            ),
-          );
-        },
-      );
-    },
-  );
-}
-
 //lecture
 class LectureExample extends StatelessWidget {
   final String lectureName;
@@ -1087,6 +1062,7 @@ class LectureExample extends StatelessWidget {
     );
   }
 }
+//lecture 1
 // class LectureExample extends StatelessWidget {
 //   final String lectureName;
 //   final String date;
@@ -1505,3 +1481,4 @@ class FolderListItem extends StatelessWidget {
     );
   }
 }
+

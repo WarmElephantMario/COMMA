@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
-import 'components.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:file_picker/file_picker.dart';
+import 'dart:typed_data';
+import 'components.dart'; // components.dart 파일을 임포트
+import '62lecture_start.dart'; 
+import '63record.dart'; // 추가: RecordPage 임포트
 
 class LearningPreparation extends StatefulWidget {
   const LearningPreparation({super.key});
@@ -9,9 +14,11 @@ class LearningPreparation extends StatefulWidget {
 }
 
 class _LearningPreparationState extends State<LearningPreparation> {
-  int _selectedOption = 0;
-  bool _isMaterialEmbedded = false; // 강의 자료가 임베드되었는지 여부를 관리하는 변수
-  bool _isIconVisible = true; // 아이콘이 보이는지 여부를 관리하는 변수
+  String? _selectedFileName;
+  String? _downloadURL; // 다운로드 URL을 저장할 변수 추가
+  bool _isMaterialEmbedded = false;
+  bool _isIconVisible = true;
+  Uint8List? _fileBytes;
 
   int _selectedIndex = 2; // 학습 시작 탭이 기본 선택되도록 설정
 
@@ -21,91 +28,44 @@ class _LearningPreparationState extends State<LearningPreparation> {
     });
   }
 
-  Widget _buildRadioOption(String text, int value) {
-    return Row(
-      children: [
-        Radio(
-          value: value,
-          groupValue: _selectedOption,
-          onChanged: (value) {
-            setState(() {
-              _selectedOption = value!;
-            });
-          },
-          activeColor: const Color(0xFF36AE92),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          text,
-          style: const TextStyle(
-            color: Color(0xFF414141),
-            fontSize: 16,
-            fontFamily: 'DM Sans',
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
-    );
+  Future<void> _pickFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+    if (result != null) {
+      setState(() {
+        _fileBytes = result.files.first.bytes;
+        _selectedFileName = result.files.first.name;
+        _isMaterialEmbedded = true;
+        _isIconVisible = false;
+      });
+
+      await _uploadFileToFirebase(_fileBytes!, _selectedFileName!);
+    }
   }
 
-  Widget _buildMaterialInfo() {
-    if (_isMaterialEmbedded) {
-      return Column(
-        children: [
-          const SizedBox(height: 20),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.teal.shade50,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: const EdgeInsets.all(8),
-            child: const Row(
-              children: [
-                Icon(Icons.picture_as_pdf, color: Colors.red, size: 40),
-                SizedBox(width: 15),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '인공지능_ch03_algorithm.pdf',
-                      style: TextStyle(
-                        color: Color(0xFF575757),
-                        fontSize: 15,
-                        fontFamily: 'DM Sans',
-                        fontWeight: FontWeight.w500,
-                        height: 1.2,
-                      ),
-                    ),
-                    Text(
-                      '2024년 6월 11일  845kb',
-                      style: TextStyle(
-                        color: Color(0xFF575757),
-                        fontSize: 14,
-                        fontFamily: 'DM Sans',
-                        fontWeight: FontWeight.w500,
-                        height: 1.2,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      );
+  Future<void> _uploadFileToFirebase(Uint8List fileBytes, String fileName) async {
+    try {
+      Reference storageRef = FirebaseStorage.instance.ref().child('uploads/$fileName');
+      UploadTask uploadTask = storageRef.putData(fileBytes);
+
+      TaskSnapshot taskSnapshot = await uploadTask;
+      String downloadURL = await taskSnapshot.ref.getDownloadURL();
+
+      setState(() {
+        _downloadURL = downloadURL; // 다운로드 URL 설정
+      });
+
+      print('File uploaded successfully! Download URL: $downloadURL');
+    } catch (e) {
+      print('File upload failed: $e');
     }
-    return Container();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 0, // Hide the AppBar
-        backgroundColor: Colors.white,
-        elevation: 0,
-      ),
-      backgroundColor: Colors.white, // 화면 백그라운드 색상을 흰색으로 설정
+      backgroundColor: Colors.white, 
+      appBar: AppBar(toolbarHeight: 0),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
@@ -144,24 +104,50 @@ class _LearningPreparationState extends State<LearningPreparation> {
               children: [
                 ClickButton(
                   text: _isMaterialEmbedded ? '강의 자료 학습 시작하기' : '강의 자료를 임베드하세요',
-                  onPressed: () {
-                    setState(() {
-                      if (_isMaterialEmbedded) {
-                        showLearningDialog(context); // 버튼 클릭 시 팝업 창 표시
-                      } else {
-                        _isMaterialEmbedded = true; // 버튼 클릭 시 상태 업데이트
-                        _isIconVisible = false; // 아이콘 숨기기
-                      }
-                    });
-                  },
-                  width: MediaQuery.of(context).size.width * 0.5, // 원하는 너비 설정
-                  height: 50.0, // 원하는 높이 설정
+                  onPressed: _isMaterialEmbedded ? () {
+                    showLearningDialog(context, _selectedFileName!, _downloadURL!); // 파일 이름과 URL을 전달하여 showLearningDialog 호출
+                  } : _pickFile,
+                  width: MediaQuery.of(context).size.width * 0.5,
+                  height: 50.0,
                   iconPath: _isIconVisible ? 'assets/Vector.png' : null,
                 ),
               ],
             ),
           ),
-          _buildMaterialInfo(),
+          if (_isMaterialEmbedded)
+            Column(
+              children: [
+                const SizedBox(height: 20),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.teal.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: EdgeInsets.all(8),
+                  child: Row(
+                    children: [
+                      Icon(Icons.picture_as_pdf, color: Colors.red, size: 40),
+                      SizedBox(width: 15),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _selectedFileName!,
+                            style: TextStyle(
+                              color: Color(0xFF575757),
+                              fontSize: 15,
+                              fontFamily: 'DM Sans',
+                              fontWeight: FontWeight.w500,
+                              height: 1.2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
         ],
       ),
       bottomNavigationBar:

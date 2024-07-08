@@ -1,19 +1,70 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'components.dart';
+import 'dart:convert';
 import '62lecture_start.dart';
+import 'package:intl/intl.dart';
 
 enum RecordingState { initial, recording, recorded }
 
 class RecordPage extends StatefulWidget {
-  const RecordPage({super.key});
+  final String selectedFolderId; // 폴더 ID
+  final String noteName;
+  final String fileUrl; // 추가: 파일 URL
+  final String folderName; // 추가: 폴더 이름
+  final RecordingState recordingState;
+  final String lectureName; // 추가: 강의자료 이름
+
+  const RecordPage({
+    Key? key,
+    required this.selectedFolderId,
+    required this.noteName,
+    required this.fileUrl,
+    required this.folderName,
+    required this.recordingState,
+    required this.lectureName, // 추가: 강의자료 이름
+  }) : super(key: key);
 
   @override
   _RecordPageState createState() => _RecordPageState();
 }
 
 class _RecordPageState extends State<RecordPage> {
-  RecordingState _recordingState = RecordingState.initial; // 녹음 상태를 나타내는 변수
-  int _selectedIndex = 2; // 학습 시작 탭이 기본 선택되도록 설정
+  late RecordingState _recordingState;
+  int _selectedIndex = 2;
+  dynamic _createdAt;
+
+  @override
+  void initState() {
+    super.initState();
+    _recordingState = widget.recordingState;
+    if (_recordingState == RecordingState.recorded) {
+      _fetchCreatedAt();
+    }
+  }
+
+  Future<void> _fetchCreatedAt() async {
+    var url = Uri.parse(
+        'http://localhost:3000/api/get-file-created-at?folderId=${widget.selectedFolderId}&fileName=${widget.noteName}');
+    try {
+      var response = await http.get(url);
+      if (response.statusCode == 200) {
+        var jsonResponse = jsonDecode(response.body);
+        setState(() {
+          _createdAt = jsonResponse['createdAt'];
+        });
+      } else {
+        print('Failed to fetch created_at: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error during HTTP request: $e');
+    }
+  }
+
+  String _formatDate(dynamic dateStr) {
+    DateTime dateTime = DateTime.parse(dateStr);
+    return DateFormat('yyyy/MM/dd hh:mm a').format(dateTime);
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -27,12 +78,55 @@ class _RecordPageState extends State<RecordPage> {
     });
   }
 
+  Future<void> _startRecording() async {
+    var url = 'http://localhost:3000/api/lecture-files';
+
+    var body = {
+      'folder_id': widget.selectedFolderId, // 선택한 폴더의 ID 사용
+      'file_name': widget.noteName,
+      'file_url': widget.fileUrl, // 다운로드 URL 사용
+      'lecture_name': widget.lectureName, // 강의자료 이름 추가
+    };
+
+    // 확인용 로그 출력
+    print('Sending HTTP POST request with data:');
+    print('selectedFolderId: ${body['folder_id']}');
+    print('noteName: ${body['file_name']}');
+    print('fileUrl: ${body['file_url']}');
+    print('lectureName: ${body['lecture_name']}');
+
+    try {
+      var response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(body), // Map을 JSON 문자열로 변환하여 전송
+      );
+
+      // HTTP 응답 확인을 위한 로그
+      print('HTTP Response Code: ${response.statusCode}');
+      print('HTTP Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        // 성공적으로 추가된 경우 처리
+        print('File added successfully');
+        // TODO: 추가적으로 처리할 로직 추가
+      } else {
+        // 실패한 경우 처리
+        print('Failed to add file: ${response.statusCode}');
+        // TODO: 실패 처리 로직 추가
+      }
+    } catch (e) {
+      // HTTP 요청 실패 시 처리
+      print('Error during HTTP request: $e');
+      // TODO: 실패 처리 로직 추가
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 0, // Hide the AppBar
-      ),
+      backgroundColor: Colors.white, 
+      appBar: AppBar(toolbarHeight: 0),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -55,7 +149,7 @@ class _RecordPageState extends State<RecordPage> {
                     } else {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (context) => LectureStartPage()),
+                        MaterialPageRoute(builder: (context) => LectureStartPage(fileName: widget.noteName, fileURL: widget.fileUrl)),
                       );
                     }
                   },
@@ -69,12 +163,12 @@ class _RecordPageState extends State<RecordPage> {
                 ),
               ],
             ),
-            const Row(
+            Row(
               children: [
                 ImageIcon(AssetImage('assets/folder_search.png')),
                 SizedBox(width: 8),
                 Text(
-                  '폴더 분류 > 기본 폴더',
+                  '폴더 분류 > ${widget.folderName}', // 폴더 이름 추가
                   style: TextStyle(
                     color: Color(0xFF575757),
                     fontSize: 12,
@@ -84,8 +178,8 @@ class _RecordPageState extends State<RecordPage> {
               ],
             ),
             const SizedBox(height: 5),
-            const Text(
-              '새로운 노트',
+            Text(
+              widget.noteName,
               style: TextStyle(
                 color: Color(0xFF414141),
                 fontSize: 20,
@@ -94,22 +188,22 @@ class _RecordPageState extends State<RecordPage> {
               ),
             ),
             const SizedBox(height: 5),
-            const Text(
-              '강의 자료: Ch01. What is Algorithm?',
+            Text(
+              '강의 자료: ${widget.lectureName}', // 강의자료 이름 추가
               style: TextStyle(
                 color: Color(0xFF575757),
                 fontSize: 12,
                 fontFamily: 'DM Sans',
               ),
             ),
-            if (_recordingState == RecordingState.recorded) // 녹음 종료됨일 때 날짜와 시간 표시
-              const Column(
+            if (_recordingState == RecordingState.recorded && _createdAt != null)
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(height: 5),
+                  const SizedBox(height: 5),
                   Text(
-                    '2024/06/07 오후 2:30',
-                    style: TextStyle(
+                    _formatDate(_createdAt!), // 포맷팅된 created_at 값 사용
+                    style: const TextStyle(
                       color: Color(0xFF575757),
                       fontSize: 12,
                       fontFamily: 'DM Sans',
@@ -117,7 +211,7 @@ class _RecordPageState extends State<RecordPage> {
                   ),
                 ],
               ),
-            const SizedBox(height: 20), // 강의 자료 밑에 여유 공간 추가
+            const SizedBox(height: 20),
             Row(
               children: [
                 if (_recordingState == RecordingState.initial)
@@ -125,14 +219,15 @@ class _RecordPageState extends State<RecordPage> {
                     text: '녹음',
                     onPressed: () {
                       setState(() {
-                        _recordingState = RecordingState.recording; // 녹음 상태 변경
+                        _recordingState = RecordingState.recording;
                       });
+                      _startRecording();
                     },
-                    width: MediaQuery.of(context).size.width * 0.25, // 원하는 너비 설정
-                    height: 40.0, // 원하는 높이 설정
+                    width: MediaQuery.of(context).size.width * 0.25,
+                    height: 40.0,
                     iconData: Icons.mic,
-                  )
-                else if (_recordingState == RecordingState.recording)
+                  ),
+                if (_recordingState == RecordingState.recording)
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -148,21 +243,20 @@ class _RecordPageState extends State<RecordPage> {
                             },
                           );
                         },
-                        width: MediaQuery.of(context).size.width * 0.3, // 원하는 너비 설정
-                        height: 40.0, // 원하는 높이 설정
+                        width: MediaQuery.of(context).size.width * 0.3,
+                        height: 40.0,
                         iconData: Icons.mic,
                       ),
-                      const SizedBox(width: 10), // 버튼과 텍스트 사이의 간격 추가
+                      const SizedBox(width: 10),
                       const Column(
-                        // 텍스트를 아래로 내리기 위해 Column 사용
                         children: [
-                          SizedBox(height: 10), // 텍스트를 아래로 내리는 간격
+                          SizedBox(height: 10),
                           Row(
                             children: [
                               Icon(Icons.fiber_manual_record, color: Color(0xFFFFA17A)),
-                              SizedBox(width: 4), // 아이콘과 텍스트 사이의 간격 추가
+                              SizedBox(width: 4),
                               Text(
-                                '녹음중',
+                                '녹음 중',
                                 style: TextStyle(
                                   color: Color(0xFFFFA17A),
                                   fontSize: 14,
@@ -174,47 +268,47 @@ class _RecordPageState extends State<RecordPage> {
                         ],
                       ),
                     ],
-                  )
-                else if (_recordingState == RecordingState.recorded)
+                  ),
+                if (_recordingState == RecordingState.recorded)
                   Row(
                     children: [
                       ClickButton(
-                        text: '녹음종료됨',
+                        text: '녹음 종료됨',
                         onPressed: () {
                           // 녹음 종료 버튼 눌렀을때 처리할 로직
                         },
-                        width: MediaQuery.of(context).size.width * 0.3, // 원하는 너비 설정
-                        height: 40.0, // 원하는 높이 설정
+                        width: MediaQuery.of(context).size.width * 0.3,
+                        height: 40.0,
                         iconData: Icons.mic_off,
                         iconColor: Colors.white,
-                        backgroundColor: const Color(0xFF9FACBD), // 배경색 설정
+                        backgroundColor: const Color(0xFF9FACBD),
                       ),
-                      const SizedBox(width: 2), // 두 버튼 사이의 간격을 줄임
+                      const SizedBox(width: 2),
                       ClickButton(
-                        text: '콜론(:) 생성하기',
+                        text: '콜론 생성(:)',
                         onPressed: () {
-                          showColonCreatedDialog(context); // 콜론 생성하기 버튼 기능 추가
+                          showColonCreatedDialog(context, widget.folderName, widget.noteName,widget.lectureName);
                         },
-                        width: MediaQuery.of(context).size.width * 0.3, // 원하는 너비 설정
-                        height: 40.0, // 원하는 높이 설정
+                        width: MediaQuery.of(context).size.width * 0.3,
+                        height: 40.0,
                       ),
                     ],
                   ),
               ],
             ),
             const SizedBox(height: 20),
-            if (_recordingState == RecordingState.recording) // 녹음 중일 때 표시될 텍스트
+            if (_recordingState == RecordingState.recording)
               const Text(
-                '네 여러분 안녕하세요\n그래서 지난번에 공부한 Time Complexity 관련된 공식을 모두 공부해 오셨겠지요?\n다시 한 번 설명하지만 알고리즘에 있어서 Time complexity는 개발자라면 꼭 필수적으로 고려할 줄 알아야 하는 문제라고 했었음',
+                '실시간 자막생성 중...',
                 style: TextStyle(
                   color: Color(0xFF414141),
                   fontSize: 16,
                   fontFamily: 'DM Sans',
                 ),
               ),
-            if (_recordingState == RecordingState.recorded) // 녹음 종료됨일 때 표시될 텍스트
+            if (_recordingState == RecordingState.recorded)
               const Text(
-                '네 여러분 안녕하세요\n그래서 지난번에 공부한 Time Complexity 관련된 공식을 모두 공부해 오셨겠지요?\n다시 한 번 설명하지만 알고리즘에 있어서 Time complexity는 개발자라면 꼭 필수적으로 고려할 줄 알아야 하는 문제라고 했었음',
+                '실시간 자막',
                 style: TextStyle(
                   color: Color(0xFF414141),
                   fontSize: 16,

@@ -93,28 +93,28 @@ class HomePageNoRecent extends StatelessWidget {
                 onTap: () {
                   print('certain lecture is clicked');
                 },
-                child: const LectureExample(
-                  lectureName: '정보통신공학',
-                  date: '2024/06/07',
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  print('certain lecture is clicked');
-                },
-                child: const LectureExample(
-                  lectureName: '컴퓨터알고리즘',
-                  date: '2024/06/10',
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  print('certain lecture is clicked');
-                },
-                child: const LectureExample(
-                  lectureName: '데이터베이스',
-                  date: '2024/06/15',
-                ),
+              //   child: const LectureExample(
+              //     lectureName: '정보통신공학',
+              //     date: '2024/06/07',
+              //   ),
+              // ),
+              // GestureDetector(
+              //   onTap: () {
+              //     print('certain lecture is clicked');
+              //   },
+              //   child: const LectureExample(
+              //     lectureName: '컴퓨터알고리즘',
+              //     date: '2024/06/10',
+              //   ),
+              // ),
+              // GestureDetector(
+              //   onTap: () {
+              //     print('certain lecture is clicked');
+              //   },
+              //   child: const LectureExample(
+              //     lectureName: '데이터베이스',
+              //     date: '2024/06/15',
+              //   ),
               ),
               const SizedBox(height: 32),
               Row(
@@ -162,28 +162,28 @@ class HomePageNoRecent extends StatelessWidget {
                 onTap: () {
                   print('certain lecture is clicked');
                 },
-                child: const LectureExample(
-                  lectureName: '정보통신공학',
-                  date: '2024/06/07',
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  print('certain lecture is clicked');
-                },
-                child: const LectureExample(
-                  lectureName: '컴퓨터알고리즘',
-                  date: '2024/06/10',
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  print('certain lecture is clicked');
-                },
-                child: const LectureExample(
-                  lectureName: '데이터베이스',
-                  date: '2024/06/15',
-                ),
+              //   child: const LectureExample(
+              //     lectureName: '정보통신공학',
+              //     date: '2024/06/07',
+              //   ),
+              // ),
+              // GestureDetector(
+              //   onTap: () {
+              //     print('certain lecture is clicked');
+              //   },
+              //   child: const LectureExample(
+              //     lectureName: '컴퓨터알고리즘',
+              //     date: '2024/06/10',
+              //   ),
+              // ),
+              // GestureDetector(
+              //   onTap: () {
+              //     print('certain lecture is clicked');
+              //   },
+              //   child: const LectureExample(
+              //     lectureName: '데이터베이스',
+              //     date: '2024/06/15',
+              //   ),
               ),
               const SizedBox(height: 32),
             ],
