@@ -5,15 +5,15 @@
 - MainPage()->RecordPage() 수정 중<br>
 - MainPage()->ColonPage() 수정 중<br><br>
 
-### 2. 수정
+### 2. 수정 및 추가
 - 37_folder_files_screen.dart 수정<br>
 - components.dart 수정<br>
-- index.js 수정 (서버)<br><br>
+- index.js 수정 : 파일목록 가져오기(서버)<br><br>
 - 60prepare.dart 수정<br>
 - 62lecture_start.dart 수정<br>
 - 63record.dart 수정<br>
 - 66colon.dart 수정<br>
-- fire.base.json 
+- fire.base.json 추가<br>
 
 ### 3.완료한 기능
 내비게이션바 배경색 흰색<br><br>
