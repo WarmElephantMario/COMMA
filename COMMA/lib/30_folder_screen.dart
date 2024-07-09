@@ -108,43 +108,6 @@ class _FolderScreenState extends State<FolderScreen> {
     }
   }
 
-  // 폴더 삭제 다이얼로그 함수 추가
-  Future<void> showDeleteFolderDialog(
-    BuildContext context,
-    int index,
-    List<Map<String, dynamic>> folders,
-    Function deleteFolder,
-    Function setState
-  ) async {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('폴더 삭제하기'),
-          content: const Text('정말로 폴더를 삭제하시겠습니까? 폴더를 삭제하면 다시 복구할 수 없습니다.'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('취소', style: TextStyle(color: Colors.red)),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('삭제'),
-              onPressed: () async {
-                await deleteFolder(folders[index]['id']);
-                setState(() {
-                  folders.removeAt(index);
-                });
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -195,15 +158,18 @@ class _FolderScreenState extends State<FolderScreen> {
                       _renameFolder,
                       setState,
                       "폴더 이름 바꾸기", // 다이얼로그 제목
-                      "폴더 이름", // 텍스트 필드 힌트 텍스트
                       "folder_name" // 변경할 항목 타입
                     ),
-                    onDelete: (index) => showDeleteFolderDialog(
+                    onDelete: (index) => showConfirmationDialog(
                       context,
-                      index,
-                      lectureFolders,
-                      _deleteFolder,
-                      setState,
+                      "정말로 폴더 '${lectureFolders[index]['folder_name']}'을(를) 삭제하시겠습니까?", // 다이얼로그 제목
+                      "폴더를 삭제하면 다시 복구할 수 없습니다.", // 다이얼로그 내용
+                      () async {
+                        await _deleteFolder('lecture', lectureFolders[index]['id']);
+                        setState(() {
+                          lectureFolders.removeAt(index);
+                        });
+                      },
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -245,15 +211,18 @@ class _FolderScreenState extends State<FolderScreen> {
                       _renameFolder,
                       setState,
                       "폴더 이름 바꾸기", // 다이얼로그 제목
-                      "폴더 이름", // 텍스트 필드 힌트 텍스트
                       "folder_name" // 변경할 항목 타입
                     ),
-                    onDelete: (index) => showDeleteFolderDialog(
+                    onDelete: (index) => showConfirmationDialog(
                       context,
-                      index,
-                      colonFolders,
-                      _deleteFolder,
-                      setState,
+                      "정말로 폴더 '${colonFolders[index]['folder_name']}'을(를) 삭제하시겠습니까?", // 다이얼로그 제목
+                      "폴더를 삭제하면 다시 복구할 수 없습니다.", // 다이얼로그 내용
+                      () async {
+                        await _deleteFolder('colon', colonFolders[index]['id']);
+                        setState(() {
+                          colonFolders.removeAt(index);
+                        });
+                      },
                     ),
                   ),
                 ],
