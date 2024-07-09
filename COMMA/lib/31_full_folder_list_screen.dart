@@ -5,6 +5,7 @@ import 'package:flutter_plugin/components.dart';
 import 'package:provider/provider.dart';
 import '../model/user_provider.dart';
 import 'folder/37_folder_files_screen.dart'; // FolderFilesScreen이 정의된 파일 임포트
+import 'api/api.dart';
 
 class FullFolderListScreen extends StatefulWidget {
   final String title;
@@ -42,7 +43,7 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
       final String folderType = widget.title == '강의폴더' ? 'lecture' : 'colon';
       final response = await http.get(
         Uri.parse(
-            'http://localhost:3000/api/$folderType-folders?user_id=$userId'),
+            '${API.baseUrl}/api/$folderType-folders?user_id=$userId'),
       );
 
       if (response.statusCode == 200) {
@@ -63,7 +64,7 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
       final String folderType = widget.title == '강의폴더' ? 'lecture' : 'colon';
       try {
         final response = await http.post(
-          Uri.parse('http://localhost:3000/api/$folderType-folders'),
+          Uri.parse('${API.baseUrl}/api/$folderType-folders'),
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
           },
@@ -93,7 +94,7 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
       final String folderType = widget.title == '강의폴더' ? 'lecture' : 'colon';
       try {
         final response = await http.put(
-          Uri.parse('http://localhost:3000/api/$folderType-folders/$id'),
+          Uri.parse('${API.baseUrl}/api/$folderType-folders/$id'),
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
           },
@@ -120,7 +121,7 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
       final String folderType = widget.title == '강의폴더' ? 'lecture' : 'colon';
       try {
         final response = await http.delete(
-          Uri.parse('http://localhost:3000/api/$folderType-folders/$id'),
+          Uri.parse('${API.baseUrl}/api/$folderType-folders/$id'),
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
           },
