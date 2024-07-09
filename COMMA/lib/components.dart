@@ -5,17 +5,14 @@ import '62lecture_start.dart';
 import '30_folder_screen.dart';
 import '33_mypage_screen.dart';
 import '60prepare.dart';
-import 'model/user.dart';
-import '11_homepage_recent.dart';
 
 //NAVIGATION BAR
 BottomNavigationBar buildBottomNavigationBar(
     BuildContext context, int currentIndex, Function(int) onItemTapped) {
+  // final userProvider = Provider.of<UserProvider>(context);
+
   final List<Widget> widgetOptions = <Widget>[
-    // MainPage(userInfo: userInfo),
-    MainPage(
-        userInfo:
-            User(1, 'example@example.com', '010-1234-5678', 'password123')),
+    const MainPage(),
     const FolderScreen(),
     const LearningPreparation(),
     MyPageScreen(),
@@ -1435,15 +1432,17 @@ class ClickButton extends StatelessWidget {
   }
 }
 
-//FolderListItem
+// 폴더 리스트
 class FolderListItem extends StatelessWidget {
   final Map<String, dynamic> folder;
+  final int fileCount; // 추가된 파일 개수 필드
   final VoidCallback onRename;
   final VoidCallback onDelete;
 
   const FolderListItem({
     super.key,
     required this.folder,
+    required this.fileCount, // 추가된 파일 개수 필드
     required this.onRename,
     required this.onDelete,
   });
@@ -1483,9 +1482,9 @@ class FolderListItem extends StatelessWidget {
           ),
           Row(
             children: [
-              const Text(
-                '0 files',
-                style: TextStyle(
+              Text(
+                '$fileCount files',
+                style: const TextStyle(
                   color: Color(0xFF005A38),
                   fontSize: 12,
                   fontFamily: 'DM Sans',

@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_plugin/12_homepage_search.dart';
-import 'components.dart'; // component.dart 파일을 불러옵니다.
-import '14_homepage_search_result.dart';
+import 'package:provider/provider.dart';
+import 'model/user_provider.dart';
 import 'api/api.dart';
-import 'model/user.dart';
-import 'dart:convert';
+import '12_homepage_search.dart';
+import 'components.dart';
+import '17_allFilesPage.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:intl/intl.dart';
 
 class MainPage extends StatefulWidget {
-  final User userInfo;
-
-  const MainPage({super.key, required this.userInfo});
+  const MainPage({super.key});
 
   @override
   _MainPageState createState() => _MainPageState();
@@ -30,8 +30,9 @@ class _MainPageState extends State<MainPage> {
   }
 
   Future<void> fetchLectureFiles() async {
-    final response =
-        await http.get(Uri.parse('${API.baseUrl}/api/getLectureFiles'));
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final response = await http.get(Uri.parse(
+        '${API.baseUrl}/api/getLectureFiles/${userProvider.user!.user_id}'));
 
     if (response.statusCode == 200) {
       setState(() {
@@ -44,8 +45,9 @@ class _MainPageState extends State<MainPage> {
   }
 
   Future<void> fetchColonFiles() async {
-    final response =
-        await http.get(Uri.parse('${API.baseUrl}/api/getColonFiles'));
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final response = await http.get(Uri.parse(
+        '${API.baseUrl}/api/getColonFiles/${userProvider.user!.user_id}'));
 
     if (response.statusCode == 200) {
       setState(() {
@@ -76,6 +78,17 @@ class _MainPageState extends State<MainPage> {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  String formatDate(String dateString) {
+    try {
+      DateTime dateTime = DateTime.parse(dateString);
+      DateTime koreaTime = dateTime.add(const Duration(hours: 9)); // UTC+9로 변환
+      return DateFormat('yyyy-MM-dd HH:mm:ss').format(koreaTime);
+    } catch (e) {
+      print('Error parsing date: $e');
+      return dateString; // 오류 발생 시 원래 문자열 반환
+    }
   }
 
   Future<void> renameItem(int fileId, String newName, String fileType) async {
@@ -173,7 +186,8 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    // final size = MediaQuery.of(context).size;
+    final userProvider = Provider.of<UserProvider>(context);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -205,7 +219,7 @@ class _MainPageState extends State<MainPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '안녕하세요, ${widget.userInfo.user_email} 님',
+                '안녕하세요, ${userProvider.user?.user_email ?? 'Guest'} 님',
                 style: const TextStyle(
                   color: Colors.black,
                   fontSize: 24,
@@ -230,7 +244,15 @@ class _MainPageState extends State<MainPage> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      print('view all button is clicked');
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AllFilesPage(
+                            userId: userProvider.user!.user_id,
+                            fileType: 'lecture',
+                          ),
+                        ),
+                      );
                     },
                     child: const Row(
                       children: [
@@ -277,7 +299,7 @@ class _MainPageState extends State<MainPage> {
                         },
                         child: LectureExample(
                           lectureName: file['file_name'] ?? 'Unknown',
-                          date: file['created_at'] ?? 'Unknown',
+                          date: formatDate(file['created_at'] ?? 'Unknown'),
                           onRename: () => showRenameDialog(
                             context,
                             lectureFiles.indexOf(file),
@@ -297,15 +319,16 @@ class _MainPageState extends State<MainPage> {
                             await fetchOtherFolders(
                                 'lecture', file['folder_id']);
                             showQuickMenu(
-                                context,
-                                file['id'],
-                                'lecture',
-                                file['folder_id'],
-                                moveItem,
-                                () => fetchOtherFolders(
-                                    'lecture', file['folder_id']),
-                                folders,
-                                setState);
+                              context,
+                              file['id'],
+                              'lecture',
+                              file['folder_id'],
+                              moveItem,
+                              () => fetchOtherFolders(
+                                  'lecture', file['folder_id']),
+                              folders,
+                              setState,
+                            );
                           },
                         ),
                       );
@@ -326,7 +349,15 @@ class _MainPageState extends State<MainPage> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      print('view all2 button is clicked');
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AllFilesPage(
+                            userId: userProvider.user!.user_id,
+                            fileType: 'colon',
+                          ),
+                        ),
+                      );
                     },
                     child: const Row(
                       children: [
@@ -373,7 +404,7 @@ class _MainPageState extends State<MainPage> {
                         },
                         child: LectureExample(
                           lectureName: file['file_name'] ?? 'Unknown',
-                          date: file['created_at'] ?? 'Unknown',
+                          date: formatDate(file['created_at'] ?? 'Unknown'),
                           onRename: () => showRenameDialog(
                             context,
                             colonFiles.indexOf(file),
@@ -392,15 +423,16 @@ class _MainPageState extends State<MainPage> {
                           onMove: () async {
                             await fetchOtherFolders('colon', file['folder_id']);
                             showQuickMenu(
-                                context,
-                                file['id'],
-                                'colon',
-                                file['folder_id'],
-                                moveItem,
-                                () => fetchOtherFolders(
-                                    'colon', file['folder_id']),
-                                folders,
-                                setState);
+                              context,
+                              file['id'],
+                              'colon',
+                              file['folder_id'],
+                              moveItem,
+                              () =>
+                                  fetchOtherFolders('colon', file['folder_id']),
+                              folders,
+                              setState,
+                            );
                           },
                         ),
                       );
