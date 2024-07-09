@@ -164,7 +164,11 @@ void showQuickMenu(BuildContext context) {
 
 // CONFIRM ALEART 1,2
 void showConfirmationDialog(
-    BuildContext context, String title, String content, VoidCallback onConfirm) {
+  BuildContext context,
+  String title,
+  String content,
+  VoidCallback onConfirm,
+) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -198,7 +202,7 @@ void showConfirmationDialog(
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: Text(
+                  child: const Text(
                     '취소',
                     style: TextStyle(
                       color: Color(0xFFFFA17A),
@@ -213,7 +217,7 @@ void showConfirmationDialog(
                     onConfirm();
                     Navigator.of(context).pop();
                   },
-                  child: Text(
+                  child: const Text(
                     '확인',
                     style: TextStyle(
                       color: Color(0xFF545454),
@@ -632,7 +636,7 @@ void showMypageDialog(BuildContext context, String title,String message, VoidCal
     );
   }
 
-// 이름 바꾸기 : 폴더 파일 
+// 이름 바꾸기 : 폴더&파일 
 Future<void> showRenameDialog(
   BuildContext context,
   int index,
@@ -640,7 +644,6 @@ Future<void> showRenameDialog(
   Function renameItem,
   Function setState,
   String title,
-  String hintText,
   String itemType // 'file_name' 또는 'folder_name'
 ) async {
   final TextEditingController nameController = TextEditingController(text: items[index][itemType]);
@@ -648,20 +651,28 @@ Future<void> showRenameDialog(
     context: context,
     builder: (context) {
       return AlertDialog(
-        title: Text(title),
+        title: Text(
+          title,
+          style: TextStyle(
+            color: Color(0xFF545454),
+            fontSize: 14,
+            fontFamily: 'DM Sans',
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         content: TextField(
           controller: nameController,
-          decoration: InputDecoration(hintText: hintText),
+          decoration: InputDecoration(hintText: items[index][itemType]),
         ),
         actions: <Widget>[
           TextButton(
-            child: const Text('취소', style: TextStyle(color: Colors.red)),
+            child: const Text('취소', style: TextStyle(color: Color(0xFFFFA17A))),
             onPressed: () {
               Navigator.of(context).pop();
             },
           ),
           TextButton(
-            child: const Text('저장'),
+            child: const Text('저장', style: TextStyle(color: Color(0xFF545454))),
             onPressed: () async {
               await renameItem(items[index]['id'], nameController.text);
               setState(() {
@@ -675,6 +686,8 @@ Future<void> showRenameDialog(
     },
   );
 }
+
+
 
 //폴더 만들기 
 Future<void> showAddFolderDialog(BuildContext context, Function addFolder) async {
@@ -724,36 +737,6 @@ Future<void> showAddFolderDialog(BuildContext context, Function addFolder) async
   );
 }
 
-//CONFIRM ALEART 3
-Future<void> showDeleteFolderDialog(BuildContext context, int index, List<Map<String, dynamic>> folders, Function deleteFolder, Function setState) async {
-  showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: const Text('폴더 삭제하기'),
-        content: const Text('정말로 삭제하시겠습니까?'),
-        actions: <Widget>[
-          TextButton(
-            child: const Text('취소', style: TextStyle(color: Colors.red)),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          TextButton(
-            child: const Text('삭제'),
-            onPressed: () async {
-              await deleteFolder(folders[index]['id']);
-              setState(() {
-                folders.removeAt(index);
-              });
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      );
-    },
-  );
-}
 
 //checkbox
 class Checkbox1 extends StatefulWidget {
