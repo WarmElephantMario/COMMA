@@ -444,6 +444,27 @@ app.get('/api/get-colon-file', (req, res) => {
     });
 });
 
+// 폴더 이름 가져오기 - 강의 폴더 또는 콜론 폴더 구분
+app.get('/api/getFolderName/:fileType/:folderId', (req, res) => {
+    const { fileType, folderId } = req.params;
+    let table = fileType === 'lecture' ? 'LectureFolders' : 'ColonFolders';
+
+    const sql = `SELECT folder_name FROM ${table} WHERE id = ?`;
+    db.query(sql, [folderId], (err, result) => {
+        if (err) {
+            console.error('Error fetching folder name:', err);
+            res.status(500).send({ error: 'Internal Server Error' });
+            return;
+        }
+        if (result.length > 0) {
+            res.json({ folder_name: result[0].folder_name });
+        } else {
+            res.status(404).send({ error: 'Folder not found' });
+        }
+    });
+});
+
+
 
 
 app.listen(port, () => {
