@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'components.dart';
 
 class LearningPreparation extends StatefulWidget {
+  const LearningPreparation({super.key});
+
   @override
   _LearningPreparationState createState() => _LearningPreparationState();
 }
@@ -30,12 +32,12 @@ class _LearningPreparationState extends State<LearningPreparation> {
               _selectedOption = value!;
             });
           },
-          activeColor: Color(0xFF36AE92),
+          activeColor: const Color(0xFF36AE92),
         ),
         const SizedBox(width: 8),
         Text(
           text,
-          style: TextStyle(
+          style: const TextStyle(
             color: Color(0xFF414141),
             fontSize: 16,
             fontFamily: 'DM Sans',
@@ -56,8 +58,8 @@ class _LearningPreparationState extends State<LearningPreparation> {
               color: Colors.teal.shade50,
               borderRadius: BorderRadius.circular(8),
             ),
-            padding: EdgeInsets.all(8),
-            child: Row(
+            padding: const EdgeInsets.all(8),
+            child: const Row(
               children: [
                 Icon(Icons.picture_as_pdf, color: Colors.red, size: 40),
                 SizedBox(width: 15),
@@ -108,7 +110,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
         padding: const EdgeInsets.all(16.0),
         children: [
           const SizedBox(height: 15),
-          Text(
+          const Text(
             '오늘의 학습 준비하기',
             style: TextStyle(
               color: Color(0xFF414141),
@@ -118,7 +120,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
             ),
           ),
           const SizedBox(height: 30),
-          Text(
+          const Text(
             '학습 유형을 선택해주세요.',
             style: TextStyle(
               color: Color(0xFF575757),
@@ -127,8 +129,14 @@ class _LearningPreparationState extends State<LearningPreparation> {
             ),
           ),
           const SizedBox(height: 30),
-          Checkbox1(label: '대체텍스트 생성'),
-          Checkbox1(label: '실시간 자막 생성'),
+          Checkbox2(
+            label: '대체텍스트 생성',
+            onChanged: (bool value) {},
+          ),
+          Checkbox2(
+            label: '실시간 자막 생성',
+            onChanged: (bool value) {},
+          ),
           const SizedBox(height: 20),
           Center(
             child: Row(
@@ -156,7 +164,8 @@ class _LearningPreparationState extends State<LearningPreparation> {
           _buildMaterialInfo(),
         ],
       ),
-      bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
+      bottomNavigationBar:
+          buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }
