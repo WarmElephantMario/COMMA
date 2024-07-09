@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'model/user_provider.dart';
 import 'package:provider/provider.dart';
+import 'api/api.dart';
 
 class FolderScreen extends StatefulWidget {
   const FolderScreen({super.key});
@@ -42,10 +43,10 @@ class _FolderScreenState extends State<FolderScreen> {
       try {
         final lectureResponse = await http.get(
           Uri.parse(
-              'http://localhost:3000/api/lecture-folders?user_id=$userId'),
+              '${API.baseUrl}/api/lecture-folders?user_id=$userId'),
         );
         final colonResponse = await http.get(
-          Uri.parse('http://localhost:3000/api/colon-folders?user_id=$userId'),
+          Uri.parse('${API.baseUrl}/api/colon-folders?user_id=$userId'),
         );
 
         if (lectureResponse.statusCode == 200 &&
@@ -72,7 +73,7 @@ class _FolderScreenState extends State<FolderScreen> {
 
     if (userId != null) {
       final url = Uri.parse(
-          'http://localhost:3000/api/${folderType == 'lecture' ? 'lecture' : 'colon'}-folders');
+          '${API.baseUrl}/api/${folderType == 'lecture' ? 'lecture' : 'colon'}-folders');
       try {
         final response = await http.post(url,
             body: jsonEncode({'folder_name': folderName, 'user_id': userId}),
@@ -97,7 +98,7 @@ class _FolderScreenState extends State<FolderScreen> {
 
   Future<void> _renameFolder(String folderType, int id, String newName) async {
     final url = Uri.parse(
-        'http://localhost:3000/api/${folderType == 'lecture' ? 'lecture' : 'colon'}-folders/$id');
+        '${API.baseUrl}/api/${folderType == 'lecture' ? 'lecture' : 'colon'}-folders/$id');
     try {
       final response = await http.put(url,
           body: jsonEncode({'folder_name': newName}),
@@ -112,7 +113,7 @@ class _FolderScreenState extends State<FolderScreen> {
 
   Future<void> _deleteFolder(String folderType, int id) async {
     final url = Uri.parse(
-        'http://localhost:3000/api/${folderType == 'lecture' ? 'lecture' : 'colon'}-folders/$id');
+        '${API.baseUrl}/api/${folderType == 'lecture' ? 'lecture' : 'colon'}-folders/$id');
     try {
       final response = await http.delete(url);
       if (response.statusCode != 200) {
