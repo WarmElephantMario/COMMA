@@ -10,7 +10,7 @@ class ColonPage extends StatefulWidget {
 }
 
 class _ColonPageState extends State<ColonPage> {
-  int _currentIndex = 2; // 학습 시작 탭이 기본 선택되도록 설정
+  // final int _currentIndex = 2; // 학습 시작 탭이 기본 선택되도록 설정
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +31,7 @@ class _ColonPageState extends State<ColonPage> {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => LearningPreparation()),
+                          builder: (context) => const LearningPreparation()),
                     );
                   },
                   child: const Text(

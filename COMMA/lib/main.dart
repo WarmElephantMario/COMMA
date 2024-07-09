@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_plugin/11_homepage_recent.dart';
-import 'package:flutter_plugin/16_homepage_move.dart';
+import 'package:provider/provider.dart';
 import 'components.dart';
-import 'model/user.dart';
-import '30_folder_screen.dart';
-import '33_mypage_screen.dart';
-import '60prepare.dart';
-import '10_homepage_no_recent.dart';
 import '1_Splash_green.dart';
-import '5_Signup.dart';
+import 'model/user_provider.dart';
 
-void main() => runApp(const MyApp());
+void main() {
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -46,8 +49,8 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
-      bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
+      bottomNavigationBar:
+          buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }
