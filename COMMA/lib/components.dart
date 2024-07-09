@@ -1481,4 +1481,3 @@ class FolderListItem extends StatelessWidget {
     );
   }
 }
-
