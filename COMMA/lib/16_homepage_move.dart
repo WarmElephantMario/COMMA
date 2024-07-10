@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_plugin/12_homepage_search.dart';
+import 'components.dart'; 
+import '14_homepage_search_result.dart';
 import 'package:provider/provider.dart';
 import 'model/user_provider.dart';
 import 'api/api.dart';
@@ -6,6 +9,8 @@ import '12_homepage_search.dart';
 import 'components.dart';
 import '17_allFilesPage.dart';
 import 'package:http/http.dart' as http;
+import '63record.dart';
+import '66colon.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
 
@@ -183,6 +188,42 @@ class _MainPageState extends State<MainPage> {
       rethrow;
     }
   }
+// 강의 파일 클릭 이벤트에서 폴더 이름 조회
+void fetchFolderAndNavigate(BuildContext context, int folderId, String fileType, Map<String, dynamic> file) async {
+    try {
+        final response = await http.get(Uri.parse('${API.baseUrl}/api/getFolderName/$fileType/$folderId'));
+        if (response.statusCode == 200) {
+            var data = jsonDecode(response.body);
+            navigateToPage(context, data['folder_name'] ?? 'Unknown Folder', file, fileType);
+        } else {
+            print('Failed to load folder name: ${response.statusCode}');
+            navigateToPage(context, 'Unknown Folder', file, fileType);
+        }
+    } catch (e) {
+        print('Error fetching folder name: $e');
+        navigateToPage(context, 'Unknown Folder', file, fileType);
+    }
+}
+
+// 강의 파일 또는 콜론 파일 페이지로 네비게이션
+void navigateToPage(BuildContext context, String folderName, Map<String, dynamic> file, String fileType) {
+    Widget page = fileType == 'lecture' ? RecordPage(
+        selectedFolderId: file['folder_id'].toString(),
+        noteName: file['file_name'] ?? 'Unknown Note',
+        fileUrl: file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
+        folderName: folderName,
+        recordingState: RecordingState.recorded,
+        lectureName: file['lecture_name'] ?? 'Unknown Lecture',
+    ) : ColonPage(
+        folderName: folderName,
+        noteName: file['file_name'] ?? 'Unknown Note',
+        lectureName: file['lecture_name'] ?? 'Unknown Lecture',
+        createdAt: file['created_at'] ?? 'Unknown Date',
+    );
+
+    Navigator.push(context, MaterialPageRoute(builder: (context) => page));
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -294,8 +335,10 @@ class _MainPageState extends State<MainPage> {
                   : lectureFiles.take(3).map((file) {
                       return GestureDetector(
                         onTap: () {
-                          print(
-                              'Lecture ${file['file_name'] ?? "N/A"} is clicked');
+                          print('Lecture ${file['file_name'] ?? "N/A"} is clicked');
+                          print('File details: $file');
+                          fetchFolderAndNavigate(context, file['folder_id'],'lecture', file);
+                   
                         },
                         child: LectureExample(
                           lectureName: file['file_name'] ?? 'Unknown',
@@ -399,8 +442,10 @@ class _MainPageState extends State<MainPage> {
                   : colonFiles.take(3).map((file) {
                       return GestureDetector(
                         onTap: () {
-                          print(
-                              'Colon ${file['file_name'] ?? "N/A"} is clicked');
+                          print('Colon ${file['file_name'] ?? "N/A"} is clicked');
+                          print('Colon file clicked: ${file['file_name']}');
+                          print('File details: $file');
+                          fetchFolderAndNavigate(context, file['folder_id'],'colon', file);
                         },
                         child: LectureExample(
                           lectureName: file['file_name'] ?? 'Unknown',
@@ -442,8 +487,9 @@ class _MainPageState extends State<MainPage> {
           ),
         ),
       ),
-      bottomNavigationBar:
-          buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
+      bottomNavigationBar:buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }
+
+
