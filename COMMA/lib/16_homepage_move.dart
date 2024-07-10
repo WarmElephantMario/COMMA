@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_plugin/12_homepage_search.dart';
-import 'components.dart'; 
+import 'components.dart';
 import '14_homepage_search_result.dart';
 import 'package:provider/provider.dart';
 import 'model/user_provider.dart';
@@ -13,6 +13,7 @@ import '63record.dart';
 import '66colon.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -35,47 +36,80 @@ class _MainPageState extends State<MainPage> {
   }
 
   Future<void> fetchLectureFiles() async {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final response = await http.get(Uri.parse(
-        '${API.baseUrl}/api/getLectureFiles/${userProvider.user!.user_id}'));
+    try {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final response = await http.get(Uri.parse(
+          'http://localhost:3000/api/getLectureFiles/${userProvider.user!.user_id}'));
 
-    if (response.statusCode == 200) {
-      setState(() {
-        lectureFiles =
-            List<Map<String, dynamic>>.from(jsonDecode(response.body)['files']);
-      });
-    } else {
-      throw Exception('Failed to load lecture files');
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        setState(() {
+          lectureFiles = List<Map<String, dynamic>>.from(
+              jsonDecode(response.body)['files']);
+        });
+      } else {
+        print('최신 강의 파일 불러오기 실패: ${response.statusCode}');
+        Fluttertoast.showToast(
+            msg: '최신 강의 파일을 불러오는 중 오류가 발생했습니다: ${response.statusCode}');
+        throw Exception('Failed to load lecture files');
+      }
+    } catch (e) {
+      print('최신 강의 파일 불러오기 중 오류 발생 $e');
+      Fluttertoast.showToast(msg: '최신 강의 파일을 불러오는 중 오류가 발생했습니다: $e');
     }
   }
 
   Future<void> fetchColonFiles() async {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final response = await http.get(Uri.parse(
-        '${API.baseUrl}/api/getColonFiles/${userProvider.user!.user_id}'));
+    try {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final response = await http.get(Uri.parse(
+          'http://localhost:3000/api/getColonFiles/${userProvider.user!.user_id}'));
 
-    if (response.statusCode == 200) {
-      setState(() {
-        colonFiles =
-            List<Map<String, dynamic>>.from(jsonDecode(response.body)['files']);
-      });
-    } else {
-      throw Exception('Failed to load colon files');
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        setState(() {
+          colonFiles = List<Map<String, dynamic>>.from(
+              jsonDecode(response.body)['files']);
+        });
+      } else {
+        print('콜론 파일 불러오기 실패: ${response.statusCode}');
+        Fluttertoast.showToast(
+            msg: '콜론 파일을 불러오는 중 오류가 발생했습니다: ${response.statusCode}');
+        throw Exception('Failed to load colon files');
+      }
+    } catch (e) {
+      print('콜론 파일 불러오기 중 오류 발생 $e');
+      Fluttertoast.showToast(msg: '콜론 파일을 불러오는 중 오류가 발생했습니다: $e');
     }
   }
 
   Future<void> fetchOtherFolders(String fileType, int currentFolderId) async {
-    final response = await http.get(Uri.parse(
-        '${API.baseUrl}/api/getOtherFolders/$fileType/$currentFolderId'));
+    try {
+      final response = await http.get(Uri.parse(
+          '${API.baseUrl}/api/getOtherFolders/$fileType/$currentFolderId'));
 
-    if (response.statusCode == 200) {
-      setState(() {
-        folders = List<Map<String, dynamic>>.from(jsonDecode(response.body));
-        folders.removeWhere((folder) => folder['id'] == currentFolderId);
-        print('Fetched folders: $folders');
-      });
-    } else {
-      throw Exception('Failed to load folders');
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        setState(() {
+          folders = List<Map<String, dynamic>>.from(jsonDecode(response.body));
+          folders.removeWhere((folder) => folder['id'] == currentFolderId);
+          print('Fetched folders: $folders');
+        });
+      } else {
+        print('폴더 불러오기 실패: ${response.statusCode}');
+        Fluttertoast.showToast(
+            msg: '폴더를 불러오는 중 오류가 발생했습니다: ${response.statusCode}');
+        throw Exception('Failed to load folders');
+      }
+    } catch (e) {
+      print('폴더 불러오기 중 오류 발생 $e');
+      Fluttertoast.showToast(msg: '폴더를 불러오는 중 오류가 발생했습니다: $e');
     }
   }
 
@@ -104,6 +138,9 @@ class _MainPageState extends State<MainPage> {
         headers: {'Content-Type': 'application/json'},
       );
 
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
       if (response.statusCode == 200) {
         setState(() {
           if (fileType == 'lecture') {
@@ -123,11 +160,14 @@ class _MainPageState extends State<MainPage> {
           }
         });
       } else {
+        print('파일 이름 변경 실패: ${response.statusCode}');
+        Fluttertoast.showToast(
+            msg: '파일 이름 변경 중 오류가 발생했습니다: ${response.statusCode}');
         throw Exception('Failed to rename file');
       }
     } catch (error) {
       print('Error renaming file: $error');
-      rethrow;
+      Fluttertoast.showToast(msg: '파일 이름 변경 중 오류가 발생했습니다: $error');
     }
   }
 
@@ -136,6 +176,9 @@ class _MainPageState extends State<MainPage> {
       final response = await http.delete(
         Uri.parse('${API.baseUrl}/api/$fileType-files/$fileId'),
       );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
         setState(() {
@@ -146,11 +189,14 @@ class _MainPageState extends State<MainPage> {
           }
         });
       } else {
+        print('파일 삭제 실패: ${response.statusCode}');
+        Fluttertoast.showToast(
+            msg: '파일 삭제 중 오류가 발생했습니다: ${response.statusCode}');
         throw Exception('Failed to delete file');
       }
     } catch (error) {
       print('Error deleting file: $error');
-      rethrow;
+      Fluttertoast.showToast(msg: '파일 삭제 중 오류가 발생했습니다: $error');
     }
   }
 
@@ -162,6 +208,9 @@ class _MainPageState extends State<MainPage> {
         headers: {'Content-Type': 'application/json'},
       );
 
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
       if (response.statusCode == 200) {
         setState(() {
           if (fileType == 'lecture') {
@@ -181,53 +230,60 @@ class _MainPageState extends State<MainPage> {
           }
         });
       } else {
+        print('파일 이동 실패: ${response.statusCode}');
+        Fluttertoast.showToast(
+            msg: '파일 이동 중 오류가 발생했습니다: ${response.statusCode}');
         throw Exception('Failed to move file');
       }
     } catch (error) {
       print('Error moving file: $error');
-      rethrow;
+      Fluttertoast.showToast(msg: '파일 이동 중 오류가 발생했습니다: $error');
     }
   }
-// 강의 파일 클릭 이벤트에서 폴더 이름 조회
-void fetchFolderAndNavigate(BuildContext context, int folderId, String fileType, Map<String, dynamic> file) async {
-    try {
-        final response = await http.get(Uri.parse('${API.baseUrl}/api/getFolderName/$fileType/$folderId'));
-        if (response.statusCode == 200) {
-            var data = jsonDecode(response.body);
-            navigateToPage(context, data['folder_name'] ?? 'Unknown Folder', file, fileType);
-        } else {
-            print('Failed to load folder name: ${response.statusCode}');
-            navigateToPage(context, 'Unknown Folder', file, fileType);
-        }
-    } catch (e) {
-        print('Error fetching folder name: $e');
-        navigateToPage(context, 'Unknown Folder', file, fileType);
-    }
-}
 
-// 강의 파일 또는 콜론 파일 페이지로 네비게이션
-void navigateToPage(BuildContext context, String folderName, Map<String, dynamic> file, String fileType) {
-    Widget page = fileType == 'lecture' ? RecordPage(
-        selectedFolderId: file['folder_id'].toString(),
-        noteName: file['file_name'] ?? 'Unknown Note',
-        fileUrl: file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
-        folderName: folderName,
-        recordingState: RecordingState.recorded,
-        lectureName: file['lecture_name'] ?? 'Unknown Lecture',
-    ) : ColonPage(
-        folderName: folderName,
-        noteName: file['file_name'] ?? 'Unknown Note',
-        lectureName: file['lecture_name'] ?? 'Unknown Lecture',
-        createdAt: file['created_at'] ?? 'Unknown Date',
-    );
+  void fetchFolderAndNavigate(BuildContext context, int folderId,
+      String fileType, Map<String, dynamic> file) async {
+    try {
+      final response = await http.get(
+          Uri.parse('${API.baseUrl}/api/getFolderName/$fileType/$folderId'));
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+        navigateToPage(
+            context, data['folder_name'] ?? 'Unknown Folder', file, fileType);
+      } else {
+        print('Failed to load folder name: ${response.statusCode}');
+        navigateToPage(context, 'Unknown Folder', file, fileType);
+      }
+    } catch (e) {
+      print('Error fetching folder name: $e');
+      navigateToPage(context, 'Unknown Folder', file, fileType);
+    }
+  }
+
+  void navigateToPage(BuildContext context, String folderName,
+      Map<String, dynamic> file, String fileType) {
+    Widget page = fileType == 'lecture'
+        ? RecordPage(
+            selectedFolderId: file['folder_id'].toString(),
+            noteName: file['file_name'] ?? 'Unknown Note',
+            fileUrl:
+                file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
+            folderName: folderName,
+            recordingState: RecordingState.recorded,
+            lectureName: file['lecture_name'] ?? 'Unknown Lecture',
+          )
+        : ColonPage(
+            folderName: folderName,
+            noteName: file['file_name'] ?? 'Unknown Note',
+            lectureName: file['lecture_name'] ?? 'Unknown Lecture',
+            createdAt: file['created_at'] ?? 'Unknown Date',
+          );
 
     Navigator.push(context, MaterialPageRoute(builder: (context) => page));
-}
-
+  }
 
   @override
   Widget build(BuildContext context) {
-    // final size = MediaQuery.of(context).size;
     final userProvider = Provider.of<UserProvider>(context);
 
     return Scaffold(
@@ -335,10 +391,11 @@ void navigateToPage(BuildContext context, String folderName, Map<String, dynamic
                   : lectureFiles.take(3).map((file) {
                       return GestureDetector(
                         onTap: () {
-                          print('Lecture ${file['file_name'] ?? "N/A"} is clicked');
+                          print(
+                              'Lecture ${file['file_name'] ?? "N/A"} is clicked');
                           print('File details: $file');
-                          fetchFolderAndNavigate(context, file['folder_id'],'lecture', file);
-                   
+                          fetchFolderAndNavigate(
+                              context, file['folder_id'], 'lecture', file);
                         },
                         child: LectureExample(
                           lectureName: file['file_name'] ?? 'Unknown',
@@ -442,10 +499,12 @@ void navigateToPage(BuildContext context, String folderName, Map<String, dynamic
                   : colonFiles.take(3).map((file) {
                       return GestureDetector(
                         onTap: () {
-                          print('Colon ${file['file_name'] ?? "N/A"} is clicked');
+                          print(
+                              'Colon ${file['file_name'] ?? "N/A"} is clicked');
                           print('Colon file clicked: ${file['file_name']}');
                           print('File details: $file');
-                          fetchFolderAndNavigate(context, file['folder_id'],'colon', file);
+                          fetchFolderAndNavigate(
+                              context, file['folder_id'], 'colon', file);
                         },
                         child: LectureExample(
                           lectureName: file['file_name'] ?? 'Unknown',
@@ -487,9 +546,8 @@ void navigateToPage(BuildContext context, String folderName, Map<String, dynamic
           ),
         ),
       ),
-      bottomNavigationBar:buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
+      bottomNavigationBar:
+          buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }
-
-

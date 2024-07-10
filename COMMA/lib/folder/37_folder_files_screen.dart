@@ -10,11 +10,10 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../model/user_provider.dart';
 
-
 class FolderFilesScreen extends StatefulWidget {
   final String folderName;
-  final int folderId; 
-  final String folderType; 
+  final int folderId;
+  final String folderType;
 
   const FolderFilesScreen({
     super.key,
@@ -38,6 +37,9 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
   }
 
   Future<void> fetchFiles() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userId = userProvider.user?.user_id;
+
     final response = await http.get(Uri.parse(
       'http://localhost:3000/api/${widget.folderType}-files/${widget.folderId}',
     ));
@@ -62,10 +64,6 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
     } else {
       throw Exception('Failed to load files');
     }
-  }
-
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userId = userProvider.user?.user_id;
 
     if (userId != null) {
       final response = await http.get(Uri.parse(
@@ -143,11 +141,10 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
   }
 
   void _openFile(Map<String, dynamic> file) {
-
     // lectureName 로그 출력 추가
     print('Opening file: ${file['file_name']}');
     print('Lecture name: ${file['lecture_name']}');
-    
+
     if (widget.folderType == 'colon') {
       Navigator.push(
         context,
@@ -206,25 +203,23 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
                     child: FileListItem(
                       file: file,
                       onRename: () => showRenameDialog(
-                        context,
-                        index,
-                        files,
-                        (id, newName) => _renameFile(id, newName),
-                        setState,
-                        "파일 이름 바꾸기", // 다이얼로그 제목
-                        "file_name" // 변경할 항목 타입
-                      ),
+                          context,
+                          index,
+                          files,
+                          (id, newName) => _renameFile(id, newName),
+                          setState,
+                          "파일 이름 바꾸기", // 다이얼로그 제목
+                          "file_name" // 변경할 항목 타입
+                          ),
                       onDelete: () => showConfirmationDialog(
-                        context,
-                        "정말 파일을 삭제하시겠습니까?",
-                        "파일을 삭제하면 다시 복구할 수 없습니다.",
-                        () async{
-                           await _deleteFile(file['id']);
-                          setState(() {
-                            files.removeAt(index);
-                          });
-                        }
-                      ),
+                          context,
+                          "정말 파일을 삭제하시겠습니까?",
+                          "파일을 삭제하면 다시 복구할 수 없습니다.", () async {
+                        await _deleteFile(file['id']);
+                        setState(() {
+                          files.removeAt(index);
+                        });
+                      }),
                     ),
                   );
                 }).toList(),

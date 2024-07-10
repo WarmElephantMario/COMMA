@@ -5,12 +5,12 @@ import '62lecture_start.dart';
 import '30_folder_screen.dart';
 import '33_mypage_screen.dart';
 import '60prepare.dart';
-import 'model/user.dart';
+import 'package:provider/provider.dart';
+import 'model/user_provider.dart';
 import '63record.dart';
 import '66colon.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
 
 BottomNavigationBar buildBottomNavigationBar(
     BuildContext context, int currentIndex, Function(int) onItemTapped) {
@@ -74,22 +74,22 @@ BottomNavigationBar buildBottomNavigationBar(
   );
 }
 
+Future<List<Map<String, String>>> fetchFolders() async {
+  final response =
+      await http.get(Uri.parse('http://localhost:3000/api/lecture-folders'));
 
-  Future<List<Map<String, String>>> fetchFolders() async {
-    final response = await http.get(Uri.parse('http://localhost:3000/api/lecture-folders'));
-
-    if (response.statusCode == 200) {
-      final List<dynamic> folderList = json.decode(response.body);
-      return folderList.map((folder) {
-        return {
-          'id': folder['id'].toString(),
-          'name': folder['folder_name'].toString(),
-        };
-      }).toList();
-    } else {
-      throw Exception('Failed to load folders');
-    }
+  if (response.statusCode == 200) {
+    final List<dynamic> folderList = json.decode(response.body);
+    return folderList.map((folder) {
+      return {
+        'id': folder['id'].toString(),
+        'name': folder['folder_name'].toString(),
+      };
+    }).toList();
+  } else {
+    throw Exception('Failed to load folders');
   }
+}
 
 //showQuickMenu 함수
 void showQuickMenu(
@@ -298,7 +298,9 @@ void showConfirmationDialog(
 }
 
 // Colon alarm
-void showColonCreatedDialog(BuildContext context, String folderName, String noteName,String lectureName) {
+void showColonCreatedDialog(BuildContext context, String folderName,
+    String noteName, String lectureName) {
+  final userProvider = Provider.of<UserProvider>(context, listen: false);
   showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -306,7 +308,7 @@ void showColonCreatedDialog(BuildContext context, String folderName, String note
         backgroundColor: Colors.white,
         title: Column(
           children: [
-            Text(
+            const Text(
               '콜론이 생성되었습니다.',
               style: TextStyle(
                 color: Color(0xFF545454),
@@ -319,7 +321,7 @@ void showColonCreatedDialog(BuildContext context, String folderName, String note
             const SizedBox(height: 4),
             Text(
               '폴더 이름: $folderName(:)', // 기본폴더 대신 folderName 사용
-              style: TextStyle(
+              style: const TextStyle(
                 color: Color(0xFF245B3A),
                 fontSize: 14,
                 fontFamily: 'DM Sans',
@@ -328,7 +330,7 @@ void showColonCreatedDialog(BuildContext context, String folderName, String note
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 4),
-            Text(
+            const Text(
               '으로 이동하시겠습니까?',
               style: TextStyle(
                 color: Color(0xFF545454),
@@ -349,7 +351,7 @@ void showColonCreatedDialog(BuildContext context, String folderName, String note
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: Text(
+                  child: const Text(
                     '취소',
                     style: TextStyle(
                       color: Color(0xFFFFA17A),
@@ -359,13 +361,16 @@ void showColonCreatedDialog(BuildContext context, String folderName, String note
                     ),
                   ),
                 ),
-                SizedBox(width: 16),
+                const SizedBox(width: 16),
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
-                    createColonFolder(folderName + "(:)", noteName, '',lectureName).then((_) async {
+                    createColonFolder("$folderName (:)", noteName, '',
+                            lectureName, userProvider.user!.user_id)
+                        .then((_) async {
                       // Fetch the created_at value after creating the folder and file
-                      var fetchUrl = 'http://localhost:3000/api/get-colon-file?folderName=${folderName + "(:)"}';
+                      var fetchUrl =
+                          'http://localhost:3000/api/get-colon-file?folderName=${"$folderName(:)"}';
                       var fetchResponse = await http.get(Uri.parse(fetchUrl));
 
                       if (fetchResponse.statusCode == 200) {
@@ -376,15 +381,20 @@ void showColonCreatedDialog(BuildContext context, String folderName, String note
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => ColonPage(folderName: folderName, noteName: noteName,lectureName: lectureName,createdAt: createdAt),
+                            builder: (context) => ColonPage(
+                                folderName: folderName,
+                                noteName: noteName,
+                                lectureName: lectureName,
+                                createdAt: createdAt),
                           ),
                         );
                       } else {
-                        print('Failed to fetch colon file details: ${fetchResponse.statusCode}');
+                        print(
+                            'Failed to fetch colon file details: ${fetchResponse.statusCode}');
                       }
                     });
                   },
-                  child: Text(
+                  child: const Text(
                     '확인',
                     style: TextStyle(
                       color: Color(0xFF545454),
@@ -403,8 +413,8 @@ void showColonCreatedDialog(BuildContext context, String folderName, String note
   );
 }
 
-
-Future<void> createColonFolder(String folderName, String noteName, String fileUrl,String lectureName) async {
+Future<void> createColonFolder(String folderName, String noteName,
+    String fileUrl, String lectureName, int userId) async {
   var url = 'http://localhost:3000/api/create-colon-folder';
 
   var body = {
@@ -412,6 +422,7 @@ Future<void> createColonFolder(String folderName, String noteName, String fileUr
     'noteName': noteName, // noteName 추가
     'fileUrl': '', // 빈 문자열
     'lectureName': lectureName,
+    'userId': userId
   };
 
   try {
@@ -431,7 +442,6 @@ Future<void> createColonFolder(String folderName, String noteName, String fileUr
   }
 }
 
-
 // Learning - 강의 자료 학습중 팝업
 void showLearningDialog(BuildContext context, String fileName, String fileURL) {
   showDialog(
@@ -439,12 +449,13 @@ void showLearningDialog(BuildContext context, String fileName, String fileURL) {
     barrierDismissible: false,
     builder: (BuildContext context) {
       // Navigate to LectureStartPage after 1 second
-      Future.delayed(Duration(seconds: 1), () {
+      Future.delayed(const Duration(seconds: 1), () {
         Navigator.of(context).pop(); // Close the dialog
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => LectureStartPage(fileName: fileName, fileURL: fileURL),
+            builder: (context) =>
+                LectureStartPage(fileName: fileName, fileURL: fileURL),
           ),
         );
       });
@@ -507,8 +518,6 @@ void showLearningDialog(BuildContext context, String fileName, String fileURL) {
     },
   );
 }
-
-
 
 //alarm
 //delete alarm
@@ -1064,7 +1073,7 @@ class LectureExample extends StatelessWidget {
     );
   }
 }
-//lecture 1
+// lecture 1
 // class LectureExample extends StatelessWidget {
 //   final String lectureName;
 //   final String date;
