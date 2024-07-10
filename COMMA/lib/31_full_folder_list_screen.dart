@@ -1,16 +1,17 @@
-import 'package:flutter/material.dart';
-import 'components.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'folder/37_folder_files_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_plugin/components.dart';
+import 'package:provider/provider.dart';
+import '../model/user_provider.dart';
+import 'folder/37_folder_files_screen.dart'; // FolderFilesScreen이 정의된 파일 임포트
+import 'api/api.dart';
 
 class FullFolderListScreen extends StatefulWidget {
-  final List<Map<String, dynamic>> folders;
   final String title;
 
   const FullFolderListScreen({
     super.key,
-    required this.folders,
     required this.title,
   });
 
@@ -19,9 +20,7 @@ class FullFolderListScreen extends StatefulWidget {
 }
 
 class _FullFolderListScreenState extends State<FullFolderListScreen> {
-  late List<Map<String, dynamic>> folders;
-  late List<Map<String, dynamic>> colonFolders;
-
+  List<Map<String, dynamic>> folders = [];
   int _selectedIndex = 1;
 
   void _onItemTapped(int index) {
@@ -33,70 +32,110 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
   @override
   void initState() {
     super.initState();
-    folders = widget.folders;
-    colonFolders = folders.where((folder) => folder['type'] == 'colon').toList();
+    fetchFolders();
   }
 
-  Future<void> _addFolder(String folderName) async {
-    final String folderType = widget.title == '강의폴더' ? 'lecture' : 'colon';
-    try {
-      final response = await http.post(
-        Uri.parse('http://localhost:3000/api/$folderType-folders'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, String>{
-          'folder_name': folderName,
-        }),
+  Future<void> fetchFolders() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userId = userProvider.user?.user_id;
+
+    if (userId != null) {
+      final String folderType = widget.title == '강의폴더' ? 'lecture' : 'colon';
+      final response = await http.get(
+        Uri.parse(
+            '${API.baseUrl}/api/$folderType-folders?user_id=$userId'),
       );
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> newFolder = jsonDecode(response.body);
         setState(() {
-          folders.add(newFolder);
-          if (folderType == 'colon') {
-            colonFolders.add(newFolder);
-          }
+          folders = List<Map<String, dynamic>>.from(jsonDecode(response.body));
         });
+      } else {
+        throw Exception('Failed to load folders');
       }
-    } catch (e) {
-      throw Exception('Failed to add folder');
+    }
+  }
+
+  Future<void> _addFolder(String folderName) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userId = userProvider.user?.user_id;
+
+    if (userId != null) {
+      final String folderType = widget.title == '강의폴더' ? 'lecture' : 'colon';
+      try {
+        final response = await http.post(
+          Uri.parse('${API.baseUrl}/api/$folderType-folders'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(<String, dynamic>{
+            'folder_name': folderName,
+            'user_id': userId,
+          }),
+        );
+
+        if (response.statusCode == 200) {
+          final Map<String, dynamic> newFolder = jsonDecode(response.body);
+          setState(() {
+            folders.add(newFolder);
+          });
+        }
+      } catch (e) {
+        throw Exception('Failed to add folder');
+      }
     }
   }
 
   Future<void> _renameFolder(int id, String newName) async {
-    final String folderType = widget.title == '강의폴더' ? 'lecture' : 'colon';
-    try {
-      final response = await http.put(
-        Uri.parse('http://localhost:3000/api/$folderType-folders/$id'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, String>{
-          'folder_name': newName,
-        }),
-      );
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userId = userProvider.user?.user_id;
 
-      if (response.statusCode != 200) {
+    if (userId != null) {
+      final String folderType = widget.title == '강의폴더' ? 'lecture' : 'colon';
+      try {
+        final response = await http.put(
+          Uri.parse('${API.baseUrl}/api/$folderType-folders/$id'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(<String, dynamic>{
+            'folder_name': newName,
+            'user_id': userId,
+          }),
+        );
+
+        if (response.statusCode != 200) {
+          throw Exception('Failed to rename folder');
+        }
+      } catch (e) {
         throw Exception('Failed to rename folder');
       }
-    } catch (e) {
-      throw Exception('Failed to rename folder');
     }
   }
 
   Future<void> _deleteFolder(int id) async {
-    final String folderType = widget.title == '강의폴더' ? 'lecture' : 'colon';
-    try {
-      final response = await http.delete(
-        Uri.parse('http://localhost:3000/api/$folderType-folders/$id'),
-      );
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userId = userProvider.user?.user_id;
 
-      if (response.statusCode != 200) {
+    if (userId != null) {
+      final String folderType = widget.title == '강의폴더' ? 'lecture' : 'colon';
+      try {
+        final response = await http.delete(
+          Uri.parse('${API.baseUrl}/api/$folderType-folders/$id'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(<String, dynamic>{
+            'user_id': userId,
+          }),
+        );
+
+        if (response.statusCode != 200) {
+          throw Exception('Failed to delete folder');
+        }
+      } catch (e) {
         throw Exception('Failed to delete folder');
       }
-    } catch (e) {
-      throw Exception('Failed to delete folder');
     }
   }
 
@@ -163,23 +202,24 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
                     },
                     child: FolderListItem(
                       folder: folder,
+                      fileCount: folder['file_count'] ?? 0, // 파일 개수 전달
                       onRename: () => showRenameDialog(
                         context,
                         index,
                         folders,
                         _renameFolder,
                         setState,
-                        "폴더 이름 바꾸기", // 다이얼로그 제목 
+                        "폴더 이름 바꾸기", // 다이얼로그 제목
                         "folder_name", // 변경할 항목 타입
                       ),
                       onDelete: () => showConfirmationDialog(
                         context,
-                        "정말로 폴더 '${colonFolders[index]['name']}'을(를) 삭제하시겠습니까?", // 다이얼로그 제목
+                        "정말로 폴더 '${folder['folder_name']}'을(를) 삭제하시겠습니까?", // 다이얼로그 제목
                         "폴더를 삭제하면 다시 복구할 수 없습니다.", // 다이얼로그 내용
                         () async {
-                          await _deleteFolder(colonFolders[index]['id']);
+                          await _deleteFolder(folder['id']);
                           setState(() {
-                            colonFolders.removeAt(index);
+                            folders.removeAt(index);
                           });
                         },
                       ),
@@ -191,7 +231,8 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
           );
         },
       ),
-      bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
+      bottomNavigationBar:
+          buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }

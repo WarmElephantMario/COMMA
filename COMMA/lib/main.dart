@@ -6,13 +6,24 @@ import 'dart:io' show Platform, File;
 import 'components.dart';
 import '60prepare.dart';
 import 'firebase_options.dart';
+import 'package:provider/provider.dart';
+import 'components.dart';
+import '1_Splash_green.dart';
+import 'model/user_provider.dart';
 
-void main() async {
+void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -52,7 +63,8 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
+      bottomNavigationBar:
+          buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }
@@ -68,7 +80,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
 // class FigmaToCodeApp extends StatelessWidget {
 //   const FigmaToCodeApp({super.key});
-
+//
 //   @override
 //   Widget build(BuildContext context) {
 //     return GetMaterialApp(

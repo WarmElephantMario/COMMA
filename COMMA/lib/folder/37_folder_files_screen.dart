@@ -6,6 +6,10 @@ import 'package:flutter_plugin/components.dart';
 import 'package:flutter_plugin/30_folder_screen.dart';
 import 'package:flutter_plugin/66colon.dart'; // ColonPage import
 import 'package:flutter_plugin/63record.dart'; // RecordPage import
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../model/user_provider.dart';
+
 
 class FolderFilesScreen extends StatefulWidget {
   final String folderName;
@@ -60,18 +64,69 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
     }
   }
 
-  Future<void> _renameFile(String folderType, int id, String newName) async {
-    final url = Uri.parse(
-        'http://localhost:3000/api/${folderType == 'lecture' ? 'lecture' : 'colon'}-folders/$id');
-    try {
-      final response = await http.put(url,
-          body: jsonEncode({'folder_name': newName}),
-          headers: {'Content-Type': 'application/json'});
-      if (response.statusCode != 200) {
-        throw Exception('Failed to rename folder');
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userId = userProvider.user?.user_id;
+
+    if (userId != null) {
+      final response = await http.get(Uri.parse(
+        'http://localhost:3000/api/${widget.folderType}-files/${widget.folderId}?user_id=$userId',
+      ));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> fileData = jsonDecode(response.body);
+        setState(() {
+          files = fileData.map((file) {
+            return {
+              'file_name': file['file_name'] ?? 'Unknown',
+              'file_url': file['file_url'] ?? '',
+              'created_at': file['created_at'] ?? '',
+              'id': file['id'] // 파일 ID 추가
+            };
+          }).toList();
+        });
+      } else {
+        throw Exception('Failed to load files');
       }
-    } catch (e) {
-      print(e);
+    }
+  }
+
+  Future<void> _renameFile(int id, String newName) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userId = userProvider.user?.user_id;
+
+    if (userId != null) {
+      final url =
+          Uri.parse('http://localhost:3000/api/${widget.folderType}-files/$id');
+      try {
+        final response = await http.put(url,
+            body: jsonEncode({'file_name': newName, 'user_id': userId}),
+            headers: {'Content-Type': 'application/json'});
+        if (response.statusCode != 200) {
+          throw Exception('Failed to rename file');
+        }
+      } catch (e) {
+        print(e);
+      }
+    }
+  }
+
+  Future<void> _deleteFile(int id) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userId = userProvider.user?.user_id;
+
+    if (userId != null) {
+      final url =
+          Uri.parse('http://localhost:3000/api/${widget.folderType}-files/$id');
+      try {
+        final response = await http.delete(url,
+            body: jsonEncode({'user_id': userId}),
+            headers: {'Content-Type': 'application/json'});
+        if (response.statusCode != 200) {
+          throw Exception('Failed to delete file');
+        }
+      } catch (e) {
+        print(e);
+      }
     }
   }
 
@@ -154,7 +209,7 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
                         context,
                         index,
                         files,
-                        _renameFile,
+                        (id, newName) => _renameFile(id, newName),
                         setState,
                         "파일 이름 바꾸기", // 다이얼로그 제목
                         "file_name" // 변경할 항목 타입
@@ -163,8 +218,8 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
                         context,
                         "정말 파일을 삭제하시겠습니까?",
                         "파일을 삭제하면 다시 복구할 수 없습니다.",
-                        () {
-                          // 파일 삭제 로직 추가
+                        () async{
+                           await _deleteFile(file['id']);
                           setState(() {
                             files.removeAt(index);
                           });
@@ -178,7 +233,8 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
           );
         },
       ),
-      bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
+      bottomNavigationBar:
+          buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }
@@ -195,10 +251,11 @@ class FileListItem extends StatelessWidget {
     required this.onDelete,
   });
 
-  String formatDateTime(String dateTime) {
+  String formatDateTimeToKorean(String dateTime) {
     if (dateTime.isEmpty) return 'Unknown';
-    final DateTime parsedDateTime = DateTime.parse(dateTime);
-    return DateFormat('yyyy/MM/dd HH:mm').format(parsedDateTime);
+    final DateTime utcDateTime = DateTime.parse(dateTime);
+    final DateTime koreanDateTime = utcDateTime.add(const Duration(hours: 9));
+    return DateFormat('yyyy/MM/dd HH:mm').format(koreanDateTime);
   }
 
   @override
@@ -243,7 +300,7 @@ class FileListItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                formatDateTime(file['created_at'] ?? ''),
+                formatDateTimeToKorean(file['created_at'] ?? ''),
                 style: const TextStyle(
                   fontSize: 12,
                   color: Color(0xFF6C7A89),
