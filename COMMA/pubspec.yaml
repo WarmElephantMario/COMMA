@@ -59,7 +59,6 @@ dev_dependencies:
   http: ^0.13.3
   fluttertoast: ^8.0.9
   shared_preferences: ^2.0.15
-  intl: ^0.17.0
 
 
   # The "flutter_lints" package below contains a set of recommended lints to
