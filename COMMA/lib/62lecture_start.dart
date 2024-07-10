@@ -3,12 +3,16 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'components.dart';
 import '63record.dart';
+import 'package:provider/provider.dart';
+import 'model/user.dart';
+import 'model/user_provider.dart';
 
 class LectureStartPage extends StatefulWidget {
   final String fileName;
   final String fileURL;
 
-  LectureStartPage({required this.fileName, required this.fileURL});
+  const LectureStartPage(
+      {super.key, required this.fileName, required this.fileURL});
 
   @override
   _LectureStartPageState createState() => _LectureStartPageState();
@@ -16,7 +20,7 @@ class LectureStartPage extends StatefulWidget {
 
 class _LectureStartPageState extends State<LectureStartPage> {
   int _selectedIndex = 2;
-  String _selectedFolder = '기본 폴더';
+  String _selectedFolder = '짱구';
   String _noteName = '새로운 노트';
   List<Map<String, dynamic>> folderList = [];
   List<Map<String, dynamic>> items = [
@@ -42,12 +46,22 @@ class _LectureStartPageState extends State<LectureStartPage> {
   }
 
   Future<void> fetchFolderList() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userId = userProvider.user?.user_id ?? '';
+
     try {
-      final response = await http.get(Uri.parse('http://localhost:3000/api/lecture-folders'));
+      final response = await http
+          .get(Uri.parse('http://localhost:3000/api/lecture-folders/$userId'));
       if (response.statusCode == 200) {
         final List<dynamic> folderData = json.decode(response.body);
         setState(() {
-          folderList = folderData.map((folder) => {'id': folder['id'], 'folder_name': folder['folder_name'], 'selected': false}).toList();
+          folderList = folderData
+              .map((folder) => {
+                    'id': folder['id'],
+                    'folder_name': folder['folder_name'],
+                    'selected': false
+                  })
+              .toList();
         });
       } else {
         throw Exception('Failed to load folders');
@@ -58,7 +72,11 @@ class _LectureStartPageState extends State<LectureStartPage> {
   }
 
   Future<void> fetchOtherFolders(String fileType, int currentFolderId) async {
-    final response = await http.get(Uri.parse('http://localhost:3000/api/getOtherFolders/$fileType/$currentFolderId'));
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userId = userProvider.user?.user_id ?? '';
+
+    final response = await http.get(Uri.parse(
+        'http://localhost:3000/api/getOtherFolders/$fileType/$currentFolderId?user_id=$userId'));
 
     if (response.statusCode == 200) {
       setState(() {
@@ -70,7 +88,8 @@ class _LectureStartPageState extends State<LectureStartPage> {
     }
   }
 
-  Future<void> moveItem(int fileId, int selectedFolderId, String fileType) async {
+  Future<void> moveItem(
+      int fileId, int selectedFolderId, String fileType) async {
     final response = await http.put(
       Uri.parse('http://localhost:3000/api/$fileType-files/move/$fileId'),
       headers: {'Content-Type': 'application/json'},
@@ -82,7 +101,8 @@ class _LectureStartPageState extends State<LectureStartPage> {
     }
   }
 
-  Future<void> showQuickMenu(BuildContext context, int fileId, String fileType, int currentFolderId) async {
+  Future<void> showQuickMenu(BuildContext context, int fileId, String fileType,
+      int currentFolderId) async {
     setState(() {
       folderList.clear();
     });
@@ -143,7 +163,10 @@ class _LectureStartPageState extends State<LectureStartPage> {
                         onPressed: () async {
                           final selectedFolder = folderList.firstWhere(
                               (folder) => folder['selected'] == true,
-                              orElse: () => {});
+                              orElse: () => {
+                                    'id': -1,
+                                    'folder_name': '기본 폴더'
+                                  }); // 조건에 맞는 폴더가 없으면 기본값 반환
                           final selectedFolderId = selectedFolder['id'];
                           await moveItem(fileId, selectedFolderId, fileType);
                           _selectFolder(selectedFolder['folder_name']);
@@ -220,13 +243,16 @@ class _LectureStartPageState extends State<LectureStartPage> {
   }
 
   int getFolderIdByName(String folderName) {
-    return folderList.firstWhere((folder) => folder['folder_name'] == folderName)['id'];
+    return folderList.firstWhere(
+      (folder) => folder['folder_name'] == folderName,
+      orElse: () => {'id': -1}, // 조건에 맞는 폴더가 없을 때 기본값 반환
+    )['id'];
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, 
+      backgroundColor: Colors.white,
       appBar: AppBar(
         toolbarHeight: 0,
       ),
@@ -236,7 +262,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 15),
-            Text(
+            const Text(
               '오늘의 학습 시작하기',
               style: TextStyle(
                 color: Color(0xFF414141),
@@ -247,7 +273,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
               ),
             ),
             const SizedBox(height: 30),
-            Text(
+            const Text(
               '업로드 한 강의 자료의 AI 학습이 완료되었어요!\n학습을 시작하려면 강의실에 입장하세요.',
               style: TextStyle(
                 color: Color(0xFF575757),
@@ -257,24 +283,24 @@ class _LectureStartPageState extends State<LectureStartPage> {
                 height: 1.2,
               ),
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             Container(
               decoration: BoxDecoration(
                 color: Colors.teal.shade50,
                 borderRadius: BorderRadius.circular(8),
               ),
-              padding: EdgeInsets.all(8),
+              padding: const EdgeInsets.all(8),
               child: Row(
                 children: [
-                  Icon(Icons.picture_as_pdf, color: Colors.red, size: 40),
-                  SizedBox(width: 15),
+                  const Icon(Icons.picture_as_pdf, color: Colors.red, size: 40),
+                  const SizedBox(width: 15),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           widget.fileName,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Color(0xFF575757),
                             fontSize: 15,
                             fontFamily: 'DM Sans',
@@ -289,10 +315,11 @@ class _LectureStartPageState extends State<LectureStartPage> {
                 ],
               ),
             ),
-            SizedBox(height: 15),
+            const SizedBox(height: 15),
             GestureDetector(
               onTap: () {
-                showQuickMenu(context, 1, 'lecture', 0); // fileId, fileType, currentFolderId 적절히 수정
+                showQuickMenu(context, 10, 'lecture',
+                    18); // fileId, fileType, currentFolderId 적절히 수정
               },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -315,7 +342,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
                 ],
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             GestureDetector(
               onTap: () {
                 showRenameDialog(
@@ -331,11 +358,11 @@ class _LectureStartPageState extends State<LectureStartPage> {
               child: Row(
                 children: [
                   Image.asset('assets/text.png'),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       _noteName,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Color(0xFF575757),
                         fontSize: 12,
                         fontFamily: 'DM Sans',
@@ -348,12 +375,16 @@ class _LectureStartPageState extends State<LectureStartPage> {
                 ],
               ),
             ),
-            SizedBox(height: 100),
+            const SizedBox(height: 100),
             Center(
               child: ClickButton(
                 text: '강의실 입장하기',
                 onPressed: () {
                   int selectedFolderId = getFolderIdByName(_selectedFolder);
+                  if (selectedFolderId == -1) {
+                    print('Selected folder not found');
+                    return;
+                  }
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -372,11 +403,11 @@ class _LectureStartPageState extends State<LectureStartPage> {
                 height: 50.0,
               ),
             ),
-            SizedBox(height: 16),
           ],
         ),
       ),
-      bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
+      bottomNavigationBar:
+          buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }

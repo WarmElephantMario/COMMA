@@ -3,7 +3,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:typed_data';
 import 'components.dart'; // components.dart 파일을 임포트
-import '62lecture_start.dart'; 
+import 'model/user_provider.dart';
+import 'package:provider/provider.dart';
 import '63record.dart'; // 추가: RecordPage 임포트
 
 class LearningPreparation extends StatefulWidget {
@@ -43,9 +44,13 @@ class _LearningPreparationState extends State<LearningPreparation> {
     }
   }
 
-  Future<void> _uploadFileToFirebase(Uint8List fileBytes, String fileName) async {
+  Future<void> _uploadFileToFirebase(
+      Uint8List fileBytes, String fileName) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
     try {
-      Reference storageRef = FirebaseStorage.instance.ref().child('uploads/$fileName');
+      Reference storageRef = FirebaseStorage.instance
+          .ref()
+          .child('uploads/${userProvider.user!.user_id}/$fileName');
       UploadTask uploadTask = storageRef.putData(fileBytes);
 
       TaskSnapshot taskSnapshot = await uploadTask;
@@ -64,7 +69,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, 
+      backgroundColor: Colors.white,
       appBar: AppBar(toolbarHeight: 0),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
@@ -104,9 +109,12 @@ class _LearningPreparationState extends State<LearningPreparation> {
               children: [
                 ClickButton(
                   text: _isMaterialEmbedded ? '강의 자료 학습 시작하기' : '강의 자료를 임베드하세요',
-                  onPressed: _isMaterialEmbedded ? () {
-                    showLearningDialog(context, _selectedFileName!, _downloadURL!); // 파일 이름과 URL을 전달하여 showLearningDialog 호출
-                  } : _pickFile,
+                  onPressed: _isMaterialEmbedded
+                      ? () {
+                          showLearningDialog(context, _selectedFileName!,
+                              _downloadURL!); // 파일 이름과 URL을 전달하여 showLearningDialog 호출
+                        }
+                      : _pickFile,
                   width: MediaQuery.of(context).size.width * 0.5,
                   height: 50.0,
                   iconPath: _isIconVisible ? 'assets/Vector.png' : null,
@@ -123,17 +131,18 @@ class _LearningPreparationState extends State<LearningPreparation> {
                     color: Colors.teal.shade50,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  padding: EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(8),
                   child: Row(
                     children: [
-                      Icon(Icons.picture_as_pdf, color: Colors.red, size: 40),
-                      SizedBox(width: 15),
+                      const Icon(Icons.picture_as_pdf,
+                          color: Colors.red, size: 40),
+                      const SizedBox(width: 15),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             _selectedFileName!,
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Color(0xFF575757),
                               fontSize: 15,
                               fontFamily: 'DM Sans',

@@ -14,7 +14,7 @@ app.use(cors());
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: '@yenamasumi17',
+    password: 'pasword',
     database: 'comma'
 });
 
@@ -429,8 +429,8 @@ app.get('/api/searchFiles', (req, res) => {
 });
 
 
-  //강의파일 생성
-  app.post('/api/lecture-files', (req, res) => {
+//강의파일 생성
+app.post('/api/lecture-files', (req, res) => {
     console.log('POST /api/lecture-files called');
     const { folder_id, file_name, file_url } = req.body;
 
@@ -449,11 +449,11 @@ app.get('/api/searchFiles', (req, res) => {
 });
 //콜론폴더 생성 및 파일 생성
 app.post('/api/create-colon-folder', (req, res) => {
-    const { folderName, noteName, fileUrl } = req.body;
-    
+    const { folderName, noteName, fileUrl, lectureName, userId } = req.body;
+
     // Check if the folder already exists
-    const checkFolderQuery = 'SELECT id FROM ColonFolders WHERE folder_name = ?';
-    db.query(checkFolderQuery, [folderName], (err, results) => {
+    const checkFolderQuery = 'SELECT id FROM ColonFolders WHERE folder_name = ? AND user_id = ?';
+    db.query(checkFolderQuery, [folderName, userId], (err, results) => {
         if (err) {
             return res.status(500).json({ error: 'Failed to check folder existence' });
         }
@@ -463,8 +463,8 @@ app.post('/api/create-colon-folder', (req, res) => {
             const folderId = results[0].id;
 
             // Insert file into the existing folder
-            const insertFileQuery = 'INSERT INTO ColonFiles (folder_id, file_name, file_url) VALUES (?, ?, ?)';
-            db.query(insertFileQuery, [folderId, noteName, fileUrl], (err, result) => {
+            const insertFileQuery = 'INSERT INTO ColonFiles (folder_id, file_name, file_url, lecture_name) VALUES (?, ?, ?, ?)';
+            db.query(insertFileQuery, [folderId, noteName, fileUrl, lectureName], (err, result) => {
                 if (err) {
                     return res.status(500).json({ error: 'Failed to add file to folder' });
                 }
@@ -472,16 +472,16 @@ app.post('/api/create-colon-folder', (req, res) => {
             });
         } else {
             // Folder does not exist, create a new folder
-            const createFolderQuery = 'INSERT INTO ColonFolders (folder_name) VALUES (?)';
-            db.query(createFolderQuery, [folderName], (err, result) => {
+            const createFolderQuery = 'INSERT INTO ColonFolders (folder_name, user_id) VALUES (?, ?)';
+            db.query(createFolderQuery, [folderName, userId], (err, result) => {
                 if (err) {
                     return res.status(500).json({ error: 'Failed to create folder' });
                 }
                 const folderId = result.insertId;
 
                 // Insert file into the new folder
-                const insertFileQuery = 'INSERT INTO ColonFiles (folder_id, file_name, file_url) VALUES (?, ?, ?)';
-                db.query(insertFileQuery, [folderId, noteName, fileUrl], (err, result) => {
+                const insertFileQuery = 'INSERT INTO ColonFiles (folder_id, file_name, file_url, lecture_name) VALUES (?, ?, ?, ?)';
+                db.query(insertFileQuery, [folderId, noteName, fileUrl, lectureName], (err, result) => {
                     if (err) {
                         return res.status(500).json({ error: 'Failed to add file to folder' });
                     }
@@ -494,20 +494,20 @@ app.post('/api/create-colon-folder', (req, res) => {
 //강의파일 created_at 가져오기
 app.get('/api/get-file-created-at', (req, res) => {
     const { folderId, fileName } = req.query;
-    
+
     const query = 'SELECT created_at FROM LectureFiles WHERE folder_id = ? AND file_name = ? LIMIT 1';
     db.query(query, [folderId, fileName], (err, result) => {
-      if (err) {
-        return res.status(500).json({ error: 'Failed to fetch created_at' });
-      }
-      if (result.length > 0) {
-        res.status(200).json({ createdAt: result[0].created_at });
-      } else {
-        res.status(404).json({ error: 'File not found' });
-      }
+        if (err) {
+            return res.status(500).json({ error: 'Failed to fetch created_at' });
+        }
+        if (result.length > 0) {
+            res.status(200).json({ createdAt: result[0].created_at });
+        } else {
+            res.status(404).json({ error: 'File not found' });
+        }
     });
-  });
-  
+});
+
 //콜론 파일 created_at 가져오기
 // Get colon file details
 app.get('/api/get-colon-file', (req, res) => {
@@ -550,16 +550,17 @@ app.get('/api/getFolderName/:fileType/:folderId', (req, res) => {
             res.status(404).send({ error: 'Folder not found' });
         }
     });
-=======
+
+});
+
 // 사용자별 최신 강의 파일을 가져오는 API 엔드포인트
 app.get('/api/getLectureFiles/:userId', (req, res) => {
     const userId = req.params.userId;
     const sql = `
-        SELECT LectureFiles.* FROM LectureFiles
-        INNER JOIN LectureFolders ON LectureFiles.folder_id = LectureFolders.id
-        WHERE LectureFolders.user_id = ?
-        ORDER BY LectureFiles.created_at DESC
-    `;
+    SELECT LectureFiles.* FROM LectureFiles
+    INNER JOIN LectureFolders ON LectureFiles.folder_id = LectureFolders.id
+    WHERE LectureFolders.user_id = ?
+    ORDER BY LectureFiles.created_at DESC;`;
     db.query(sql, [userId], (err, results) => {
         if (err) {
             res.status(500).send(err);
@@ -573,11 +574,10 @@ app.get('/api/getLectureFiles/:userId', (req, res) => {
 app.get('/api/getColonFiles/:userId', (req, res) => {
     const userId = req.params.userId;
     const sql = `
-        SELECT ColonFiles.* FROM ColonFiles
-        INNER JOIN ColonFolders ON ColonFiles.folder_id = ColonFolders.id
-        WHERE ColonFolders.user_id = ?
-        ORDER BY ColonFiles.created_at DESC
-    `;
+    SELECT ColonFiles.* FROM ColonFiles
+    INNER JOIN ColonFolders ON ColonFiles.folder_id = ColonFolders.id
+    WHERE ColonFolders.user_id = ?
+    ORDER BY ColonFiles.created_at DESC`;
     db.query(sql, [userId], (err, results) => {
         if (err) {
             res.status(500).send(err);
@@ -586,15 +586,6 @@ app.get('/api/getColonFiles/:userId', (req, res) => {
         }
     });
 });
-
-
-app.listen(3000, () => {
-    console.log('Server started on port 3000');
-
-});
-
-
-
 
 app.listen(port, () => {
     console.log(`Server started on port ${port}`);
