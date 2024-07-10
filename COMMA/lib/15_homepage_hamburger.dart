@@ -12,7 +12,6 @@
 //       _selectedIndex = index;
 //       // Do any additional logic when the item is tapped
 //     }
-
 //     return Scaffold(
 //       backgroundColor: Colors.white,
 //       appBar: AppBar(
@@ -194,3 +193,4 @@
 //     );
 //   }
 // }
+

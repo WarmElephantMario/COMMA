@@ -1,5 +1,6 @@
 const express = require('express');
-const mysql = require('mysql');
+//const mysql = require('mysql');
+const mysql = require('mysql2');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const crypto = require('crypto');
@@ -12,8 +13,8 @@ app.use(cors());
 
 const db = mysql.createConnection({
     host: 'localhost',
-    user: 'comma',
-    password: 'comma0812@',
+    user: 'root',
+    password: '@yenamasumi17',
     database: 'comma'
 });
 
@@ -316,6 +317,7 @@ app.post('/api/login', (req, res) => {
             return res.status(500).json({ success: false, error: err.message });
         }
 
+
         if (result.length > 0) {
             return res.json({ success: true, userData: result[0] });
         } else {
@@ -426,6 +428,129 @@ app.get('/api/searchFiles', (req, res) => {
     });
 });
 
+
+  //강의파일 생성
+  app.post('/api/lecture-files', (req, res) => {
+    console.log('POST /api/lecture-files called');
+    const { folder_id, file_name, file_url } = req.body;
+
+
+    if (!folder_id || !file_name) {
+        return res.status(400).json({ success: false, error: 'You must provide folder_id and file_name.' });
+    }
+
+    const sql = 'INSERT INTO LectureFiles (folder_id, file_name, file_url, created_at) VALUES (?, ?, ?, NOW())';
+    db.query(sql, [folder_id, file_name, file_url], (err, result) => {
+        if (err) {
+            return res.status(500).json({ success: false, error: err.message });
+        }
+        res.json({ success: true, id: result.insertId, folder_id, file_name, file_url });
+    });
+});
+//콜론폴더 생성 및 파일 생성
+app.post('/api/create-colon-folder', (req, res) => {
+    const { folderName, noteName, fileUrl } = req.body;
+    
+    // Check if the folder already exists
+    const checkFolderQuery = 'SELECT id FROM ColonFolders WHERE folder_name = ?';
+    db.query(checkFolderQuery, [folderName], (err, results) => {
+        if (err) {
+            return res.status(500).json({ error: 'Failed to check folder existence' });
+        }
+
+        if (results.length > 0) {
+            // Folder exists, use the existing folder id
+            const folderId = results[0].id;
+
+            // Insert file into the existing folder
+            const insertFileQuery = 'INSERT INTO ColonFiles (folder_id, file_name, file_url) VALUES (?, ?, ?)';
+            db.query(insertFileQuery, [folderId, noteName, fileUrl], (err, result) => {
+                if (err) {
+                    return res.status(500).json({ error: 'Failed to add file to folder' });
+                }
+                res.status(200).json({ message: 'File added to existing folder successfully' });
+            });
+        } else {
+            // Folder does not exist, create a new folder
+            const createFolderQuery = 'INSERT INTO ColonFolders (folder_name) VALUES (?)';
+            db.query(createFolderQuery, [folderName], (err, result) => {
+                if (err) {
+                    return res.status(500).json({ error: 'Failed to create folder' });
+                }
+                const folderId = result.insertId;
+
+                // Insert file into the new folder
+                const insertFileQuery = 'INSERT INTO ColonFiles (folder_id, file_name, file_url) VALUES (?, ?, ?)';
+                db.query(insertFileQuery, [folderId, noteName, fileUrl], (err, result) => {
+                    if (err) {
+                        return res.status(500).json({ error: 'Failed to add file to folder' });
+                    }
+                    res.status(200).json({ message: 'Folder and file created successfully' });
+                });
+            });
+        }
+    });
+});
+//강의파일 created_at 가져오기
+app.get('/api/get-file-created-at', (req, res) => {
+    const { folderId, fileName } = req.query;
+    
+    const query = 'SELECT created_at FROM LectureFiles WHERE folder_id = ? AND file_name = ? LIMIT 1';
+    db.query(query, [folderId, fileName], (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: 'Failed to fetch created_at' });
+      }
+      if (result.length > 0) {
+        res.status(200).json({ createdAt: result[0].created_at });
+      } else {
+        res.status(404).json({ error: 'File not found' });
+      }
+    });
+  });
+  
+//콜론 파일 created_at 가져오기
+// Get colon file details
+app.get('/api/get-colon-file', (req, res) => {
+    const { folderName } = req.query;
+
+    const query = `
+        SELECT f.id, f.file_name, f.file_url, f.created_at
+        FROM ColonFiles f
+        JOIN ColonFolders c ON f.folder_id = c.id
+        WHERE c.folder_name = ?
+        ORDER BY f.created_at DESC
+        LIMIT 1`;
+
+    db.query(query, [folderName], (err, results) => {
+        if (err) {
+            return res.status(500).json({ error: 'Failed to fetch file details' });
+        }
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'File not found' });
+        }
+        res.status(200).json(results[0]);
+    });
+});
+
+// 폴더 이름 가져오기 - 강의 폴더 또는 콜론 폴더 구분
+app.get('/api/getFolderName/:fileType/:folderId', (req, res) => {
+    const { fileType, folderId } = req.params;
+    let table = fileType === 'lecture' ? 'LectureFolders' : 'ColonFolders';
+
+    const sql = `SELECT folder_name FROM ${table} WHERE id = ?`;
+    db.query(sql, [folderId], (err, result) => {
+        if (err) {
+            console.error('Error fetching folder name:', err);
+            res.status(500).send({ error: 'Internal Server Error' });
+            return;
+        }
+        if (result.length > 0) {
+            res.json({ folder_name: result[0].folder_name });
+        } else {
+            res.status(404).send({ error: 'Folder not found' });
+        }
+    });
+=======
 // 사용자별 최신 강의 파일을 가져오는 API 엔드포인트
 app.get('/api/getLectureFiles/:userId', (req, res) => {
     const userId = req.params.userId;
@@ -465,4 +590,12 @@ app.get('/api/getColonFiles/:userId', (req, res) => {
 
 app.listen(3000, () => {
     console.log('Server started on port 3000');
+
+});
+
+
+
+
+app.listen(port, () => {
+    console.log(`Server started on port ${port}`);
 });

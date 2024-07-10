@@ -1,21 +1,40 @@
 {
   "project_info": {
-    "project_number": "643524059588",
-    "project_id": "warmelephantmario",
-    "storage_bucket": "warmelephantmario.appspot.com"
+    "project_number": "559384641747",
+    "project_id": "comma-9018a",
+    "storage_bucket": "comma-9018a.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:643524059588:android:14d1bee75c8f2408f90491",
+        "mobilesdk_app_id": "1:559384641747:android:f89163da9a7b7b422bd426",
         "android_client_info": {
-          "package_name": "com.example.flutter_plugin"
+          "package_name": "com.comma.app"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDPgH2cfm3XSGeqKb9Sopg21488sYxrMGY"
+          "current_key": "AIzaSyCJKoJP8f0BWFQ9zoVfCic_tchszB6Y_B4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:559384641747:android:bae996c6904e595c2bd426",
+        "android_client_info": {
+          "package_name": "com.comma.myapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJKoJP8f0BWFQ9zoVfCic_tchszB6Y_B4"
         }
       ],
       "services": {
@@ -25,5 +44,5 @@
       }
     }
   ],
-//  "configuration_version": "1"
-//}
+  "configuration_version": "1"
+}

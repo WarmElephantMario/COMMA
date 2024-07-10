@@ -1,6 +1,20 @@
 # 수정 및 변경 사항
 
-### 1. 수정
+### firebase 연동
+- firebase 계정 : warmelephantmario@gmail.com<br>
+- 강의자료 업로드시 firebase storage의 uploads 폴더에 저장<br>
+- $ firebase login<br>
+- 참고: 
+  [https://velog.io/@qazws78941/Flutter-%ED%8C%8C%EC%9D%B4%EC%96%B4%EB%B2%A0%EC%9D%B4%EC%8A%A4-%EC%97%B0%EB%8F%99](https://velog.io/@qazws78941/Flutter-%ED%8C%8C%EC%9D%B4%EC%96%B4%EB%B2%A0%EC%9D%B4%EC%8A%A4-%EC%97%B0%EB%8F%99) <br><br>
+
+### TODO
+- 유저 정보랑 마이페이지 연결 필요<br>
+- 디자인 수정 필요(현재 실행시켰을 때 내 노트북에서는 네비게이션바는 검정색으로, 기본 글자는 흐린 회색으로 보임, 새로 만든 페이지도 디자인 수정 필요)<br>
+- 로그인 후 뒤로가기 버튼을 누르면 다시 로그인창으로 돌아가버림 해결 필요할 듯<br>
+- showquickmenu 체크박스2 디자인 수정<br>
+- created_at 시간 포맷함수 수정<br><br>
+
+### 수정
 - 메인페이지, 폴더페이지를 유저랑 연결시킴(로그인한 유저의 폴더와 파일만 뜸)<br>
 - provider 패키지 새로 설치(전역 상태로 사용자 정보를 관리)<br>
 - 회원가입하면 자동으로 강의폴더에는 '기본 폴더', 콜론폴더에는 '기본 폴더 (:)' 가 생성되도록 수정<br>
@@ -39,7 +53,8 @@ CREATE TABLE LectureFiles (
     id INT AUTO_INCREMENT PRIMARY KEY,
     folder_id INT,
     file_name VARCHAR(255),
-    file_url VARCHAR(255),
+    file_url VARCHAR(2048),
+    lecture_name VARCHAR(255),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (folder_id) REFERENCES LectureFolders(id) ON DELETE CASCADE
 );
@@ -48,13 +63,11 @@ CREATE TABLE ColonFiles (
     id INT AUTO_INCREMENT PRIMARY KEY,
     folder_id INT,
     file_name VARCHAR(255),
-    file_url VARCHAR(255),
+    file_url VARCHAR(2048),
+    lecture_name VARCHAR(255),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (folder_id) REFERENCES ColonFolders(id) ON DELETE CASCADE
 );
 ```
 
-### 2. TODO
-- 유저 정보랑 마이페이지 연결 필요<br>
-- 디자인 수정 필요(현재 실행시켰을 때 내 노트북에서는 네비게이션바는 검정색으로, 기본 글자는 흐린 회색으로 보임, 새로 만든 페이지도 디자인 수정 필요)<br>
-- 로그인 후 뒤로가기 버튼을 누르면 다시 로그인창으로 돌아가버림 해결 필요할 듯
+

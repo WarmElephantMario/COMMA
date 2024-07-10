@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:file_picker/file_picker.dart';
+import 'dart:io' show Platform, File;
+import 'components.dart';
+import '60prepare.dart';
+import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 import 'components.dart';
 import '1_Splash_green.dart';
 import 'model/user_provider.dart';
 
-void main() {
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(
     MultiProvider(
       providers: [
@@ -20,12 +31,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("Initializing MaterialApp with theme: ${ThemeData(
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      )}");
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: SplashScreen(),
+      home: LearningPreparation()
     );
   }
 }
