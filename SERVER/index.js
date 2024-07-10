@@ -25,39 +25,21 @@ db.connect((err) => {
     console.log('MySQL Connected...');
 });
 
-// 강의 폴더 목록 가져오기
-app.get('/api/lecture-folders', (req, res) => {
-    const sql = 'SELECT id, folder_name FROM LectureFolders';
-    db.query(sql, (err, result) => {
+// 사용자 ID 기반으로 강의 폴더 목록 가져오기
+app.get('/api/lecture-folders/:userId', (req, res) => {
+    const userId = req.params.userId;
+    const sql = 'SELECT id, folder_name FROM LectureFolders WHERE user_id = ?';
+    db.query(sql, [userId], (err, result) => {
         if (err) throw err;
         res.send(result);
     });
 });
 
-// 콜론 폴더 목록 가져오기
-app.get('/api/colon-folders', (req, res) => {
-    const sql = 'SELECT id, folder_name FROM ColonFolders';
-    db.query(sql, (err, result) => {
-        if (err) throw err;
-        res.send(result);
-    });
-});
-
-// 강의 폴더의 파일 목록 가져오기
-app.get('/api/lecture-files/:folderId', (req, res) => {
-    const folderId = req.params.folderId;
-    const sql = 'SELECT id, folder_id, file_name, file_url, created_at FROM LectureFiles WHERE folder_id = ?';
-    db.query(sql, [folderId], (err, result) => {
-        if (err) throw err;
-        res.send(result);
-    });
-});
-
-// 콜론 폴더의 파일 목록 가져오기
-app.get('/api/colon-files/:folderId', (req, res) => {
-    const folderId = req.params.folderId;
-    const sql = 'SELECT id, folder_id, file_name, file_url, created_at FROM ColonFiles WHERE folder_id = ?';
-    db.query(sql, [folderId], (err, result) => {
+// 사용자 ID 기반으로 콜론 폴더 목록 가져오기
+app.get('/api/colon-folders/:userId', (req, res) => {
+    const userId = req.params.userId;
+    const sql = 'SELECT id, folder_name FROM ColonFolders WHERE user_id = ?';
+    db.query(sql, [userId], (err, result) => {
         if (err) throw err;
         res.send(result);
     });
@@ -65,21 +47,21 @@ app.get('/api/colon-files/:folderId', (req, res) => {
 
 // 강의 폴더 추가
 app.post('/api/lecture-folders', (req, res) => {
-    const folderName = req.body.folder_name;
-    const sql = 'INSERT INTO LectureFolders (folder_name) VALUES (?)';
-    db.query(sql, [folderName], (err, result) => {
+    const { folder_name, user_id } = req.body;
+    const sql = 'INSERT INTO LectureFolders (folder_name, user_id) VALUES (?, ?)';
+    db.query(sql, [folder_name, user_id], (err, result) => {
         if (err) throw err;
-        res.send({ id: result.insertId, folder_name: folderName });
+        res.send({ id: result.insertId, folder_name, user_id });
     });
 });
 
 // 콜론 폴더 추가
 app.post('/api/colon-folders', (req, res) => {
-    const folderName = req.body.folder_name;
-    const sql = 'INSERT INTO ColonFolders (folder_name) VALUES (?)';
-    db.query(sql, [folderName], (err, result) => {
+    const { folder_name, user_id } = req.body;
+    const sql = 'INSERT INTO ColonFolders (folder_name, user_id) VALUES (?, ?)';
+    db.query(sql, [`${folder_name} (:)`, user_id], (err, result) => {
         if (err) throw err;
-        res.send({ id: result.insertId, folder_name: folderName });
+        res.send({ id: result.insertId, folder_name: `${folder_name} (:)`, user_id });
     });
 });
 
@@ -111,6 +93,45 @@ app.delete('/api/:folderType-folders/:id', (req, res) => {
         res.status(200).send('Folder deleted');
     });
 });
+
+// 강의 폴더 목록 가져오기 (특정 사용자)
+app.get('/api/lecture-folders', (req, res) => {
+    const userId = req.query.user_id;
+    const sql = `
+        SELECT 
+            LectureFolders.id, 
+            LectureFolders.folder_name, 
+            COUNT(LectureFiles.id) AS file_count 
+        FROM LectureFolders 
+        LEFT JOIN LectureFiles ON LectureFolders.id = LectureFiles.folder_id 
+        WHERE LectureFolders.user_id = ? 
+        GROUP BY LectureFolders.id
+    `;
+    db.query(sql, [userId], (err, result) => {
+        if (err) throw err;
+        res.send(result);
+    });
+});
+
+// 콜론 폴더 목록 가져오기 (특정 사용자)
+app.get('/api/colon-folders', (req, res) => {
+    const userId = req.query.user_id;
+    const sql = `
+        SELECT 
+            ColonFolders.id, 
+            ColonFolders.folder_name, 
+            COUNT(ColonFiles.id) AS file_count 
+        FROM ColonFolders 
+        LEFT JOIN ColonFiles ON ColonFolders.id = ColonFiles.folder_id 
+        WHERE ColonFolders.user_id = ? 
+        GROUP BY ColonFolders.id
+    `;
+    db.query(sql, [userId], (err, result) => {
+        if (err) throw err;
+        res.send(result);
+    });
+});
+
 
 // 파일 이름 변경하기
 app.put('/api/:fileType-files/:id', (req, res) => {
@@ -158,6 +179,24 @@ app.put('/api/:fileType-files/move/:id', (req, res) => {
     });
 });
 
+// 특정 폴더의 파일 목록 가져오기 (특정 사용자)
+app.get('/api/:fileType-files/:folderId', (req, res) => {
+    const folderId = req.params.folderId;
+    const fileType = req.params.fileType;
+    const userId = req.query.user_id;
+    const tableName = fileType === 'lecture' ? 'LectureFiles' : 'ColonFiles';
+    const joinTable = fileType === 'lecture' ? 'LectureFolders' : 'ColonFolders';
+    const sql = `SELECT ${tableName}.* FROM ${tableName} INNER JOIN ${joinTable} ON ${tableName}.folder_id = ${joinTable}.id WHERE ${joinTable}.user_id = ? AND ${tableName}.folder_id = ?`;
+
+    db.query(sql, [userId, folderId], (err, result) => {
+        if (err) {
+            console.error('Failed to fetch files:', err);
+            return res.status(500).send('Failed to fetch files');
+        }
+        res.send(result);
+    });
+});
+
 // 회원가입_전화번호 중복확인
 app.post('/api/validate_phone', (req, res) => {
     const userPhone = req.body.user_phone;
@@ -184,6 +223,32 @@ app.post('/api/validate_phone', (req, res) => {
     });
 });
 
+// // 회원가입_정보 저장
+// app.post('/api/signup_info', (req, res) => {
+//     console.log('API 요청 수신: /api/signup_info');
+
+//     const userEmail = req.body.user_email;
+//     const userPhone = req.body.user_phone;
+//     const userPassword = req.body.user_password;
+//     // 비밀번호를 MD5로 해시
+//     const hashedPassword = crypto.createHash('md5').update(userPassword).digest('hex');
+
+//     console.log('전달된 이메일:', userEmail);
+//     console.log('전달된 전화번호:', userPhone);
+
+//     if (!userEmail || !userPhone || !userPassword) {
+//         return res.status(400).json({ success: false, error: 'You must fill all values.' });
+//     }
+
+//     const sqlQuery = `INSERT INTO user_table (user_email, user_phone, user_password) VALUES (?, ?, ?)`;
+//     db.query(sqlQuery, [userEmail, userPhone, hashedPassword], (err, result) => {
+//         if (err) {
+//             return res.status(500).json({ success: false, error: err.message });
+//         }
+//         return res.json({ success: true });
+//     });
+// });
+
 // 회원가입_정보 저장
 app.post('/api/signup_info', (req, res) => {
     console.log('API 요청 수신: /api/signup_info');
@@ -191,7 +256,6 @@ app.post('/api/signup_info', (req, res) => {
     const userEmail = req.body.user_email;
     const userPhone = req.body.user_phone;
     const userPassword = req.body.user_password;
-    // 비밀번호를 MD5로 해시
     const hashedPassword = crypto.createHash('md5').update(userPassword).digest('hex');
 
     console.log('전달된 이메일:', userEmail);
@@ -206,6 +270,29 @@ app.post('/api/signup_info', (req, res) => {
         if (err) {
             return res.status(500).json({ success: false, error: err.message });
         }
+
+        const userId = result.insertId; // 삽입된 사용자의 ID를 가져옴
+
+        // 기본 폴더 생성
+        const lectureFolderQuery = 'INSERT INTO LectureFolders (folder_name, user_id) VALUES (?, ?)';
+        const colonFolderQuery = 'INSERT INTO ColonFolders (folder_name, user_id) VALUES (?, ?)';
+
+        db.query(lectureFolderQuery, ['기본 폴더', userId], (err, result) => {
+            if (err) {
+                console.error('Failed to create lecture folder:', err);
+            } else {
+                console.log('Default lecture folder created');
+            }
+        });
+
+        db.query(colonFolderQuery, ['기본 폴더 (:)', userId], (err, result) => {
+            if (err) {
+                console.error('Failed to create colon folder:', err);
+            } else {
+                console.log('Default colon folder created');
+            }
+        });
+
         return res.json({ success: true });
     });
 });
@@ -239,29 +326,29 @@ app.post('/api/login', (req, res) => {
     });
 });
 
-// 최신 강의 파일을 가져오는 API 엔드포인트
-app.get('/api/getLectureFiles', (req, res) => {
-    const sql = `SELECT * FROM LectureFiles ORDER BY created_at DESC LIMIT 3`;
-    db.query(sql, (err, results) => {
-        if (err) {
-            res.status(500).send(err);
-        } else {
-            res.json({ files: results });
-        }
-    });
-});
+// // 최신 강의 파일을 가져오는 API 엔드포인트
+// app.get('/api/getLectureFiles', (req, res) => {
+//     const sql = `SELECT * FROM LectureFiles ORDER BY created_at DESC LIMIT 3`;
+//     db.query(sql, (err, results) => {
+//         if (err) {
+//             res.status(500).send(err);
+//         } else {
+//             res.json({ files: results });
+//         }
+//     });
+// });
 
-// 최신 콜론 파일을 가져오는 API 엔드포인트
-app.get('/api/getColonFiles', (req, res) => {
-    const sql = `SELECT * FROM ColonFiles ORDER BY created_at DESC LIMIT 3`;
-    db.query(sql, (err, results) => {
-        if (err) {
-            res.status(500).send(err);
-        } else {
-            res.json({ files: results });
-        }
-    });
-});
+// // 최신 콜론 파일을 가져오는 API 엔드포인트
+// app.get('/api/getColonFiles', (req, res) => {
+//     const sql = `SELECT * FROM ColonFiles ORDER BY created_at DESC LIMIT 3`;
+//     db.query(sql, (err, results) => {
+//         if (err) {
+//             res.status(500).send(err);
+//         } else {
+//             res.json({ files: results });
+//         }
+//     });
+// });
 
 // 파일 이름 변경하기
 app.put('/api/:fileType-files/:id', (req, res) => {
@@ -340,6 +427,7 @@ app.get('/api/searchFiles', (req, res) => {
         }
     });
 });
+
 
   //강의파일 생성
   app.post('/api/lecture-files', (req, res) => {
@@ -462,6 +550,47 @@ app.get('/api/getFolderName/:fileType/:folderId', (req, res) => {
             res.status(404).send({ error: 'Folder not found' });
         }
     });
+=======
+// 사용자별 최신 강의 파일을 가져오는 API 엔드포인트
+app.get('/api/getLectureFiles/:userId', (req, res) => {
+    const userId = req.params.userId;
+    const sql = `
+        SELECT LectureFiles.* FROM LectureFiles
+        INNER JOIN LectureFolders ON LectureFiles.folder_id = LectureFolders.id
+        WHERE LectureFolders.user_id = ?
+        ORDER BY LectureFiles.created_at DESC
+    `;
+    db.query(sql, [userId], (err, results) => {
+        if (err) {
+            res.status(500).send(err);
+        } else {
+            res.json({ files: results });
+        }
+    });
+});
+
+// 사용자별 최신 콜론 파일을 가져오는 API 엔드포인트
+app.get('/api/getColonFiles/:userId', (req, res) => {
+    const userId = req.params.userId;
+    const sql = `
+        SELECT ColonFiles.* FROM ColonFiles
+        INNER JOIN ColonFolders ON ColonFiles.folder_id = ColonFolders.id
+        WHERE ColonFolders.user_id = ?
+        ORDER BY ColonFiles.created_at DESC
+    `;
+    db.query(sql, [userId], (err, results) => {
+        if (err) {
+            res.status(500).send(err);
+        } else {
+            res.json({ files: results });
+        }
+    });
+});
+
+
+app.listen(3000, () => {
+    console.log('Server started on port 3000');
+
 });
 
 

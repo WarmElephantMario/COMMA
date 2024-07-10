@@ -3,6 +3,7 @@ import 'components.dart';
 import 'api/api.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart'; // 날짜 포맷을 위해 추가
 
 class MainToSearchPage extends StatefulWidget {
   const MainToSearchPage({super.key});
@@ -34,6 +35,13 @@ class _MainToSearchPageState extends State<MainToSearchPage> {
     } else {
       throw Exception('Failed to search files');
     }
+  }
+
+  String formatDateTimeToKorean(String dateTime) {
+    if (dateTime.isEmpty) return 'Unknown';
+    final DateTime utcDateTime = DateTime.parse(dateTime);
+    final DateTime koreanDateTime = utcDateTime.add(const Duration(hours: 9));
+    return DateFormat('yyyy/MM/dd HH:mm').format(koreanDateTime);
   }
 
   @override
@@ -126,7 +134,7 @@ class _MainToSearchPageState extends State<MainToSearchPage> {
                     file['file_name'],
                     style: TextStyle(color: Colors.grey[800]),
                   ),
-                  subtitle: Text(file['created_at'],
+                  subtitle: Text(formatDateTimeToKorean(file['created_at']),
                       style: TextStyle(color: Colors.grey[700])),
                   onTap: () {
                     print('File ${file['file_name']} is clicked');
