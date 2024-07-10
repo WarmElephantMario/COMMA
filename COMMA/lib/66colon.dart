@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '60prepare.dart';
-import 'components.dart'; 
+import 'components.dart';
 import 'package:intl/intl.dart';
 
 class ColonPage extends StatefulWidget {
@@ -9,22 +9,22 @@ class ColonPage extends StatefulWidget {
   final String lectureName; // 강의 자료 이름 추가
   final dynamic createdAt; // 생성 날짜 및 시간 추가
 
-  const ColonPage({
-    super.key, 
-    required this.folderName, 
-    required this.noteName, 
-    required this.lectureName, 
-    required this.createdAt});
+  const ColonPage(
+      {super.key,
+      required this.folderName,
+      required this.noteName,
+      required this.lectureName,
+      required this.createdAt});
 
   @override
   _ColonPageState createState() => _ColonPageState();
 }
 
 class _ColonPageState extends State<ColonPage> {
-
   int _selectedIndex = 2; // 학습 시작 탭이 기본 선택되도록 설정
   //late String formattedDate;
-  
+
+  @override
   void initState() {
     super.initState();
   }
@@ -34,18 +34,18 @@ class _ColonPageState extends State<ColonPage> {
       _selectedIndex = index;
     });
   }
-  String _formatDate(dynamic createdAt) {
-      DateTime dateTime = DateTime.parse(createdAt);
-      return DateFormat('yyyy/MM/dd hh:mm a').format(dateTime);
-    }
 
+  String _formatDate(dynamic createdAt) {
+    DateTime dateTime = DateTime.parse(createdAt);
+    return DateFormat('yyyy/MM/dd hh:mm a').format(dateTime);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, 
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        toolbarHeight: 0, 
+        toolbarHeight: 0,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -100,7 +100,7 @@ class _ColonPageState extends State<ColonPage> {
             const SizedBox(height: 5),
             Text(
               '강의 자료 : ${widget.lectureName}',
-              style: TextStyle(
+              style: const TextStyle(
                 color: Color(0xFF575757),
                 fontSize: 12,
                 fontFamily: 'DM Sans',
@@ -121,8 +121,8 @@ class _ColonPageState extends State<ColonPage> {
                 ClickButton(
                   text: '콜론(:) 다운하기',
                   onPressed: () {},
-                  width: MediaQuery.of(context).size.width * 0.3, 
-                  height: 40.0, 
+                  width: MediaQuery.of(context).size.width * 0.3,
+                  height: 40.0,
                 ),
               ],
             ),
@@ -139,7 +139,8 @@ class _ColonPageState extends State<ColonPage> {
           ],
         ),
       ),
-      bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
+      bottomNavigationBar:
+          buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }

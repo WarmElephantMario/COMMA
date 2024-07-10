@@ -11,7 +11,7 @@ import 'components.dart';
 import '1_Splash_green.dart';
 import 'model/user_provider.dart';
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -32,15 +32,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     print("Initializing MaterialApp with theme: ${ThemeData(
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      )}");
+      visualDensity: VisualDensity.adaptivePlatformDensity,
+    )}");
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: LearningPreparation()
-    );
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+        ),
+        home: SplashScreen());
   }
 }
 
