@@ -223,31 +223,6 @@ app.post('/api/validate_phone', (req, res) => {
     });
 });
 
-// // 회원가입_정보 저장
-// app.post('/api/signup_info', (req, res) => {
-//     console.log('API 요청 수신: /api/signup_info');
-
-//     const userEmail = req.body.user_email;
-//     const userPhone = req.body.user_phone;
-//     const userPassword = req.body.user_password;
-//     // 비밀번호를 MD5로 해시
-//     const hashedPassword = crypto.createHash('md5').update(userPassword).digest('hex');
-
-//     console.log('전달된 이메일:', userEmail);
-//     console.log('전달된 전화번호:', userPhone);
-
-//     if (!userEmail || !userPhone || !userPassword) {
-//         return res.status(400).json({ success: false, error: 'You must fill all values.' });
-//     }
-
-//     const sqlQuery = `INSERT INTO user_table (user_email, user_phone, user_password) VALUES (?, ?, ?)`;
-//     db.query(sqlQuery, [userEmail, userPhone, hashedPassword], (err, result) => {
-//         if (err) {
-//             return res.status(500).json({ success: false, error: err.message });
-//         }
-//         return res.json({ success: true });
-//     });
-// });
 
 // 회원가입_정보 저장
 app.post('/api/signup_info', (req, res) => {
@@ -328,29 +303,21 @@ app.post('/api/login', (req, res) => {
     });
 });
 
-// // 최신 강의 파일을 가져오는 API 엔드포인트
-// app.get('/api/getLectureFiles', (req, res) => {
-//     const sql = `SELECT * FROM LectureFiles ORDER BY created_at DESC LIMIT 3`;
-//     db.query(sql, (err, results) => {
-//         if (err) {
-//             res.status(500).send(err);
-//         } else {
-//             res.json({ files: results });
-//         }
-//     });
-// });
-
-// // 최신 콜론 파일을 가져오는 API 엔드포인트
-// app.get('/api/getColonFiles', (req, res) => {
-//     const sql = `SELECT * FROM ColonFiles ORDER BY created_at DESC LIMIT 3`;
-//     db.query(sql, (err, results) => {
-//         if (err) {
-//             res.status(500).send(err);
-//         } else {
-//             res.json({ files: results });
-//         }
-//     });
-// });
+//회원 닉네임 변경하기
+app.put('/api/update_nickname', (req, res) => {
+    const userId = req.body.user_id;
+    const newNickname = req.body.user_nickname;
+  
+    // 데이터베이스 업데이트 쿼리
+    const query = 'UPDATE user_table SET user_nickname = ? WHERE user_id = ?';
+    db.query(query, [newNickname, userId], (err, result) => {
+      if (err) {
+        return res.status(500).send({ success: false, error: err.message });
+      }
+      res.send({ success: true });
+    });
+  });
+  
 
 // 파일 이름 변경하기
 app.put('/api/:fileType-files/:id', (req, res) => {
