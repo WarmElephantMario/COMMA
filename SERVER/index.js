@@ -257,16 +257,18 @@ app.post('/api/signup_info', (req, res) => {
     const userPhone = req.body.user_phone;
     const userPassword = req.body.user_password;
     const hashedPassword = crypto.createHash('md5').update(userPassword).digest('hex');
+    const usernickname = req.body.user_nickname;
 
     console.log('전달된 이메일:', userEmail);
     console.log('전달된 전화번호:', userPhone);
+    console.log('생성된 닉네임:', usernickname); 
 
     if (!userEmail || !userPhone || !userPassword) {
         return res.status(400).json({ success: false, error: 'You must fill all values.' });
     }
 
-    const sqlQuery = `INSERT INTO user_table (user_email, user_phone, user_password) VALUES (?, ?, ?)`;
-    db.query(sqlQuery, [userEmail, userPhone, hashedPassword], (err, result) => {
+    const sqlQuery = `INSERT INTO user_table (user_email, user_phone, user_password, user_nickname) VALUES (?, ?, ?, ?)`;
+    db.query(sqlQuery, [userEmail, userPhone, hashedPassword, usernickname], (err, result) => {
         if (err) {
             return res.status(500).json({ success: false, error: err.message });
         }

@@ -262,7 +262,7 @@ class _MainPageState extends State<MainPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '안녕하세요, ${userProvider.user?.user_email ?? 'Guest'} 님',
+                '안녕하세요, ${userProvider.user?.user_nickname ?? 'Guest'} 님',
                 style: const TextStyle(
                   color: Colors.black,
                   fontSize: 24,
@@ -493,5 +493,3 @@ class _MainPageState extends State<MainPage> {
     );
   }
 }
-
-
