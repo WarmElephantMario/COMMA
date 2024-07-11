@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_plugin/12_homepage_search.dart';
 import 'components.dart';
-import '14_homepage_search_result.dart';
 import 'package:provider/provider.dart';
 import 'model/user_provider.dart';
 import 'api/api.dart';
-import '12_homepage_search.dart';
 import 'components.dart';
 import '17_allFilesPage.dart';
 import 'package:http/http.dart' as http;
@@ -13,6 +10,7 @@ import '63record.dart';
 import '66colon.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
+import '12_hompage_search.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -317,7 +315,7 @@ class _MainPageState extends State<MainPage> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => AllFilesPage(
-                            userId: userProvider.user!.userKey,
+                            userKey: userProvider.user!.userKey,
                             fileType: 'lecture',
                           ),
                         ),
@@ -424,7 +422,7 @@ class _MainPageState extends State<MainPage> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => AllFilesPage(
-                            userId: userProvider.user!.userKey,
+                            userKey: userProvider.user!.userKey,
                             fileType: 'colon',
                           ),
                         ),
