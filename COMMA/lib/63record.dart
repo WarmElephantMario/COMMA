@@ -48,7 +48,7 @@ class _RecordPageState extends State<RecordPage> {
 
   Future<void> _fetchCreatedAt() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userId = userProvider.user?.user_id;
+    final userId = userProvider.user?.userKey;
 
     if (userId != null) {
       var url = Uri.parse(
@@ -92,7 +92,7 @@ class _RecordPageState extends State<RecordPage> {
 
   Future<void> _startRecording() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userId = userProvider.user?.user_id;
+    final userId = userProvider.user?.userKey;
 
     if (userId != null) {
       var url = '${API.baseUrl}/api/lecture-files';
