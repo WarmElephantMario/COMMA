@@ -141,9 +141,12 @@ class _SigninPageState extends State<SigninPage> {
                   padding: EdgeInsets.symmetric(horizontal: size.width * 0.05),
                   child: GestureDetector(
                     onTap: () async {
+                      print("im here");
                       if (_formKey.currentState!.validate()) {
                         User? userInfo = await userLogin(context);
+                        print("im here2");
                         if (userInfo != null) {
+                          print("im here3");
                           Navigator.push(
                             context,
                             MaterialPageRoute(

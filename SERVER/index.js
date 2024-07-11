@@ -12,9 +12,9 @@ app.use(bodyParser.json());
 app.use(cors());
 
 const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'pasword',
+    host: '10.240.4.249',
+    user: 'comma',
+    password: 'comma0812!',
     database: 'comma'
 });
 
