@@ -44,11 +44,11 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
 
   Future<void> fetchFiles() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userId = userProvider.user?.user_id;
+    final userKey = userProvider.user?.userKey;
 
-    if (userId != null) {
+    if (userKey != null) {
       final response = await http.get(Uri.parse(
-        '${API.baseUrl}/api/${widget.folderType}-files/${widget.folderId}?user_id=$userId',
+        '${API.baseUrl}/api/${widget.folderType}-files/${widget.folderId}?userKey=$userKey',
       ));
 
       if (response.statusCode == 200) {
@@ -73,13 +73,13 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
 
   Future<void> _renameFile(int id, String newName) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userId = userProvider.user?.user_id;
+    final userKey = userProvider.user?.userKey;
 
-    if (userId != null) {
+    if (userKey != null) {
       final url = Uri.parse('${API.baseUrl}/api/${widget.folderType}-files/$id');
       try {
         final response = await http.put(url,
-            body: jsonEncode({'file_name': newName, 'user_id': userId}),
+            body: jsonEncode({'file_name': newName, 'userKey': userKey}),
             headers: {'Content-Type': 'application/json'});
         if (response.statusCode != 200) {
           throw Exception('Failed to rename file');
@@ -92,13 +92,13 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
 
   Future<void> _deleteFile(int id) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userId = userProvider.user?.user_id;
+    final userKey = userProvider.user?.userKey;
 
-    if (userId != null) {
+    if (userKey != null) {
       final url = Uri.parse('${API.baseUrl}/api/${widget.folderType}-files/$id');
       try {
         final response = await http.delete(url,
-            body: jsonEncode({'user_id': userId}),
+            body: jsonEncode({'userKey': userKey}),
             headers: {'Content-Type': 'application/json'});
         if (response.statusCode != 200) {
           throw Exception('Failed to delete file');
