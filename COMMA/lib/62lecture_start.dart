@@ -38,12 +38,12 @@ class _LectureStartPageState extends State<LectureStartPage> {
   }
   Future<void> fetchFolderList() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userId = userProvider.user?.userKey;
+    final userKey = userProvider.user?.userKey;
 
-    if (userId != null) {
+    if (userKey != null) {
       try {
         final response = await http.get(
-          Uri.parse('${API.baseUrl}/api/lecture-folders?user_id=$userId'),
+          Uri.parse('${API.baseUrl}/api/lecture-folders?userKey=$userKey'),
         );
 
         if (response.statusCode == 200) {
@@ -70,7 +70,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
         print('Folder list fetch failed: $e');
       }
     } else {
-      print('User ID is null, cannot fetch folders.');
+      print('User Key is null, cannot fetch folders.');
     }
   }
   void _selectFolder(String folderName) {
