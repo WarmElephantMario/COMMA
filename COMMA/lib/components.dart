@@ -371,7 +371,7 @@ void showColonCreatedDialog(BuildContext context, String folderName, String note
                   TextButton(
                     onPressed: () async {
                       Navigator.of(context).pop();
-                      int folderId = await createColonFolder(folderName + " (:)", noteName, '', lectureName, userId);
+                      int folderId = await createColonFolder(folderName + " (:)", noteName+" (:)", '', lectureName, userId);
 
                       // Fetch the created_at value after creating the folder and file
                       var fetchUrl = '${API.baseUrl}/api/get-colon-file?folderName=${folderName + " (:)"}&userId=$userId';
@@ -385,7 +385,7 @@ void showColonCreatedDialog(BuildContext context, String folderName, String note
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => ColonPage(folderName: folderName + " (:)", noteName: noteName, lectureName: lectureName, createdAt: createdAt),
+                            builder: (context) => ColonPage(folderName: folderName + " (:)", noteName: noteName+" (:)", lectureName: lectureName, createdAt: createdAt),
                           ),
                         );
                       } else {
