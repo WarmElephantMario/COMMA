@@ -74,7 +74,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
       print("Starting file upload...");
       Reference storageRef = FirebaseStorage.instance
           .ref()
-          .child('uploads/${userProvider.user!.user_id}/$fileName');
+          .child('uploads/${userProvider.user!.userKey}/$fileName');
       UploadTask uploadTask = storageRef.putData(fileBytes);
 
       TaskSnapshot taskSnapshot = await uploadTask;

@@ -38,7 +38,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
   }
   Future<void> fetchFolderList() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userId = userProvider.user?.user_id;
+    final userId = userProvider.user?.userKey;
 
     if (userId != null) {
       try {
