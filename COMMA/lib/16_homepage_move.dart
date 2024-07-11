@@ -261,14 +261,40 @@ class _MainPageState extends State<MainPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                '안녕하세요, ${userProvider.user?.user_nickname ?? 'Guest'} 님',
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 24,
-                  fontFamily: 'DM Sans',
-                  fontWeight: FontWeight.w700,
-                  height: 1.5,
+              Text.rich(
+                TextSpan(
+                  children: [
+                    const TextSpan(
+                      text: '안녕하세요, ',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 24,
+                        fontFamily: 'DM Sans',
+                        fontWeight: FontWeight.w500,
+                        height: 1.5,
+                      ),
+                    ),
+                    TextSpan(
+                      text: '${userProvider.user?.user_nickname ?? 'Guest'}',
+                      style: const TextStyle(
+                        color: Color(0xFF36AE92), // 원하는 색상으로 설정
+                        fontSize: 24,
+                        fontFamily: 'DM Sans',
+                        fontWeight: FontWeight.w700,
+                        height: 1.5,
+                      ),
+                    ),
+                    const TextSpan(
+                      text: ' 님',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 24,
+                        fontFamily: 'DM Sans',
+                        fontWeight: FontWeight.w500,
+                        height: 1.5,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 16),
