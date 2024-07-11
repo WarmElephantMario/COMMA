@@ -37,16 +37,16 @@ class _FolderScreenState extends State<FolderScreen> {
 
   Future<void> fetchFolders() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userId = userProvider.user?.user_id;
+    final userKey = userProvider.user?.userKey;
 
-    if (userId != null) {
+    if (userKey != null) {
       try {
         final lectureResponse = await http.get(
           Uri.parse(
-              '${API.baseUrl}/api/lecture-folders?user_id=$userId'),
+              '${API.baseUrl}/api/lecture-folders?userKey=$userKey'),
         );
         final colonResponse = await http.get(
-          Uri.parse('${API.baseUrl}/api/colon-folders?user_id=$userId'),
+          Uri.parse('${API.baseUrl}/api/colon-folders?userKey=$userKey'),
         );
 
         if (lectureResponse.statusCode == 200 &&
@@ -69,14 +69,14 @@ class _FolderScreenState extends State<FolderScreen> {
 
   Future<void> _addFolder(String folderName, String folderType) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userId = userProvider.user?.user_id;
+    final userKey = userProvider.user?.userKey;
 
-    if (userId != null) {
+    if (userKey != null) {
       final url = Uri.parse(
           '${API.baseUrl}/api/${folderType == 'lecture' ? 'lecture' : 'colon'}-folders');
       try {
         final response = await http.post(url,
-            body: jsonEncode({'folder_name': folderName, 'user_id': userId}),
+            body: jsonEncode({'folder_name': folderName, 'userKey': userKey}),
             headers: {'Content-Type': 'application/json'});
         if (response.statusCode == 200) {
           final newFolder = jsonDecode(response.body);
