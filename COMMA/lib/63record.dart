@@ -102,7 +102,7 @@ class _RecordPageState extends State<RecordPage> {
         'file_name': widget.noteName,
         'file_url': widget.fileUrl, // 다운로드 URL 사용
         'lecture_name': widget.lectureName, // 강의자료 이름 추가
-        'user_id': userKey,
+        'userKey': userKey,
       };
 
       // 확인용 로그 출력
@@ -111,7 +111,7 @@ class _RecordPageState extends State<RecordPage> {
       print('noteName: ${body['file_name']}');
       print('fileUrl: ${body['file_url']}');
       print('lectureName: ${body['lecture_name']}');
-      print('userKey: ${body['user_id']}');
+      print('userKey: ${body['userKey']}');
 
       try {
         var response = await http.post(

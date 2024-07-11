@@ -110,7 +110,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
 
 int getFolderIdByName(String folderName) {
     return folderList
-        .firstWhere((folder) => folder['folder_name'] == folderName)['id'];
+        .firstWhere((folder) => folder['folder_name'] == folderName, orElse: () => {'id': -1})['id'];
   }
 
  void showQuickMenu(
