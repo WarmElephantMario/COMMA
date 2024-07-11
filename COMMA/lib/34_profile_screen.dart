@@ -79,7 +79,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     Future<void> _updateNickname(String newNickname) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userId = userProvider.user?.user_id ?? 0;
+    final userKey = userProvider.user?.userKey ?? 0;
 
     final response = await http.put(
       Uri.parse('${API.baseUrl}/api/update_nickname'),
@@ -87,7 +87,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         'Content-Type': 'application/json',
       },
       body: jsonEncode({
-        'user_id': userId,
+        'userKey': userKey,
         'user_nickname': newNickname,
       }),
     );
