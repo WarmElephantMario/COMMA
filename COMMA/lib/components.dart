@@ -304,9 +304,9 @@ void showConfirmationDialog(
 
 void showColonCreatedDialog(BuildContext context, String folderName, String noteName, String lectureName) {
   final userProvider = Provider.of<UserProvider>(context, listen: false);
-  final userId = userProvider.user?.userKey;
+  final userKey = userProvider.user?.userKey;
 
-  if (userId != null) {
+  if (userKey != null) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -371,10 +371,10 @@ void showColonCreatedDialog(BuildContext context, String folderName, String note
                   TextButton(
                     onPressed: () async {
                       Navigator.of(context).pop();
-                      int folderId = await createColonFolder(folderName + " (:)", noteName+" (:)", '', lectureName, userId);
+                      int folderId = await createColonFolder(folderName + " (:)", noteName+" (:)", '', lectureName, userKey);
 
                       // Fetch the created_at value after creating the folder and file
-                      var fetchUrl = '${API.baseUrl}/api/get-colon-file?folderName=${folderName + " (:)"}&userId=$userId';
+                      var fetchUrl = '${API.baseUrl}/api/get-colon-file?folderName=${folderName + " (:)"}&userKey=$userKey';
                       var fetchResponse = await http.get(Uri.parse(fetchUrl));
 
                       if (fetchResponse.statusCode == 200) {
@@ -410,12 +410,12 @@ void showColonCreatedDialog(BuildContext context, String folderName, String note
       },
     );
   } else {
-    print('User ID is null, cannot create colon folder.');
+    print('User Key is null, cannot create colon folder.');
   }
 }
 
 
-Future<int> createColonFolder(String folderName, String noteName, String fileUrl, String lectureName, int userId) async {
+Future<int> createColonFolder(String folderName, String noteName, String fileUrl, String lectureName, int userKey) async {
   var url = '${API.baseUrl}/api/create-colon-folder';
 
   var body = {
@@ -423,7 +423,7 @@ Future<int> createColonFolder(String folderName, String noteName, String fileUrl
     'noteName': noteName,
     'fileUrl': fileUrl,
     'lectureName': lectureName,
-    'user_id': userId,
+    'userKey': userKey,
   };
 
   try {
