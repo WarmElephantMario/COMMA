@@ -447,6 +447,7 @@ Future<int> createColonFolder(String folderName, String noteName, String fileUrl
   }
 }
 
+
 // Learning - 강의 자료 학습중 팝업
 void showLearningDialog(BuildContext context, String fileName, String fileURL) {
   showDialog(

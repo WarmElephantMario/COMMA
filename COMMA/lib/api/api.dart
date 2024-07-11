@@ -14,3 +14,4 @@ class API {
   static const getAllFolders = "$hostConnectLectureFile/getAllFolders.php";
   static const deleteFolder = "$hostConnectLectureFile/deleteFolder.php";
 }
+
