@@ -37,7 +37,7 @@ class _MainPageState extends State<MainPage> {
   Future<void> fetchLectureFiles() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final response = await http.get(Uri.parse(
-        '${API.baseUrl}/api/getLectureFiles/${userProvider.user!.user_id}'));
+        '${API.baseUrl}/api/getLectureFiles/${userProvider.user!.userKey}'));
 
     if (response.statusCode == 200) {
       setState(() {
@@ -52,7 +52,7 @@ class _MainPageState extends State<MainPage> {
   Future<void> fetchColonFiles() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final response = await http.get(Uri.parse(
-        '${API.baseUrl}/api/getColonFiles/${userProvider.user!.user_id}'));
+        '${API.baseUrl}/api/getColonFiles/${userProvider.user!.userKey}'));
 
     if (response.statusCode == 200) {
       setState(() {
