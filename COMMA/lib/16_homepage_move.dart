@@ -39,7 +39,7 @@ class _MainPageState extends State<MainPage> {
     try {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       final response = await http.get(Uri.parse(
-          'http://localhost:3000/api/getLectureFiles/${userProvider.user!.user_id}'));
+          '${API.baseUrl}/api/getLectureFiles/${userProvider.user!.user_id}'));
 
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
@@ -65,7 +65,7 @@ class _MainPageState extends State<MainPage> {
     try {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       final response = await http.get(Uri.parse(
-          'http://localhost:3000/api/getColonFiles/${userProvider.user!.user_id}'));
+          '${API.baseUrl}/api/getColonFiles/${userProvider.user!.user_id}'));
 
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
@@ -316,7 +316,7 @@ class _MainPageState extends State<MainPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '안녕하세요, ${userProvider.user?.user_email ?? 'Guest'} 님',
+                '안녕하세요, ${userProvider.user?.user_nickname ?? 'Guest'} 님',
                 style: const TextStyle(
                   color: Colors.black,
                   fontSize: 24,

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'dart:io';
 import 'components.dart';
+import 'model/user_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -19,12 +21,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _selectedIndex = index;
     });
   }
-  String name = "이화연";
-  String email = "ewha.comma@gmail.com";
-  String phoneNumber = "010-1234-5678";
+  String name = "-";
+  String email = "-";
+  String phoneNumber = "-";
+  String nickname = "-";
   File? _image;
 
   final ImagePicker _picker = ImagePicker();
+
+  @override
+  void initState() {
+    super.initState();
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    nickname = userProvider.user?.user_nickname ?? "-";
+    email = userProvider.user?.user_email ?? "-";
+    phoneNumber = userProvider.user?.user_phone ?? "-";
+  }
 
   void _showEditNameDialog() {
     final TextEditingController nameController =
@@ -105,6 +117,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+
+    final userProvider = Provider.of<UserProvider>(context);
+
+    nickname = userProvider.user?.user_nickname ?? "-";
+    email = userProvider.user?.user_email ?? "-";
+    phoneNumber = userProvider.user?.user_phone ?? "-";
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -153,7 +172,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  _buildProfileItem('이름', name, _showEditNameDialog),
+                  _buildProfileItem('닉네임', nickname, _showEditNameDialog),
                   _buildProfileItem('이메일', email, null),
                   _buildProfileItem('전화번호', phoneNumber, null),
                 ],
