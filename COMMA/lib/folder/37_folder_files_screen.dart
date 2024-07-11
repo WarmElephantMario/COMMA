@@ -6,7 +6,6 @@ import 'package:flutter_plugin/components.dart';
 import 'package:flutter_plugin/30_folder_screen.dart';
 import 'package:flutter_plugin/66colon.dart'; // ColonPage import
 import 'package:flutter_plugin/63record.dart'; // RecordPage import
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../model/user_provider.dart';
 import '../api/api.dart';
@@ -29,7 +28,13 @@ class FolderFilesScreen extends StatefulWidget {
 
 class _FolderFilesScreenState extends State<FolderFilesScreen> {
   List<Map<String, dynamic>> files = [];
-  int _selectedIndex = 0;
+  int _selectedIndex = 1;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
   void initState() {
@@ -40,31 +45,6 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
   Future<void> fetchFiles() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userId = userProvider.user?.user_id;
-
-    final response = await http.get(Uri.parse(
-      '${API.baseUrl}/api/${widget.folderType}-files/${widget.folderId}',
-    ));
-
-    if (response.statusCode == 200) {
-      final List<dynamic> fileData = jsonDecode(response.body);
-
-      // API 응답 로깅 추가
-      print('API response: ${response.body}');
-
-      setState(() {
-        files = fileData.map((file) {
-          return {
-            'id': file['id'], // 파일 ID 추가
-            'file_name': file['file_name'] ?? '',
-            'file_url': file['file_url'] ?? '',
-            'created_at': file['created_at'] ?? '',
-            'lecture_name': file['lecture_name'] ?? '', // 강의자료 이름 추가
-          };
-        }).toList();
-      });
-    } else {
-      throw Exception('Failed to load files');
-    }
 
     if (userId != null) {
       final response = await http.get(Uri.parse(
@@ -79,7 +59,9 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
               'file_name': file['file_name'] ?? 'Unknown',
               'file_url': file['file_url'] ?? '',
               'created_at': file['created_at'] ?? '',
-              'id': file['id'] // 파일 ID 추가
+              'id': file['id'], // 파일 ID 추가
+              'folder_id': file['folder_id'] ?? 0, // 폴더 ID 추가
+              'lecture_name': file['lecture_name'] ?? 'Unknown Lecture' // 강의 이름 추가
             };
           }).toList();
         });
@@ -94,8 +76,7 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
     final userId = userProvider.user?.user_id;
 
     if (userId != null) {
-      final url =
-          Uri.parse('${API.baseUrl}/api/${widget.folderType}-files/$id');
+      final url = Uri.parse('${API.baseUrl}/api/${widget.folderType}-files/$id');
       try {
         final response = await http.put(url,
             body: jsonEncode({'file_name': newName, 'user_id': userId}),
@@ -114,8 +95,7 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
     final userId = userProvider.user?.user_id;
 
     if (userId != null) {
-      final url =
-          Uri.parse('${API.baseUrl}/api/${widget.folderType}-files/$id');
+      final url = Uri.parse('${API.baseUrl}/api/${widget.folderType}-files/$id');
       try {
         final response = await http.delete(url,
             body: jsonEncode({'user_id': userId}),
@@ -129,50 +109,48 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
     }
   }
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
   String formatDateTime(String dateTime) {
     if (dateTime.isEmpty) return 'Unknown';
     final DateTime parsedDateTime = DateTime.parse(dateTime);
     return DateFormat('yyyy/MM/dd HH:mm').format(parsedDateTime);
   }
 
-  void _openFile(Map<String, dynamic> file) {
-    // lectureName 로그 출력 추가
-    print('Opening file: ${file['file_name']}');
-    print('Lecture name: ${file['lecture_name']}');
-
-    if (widget.folderType == 'colon') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ColonPage(
-            folderName: widget.folderName,
-            noteName: file['file_name'],
-            lectureName: file['lecture_name'],
-            createdAt: file['created_at'],
-          ),
-        ),
-      );
-    } else if (widget.folderType == 'lecture') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => RecordPage(
-            selectedFolderId: widget.folderId.toString(),
-            noteName: file['file_name'],
-            fileUrl: file['file_url'],
-            folderName: widget.folderName,
-            recordingState: RecordingState.recorded, // 녹음된 상태로 설정
-            lectureName: file['lecture_name'], // 강의자료 이름 추가
-          ),
-        ),
-      );
+  // 강의 파일 클릭 이벤트에서 폴더 이름 조회
+  void fetchFolderAndNavigate(BuildContext context, int folderId, String fileType, Map<String, dynamic> file) async {
+    try {
+      final response = await http.get(Uri.parse('${API.baseUrl}/api/getFolderName/$fileType/$folderId'));
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+        navigateToPage(context, data['folder_name'] ?? 'Unknown Folder', file, fileType);
+      } else {
+        print('Failed to load folder name: ${response.statusCode}');
+        navigateToPage(context, 'Unknown Folder', file, fileType);
+      }
+    } catch (e) {
+      print('Error fetching folder name: $e');
+      navigateToPage(context, 'Unknown Folder', file, fileType);
     }
+  }
+
+  // 강의 파일 또는 콜론 파일 페이지로 네비게이션
+  void navigateToPage(BuildContext context, String folderName, Map<String, dynamic> file, String fileType) {
+    Widget page = fileType == 'lecture'
+        ? RecordPage(
+      selectedFolderId: file['folder_id'].toString(),
+      noteName: file['file_name'] ?? 'Unknown Note',
+      fileUrl: file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
+      folderName: folderName,
+      recordingState: RecordingState.recorded,
+      lectureName: file['lecture_name'] ?? 'Unknown Lecture',
+    )
+        : ColonPage(
+      folderName: folderName,
+      noteName: file['file_name'] ?? 'Unknown Note',
+      lectureName: file['lecture_name'] ?? 'Unknown Lecture',
+      createdAt: file['created_at'] ?? 'Unknown Date',
+    );
+
+    Navigator.push(context, MaterialPageRoute(builder: (context) => page));
   }
 
   @override
@@ -200,18 +178,18 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
                   int index = entry.key;
                   Map<String, dynamic> file = entry.value;
                   return GestureDetector(
-                    onTap: () => _openFile(file), // 파일을 탭하면 열기
+                    onTap: () => fetchFolderAndNavigate(context, file['folder_id'], widget.folderType, file), // 파일을 탭하면 열기
                     child: FileListItem(
                       file: file,
                       onRename: () => showRenameDialog(
                           context,
                           index,
                           files,
-                          (id, newName) => _renameFile(id, newName),
+                              (id, newName) => _renameFile(id, newName),
                           setState,
                           "파일 이름 바꾸기", // 다이얼로그 제목
                           "file_name" // 변경할 항목 타입
-                          ),
+                      ),
                       onDelete: () => showConfirmationDialog(
                           context,
                           "정말 파일을 삭제하시겠습니까?",
@@ -230,7 +208,7 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
         },
       ),
       bottomNavigationBar:
-          buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
+      buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }
