@@ -6,6 +6,8 @@ import 'components.dart'; // components.dart 파일을 임포트
 import 'model/user_provider.dart';
 import 'package:provider/provider.dart';
 import '63record.dart'; // 추가: RecordPage 임포트
+import 'dart:io';
+import 'api/api.dart';
 
 class LearningPreparation extends StatefulWidget {
   const LearningPreparation({super.key});
@@ -30,17 +32,38 @@ class _LearningPreparationState extends State<LearningPreparation> {
   }
 
   Future<void> _pickFile() async {
+    print("File picker opened.");
     FilePickerResult? result = await FilePicker.platform.pickFiles();
 
     if (result != null) {
-      setState(() {
-        _fileBytes = result.files.first.bytes;
+       print("File picker result: ${result.files.map((file) => file.name).toList()}"); // 결과 전체 로그 출력
+
+      Uint8List? fileBytes = result.files.first.bytes;
+        if (fileBytes == null) {
+        // If fileBytes is null, read the file as bytes from its path
+        String? filePath = result.files.first.path;
+        print(filePath);
+          if (filePath != null) {
+            File file = File(filePath);
+            fileBytes = await file.readAsBytes();
+          } else {
+            print("File path is null");
+            return;
+          }
+        }
+      
+       setState(() {
+        // _fileBytes = result.files.first.bytes;
+        _fileBytes = fileBytes;
         _selectedFileName = result.files.first.name;
         _isMaterialEmbedded = true;
         _isIconVisible = false;
       });
 
+      print("File picked: $_selectedFileName, bytes length: ${_fileBytes?.length}");
       await _uploadFileToFirebase(_fileBytes!, _selectedFileName!);
+    } else {
+      print("File picking cancelled.");
     }
   }
 
@@ -48,6 +71,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
       Uint8List fileBytes, String fileName) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     try {
+      print("Starting file upload...");
       Reference storageRef = FirebaseStorage.instance
           .ref()
           .child('uploads/${userProvider.user!.user_id}/$fileName');
@@ -111,6 +135,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
                   text: _isMaterialEmbedded ? '강의 자료 학습 시작하기' : '강의 자료를 임베드하세요',
                   onPressed: _isMaterialEmbedded
                       ? () {
+                          print("Starting learning with file: $_selectedFileName");
                           showLearningDialog(context, _selectedFileName!,
                               _downloadURL!); // 파일 이름과 URL을 전달하여 showLearningDialog 호출
                         }

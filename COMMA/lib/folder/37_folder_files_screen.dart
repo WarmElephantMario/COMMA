@@ -9,6 +9,7 @@ import 'package:flutter_plugin/63record.dart'; // RecordPage import
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../model/user_provider.dart';
+import '../api/api.dart';
 
 class FolderFilesScreen extends StatefulWidget {
   final String folderName;
@@ -41,7 +42,7 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
     final userId = userProvider.user?.user_id;
 
     final response = await http.get(Uri.parse(
-      'http://localhost:3000/api/${widget.folderType}-files/${widget.folderId}',
+      '${API.baseUrl}/api/${widget.folderType}-files/${widget.folderId}',
     ));
 
     if (response.statusCode == 200) {
@@ -67,7 +68,7 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
 
     if (userId != null) {
       final response = await http.get(Uri.parse(
-        'http://localhost:3000/api/${widget.folderType}-files/${widget.folderId}?user_id=$userId',
+        '${API.baseUrl}/api/${widget.folderType}-files/${widget.folderId}?user_id=$userId',
       ));
 
       if (response.statusCode == 200) {
@@ -94,7 +95,7 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
 
     if (userId != null) {
       final url =
-          Uri.parse('http://localhost:3000/api/${widget.folderType}-files/$id');
+          Uri.parse('${API.baseUrl}/api/${widget.folderType}-files/$id');
       try {
         final response = await http.put(url,
             body: jsonEncode({'file_name': newName, 'user_id': userId}),
@@ -114,7 +115,7 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
 
     if (userId != null) {
       final url =
-          Uri.parse('http://localhost:3000/api/${widget.folderType}-files/$id');
+          Uri.parse('${API.baseUrl}/api/${widget.folderType}-files/$id');
       try {
         final response = await http.delete(url,
             body: jsonEncode({'user_id': userId}),

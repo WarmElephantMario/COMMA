@@ -4,6 +4,7 @@ import 'components.dart';
 import 'dart:convert';
 import '62lecture_start.dart';
 import 'package:intl/intl.dart';
+import 'api/api.dart';
 
 enum RecordingState { initial, recording, recorded }
 
@@ -45,7 +46,7 @@ class _RecordPageState extends State<RecordPage> {
 
   Future<void> _fetchCreatedAt() async {
     var url = Uri.parse(
-        'http://localhost:3000/api/get-file-created-at?folderId=${widget.selectedFolderId}&fileName=${widget.noteName}');
+        '${API.baseUrl}/api/get-file-created-at?folderId=${widget.selectedFolderId}&fileName=${widget.noteName}');
     try {
       var response = await http.get(url);
       if (response.statusCode == 200) {
@@ -79,7 +80,7 @@ class _RecordPageState extends State<RecordPage> {
   }
 
   Future<void> _startRecording() async {
-    var url = 'http://localhost:3000/api/lecture-files';
+    var url = '${API.baseUrl}/api/lecture-files';
 
     var body = {
       'folder_id': widget.selectedFolderId, // 선택한 폴더의 ID 사용

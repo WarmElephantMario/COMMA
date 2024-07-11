@@ -6,6 +6,7 @@ import '63record.dart';
 import 'package:provider/provider.dart';
 import 'model/user.dart';
 import 'model/user_provider.dart';
+import 'api/api.dart';
 
 class LectureStartPage extends StatefulWidget {
   final String fileName;
@@ -51,7 +52,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
 
     try {
       final response = await http
-          .get(Uri.parse('http://localhost:3000/api/lecture-folders/$userId'));
+          .get(Uri.parse('${API.baseUrl}/api/lecture-folders/$userId'));
       if (response.statusCode == 200) {
         final List<dynamic> folderData = json.decode(response.body);
         setState(() {
@@ -76,7 +77,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
     final userId = userProvider.user?.user_id ?? '';
 
     final response = await http.get(Uri.parse(
-        'http://localhost:3000/api/getOtherFolders/$fileType/$currentFolderId?user_id=$userId'));
+        '${API.baseUrl}/api/getOtherFolders/$fileType/$currentFolderId?user_id=$userId'));
 
     if (response.statusCode == 200) {
       setState(() {
@@ -91,7 +92,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
   Future<void> moveItem(
       int fileId, int selectedFolderId, String fileType) async {
     final response = await http.put(
-      Uri.parse('http://localhost:3000/api/$fileType-files/move/$fileId'),
+      Uri.parse('${API.baseUrl}/api/$fileType-files/move/$fileId'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'folder_id': selectedFolderId}),
     );
@@ -228,7 +229,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
 
   Future<void> renameItem(int id, String newName) async {
     final response = await http.put(
-      Uri.parse('http://localhost:3000/api/lecture-files/$id'),
+      Uri.parse('${API.baseUrl}/api/lecture-files/$id'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'file_name': newName}),
     );

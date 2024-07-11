@@ -28,13 +28,13 @@ class _SplashScreenState extends State<SplashScreen> {
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: Colors.green,
+      backgroundColor: Color(0xFF36AE92),
       body: Center(
         child: Container(
           width: size.width * 0.3, // Adjust this value to change logo size
           height: size.width * 0.3, // Maintain aspect ratio
           decoration: const BoxDecoration(
-            color: Colors.green,
+            color: Color(0xFF36AE92),
             image: DecorationImage(
               image: AssetImage('assets/logo_white.png'),
               fit: BoxFit.contain,

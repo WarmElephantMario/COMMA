@@ -1,4 +1,4 @@
-package com.example.flutter_plugin
+package com.comma.myapp
 
 import io.flutter.embedding.android.FlutterActivity
 import android.os.Bundle
