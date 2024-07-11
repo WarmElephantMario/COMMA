@@ -432,65 +432,65 @@ app.get('/api/searchFiles', (req, res) => {
 //강의파일 생성
 app.post('/api/lecture-files', (req, res) => {
     console.log('POST /api/lecture-files called');
-    const { folder_id, file_name, file_url } = req.body;
-
+    const { folder_id, file_name, file_url, lecture_name } = req.body;
 
     if (!folder_id || !file_name) {
-        return res.status(400).json({ success: false, error: 'You must provide folder_id and file_name.' });
+      return res.status(400).json({ success: false, error: 'You must provide folder_id and file_name.' });
     }
 
-    const sql = 'INSERT INTO LectureFiles (folder_id, file_name, file_url, created_at) VALUES (?, ?, ?, NOW())';
-    db.query(sql, [folder_id, file_name, file_url], (err, result) => {
-        if (err) {
-            return res.status(500).json({ success: false, error: err.message });
-        }
-        res.json({ success: true, id: result.insertId, folder_id, file_name, file_url });
+    const sql = 'INSERT INTO LectureFiles (folder_id, file_name, file_url, lecture_name) VALUES (?, ?, ?, ?)';
+    db.query(sql, [folder_id, file_name, file_url, lecture_name], (err, result) => {
+      if (err) {
+        return res.status(500).json({ success: false, error: err.message });
+      }
+      res.json({ success: true, id: result.insertId, folder_id, file_name, file_url, lecture_name });
     });
-});
-//콜론폴더 생성 및 파일 생성
-app.post('/api/create-colon-folder', (req, res) => {
-    const { folderName, noteName, fileUrl, lectureName, userId } = req.body;
+  });
+  //콜론폴더 생성 및 파일 생성
+  app.post('/api/create-colon-folder', (req, res) => {
+      const { folderName, noteName, fileUrl, lectureName, user_id } = req.body;
 
-    // Check if the folder already exists
-    const checkFolderQuery = 'SELECT id FROM ColonFolders WHERE folder_name = ? AND user_id = ?';
-    db.query(checkFolderQuery, [folderName, userId], (err, results) => {
-        if (err) {
-            return res.status(500).json({ error: 'Failed to check folder existence' });
-        }
+      // Check if the folder already exists for the same user
+      const checkFolderQuery = 'SELECT id FROM ColonFolders WHERE folder_name = ? AND user_id = ?';
+      db.query(checkFolderQuery, [folderName, user_id], (err, results) => {
+          if (err) {
+              return res.status(500).json({ error: 'Failed to check folder existence' });
+          }
 
-        if (results.length > 0) {
-            // Folder exists, use the existing folder id
-            const folderId = results[0].id;
+          if (results.length > 0) {
+              // Folder exists, use the existing folder id
+              const folderId = results[0].id;
 
-            // Insert file into the existing folder
-            const insertFileQuery = 'INSERT INTO ColonFiles (folder_id, file_name, file_url, lecture_name) VALUES (?, ?, ?, ?)';
-            db.query(insertFileQuery, [folderId, noteName, fileUrl, lectureName], (err, result) => {
-                if (err) {
-                    return res.status(500).json({ error: 'Failed to add file to folder' });
-                }
-                res.status(200).json({ message: 'File added to existing folder successfully' });
-            });
-        } else {
-            // Folder does not exist, create a new folder
-            const createFolderQuery = 'INSERT INTO ColonFolders (folder_name, user_id) VALUES (?, ?)';
-            db.query(createFolderQuery, [folderName, userId], (err, result) => {
-                if (err) {
-                    return res.status(500).json({ error: 'Failed to create folder' });
-                }
-                const folderId = result.insertId;
+              // Insert file into the existing folder
+              const insertFileQuery = 'INSERT INTO ColonFiles (folder_id, file_name, file_url, lecture_name, created_at) VALUES (?, ?, ?, ?, NOW())';
+              db.query(insertFileQuery, [folderId, noteName, fileUrl, lectureName], (err, result) => {
+                  if (err) {
+                      return res.status(500).json({ error: 'Failed to add file to folder' });
+                  }
+                  res.status(200).json({ message: 'File added to existing folder successfully', folder_id: folderId });
+              });
+          } else {
+              // Folder does not exist, create a new folder
+              const createFolderQuery = 'INSERT INTO ColonFolders (folder_name, user_id) VALUES (?, ?)';
+              db.query(createFolderQuery, [folderName, user_id], (err, result) => {
+                  if (err) {
+                      return res.status(500).json({ error: 'Failed to create folder' });
+                  }
+                  const folderId = result.insertId;
 
-                // Insert file into the new folder
-                const insertFileQuery = 'INSERT INTO ColonFiles (folder_id, file_name, file_url, lecture_name) VALUES (?, ?, ?, ?)';
-                db.query(insertFileQuery, [folderId, noteName, fileUrl, lectureName], (err, result) => {
-                    if (err) {
-                        return res.status(500).json({ error: 'Failed to add file to folder' });
-                    }
-                    res.status(200).json({ message: 'Folder and file created successfully' });
-                });
-            });
-        }
-    });
-});
+                  // Insert file into the new folder
+                  const insertFileQuery = 'INSERT INTO ColonFiles (folder_id, file_name, file_url, lecture_name, created_at) VALUES (?, ?, ?, ?, NOW())';
+                  db.query(insertFileQuery, [folderId, noteName, fileUrl, lectureName], (err, result) => {
+                      if (err) {
+                          return res.status(500).json({ error: 'Failed to add file to folder' });
+                      }
+                      res.status(200).json({ message: 'Folder and file created successfully', folder_id: folderId });
+                  });
+              });
+          }
+      });
+  });
+
 //강의파일 created_at 가져오기
 app.get('/api/get-file-created-at', (req, res) => {
     const { folderId, fileName } = req.query;
@@ -557,10 +557,11 @@ app.get('/api/getFolderName/:fileType/:folderId', (req, res) => {
 app.get('/api/getLectureFiles/:userId', (req, res) => {
     const userId = req.params.userId;
     const sql = `
-    SELECT LectureFiles.* FROM LectureFiles
-    INNER JOIN LectureFolders ON LectureFiles.folder_id = LectureFolders.id
-    WHERE LectureFolders.user_id = ?
-    ORDER BY LectureFiles.created_at DESC;`;
+        SELECT LectureFiles.* FROM LectureFiles
+        INNER JOIN LectureFolders ON LectureFiles.folder_id = LectureFolders.id
+        WHERE LectureFolders.user_id = ?
+        ORDER BY LectureFiles.created_at DESC
+    `;
     db.query(sql, [userId], (err, results) => {
         if (err) {
             res.status(500).send(err);
