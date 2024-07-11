@@ -26,20 +26,20 @@ db.connect((err) => {
 });
 
 // 사용자 ID 기반으로 강의 폴더 목록 가져오기
-app.get('/api/lecture-folders/:userId', (req, res) => {
-    const userId = req.params.userId;
+app.get('/api/lecture-folders/:userKey', (req, res) => {
+    const userKey = req.params.userKey;
     const sql = 'SELECT id, folder_name FROM LectureFolders WHERE user_id = ?';
-    db.query(sql, [userId], (err, result) => {
+    db.query(sql, [userKey], (err, result) => {
         if (err) throw err;
         res.send(result);
     });
 });
 
 // 사용자 ID 기반으로 콜론 폴더 목록 가져오기
-app.get('/api/colon-folders/:userId', (req, res) => {
-    const userId = req.params.userId;
+app.get('/api/colon-folders/:userKey', (req, res) => {
+    const userKey = req.params.userKey;
     const sql = 'SELECT id, folder_name FROM ColonFolders WHERE user_id = ?';
-    db.query(sql, [userId], (err, result) => {
+    db.query(sql, [userKey], (err, result) => {
         if (err) throw err;
         res.send(result);
     });
@@ -96,7 +96,7 @@ app.delete('/api/:folderType-folders/:id', (req, res) => {
 
 // 강의 폴더 목록 가져오기 (특정 사용자)
 app.get('/api/lecture-folders', (req, res) => {
-    const userId = req.query.user_id;
+    const userKey = req.query.user_id;
     const sql = `
         SELECT 
             LectureFolders.id, 
@@ -107,7 +107,7 @@ app.get('/api/lecture-folders', (req, res) => {
         WHERE LectureFolders.user_id = ? 
         GROUP BY LectureFolders.id
     `;
-    db.query(sql, [userId], (err, result) => {
+    db.query(sql, [userKey], (err, result) => {
         if (err) throw err;
         res.send(result);
     });
@@ -115,7 +115,7 @@ app.get('/api/lecture-folders', (req, res) => {
 
 // 콜론 폴더 목록 가져오기 (특정 사용자)
 app.get('/api/colon-folders', (req, res) => {
-    const userId = req.query.user_id;
+    const userKey = req.query.user_id;
     const sql = `
         SELECT 
             ColonFolders.id, 
@@ -126,7 +126,7 @@ app.get('/api/colon-folders', (req, res) => {
         WHERE ColonFolders.user_id = ? 
         GROUP BY ColonFolders.id
     `;
-    db.query(sql, [userId], (err, result) => {
+    db.query(sql, [userKey], (err, result) => {
         if (err) throw err;
         res.send(result);
     });
@@ -183,12 +183,12 @@ app.put('/api/:fileType-files/move/:id', (req, res) => {
 app.get('/api/:fileType-files/:folderId', (req, res) => {
     const folderId = req.params.folderId;
     const fileType = req.params.fileType;
-    const userId = req.query.user_id;
+    const userKey = req.query.user_id;
     const tableName = fileType === 'lecture' ? 'LectureFiles' : 'ColonFiles';
     const joinTable = fileType === 'lecture' ? 'LectureFolders' : 'ColonFolders';
     const sql = `SELECT ${tableName}.* FROM ${tableName} INNER JOIN ${joinTable} ON ${tableName}.folder_id = ${joinTable}.id WHERE ${joinTable}.user_id = ? AND ${tableName}.folder_id = ?`;
 
-    db.query(sql, [userId, folderId], (err, result) => {
+    db.query(sql, [userKey, folderId], (err, result) => {
         if (err) {
             console.error('Failed to fetch files:', err);
             return res.status(500).send('Failed to fetch files');
@@ -198,27 +198,27 @@ app.get('/api/:fileType-files/:folderId', (req, res) => {
 });
 
 // 회원가입_전화번호 중복확인
-app.post('/api/validate_phone', (req, res) => {
-    const userPhone = req.body.user_phone;
+app.post('/api/validate_email', (req, res) => {
+    const userEmail = req.body.user_email;
 
-    console.log('API 요청 수신: /api/validate_phone');
-    console.log('전달된 전화번호:', userPhone);
+    console.log('API 요청 수신: /api/validate_email');
+    console.log('전달된 이메일 주소:', userEmail);
 
-    if (!userPhone) {
-        return res.status(400).json({ success: false, error: "Invalid input", phone: userPhone });
+    if (!userEmail) {
+        return res.status(400).json({ success: false, error: "Invalid input", email: userEmail });
     }
 
-    const sqlQuery = "SELECT * FROM user_table WHERE user_phone = ?";
-    db.query(sqlQuery, [userPhone], (err, result) => {
+    const sqlQuery = "SELECT * FROM user_table WHERE user_email = ?";
+    db.query(sqlQuery, [userEmail], (err, result) => {
         if (err) {
             console.error('Query failed:', err);
             return res.status(500).json({ success: false, error: "Query failed" });
         }
 
         if (result.length > 0) {
-            res.json({ existPhone: true });
+            res.json({ existEmail: true });
         } else {
-            res.json({ existPhone: false });
+            res.json({ existEmail: false });
         }
     });
 });
@@ -228,33 +228,33 @@ app.post('/api/validate_phone', (req, res) => {
 app.post('/api/signup_info', (req, res) => {
     console.log('API 요청 수신: /api/signup_info');
 
+    const userId = req.body.user_id;
     const userEmail = req.body.user_email;
-    const userPhone = req.body.user_phone;
     const userPassword = req.body.user_password;
     const hashedPassword = crypto.createHash('md5').update(userPassword).digest('hex');
     const usernickname = req.body.user_nickname;
 
+    console.log('전달된 아이디:', userId);
     console.log('전달된 이메일:', userEmail);
-    console.log('전달된 전화번호:', userPhone);
     console.log('생성된 닉네임:', usernickname); 
 
-    if (!userEmail || !userPhone || !userPassword) {
+    if (!userEmail || !userId || !userPassword) {
         return res.status(400).json({ success: false, error: 'You must fill all values.' });
     }
 
-    const sqlQuery = `INSERT INTO user_table (user_email, user_phone, user_password, user_nickname) VALUES (?, ?, ?, ?)`;
-    db.query(sqlQuery, [userEmail, userPhone, hashedPassword, usernickname], (err, result) => {
+    const sqlQuery = `INSERT INTO user_table (user_id, user_email, user_password, user_nickname) VALUES (?, ?, ?, ?)`;
+    db.query(sqlQuery, [userId, userEmail, hashedPassword, usernickname], (err, result) => {
         if (err) {
             return res.status(500).json({ success: false, error: err.message });
         }
 
-        const userId = result.insertId; // 삽입된 사용자의 ID를 가져옴
+        const userKey = result.insertId; // 삽입된 사용자의 ID를 가져옴
 
         // 기본 폴더 생성
         const lectureFolderQuery = 'INSERT INTO LectureFolders (folder_name, user_id) VALUES (?, ?)';
         const colonFolderQuery = 'INSERT INTO ColonFolders (folder_name, user_id) VALUES (?, ?)';
 
-        db.query(lectureFolderQuery, ['기본 폴더', userId], (err, result) => {
+        db.query(lectureFolderQuery, ['기본 폴더', userKey], (err, result) => {
             if (err) {
                 console.error('Failed to create lecture folder:', err);
             } else {
@@ -262,7 +262,7 @@ app.post('/api/signup_info', (req, res) => {
             }
         });
 
-        db.query(colonFolderQuery, ['기본 폴더 (:)', userId], (err, result) => {
+        db.query(colonFolderQuery, ['기본 폴더 (:)', userKey], (err, result) => {
             if (err) {
                 console.error('Failed to create colon folder:', err);
             } else {
@@ -278,18 +278,18 @@ app.post('/api/signup_info', (req, res) => {
 app.post('/api/login', (req, res) => {
     console.log('API 요청 수신: /api/login');
 
-    const userEmail = req.body.user_email;
+    const userId = req.body.user_id;
     const userPassword = req.body.user_password;
 
     // 비밀번호를 MD5로 해시
     const hashedPassword = crypto.createHash('md5').update(userPassword).digest('hex');
 
-    if (!userEmail || !userPassword) {
+    if (!userId || !userPassword) {
         return res.status(400).json({ success: false, error: 'You must fill all values.' });
     }
 
-    const sqlQuery = `SELECT * FROM user_table WHERE user_email = ? AND user_password = ?`;
-    db.query(sqlQuery, [userEmail, hashedPassword], (err, result) => {
+    const sqlQuery = `SELECT * FROM user_table WHERE user_id = ? AND user_password = ?`;
+    db.query(sqlQuery, [userId, hashedPassword], (err, result) => {
         if (err) {
             return res.status(500).json({ success: false, error: err.message });
         }
@@ -298,19 +298,19 @@ app.post('/api/login', (req, res) => {
         if (result.length > 0) {
             return res.json({ success: true, userData: result[0] });
         } else {
-            return res.json({ success: false, error: 'Invalid email or password' });
+            return res.json({ success: false, error: 'Invalid ID or password' });
         }
     });
 });
 
 //회원 닉네임 변경하기
 app.put('/api/update_nickname', (req, res) => {
-    const userId = req.body.user_id;
+    const userKey = req.body.user_id;
     const newNickname = req.body.user_nickname;
   
     // 데이터베이스 업데이트 쿼리
     const query = 'UPDATE user_table SET user_nickname = ? WHERE user_id = ?';
-    db.query(query, [newNickname, userId], (err, result) => {
+    db.query(query, [newNickname, userKey], (err, result) => {
       if (err) {
         return res.status(500).send({ success: false, error: err.message });
       }
@@ -524,15 +524,15 @@ app.get('/api/getFolderName/:fileType/:folderId', (req, res) => {
 });
 
 // 사용자별 최신 강의 파일을 가져오는 API 엔드포인트
-app.get('/api/getLectureFiles/:userId', (req, res) => {
-    const userId = req.params.userId;
+app.get('/api/getLectureFiles/:userKey', (req, res) => {
+    const userKey = req.params.userKey;
     const sql = `
         SELECT LectureFiles.* FROM LectureFiles
         INNER JOIN LectureFolders ON LectureFiles.folder_id = LectureFolders.id
         WHERE LectureFolders.user_id = ?
         ORDER BY LectureFiles.created_at DESC
     `;
-    db.query(sql, [userId], (err, results) => {
+    db.query(sql, [userKey], (err, results) => {
         if (err) {
             res.status(500).send(err);
         } else {
@@ -542,14 +542,14 @@ app.get('/api/getLectureFiles/:userId', (req, res) => {
 });
 
 // 사용자별 최신 콜론 파일을 가져오는 API 엔드포인트
-app.get('/api/getColonFiles/:userId', (req, res) => {
-    const userId = req.params.userId;
+app.get('/api/getColonFiles/:userKey', (req, res) => {
+    const userKey = req.params.userKey;
     const sql = `
     SELECT ColonFiles.* FROM ColonFiles
     INNER JOIN ColonFolders ON ColonFiles.folder_id = ColonFolders.id
     WHERE ColonFolders.user_id = ?
     ORDER BY ColonFiles.created_at DESC`;
-    db.query(sql, [userId], (err, results) => {
+    db.query(sql, [userKey], (err, results) => {
         if (err) {
             res.status(500).send(err);
         } else {

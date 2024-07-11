@@ -27,7 +27,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
   String name = "-";
   String email = "-";
-  String phoneNumber = "-";
+  String id = "-";
   String nickname = "-";
   File? _image;
 
@@ -39,7 +39,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     nickname = userProvider.user?.user_nickname ?? "-";
     email = userProvider.user?.user_email ?? "-";
-    phoneNumber = userProvider.user?.user_phone ?? "-";
   }
 
   void _showEditNameDialog() {
@@ -156,7 +155,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     nickname = userProvider.user?.user_nickname ?? "-";
     email = userProvider.user?.user_email ?? "-";
-    phoneNumber = userProvider.user?.user_phone ?? "-";
 
     return Scaffold(
       appBar: AppBar(
@@ -207,8 +205,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 20),
                   _buildProfileItem('닉네임', nickname, _showEditNameDialog),
+                  _buildProfileItem('아이디', id, null),
                   _buildProfileItem('이메일', email, null),
-                  _buildProfileItem('전화번호', phoneNumber, null),
+                  // _buildProfileItem('전화번호', phoneNumber, null),
                 ],
               ),
             ),

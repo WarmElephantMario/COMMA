@@ -317,7 +317,7 @@ class _MainPageState extends State<MainPage> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => AllFilesPage(
-                            userId: userProvider.user!.user_id,
+                            userId: userProvider.user!.userKey,
                             fileType: 'lecture',
                           ),
                         ),
@@ -424,7 +424,7 @@ class _MainPageState extends State<MainPage> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => AllFilesPage(
-                            userId: userProvider.user!.user_id,
+                            userId: userProvider.user!.userKey,
                             fileType: 'colon',
                           ),
                         ),
