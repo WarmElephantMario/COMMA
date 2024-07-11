@@ -28,7 +28,7 @@ db.connect((err) => {
 // 사용자 ID 기반으로 강의 폴더 목록 가져오기
 app.get('/api/lecture-folders/:userKey', (req, res) => {
     const userKey = req.params.userKey;
-    const sql = 'SELECT id, folder_name FROM LectureFolders WHERE user_id = ?';
+    const sql = 'SELECT id, folder_name FROM LectureFolders WHERE userKey = ?';
     db.query(sql, [userKey], (err, result) => {
         if (err) throw err;
         res.send(result);
@@ -38,7 +38,7 @@ app.get('/api/lecture-folders/:userKey', (req, res) => {
 // 사용자 ID 기반으로 콜론 폴더 목록 가져오기
 app.get('/api/colon-folders/:userKey', (req, res) => {
     const userKey = req.params.userKey;
-    const sql = 'SELECT id, folder_name FROM ColonFolders WHERE user_id = ?';
+    const sql = 'SELECT id, folder_name FROM ColonFolders WHERE userKey = ?';
     db.query(sql, [userKey], (err, result) => {
         if (err) throw err;
         res.send(result);
@@ -47,21 +47,21 @@ app.get('/api/colon-folders/:userKey', (req, res) => {
 
 // 강의 폴더 추가
 app.post('/api/lecture-folders', (req, res) => {
-    const { folder_name, user_id } = req.body;
-    const sql = 'INSERT INTO LectureFolders (folder_name, user_id) VALUES (?, ?)';
-    db.query(sql, [folder_name, user_id], (err, result) => {
+    const { folder_name, userKey } = req.body;
+    const sql = 'INSERT INTO LectureFolders (folder_name, userKey) VALUES (?, ?)';
+    db.query(sql, [folder_name, userKey], (err, result) => {
         if (err) throw err;
-        res.send({ id: result.insertId, folder_name, user_id });
+        res.send({ id: result.insertId, folder_name, userKey });
     });
 });
 
 // 콜론 폴더 추가
 app.post('/api/colon-folders', (req, res) => {
-    const { folder_name, user_id } = req.body;
-    const sql = 'INSERT INTO ColonFolders (folder_name, user_id) VALUES (?, ?)';
-    db.query(sql, [`${folder_name} (:)`, user_id], (err, result) => {
+    const { folder_name, userKey } = req.body;
+    const sql = 'INSERT INTO ColonFolders (folder_name, userKey) VALUES (?, ?)';
+    db.query(sql, [`${folder_name} (:)`, userKey], (err, result) => {
         if (err) throw err;
-        res.send({ id: result.insertId, folder_name: `${folder_name} (:)`, user_id });
+        res.send({ id: result.insertId, folder_name: `${folder_name} (:)`, userKey });
     });
 });
 
@@ -96,7 +96,7 @@ app.delete('/api/:folderType-folders/:id', (req, res) => {
 
 // 강의 폴더 목록 가져오기 (특정 사용자)
 app.get('/api/lecture-folders', (req, res) => {
-    const userKey = req.query.user_id;
+    const userKey = req.query.userKey;
     const sql = `
         SELECT 
             LectureFolders.id, 
@@ -104,7 +104,7 @@ app.get('/api/lecture-folders', (req, res) => {
             COUNT(LectureFiles.id) AS file_count 
         FROM LectureFolders 
         LEFT JOIN LectureFiles ON LectureFolders.id = LectureFiles.folder_id 
-        WHERE LectureFolders.user_id = ? 
+        WHERE LectureFolders.userKey = ? 
         GROUP BY LectureFolders.id
     `;
     db.query(sql, [userKey], (err, result) => {
@@ -115,7 +115,7 @@ app.get('/api/lecture-folders', (req, res) => {
 
 // 콜론 폴더 목록 가져오기 (특정 사용자)
 app.get('/api/colon-folders', (req, res) => {
-    const userKey = req.query.user_id;
+    const userKey = req.query.userKey;
     const sql = `
         SELECT 
             ColonFolders.id, 
@@ -123,7 +123,7 @@ app.get('/api/colon-folders', (req, res) => {
             COUNT(ColonFiles.id) AS file_count 
         FROM ColonFolders 
         LEFT JOIN ColonFiles ON ColonFolders.id = ColonFiles.folder_id 
-        WHERE ColonFolders.user_id = ? 
+        WHERE ColonFolders.userKey = ? 
         GROUP BY ColonFolders.id
     `;
     db.query(sql, [userKey], (err, result) => {
@@ -183,10 +183,10 @@ app.put('/api/:fileType-files/move/:id', (req, res) => {
 app.get('/api/:fileType-files/:folderId', (req, res) => {
     const folderId = req.params.folderId;
     const fileType = req.params.fileType;
-    const userKey = req.query.user_id;
+    const userKey = req.query.userKey;
     const tableName = fileType === 'lecture' ? 'LectureFiles' : 'ColonFiles';
     const joinTable = fileType === 'lecture' ? 'LectureFolders' : 'ColonFolders';
-    const sql = `SELECT ${tableName}.* FROM ${tableName} INNER JOIN ${joinTable} ON ${tableName}.folder_id = ${joinTable}.id WHERE ${joinTable}.user_id = ? AND ${tableName}.folder_id = ?`;
+    const sql = `SELECT ${tableName}.* FROM ${tableName} INNER JOIN ${joinTable} ON ${tableName}.folder_id = ${joinTable}.id WHERE ${joinTable}.userKey = ? AND ${tableName}.folder_id = ?`;
 
     db.query(sql, [userKey, folderId], (err, result) => {
         if (err) {
@@ -251,8 +251,8 @@ app.post('/api/signup_info', (req, res) => {
         const userKey = result.insertId; // 삽입된 사용자의 ID를 가져옴
 
         // 기본 폴더 생성
-        const lectureFolderQuery = 'INSERT INTO LectureFolders (folder_name, user_id) VALUES (?, ?)';
-        const colonFolderQuery = 'INSERT INTO ColonFolders (folder_name, user_id) VALUES (?, ?)';
+        const lectureFolderQuery = 'INSERT INTO LectureFolders (folder_name, userKey) VALUES (?, ?)';
+        const colonFolderQuery = 'INSERT INTO ColonFolders (folder_name, userKey) VALUES (?, ?)';
 
         db.query(lectureFolderQuery, ['기본 폴더', userKey], (err, result) => {
             if (err) {
@@ -417,11 +417,11 @@ app.post('/api/lecture-files', (req, res) => {
   
 //콜론폴더 생성 및 파일 생성
 app.post('/api/create-colon-folder', (req, res) => {
-    const { folderName, noteName, fileUrl, lectureName, user_id } = req.body;
+    const { folderName, noteName, fileUrl, lectureName, userKey } = req.body;
 
     // Check if the folder already exists for the same user
-    const checkFolderQuery = 'SELECT id FROM ColonFolders WHERE folder_name = ? AND user_id = ?';
-    db.query(checkFolderQuery, [folderName, user_id], (err, results) => {
+    const checkFolderQuery = 'SELECT id FROM ColonFolders WHERE folder_name = ? AND userKey = ?';
+    db.query(checkFolderQuery, [folderName, userKey], (err, results) => {
         if (err) {
             return res.status(500).json({ error: 'Failed to check folder existence' });
         }
@@ -440,8 +440,8 @@ app.post('/api/create-colon-folder', (req, res) => {
             });
         } else {
             // Folder does not exist, create a new folder
-            const createFolderQuery = 'INSERT INTO ColonFolders (folder_name, user_id) VALUES (?, ?)';
-            db.query(createFolderQuery, [folderName, user_id], (err, result) => {
+            const createFolderQuery = 'INSERT INTO ColonFolders (folder_name, userKey) VALUES (?, ?)';
+            db.query(createFolderQuery, [folderName, userKey], (err, result) => {
                 if (err) {
                     return res.status(500).json({ error: 'Failed to create folder' });
                 }
@@ -529,7 +529,7 @@ app.get('/api/getLectureFiles/:userKey', (req, res) => {
     const sql = `
         SELECT LectureFiles.* FROM LectureFiles
         INNER JOIN LectureFolders ON LectureFiles.folder_id = LectureFolders.id
-        WHERE LectureFolders.user_id = ?
+        WHERE LectureFolders.userKey = ?
         ORDER BY LectureFiles.created_at DESC
     `;
     db.query(sql, [userKey], (err, results) => {
@@ -547,7 +547,7 @@ app.get('/api/getColonFiles/:userKey', (req, res) => {
     const sql = `
     SELECT ColonFiles.* FROM ColonFiles
     INNER JOIN ColonFolders ON ColonFiles.folder_id = ColonFolders.id
-    WHERE ColonFolders.user_id = ?
+    WHERE ColonFolders.userKey = ?
     ORDER BY ColonFiles.created_at DESC`;
     db.query(sql, [userKey], (err, results) => {
         if (err) {
