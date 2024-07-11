@@ -8,12 +8,12 @@ import '66colon.dart';
 import 'components.dart'; // showCustomMenu 함수가 있는 파일을 import
 
 class AllFilesPage extends StatefulWidget {
-  final int userId;
+  final int userKey;
   final String fileType;
 
   const AllFilesPage({
     super.key,
-    required this.userId,
+    required this.userKey,
     required this.fileType,
   });
 
@@ -32,7 +32,7 @@ class _AllFilesPageState extends State<AllFilesPage> {
 
   Future<void> fetchFiles() async {
     final response = await http.get(Uri.parse(
-        '${API.baseUrl}/api/get${widget.fileType == 'lecture' ? 'Lecture' : 'Colon'}Files/${widget.userId}'));
+        '${API.baseUrl}/api/get${widget.fileType == 'lecture' ? 'Lecture' : 'Colon'}Files/${widget.userKey}'));
 
     if (response.statusCode == 200) {
       setState(() {
