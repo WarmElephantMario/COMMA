@@ -4,6 +4,10 @@ import 'package:provider/provider.dart';
 import 'dart:io';
 import 'components.dart';
 import 'model/user_provider.dart';
+import 'api/api.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -39,16 +43,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showEditNameDialog() {
-    final TextEditingController nameController =
-        TextEditingController(text: name);
+    final TextEditingController nicknameController = TextEditingController(text: nickname);
+
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('이름 바꾸기'),
+          title: const Text('닉네임 바꾸기'),
           content: TextField(
-            controller: nameController,
-            decoration: const InputDecoration(hintText: '새 이름을 입력하세요'),
+            controller: nicknameController,
+            decoration: const InputDecoration(hintText: '새 닉네임을 입력하세요'),
           ),
           actions: <Widget>[
             TextButton(
@@ -59,9 +63,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             TextButton(
               child: const Text('저장'),
-              onPressed: () {
+              onPressed: () async{
+                String newNickname = nicknameController.text;
+                await _updateNickname(newNickname);
                 setState(() {
-                  name = nameController.text;
+                  nickname = newNickname;
                 });
                 Navigator.of(context).pop();
               },
@@ -70,6 +76,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
         );
       },
     );
+  }
+
+    Future<void> _updateNickname(String newNickname) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userId = userProvider.user?.user_id ?? 0;
+
+    final response = await http.put(
+      Uri.parse('${API.baseUrl}/api/update_nickname'),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'user_id': userId,
+        'user_nickname': newNickname,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      var responseBody = jsonDecode(response.body);
+      if (responseBody['success']) {
+        userProvider.updateUserNickname(newNickname);
+        Fluttertoast.showToast(msg: '닉네임이 성공적으로 업데이트되었습니다.');
+      } else {
+        Fluttertoast.showToast(msg: '닉네임 업데이트 중 오류가 발생했습니다.');
+      }
+    } else {
+      Fluttertoast.showToast(msg: '서버 오류: 닉네임 업데이트 실패');
+    }
   }
 
   Future<void> _pickImage() async {
