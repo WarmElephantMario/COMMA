@@ -25,7 +25,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _selectedIndex = index;
     });
   }
-  String name = "-";
+
   String email = "-";
   String id = "-";
   String nickname = "-";

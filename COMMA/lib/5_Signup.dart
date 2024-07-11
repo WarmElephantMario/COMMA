@@ -43,7 +43,6 @@ class _SignUpPageState extends State<SignUpPage> {
 
   final TextEditingController idController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
 
@@ -127,7 +126,6 @@ class _SignUpPageState extends State<SignUpPage> {
             idController.clear();
             emailController.clear();
             passwordController.clear();
-            phoneController.clear();
           });
         } else {
           Fluttertoast.showToast(msg: 'Error occurred. Please try again.');
