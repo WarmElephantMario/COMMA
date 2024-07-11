@@ -25,12 +25,13 @@
 **데이터베이스 테이블 구조**<br>
 ```sql
 CREATE TABLE user_table (
-  user_id SERIAL PRIMARY KEY,
+  userKey SERIAL PRIMARY KEY,
+  user_id VARCHAR(255) NOT NULL,
   user_email VARCHAR(255) NOT NULL UNIQUE,
-  user_phone VARCHAR(20) NOT NULL UNIQUE,
   user_password VARCHAR(255) NOT NULL,
-  user_nickname VARCHAR(50) NOT NULL
+  user_nickname VARCHAR(50) NOT NULL DEFAULT 'Guest'
 );
+
 
 
 CREATE TABLE LectureFolders (
