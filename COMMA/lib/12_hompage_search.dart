@@ -7,6 +7,7 @@ import 'package:intl/intl.dart'; // 날짜 포맷을 위해 추가
 import '63record.dart';
 import '66colon.dart';
 
+
 class MainToSearchPage extends StatefulWidget {
   const MainToSearchPage({super.key});
 
@@ -36,6 +37,7 @@ class _MainToSearchPageState extends State<MainToSearchPage> {
       throw Exception('Failed to search files');
     }
   }
+
 
   String formatDateTimeToKorean(String? dateTime) {
     if (dateTime == null || dateTime.isEmpty) return 'Unknown';
@@ -167,7 +169,6 @@ class _MainToSearchPageState extends State<MainToSearchPage> {
               itemCount: searchResults.length,
               itemBuilder: (context, index) {
                 final file = searchResults[index];
-
                 // null 값을 처리하여 기본값을 설정
                 final fileName = file['file_name'] ?? 'Unknown Note';
                 final fileUrl = file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt';

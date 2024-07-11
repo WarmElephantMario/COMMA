@@ -443,7 +443,7 @@ void showColonCreatedDialog(BuildContext context, String folderName, String note
       },
     );
   } else {
-    print('User ID is null, cannot create colon folder.');
+    print('User Key is null, cannot create colon folder.');
   }
 }
 

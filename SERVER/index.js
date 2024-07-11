@@ -415,12 +415,12 @@ app.post('/api/lecture-files', (req, res) => {
     });
   });
   
+
   //콜론 폴더 생성
   app.post('/api/create-colon-folder', (req, res) => {
     const { folderName, noteName, fileUrl, lectureName, userKey } = req.body;
 
     console.log('Received request to create colon folder:', { folderName, noteName, fileUrl, lectureName, userKey });
-
     // Check if the folder already exists for the same user
     const checkFolderQuery = 'SELECT id FROM ColonFolders WHERE folder_name = ? AND userKey = ?';
     db.query(checkFolderQuery, [folderName, userKey], (err, results) => {
