@@ -20,12 +20,12 @@ class SigninPage extends StatefulWidget {
 class _SigninPageState extends State<SigninPage> {
   final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController emailController = TextEditingController();
+  final TextEditingController idController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
   @override
   void dispose() {
-    emailController.dispose();
+    idController.dispose();
     passwordController.dispose();
     super.dispose();
   }
@@ -38,7 +38,7 @@ class _SigninPageState extends State<SigninPage> {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          'user_email': emailController.text.trim(),
+          'user_id' : idController.text.trim(),
           'user_password': passwordController.text.trim(),
         }),
       );
@@ -58,12 +58,12 @@ class _SigninPageState extends State<SigninPage> {
           Provider.of<UserProvider>(context, listen: false).setUser(userInfo);
 
           setState(() {
-            emailController.clear();
+            idController.clear();
             passwordController.clear();
           });
           return userInfo;
         } else {
-          Fluttertoast.showToast(msg: 'Please check your email and password.');
+          Fluttertoast.showToast(msg: 'Please check your id and password.');
           return null;
         }
       }
@@ -119,9 +119,9 @@ class _SigninPageState extends State<SigninPage> {
                   child: Column(
                     children: [
                       InputButton(
-                        label: 'Email address',
+                        label: 'Your ID',
                         keyboardType: TextInputType.emailAddress,
-                        controller: emailController,
+                        controller: idController,
                       ),
                       SizedBox(height: size.height * 0.025),
                       InputButton(
