@@ -301,7 +301,40 @@ void showConfirmationDialog(
   );
 }
 
+// 콜론 폴더 생성 및 파일 생성 함수
+Future<int> createColonFolder(String folderName, String noteName, String fileUrl, String lectureName, int userKey) async {
+  var url = '${API.baseUrl}/api/create-colon-folder';
 
+  var body = {
+    'folderName': folderName,
+    'noteName': noteName,
+    'fileUrl': fileUrl,
+    'lectureName': lectureName,
+    'userKey': userKey,
+  };
+
+  try {
+    var response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 200) {
+      var jsonResponse = jsonDecode(response.body);
+      print('Folder and file created successfully');
+      return jsonResponse['folder_id'];
+    } else {
+      print('Failed to create folder and file: ${response.statusCode}');
+      return -1;
+    }
+  } catch (e) {
+    print('Error during HTTP request: $e');
+    return -1;
+  }
+}
+
+// 콜론 생성 다이얼로그 함수
 void showColonCreatedDialog(BuildContext context, String folderName, String noteName, String lectureName) {
   final userProvider = Provider.of<UserProvider>(context, listen: false);
   final userKey = userProvider.user?.userKey;
@@ -399,7 +432,7 @@ void showColonCreatedDialog(BuildContext context, String folderName, String note
                         fontSize: 14,
                         fontFamily: 'DM Sans',
                         fontWeight: FontWeight.bold,
-                      ),
+                    ),
                     ),
                   ),
                 ],
@@ -411,39 +444,6 @@ void showColonCreatedDialog(BuildContext context, String folderName, String note
     );
   } else {
     print('User Key is null, cannot create colon folder.');
-  }
-}
-
-
-Future<int> createColonFolder(String folderName, String noteName, String fileUrl, String lectureName, int userKey) async {
-  var url = '${API.baseUrl}/api/create-colon-folder';
-
-  var body = {
-    'folderName': folderName,
-    'noteName': noteName,
-    'fileUrl': fileUrl,
-    'lectureName': lectureName,
-    'userKey': userKey,
-  };
-
-  try {
-    var response = await http.post(
-      Uri.parse(url),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(body),
-    );
-
-    if (response.statusCode == 200) {
-      var jsonResponse = jsonDecode(response.body);
-      print('Folder and file created successfully');
-      return jsonResponse['folder_id'];
-    } else {
-      print('Failed to create folder and file: ${response.statusCode}');
-      return -1;
-    }
-  } catch (e) {
-    print('Error during HTTP request: $e');
-    return -1;
   }
 }
 
