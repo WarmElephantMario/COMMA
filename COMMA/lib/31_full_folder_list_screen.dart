@@ -37,13 +37,13 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
 
   Future<void> fetchFolders() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userId = userProvider.user?.user_id;
+    final userKey = userProvider.user?.userKey;
 
-    if (userId != null) {
+    if (userKey != null) {
       final String folderType = widget.title == '강의폴더' ? 'lecture' : 'colon';
       final response = await http.get(
         Uri.parse(
-            '${API.baseUrl}/api/$folderType-folders?user_id=$userId'),
+            '${API.baseUrl}/api/$folderType-folders?userKey=$userKey'),
       );
 
       if (response.statusCode == 200) {
@@ -58,9 +58,9 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
 
   Future<void> _addFolder(String folderName) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userId = userProvider.user?.user_id;
+    final userKey = userProvider.user?.userKey;
 
-    if (userId != null) {
+    if (userKey != null) {
       final String folderType = widget.title == '강의폴더' ? 'lecture' : 'colon';
       try {
         final response = await http.post(
@@ -70,7 +70,7 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
           },
           body: jsonEncode(<String, dynamic>{
             'folder_name': folderName,
-            'user_id': userId,
+            'userKey': userKey,
           }),
         );
 
@@ -88,9 +88,9 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
 
   Future<void> _renameFolder(int id, String newName) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userId = userProvider.user?.user_id;
+    final userKey = userProvider.user?.userKey;
 
-    if (userId != null) {
+    if (userKey != null) {
       final String folderType = widget.title == '강의폴더' ? 'lecture' : 'colon';
       try {
         final response = await http.put(
@@ -100,7 +100,7 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
           },
           body: jsonEncode(<String, dynamic>{
             'folder_name': newName,
-            'user_id': userId,
+            'userKey': userKey,
           }),
         );
 
@@ -115,9 +115,9 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
 
   Future<void> _deleteFolder(int id) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userId = userProvider.user?.user_id;
+    final userKey = userProvider.user?.userKey;
 
-    if (userId != null) {
+    if (userKey != null) {
       final String folderType = widget.title == '강의폴더' ? 'lecture' : 'colon';
       try {
         final response = await http.delete(
@@ -126,7 +126,7 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
             'Content-Type': 'application/json; charset=UTF-8',
           },
           body: jsonEncode(<String, dynamic>{
-            'user_id': userId,
+            'userKey': userKey,
           }),
         );
 
