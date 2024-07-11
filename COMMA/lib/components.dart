@@ -304,7 +304,7 @@ void showConfirmationDialog(
 
 void showColonCreatedDialog(BuildContext context, String folderName, String noteName, String lectureName) {
   final userProvider = Provider.of<UserProvider>(context, listen: false);
-  final userId = userProvider.user?.user_id;
+  final userId = userProvider.user?.userKey;
 
   if (userId != null) {
     showDialog(

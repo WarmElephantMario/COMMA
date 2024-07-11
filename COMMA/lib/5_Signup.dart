@@ -41,6 +41,7 @@ class SignUpPage extends StatefulWidget {
 class _SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
 
+  final TextEditingController idController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -62,22 +63,22 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
 
-  Future<bool> checkUserPhone() async {
+  Future<bool> checkUserEmail() async {
     try {
       var response = await http.post(
-        Uri.parse('${API.baseUrl}/api/validate_phone'),
+        Uri.parse('${API.baseUrl}/api/validate_email'),
         headers: {
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({'user_phone': phoneController.text.trim()}),
+        body: jsonEncode({'user_email': emailController.text.trim()}),
       );
 
       print(response.statusCode);
       if (response.statusCode == 200) {
         var responseBody = jsonDecode(response.body);
 
-        if (responseBody['existPhone'] == true) {
-          Fluttertoast.showToast(msg: "This phone number is already in use.");
+        if (responseBody['existEmail'] == true) {
+          Fluttertoast.showToast(msg: "This Email Address is already in use.");
           return false;
         } else {
           print('validation success');
@@ -98,8 +99,8 @@ class _SignUpPageState extends State<SignUpPage> {
 
     User userModel = User(
       1,
+      idController.text.trim(),
       emailController.text.trim(),
-      phoneController.text.trim(),
       passwordController.text.trim(),
       randomNickname,
     );
@@ -123,6 +124,7 @@ class _SignUpPageState extends State<SignUpPage> {
         if (resSignup['success'] == true) {
           Fluttertoast.showToast(msg: 'Signup successfully');
           setState(() {
+            idController.clear();
             emailController.clear();
             passwordController.clear();
             phoneController.clear();
@@ -142,8 +144,8 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   void dispose() {
+    idController.dispose();
     emailController.dispose();
-    phoneController.dispose();
     passwordController.dispose();
     super.dispose();
   }
@@ -189,9 +191,9 @@ class _SignUpPageState extends State<SignUpPage> {
                 child: Column(
                   children: [
                     InputButton(
-                      label: 'Email address',
-                      keyboardType: TextInputType.emailAddress,
-                      controller: emailController,
+                      label: 'Your ID',
+                      keyboardType: TextInputType.name,
+                      controller: idController,
                     ),
                     SizedBox(height: size.height * 0.035),
                     InputButton(
@@ -201,9 +203,9 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     SizedBox(height: size.height * 0.035),
                     InputButton(
-                      label: 'Phone number',
-                      keyboardType: TextInputType.phone,
-                      controller: phoneController,
+                      label: 'Email address',
+                      keyboardType: TextInputType.emailAddress,
+                      controller: emailController,
                     ),
                   ],
                 ),
@@ -228,8 +230,8 @@ class _SignUpPageState extends State<SignUpPage> {
                       GestureDetector(
                         onTap: () async {
                           if (_formKey.currentState!.validate()) {
-                            bool isPhoneValid = await checkUserPhone();
-                            if (isPhoneValid) {
+                            bool isEmailValid = await checkUserEmail();
+                            if (isEmailValid) {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
