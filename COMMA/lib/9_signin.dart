@@ -50,6 +50,7 @@ class _SigninPageState extends State<SigninPage> {
         if (resLogin['success'] == true) {
           Fluttertoast.showToast(msg: 'login successfully');
           User userInfo = User.fromJson(resLogin['userData']);
+          // print(userInfo);
 
           print("Login success");
 

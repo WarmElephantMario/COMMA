@@ -24,12 +24,14 @@
 
 **데이터베이스 테이블 구조**<br>
 ```sql
-CREATE TABLE User_Table(
-    user_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_email VARCHAR(255),
-    user_phone VARCHAR(255),
-    user_password VARCHAR(32) NOT NULL
+CREATE TABLE user_table (
+  user_id SERIAL PRIMARY KEY,
+  user_email VARCHAR(255) NOT NULL UNIQUE,
+  user_phone VARCHAR(20) NOT NULL UNIQUE,
+  user_password VARCHAR(255) NOT NULL,
+  user_nickname VARCHAR(50) NOT NULL
 );
+
 
 CREATE TABLE LectureFolders (
     id INT AUTO_INCREMENT PRIMARY KEY,
