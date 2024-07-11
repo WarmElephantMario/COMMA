@@ -108,12 +108,12 @@ class _LectureStartPageState extends State<LectureStartPage> {
     });
   }
 
-  int getFolderIdByName(String folderName) {
+int getFolderIdByName(String folderName) {
     return folderList
         .firstWhere((folder) => folder['folder_name'] == folderName)['id'];
   }
 
-  void showQuickMenu(
+ void showQuickMenu(
       BuildContext context,
       Future<void> Function() fetchOtherFolders,
       List<Map<String, dynamic>> folders,
