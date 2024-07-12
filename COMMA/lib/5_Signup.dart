@@ -45,14 +45,81 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-
   String generateRandomNickname() {
-    const adjectives = ["짱멋진", "성실한", "용감한", "힘찬", "다정한", "밝은", "행복한", "씩씩한", "진지한", "유쾌한", "즐거운", "똑똑한",
-                        "솔직한", "온화한", "강한", "상냥한", "따뜻한", "열정적인", "활기찬", "근면한", "눈부신", "친절한", "충실한", "차분한", "훈훈한", "강인한",
-                        "열정가득", "행복가득", "참신한", "당당한", "맑은", "희망찬", "강력한", "부지런한" ,"긍정적인", "명랑한", "순수한"];
-    const nouns = ["짜빠구리", "고등어", "눈사람", "사자", "호랑이", "독수리", "코끼리", "팬더", "고래", "돌고래", "늑대", "독수리", "코알라",
-                    "부엉이", "고양이", "강아지", "햄스터", "다람쥐", "원숭이", "앵무새", "바나나", "파인애플", "복숭아", "오렌지", "토마토", "브로콜리",
-                  "고구마", "시금치", "콩나물", "해바라기", "코스모스", "민들레", "진달래"];
+    const adjectives = [
+      "짱멋진",
+      "성실한",
+      "용감한",
+      "힘찬",
+      "다정한",
+      "밝은",
+      "행복한",
+      "씩씩한",
+      "진지한",
+      "유쾌한",
+      "즐거운",
+      "똑똑한",
+      "솔직한",
+      "온화한",
+      "강한",
+      "상냥한",
+      "따뜻한",
+      "열정적인",
+      "활기찬",
+      "근면한",
+      "눈부신",
+      "친절한",
+      "충실한",
+      "차분한",
+      "훈훈한",
+      "강인한",
+      "열정가득",
+      "행복가득",
+      "참신한",
+      "당당한",
+      "맑은",
+      "희망찬",
+      "강력한",
+      "부지런한",
+      "긍정적인",
+      "명랑한",
+      "순수한"
+    ];
+    const nouns = [
+      "짜빠구리",
+      "고등어",
+      "눈사람",
+      "사자",
+      "호랑이",
+      "독수리",
+      "코끼리",
+      "팬더",
+      "고래",
+      "돌고래",
+      "늑대",
+      "독수리",
+      "코알라",
+      "부엉이",
+      "고양이",
+      "강아지",
+      "햄스터",
+      "다람쥐",
+      "원숭이",
+      "앵무새",
+      "바나나",
+      "파인애플",
+      "복숭아",
+      "오렌지",
+      "토마토",
+      "브로콜리",
+      "고구마",
+      "시금치",
+      "콩나물",
+      "해바라기",
+      "코스모스",
+      "민들레",
+      "진달래"
+    ];
     final random = Random();
 
     final adjective = adjectives[random.nextInt(adjectives.length)];
@@ -60,7 +127,6 @@ class _SignUpPageState extends State<SignUpPage> {
 
     return "$adjective $noun";
   }
-
 
   Future<bool> checkUserEmail() async {
     try {
@@ -138,7 +204,6 @@ class _SignUpPageState extends State<SignUpPage> {
       Fluttertoast.showToast(msg: 'Error: ${e.toString()}');
     }
   }
-
 
   @override
   void dispose() {

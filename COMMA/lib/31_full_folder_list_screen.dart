@@ -42,8 +42,7 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
     if (userKey != null) {
       final String folderType = widget.title == '강의폴더' ? 'lecture' : 'colon';
       final response = await http.get(
-        Uri.parse(
-            '${API.baseUrl}/api/$folderType-folders?userKey=$userKey'),
+        Uri.parse('${API.baseUrl}/api/$folderType-folders?userKey=$userKey'),
       );
 
       if (response.statusCode == 200) {
@@ -86,12 +85,11 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
     }
   }
 
-  Future<void> _renameFolder(int id, String newName) async {
+  Future<void> _renameFolder(String folderType, int id, String newName) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userKey = userProvider.user?.userKey;
 
     if (userKey != null) {
-      final String folderType = widget.title == '강의폴더' ? 'lecture' : 'colon';
       try {
         final response = await http.put(
           Uri.parse('${API.baseUrl}/api/$folderType-folders/$id'),
@@ -143,38 +141,39 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: Text(widget.title,
-          style: TextStyle(
-              color: Color.fromARGB(255, 48, 48, 48),
-              fontFamily: 'DM Sans',
-              fontWeight: FontWeight.w600),
+          backgroundColor: Colors.white,
+          title: Text(
+            widget.title,
+            style: const TextStyle(
+                color: Color.fromARGB(255, 48, 48, 48),
+                fontFamily: 'DM Sans',
+                fontWeight: FontWeight.w600),
           ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 30),
-            child: TextButton(
-              onPressed: () {
-                showAddFolderDialog(context, _addFolder);
-              },
-              child: Row(
-                children: [
-                  const Text(
-                    '추가하기',
-                    style: TextStyle(
-                      color: Color(0xFF36AE92),
-                      fontSize: 15,
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 30),
+              child: TextButton(
+                onPressed: () {
+                  showAddFolderDialog(context, _addFolder);
+                },
+                child: Row(
+                  children: [
+                    const Text(
+                      '추가하기',
+                      style: TextStyle(
+                        color: Color(0xFF36AE92),
+                        fontSize: 15,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 5),
-                  Image.asset('assets/add2.png'),
-                ],
+                    const SizedBox(width: 5),
+                    Image.asset('assets/add2.png'),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
-          iconTheme: IconThemeData(color: Color.fromARGB(255, 48, 48, 48))
-      ),
+          ],
+          iconTheme:
+              const IconThemeData(color: Color.fromARGB(255, 48, 48, 48))),
       backgroundColor: Colors.white,
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -203,10 +202,11 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
                     child: FolderListItem(
                       folder: folder,
                       fileCount: folder['file_count'] ?? 0, // 파일 개수 전달
-                      onRename: () => showRenameDialog(
+                      onRename: () => showRenameDialogVer2(
                         context,
                         index,
                         folders,
+                        widget.title == '강의폴더' ? 'lecture' : 'colon',
                         _renameFolder,
                         setState,
                         "폴더 이름 바꾸기", // 다이얼로그 제목

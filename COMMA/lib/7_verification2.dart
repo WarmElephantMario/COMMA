@@ -96,7 +96,7 @@ class Information extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                           builder: (context) =>
-                              Verification_Complete_screen()));
+                              const Verification_Complete_screen()));
                 },
               ),
               const SizedBox(height: 200),

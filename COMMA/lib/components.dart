@@ -197,7 +197,7 @@ void showQuickMenu(
                   children: folders.map((folder) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 5),
-                      child: Checkbox2(
+                      child: CustomCheckbox(
                         label: folder['folder_name'],
                         isSelected: folder['selected'] ?? false,
                         onChanged: (bool isSelected) {
@@ -733,6 +733,65 @@ Future<void> showCustomMenu(BuildContext context, VoidCallback onRename,
   });
 }
 
+Future<void> showCustomMenu2(
+    BuildContext context, VoidCallback onRename, VoidCallback onDelete) async {
+  final RenderBox button = context.findRenderObject() as RenderBox;
+  final RenderBox overlay =
+      Overlay.of(context).context.findRenderObject() as RenderBox;
+
+  final Offset buttonPosition =
+      button.localToGlobal(Offset.zero, ancestor: overlay);
+  final double left = buttonPosition.dx;
+  final double top = buttonPosition.dy + button.size.height;
+
+  await showMenu<String>(
+    context: context,
+    position: RelativeRect.fromLTRB(left, top, left + button.size.width, top),
+    items: [
+      const PopupMenuItem<String>(
+        value: 'rename',
+        child: Center(
+          child: Text(
+            '이름 바꾸기',
+            style: TextStyle(
+              color: Color.fromRGBO(84, 84, 84, 1),
+              fontSize: 14,
+              fontFamily: 'Poppins',
+              fontWeight: FontWeight.w700,
+              height: 1.2,
+            ),
+          ),
+        ),
+      ),
+      const PopupMenuItem<String>(
+        value: 'delete',
+        child: Center(
+          child: Text(
+            '삭제하기',
+            style: TextStyle(
+              color: Color.fromRGBO(255, 161, 122, 1),
+              fontSize: 14,
+              fontFamily: 'Poppins',
+              fontWeight: FontWeight.w700,
+              height: 1.2,
+            ),
+          ),
+        ),
+      ),
+    ],
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(20),
+    ),
+    color: Colors.white,
+  ).then((value) {
+    if (value == 'delete') {
+      onDelete();
+    } else if (value == 'rename') {
+      onRename();
+    }
+  });
+}
+
 //로그아웃, 회원탈퇴
 void showMypageDialog(BuildContext context, String title, String message,
     VoidCallback onConfirm) {
@@ -770,7 +829,7 @@ void showMypageDialog(BuildContext context, String title, String message,
   );
 }
 
-// 이름 바꾸기 : 폴더&파일
+// 이름 바꾸기1 : 폴더&파일
 Future<void> showRenameDialog(
     BuildContext context,
     int index,
@@ -782,6 +841,7 @@ Future<void> showRenameDialog(
     ) async {
   final TextEditingController nameController =
       TextEditingController(text: items[index][itemType]);
+
   showDialog(
     context: context,
     builder: (context) {
@@ -810,6 +870,65 @@ Future<void> showRenameDialog(
             child: const Text('저장', style: TextStyle(color: Color(0xFF545454))),
             onPressed: () async {
               await renameItem(items[index]['id'], nameController.text);
+              setState(() {
+                items[index][itemType] = nameController.text;
+              });
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+// 폴더 페이지 - 햄버거 - 이름바꾸기
+Future<void> showRenameDialogVer2(
+    BuildContext context,
+    int index,
+    List<Map<String, dynamic>> items,
+    String folderType, // 폴더 타입 추가
+    Future<void> Function(String, int, String) renameItem,
+    Function setState,
+    String title,
+    String itemType // 'file_name' 또는 'folder_name'
+    ) async {
+  final TextEditingController nameController =
+      TextEditingController(text: items[index][itemType]);
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        backgroundColor: Colors.white,
+        title: Text(
+          title,
+          style: const TextStyle(
+            color: Color(0xFF545454),
+            fontSize: 14,
+            fontFamily: 'DM Sans',
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: TextField(
+          controller: nameController,
+          decoration: InputDecoration(
+              hintText: items[index][itemType],
+              hintStyle:
+                  const TextStyle(color: Color.fromARGB(255, 85, 85, 85))),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('취소', style: TextStyle(color: Color(0xFFFFA17A))),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          TextButton(
+            child: const Text('저장', style: TextStyle(color: Color(0xFF545454))),
+            onPressed: () async {
+              await renameItem(
+                  folderType, items[index]['id'], nameController.text);
               setState(() {
                 items[index][itemType] = nameController.text;
               });
@@ -875,72 +994,7 @@ Future<void> showAddFolderDialog(
   );
 }
 
-// // checkbox
-// class Checkbox1 extends StatefulWidget {
-//   final String label;
-//   const Checkbox1({super.key, required this.label});
-
-//   @override
-//   _Checkbox1State createState() => _Checkbox1State();
-// }
-
-// class _Checkbox1State extends State<Checkbox1> {
-//   bool isChecked = false;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final size = MediaQuery.of(context).size;
-//     return Column(
-//       children: [
-//         Container(
-//           width: size.width,
-//           height: 24,
-//           padding: const EdgeInsets.only(left: 18),
-//           child: Row(
-//             mainAxisSize: MainAxisSize.min,
-//             mainAxisAlignment: MainAxisAlignment.start,
-//             crossAxisAlignment: CrossAxisAlignment.center,
-//             children: [
-//               GestureDetector(
-//                 onTap: () {
-//                   setState(() {
-//                     isChecked = !isChecked;
-//                   });
-//                   print('checkbox is clicked');
-//                 },
-//                 child: Container(
-//                   width: 18,
-//                   height: 18,
-//                   decoration: BoxDecoration(
-//                     shape: BoxShape.circle,
-//                     border: Border.all(
-//                         color:
-//                             isChecked ? const Color(0xFF36AE92) : Colors.grey,
-//                         width: 2),
-//                   ),
-//                 ),
-//               ),
-//               const SizedBox(
-//                   width:
-//                       8), // Add some spacing between the checkbox and the text
-//               Text(
-//                 widget.label,
-//                 style: const TextStyle(
-//                   color: Color(0xFF1F1F39),
-//                   fontSize: 15,
-//                   fontFamily: 'Poppins',
-//                   fontWeight: FontWeight.w700,
-//                   height: 1.2,
-//                 ),
-//               ),
-//             ],
-//           ),
-//         ),
-//       ],
-//     );
-//   }
-// }
-
+// 체크박스
 class CustomCheckbox extends StatefulWidget {
   final String label;
   final bool isSelected;
@@ -1013,57 +1067,57 @@ class _CustomCheckboxState extends State<CustomCheckbox> {
 }
 
 // Checkbox2 위젯
-class Checkbox2 extends StatefulWidget {
-  final String label;
-  final bool isSelected;
-  final Function(bool) onChanged;
+// class Checkbox2 extends StatefulWidget {
+//   final String label;
+//   final bool isSelected;
+//   final Function(bool) onChanged;
 
-  const Checkbox2({
-    super.key,
-    required this.label,
-    this.isSelected = false,
-    required this.onChanged,
-  });
+//   const Checkbox2({
+//     super.key,
+//     required this.label,
+//     this.isSelected = false,
+//     required this.onChanged,
+//   });
 
-  @override
-  _Checkbox2State createState() => _Checkbox2State();
-}
+//   @override
+//   _Checkbox2State createState() => _Checkbox2State();
+// }
 
-class _Checkbox2State extends State<Checkbox2> {
-  late bool isSelected;
+// class _Checkbox2State extends State<Checkbox2> {
+//   late bool isSelected;
 
-  @override
-  void initState() {
-    super.initState();
-    isSelected = widget.isSelected;
-  }
+//   @override
+//   void initState() {
+//     super.initState();
+//     isSelected = widget.isSelected;
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          isSelected = !isSelected;
-        });
-        widget.onChanged(isSelected);
-      },
-      child: Row(
-        children: [
-          Checkbox(
-            value: isSelected,
-            onChanged: (value) {
-              setState(() {
-                isSelected = value!;
-              });
-              widget.onChanged(isSelected);
-            },
-          ),
-          Text(widget.label),
-        ],
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return GestureDetector(
+//       onTap: () {
+//         setState(() {
+//           isSelected = !isSelected;
+//         });
+//         widget.onChanged(isSelected);
+//       },
+//       child: Row(
+//         children: [
+//           Checkbox(
+//             value: isSelected,
+//             onChanged: (value) {
+//               setState(() {
+//                 isSelected = value!;
+//               });
+//               widget.onChanged(isSelected);
+//             },
+//           ),
+//           Text(widget.label),
+//         ],
+//       ),
+//     );
+//   }
+// }
 
 //lecture
 class LectureExample extends StatelessWidget {
@@ -1142,7 +1196,6 @@ class LectureExample extends StatelessWidget {
                   child: GestureDetector(
                     child: const Icon(
                       Icons.more_vert,
-                      color: Color.fromARGB(255, 48, 48, 48), // Icon color
                     ),
                     onTap: () {
                       showCustomMenu(context, onRename, onDelete, onMove);
@@ -1157,164 +1210,6 @@ class LectureExample extends StatelessWidget {
     );
   }
 }
-//lecture 1
-// class LectureExample extends StatelessWidget {
-//   final String lectureName;
-//   final String date;
-
-//   const LectureExample({
-//     super.key,
-//     required this.lectureName,
-//     required this.date,
-//   });
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Padding(
-//       padding: const EdgeInsets.symmetric(vertical: 4.0),
-//       child: Container(
-//         width: double.infinity,
-//         height: 58,
-//         decoration: BoxDecoration(
-//           color: const Color(0xFFE9F3ED), // Background color
-//           borderRadius: BorderRadius.circular(10), // Rounded corners
-//         ),
-//         child: Row(
-//           children: [
-//             Container(
-//               width: 40,
-//               height: 40,
-//               margin: const EdgeInsets.all(8.0),
-//               decoration: BoxDecoration(
-//                 color: const Color(0xFF005A38), // Color of the square
-//                 borderRadius:
-//                     BorderRadius.circular(8), // Rounded corners for the square
-//               ),
-//             ),
-//             Expanded(
-//               child: Padding(
-//                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-//                 child: Row(
-//                   // crossAxisAlignment: CrossAxisAlignment.start,
-//                   // mainAxisAlignment: MainAxisAlignment.center,
-//                   children: [
-//                     Text(
-//                       lectureName,
-//                       style: const TextStyle(
-//                         color: Color(0xFF1F1F39),
-//                         fontSize: 14,
-//                         fontFamily: 'Poppins',
-//                         fontWeight: FontWeight.w700,
-//                         height: 1.2,
-//                       ),
-//                     ),
-//                     const Spacer(),
-//                     Text(
-//                       date,
-//                       style: const TextStyle(
-//                         color: Color(0xFF005A38),
-//                         fontSize: 12,
-//                         fontFamily: 'DM Sans',
-//                         fontWeight: FontWeight.w500,
-//                         height: 1.2,
-//                       ),
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//             ),
-//             Builder(
-//               builder: (BuildContext context) {
-//                 return Padding(
-//                   padding: const EdgeInsets.all(8.0),
-//                   child: GestureDetector(
-//                     child: const Icon(
-//                       Icons.more_vert,
-//                       color: Color(0xFF36AE92), // Icon color
-//                     ),
-//                     onTap: () async {
-//                       final RenderBox button =
-//                           context.findRenderObject() as RenderBox;
-//                       final RenderBox overlay = Overlay.of(context)
-//                           .context
-//                           .findRenderObject() as RenderBox;
-
-//                       final Offset buttonPosition =
-//                           button.localToGlobal(Offset.zero, ancestor: overlay);
-//                       final double left = buttonPosition.dx;
-//                       final double top = buttonPosition.dy + button.size.height;
-
-//                       await showMenu<String>(
-//                         context: context,
-//                         position: RelativeRect.fromLTRB(
-//                             left, top, left + button.size.width, top),
-//                         items: [
-//                           const PopupMenuItem<String>(
-//                             value: 'delete',
-//                             child: Center(
-//                               child: Text(
-//                                 '삭제하기',
-//                                 style: TextStyle(
-//                                   color: Color.fromRGBO(255, 161, 122, 1),
-//                                   fontSize: 14,
-//                                   fontFamily: 'Poppins',
-//                                   fontWeight: FontWeight.w700,
-//                                   height: 1.2,
-//                                 ),
-//                               ),
-//                             ),
-//                           ),
-//                           const PopupMenuItem<String>(
-//                             value: 'move',
-//                             child: Center(
-//                               child: Text(
-//                                 '이동하기',
-//                                 style: TextStyle(
-//                                   color: Color.fromRGBO(84, 84, 84, 1),
-//                                   fontSize: 14,
-//                                   fontFamily: 'Poppins',
-//                                   fontWeight: FontWeight.w700,
-//                                   height: 1.2,
-//                                 ),
-//                               ),
-//                             ),
-//                           ),
-//                           const PopupMenuItem<String>(
-//                             value: 'rename',
-//                             child: Center(
-//                               child: Text(
-//                                 '이름 바꾸기',
-//                                 style: TextStyle(
-//                                   color: Color.fromRGBO(84, 84, 84, 1),
-//                                   fontSize: 14,
-//                                   fontFamily: 'Poppins',
-//                                   fontWeight: FontWeight.w700,
-//                                   height: 1.2,
-//                                 ),
-//                               ),
-//                             ),
-//                           ),
-//                         ],
-//                         shape: RoundedRectangleBorder(
-//                           borderRadius: BorderRadius.circular(20),
-//                         ),
-//                         color: Colors.white,
-//                       ).then((value) {
-//                         if (value != null) {
-//                           print(value);
-//                         }
-//                       });
-//                     },
-//                   ),
-//                 );
-//               },
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
 
 //RenameDeletePopup 이름바꾸기
 class RenameDeletePopup extends StatelessWidget {
@@ -1534,14 +1429,18 @@ class FolderListItem extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 25,
-            height: 25,
-            decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.1),
+            width: 30,
+            height: 30,
+            decoration: const BoxDecoration(
+              color: Color.fromRGBO(204, 227, 205, 1),
               shape: BoxShape.circle,
             ),
             child: const Center(
-              child: Icon(Icons.folder_sharp, size: 22),
+              child: Icon(
+                Icons.folder_rounded,
+                color: Color.fromARGB(255, 41, 129, 108),
+                size: 22,
+              ),
             ),
           ),
           const SizedBox(width: 10),
@@ -1549,6 +1448,7 @@ class FolderListItem extends StatelessWidget {
             child: Text(
               folder['folder_name'],
               style: const TextStyle(
+                color: Color(0xFF414141),
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),

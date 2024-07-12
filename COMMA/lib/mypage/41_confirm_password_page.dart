@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_plugin/components.dart'; 
+import 'package:flutter_plugin/components.dart';
 import '40_change_password_page.dart';
 
 class ConfirmPasswordPage extends StatefulWidget {
@@ -25,12 +25,13 @@ class _ConfirmPasswordPageState extends State<ConfirmPasswordPage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        iconTheme: IconThemeData(color: Color.fromARGB(255, 48, 48, 48)),
-        title: const Text('비밀번호 확인',
-        style: TextStyle(
-            color: Color.fromARGB(255, 48, 48, 48),
-            fontFamily: 'DM Sans',
-            fontWeight: FontWeight.w600),
+        iconTheme: const IconThemeData(color: Color.fromARGB(255, 48, 48, 48)),
+        title: const Text(
+          '비밀번호 확인',
+          style: TextStyle(
+              color: Color.fromARGB(255, 48, 48, 48),
+              fontFamily: 'DM Sans',
+              fontWeight: FontWeight.w600),
         ),
       ),
       body: Center(
@@ -67,18 +68,18 @@ class _ConfirmPasswordPageState extends State<ConfirmPasswordPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => ChangePasswordPage()),
+                        builder: (context) => const ChangePasswordPage()),
                   );
                 },
                 width: MediaQuery.of(context).size.width * 0.5, // 원하는 너비 설정
                 height: 50.0, // 원하는 높이 설정
-            
               ),
             ],
           ),
         ),
       ),
-      bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
+      bottomNavigationBar:
+          buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }
