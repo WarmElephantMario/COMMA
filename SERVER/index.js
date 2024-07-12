@@ -236,7 +236,7 @@ app.post('/api/signup_info', (req, res) => {
 
     console.log('전달된 아이디:', userId);
     console.log('전달된 이메일:', userEmail);
-    console.log('생성된 닉네임:', usernickname); 
+    console.log('생성된 닉네임:', usernickname);
 
     if (!userEmail || !userId || !userPassword) {
         return res.status(400).json({ success: false, error: 'You must fill all values.' });
@@ -374,17 +374,17 @@ app.post('/api/delete_user', async (req, res) => {
 app.put('/api/update_nickname', (req, res) => {
     const userKey = req.body.user_id;
     const newNickname = req.body.user_nickname;
-  
+
     // 데이터베이스 업데이트 쿼리
     const query = 'UPDATE user_table SET user_nickname = ? WHERE user_id = ?';
     db.query(query, [newNickname, userKey], (err, result) => {
-      if (err) {
-        return res.status(500).send({ success: false, error: err.message });
-      }
-      res.send({ success: true });
+        if (err) {
+            return res.status(500).send({ success: false, error: err.message });
+        }
+        res.send({ success: true });
     });
-  });
-  
+});
+
 
 // 파일 이름 변경하기
 app.put('/api/:fileType-files/:id', (req, res) => {
@@ -468,28 +468,31 @@ app.get('/api/searchFiles', (req, res) => {
 app.post('/api/lecture-files', (req, res) => {
     console.log('POST /api/lecture-files called');
     const { folder_id, file_name, file_url, lecture_name } = req.body;
-  
+
     if (!folder_id || !file_name) {
-      return res.status(400).json({ success: false, error: 'You must provide folder_id and file_name.' });
+        return res.status(400).json({ success: false, error: 'You must provide folder_id and file_name.' });
     }
-  
+
     const sql = 'INSERT INTO LectureFiles (folder_id, file_name, file_url, lecture_name) VALUES (?, ?, ?, ?)';
     db.query(sql, [folder_id, file_name, file_url, lecture_name], (err, result) => {
-      if (err) {
-        return res.status(500).json({ success: false, error: err.message });
-      }
-      res.json({ success: true, id: result.insertId, folder_id, file_name, file_url, lecture_name });
+        if (err) {
+            return res.status(500).json({ success: false, error: err.message });
+        }
+        res.json({ success: true, id: result.insertId, folder_id, file_name, file_url, lecture_name });
     });
-  });
-  
-//콜론폴더 생성 및 파일 생성
+});
+
+
+//콜론 폴더 생성
 app.post('/api/create-colon-folder', (req, res) => {
     const { folderName, noteName, fileUrl, lectureName, userKey } = req.body;
 
+    console.log('Received request to create colon folder:', { folderName, noteName, fileUrl, lectureName, userKey });
     // Check if the folder already exists for the same user
     const checkFolderQuery = 'SELECT id FROM ColonFolders WHERE folder_name = ? AND userKey = ?';
     db.query(checkFolderQuery, [folderName, userKey], (err, results) => {
         if (err) {
+            console.error('Failed to check folder existence:', err);
             return res.status(500).json({ error: 'Failed to check folder existence' });
         }
 
@@ -501,6 +504,7 @@ app.post('/api/create-colon-folder', (req, res) => {
             const insertFileQuery = 'INSERT INTO ColonFiles (folder_id, file_name, file_url, lecture_name, created_at) VALUES (?, ?, ?, ?, NOW())';
             db.query(insertFileQuery, [folderId, noteName, fileUrl, lectureName], (err, result) => {
                 if (err) {
+                    console.error('Failed to add file to folder:', err);
                     return res.status(500).json({ error: 'Failed to add file to folder' });
                 }
                 res.status(200).json({ message: 'File added to existing folder successfully', folder_id: folderId });
@@ -510,6 +514,7 @@ app.post('/api/create-colon-folder', (req, res) => {
             const createFolderQuery = 'INSERT INTO ColonFolders (folder_name, userKey) VALUES (?, ?)';
             db.query(createFolderQuery, [folderName, userKey], (err, result) => {
                 if (err) {
+                    console.error('Failed to create folder:', err);
                     return res.status(500).json({ error: 'Failed to create folder' });
                 }
                 const folderId = result.insertId;
@@ -518,7 +523,8 @@ app.post('/api/create-colon-folder', (req, res) => {
                 const insertFileQuery = 'INSERT INTO ColonFiles (folder_id, file_name, file_url, lecture_name, created_at) VALUES (?, ?, ?, ?, NOW())';
                 db.query(insertFileQuery, [folderId, noteName, fileUrl, lectureName], (err, result) => {
                     if (err) {
-                        return res.status(500).json({ error: 'Failed to add file to folder' });
+                        console.error('Failed to add file to new folder:', err);
+                        return res.status(500).json({ error: 'Failed to add file to new folder' });
                     }
                     res.status(200).json({ message: 'Folder and file created successfully', folder_id: folderId });
                 });
@@ -526,6 +532,8 @@ app.post('/api/create-colon-folder', (req, res) => {
         }
     });
 });
+
+
 
 
 //강의파일 created_at 가져오기
@@ -627,7 +635,7 @@ app.get('/api/getColonFiles/:userKey', (req, res) => {
 // 콜론 폴더 이름 가져오기
 app.get('/api/get-folder-name', (req, res) => {
     const { folderId } = req.query;
-    
+
     const sql = 'SELECT folder_name FROM LectureFolders WHERE id = ?';
     db.query(sql, [folderId], (err, results) => {
         if (err) {

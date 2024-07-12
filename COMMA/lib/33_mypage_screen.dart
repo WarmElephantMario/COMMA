@@ -26,12 +26,20 @@ class _MyPageScreenState extends State<MyPageScreen> {
   }
   
   Widget _buildCard(BuildContext context, String title, VoidCallback onTap) {
-    return Card(
-      elevation: 0.5,
-      child: ListTile(
-        title: Text(title),
-        trailing: const Icon(Icons.arrow_forward_ios),
-        onTap: onTap,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: Color(0xFFEEEEEE), width: 2),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: ListTile(
+          title: Text(title),
+          trailing: const Icon(Icons.arrow_forward_ios),
+          onTap: onTap,
+          textColor: Colors.black,
+        ),
       ),
     );
   }
@@ -72,8 +80,11 @@ class _MyPageScreenState extends State<MyPageScreen> {
         title: const Text(
           '마이페이지',
           style: TextStyle(
-              fontSize: 26, fontFamily: 'DM Sans', fontWeight: FontWeight.bold),
+              color: Color.fromARGB(255, 48, 48, 48),
+              fontFamily: 'DM Sans',
+              fontWeight: FontWeight.w700),
         ),
+        iconTheme: IconThemeData(color: Color.fromARGB(255, 48, 48, 48))
       ),
       body: ListView(
         children: <Widget>[
