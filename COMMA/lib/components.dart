@@ -5,12 +5,11 @@ import '62lecture_start.dart';
 import '30_folder_screen.dart';
 import '33_mypage_screen.dart';
 import '60prepare.dart';
-import 'package:provider/provider.dart';
-import 'model/user_provider.dart';
-import '63record.dart';
-import '66colon.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'model/user_provider.dart';
+import 'package:provider/provider.dart';
+import 'api/api.dart';
 
 BottomNavigationBar buildBottomNavigationBar(
     BuildContext context, int currentIndex, Function(int) onItemTapped) {
@@ -297,80 +296,117 @@ void showConfirmationDialog(
   );
 }
 
-// Colon alarm
+// 콜론 폴더 생성 및 파일 생성 함수
+Future<int> createColonFolder(String folderName, String noteName,
+    String fileUrl, String lectureName, int userKey) async {
+  var url = '${API.baseUrl}/api/create-colon-folder';
+
+  var body = {
+    'folderName': folderName,
+    'noteName': noteName,
+    'fileUrl': fileUrl,
+    'lectureName': lectureName,
+    'userKey': userKey,
+  };
+
+  try {
+    var response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 200) {
+      var jsonResponse = jsonDecode(response.body);
+      print('Folder and file created successfully');
+      return jsonResponse['folder_id'];
+    } else {
+      print('Failed to create folder and file: ${response.statusCode}');
+      return -1;
+    }
+  } catch (e) {
+    print('Error during HTTP request: $e');
+    return -1;
+  }
+}
+
+// 콜론 생성 다이얼로그 함수
 void showColonCreatedDialog(BuildContext context, String folderName,
     String noteName, String lectureName) {
   final userProvider = Provider.of<UserProvider>(context, listen: false);
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        backgroundColor: Colors.white,
-        title: Column(
-          children: [
-            const Text(
-              '콜론이 생성되었습니다.',
-              style: TextStyle(
-                color: Color(0xFF545454),
-                fontSize: 14,
-                fontFamily: 'DM Sans',
-                fontWeight: FontWeight.bold,
+  final userKey = userProvider.user?.userKey;
+
+  if (userKey != null) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: Column(
+            children: [
+              const Text(
+                '콜론이 생성되었습니다.',
+                style: TextStyle(
+                  color: Color(0xFF545454),
+                  fontSize: 14,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '폴더 이름: $folderName(:)', // 기본폴더 대신 folderName 사용
-              style: const TextStyle(
-                color: Color(0xFF245B3A),
-                fontSize: 14,
-                fontFamily: 'DM Sans',
-                fontWeight: FontWeight.bold,
+              const SizedBox(height: 4),
+              Text(
+                '폴더 이름: $folderName (:)', // 기본폴더 대신 folderName 사용
+                style: const TextStyle(
+                  color: Color(0xFF245B3A),
+                  fontSize: 14,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              '으로 이동하시겠습니까?',
-              style: TextStyle(
-                color: Color(0xFF545454),
-                fontSize: 14,
-                fontFamily: 'DM Sans',
-                fontWeight: FontWeight.bold,
+              const SizedBox(height: 4),
+              const Text(
+                '으로 이동하시겠습니까?',
+                style: TextStyle(
+                  color: Color(0xFF545454),
+                  fontSize: 14,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-        actions: <Widget>[
-          Center(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text(
-                    '취소',
-                    style: TextStyle(
-                      color: Color(0xFFFFA17A),
-                      fontSize: 14,
-                      fontFamily: 'DM Sans',
-                      fontWeight: FontWeight.bold,
+            ],
+          ),
+          actions: <Widget>[
+            Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text(
+                      '취소',
+                      style: TextStyle(
+                        color: Color(0xFFFFA17A),
+                        fontSize: 14,
+                        fontFamily: 'DM Sans',
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 16),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    createColonFolder("$folderName (:)", noteName, '',
-                            lectureName, userProvider.user!.user_id)
-                        .then((_) async {
+                  const SizedBox(width: 16),
+                  TextButton(
+                    onPressed: () async {
+                      Navigator.of(context).pop();
+                      int folderId = await createColonFolder("$folderName (:)",
+                          "$noteName (:)", '', lectureName, userKey);
+
                       // Fetch the created_at value after creating the folder and file
                       var fetchUrl =
-                          'http://localhost:3000/api/get-colon-file?folderName=${"$folderName(:)"}';
+                          '${API.baseUrl}/api/get-colon-file?folderName=${"$folderName (:)"}&userKey=$userKey';
                       var fetchResponse = await http.get(Uri.parse(fetchUrl));
 
                       if (fetchResponse.statusCode == 200) {
@@ -382,8 +418,8 @@ void showColonCreatedDialog(BuildContext context, String folderName,
                           context,
                           MaterialPageRoute(
                             builder: (context) => ColonPage(
-                                folderName: folderName,
-                                noteName: noteName,
+                                folderName: "$folderName (:)",
+                                noteName: "$noteName (:)",
                                 lectureName: lectureName,
                                 createdAt: createdAt),
                           ),
@@ -392,53 +428,26 @@ void showColonCreatedDialog(BuildContext context, String folderName,
                         print(
                             'Failed to fetch colon file details: ${fetchResponse.statusCode}');
                       }
-                    });
-                  },
-                  child: const Text(
-                    '확인',
-                    style: TextStyle(
-                      color: Color(0xFF545454),
-                      fontSize: 14,
-                      fontFamily: 'DM Sans',
-                      fontWeight: FontWeight.bold,
+                    },
+                    child: const Text(
+                      '확인',
+                      style: TextStyle(
+                        color: Color(0xFF545454),
+                        fontSize: 14,
+                        fontFamily: 'DM Sans',
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
-      );
-    },
-  );
-}
-
-Future<void> createColonFolder(String folderName, String noteName,
-    String fileUrl, String lectureName, int userId) async {
-  var url = 'http://localhost:3000/api/create-colon-folder';
-
-  var body = {
-    'folderName': folderName,
-    'noteName': noteName, // noteName 추가
-    'fileUrl': '', // 빈 문자열
-    'lectureName': lectureName,
-    'userId': userId
-  };
-
-  try {
-    var response = await http.post(
-      Uri.parse(url),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(body),
+          ],
+        );
+      },
     );
-
-    if (response.statusCode == 200) {
-      print('Folder and file created successfully');
-    } else {
-      print('Failed to create folder and file: ${response.statusCode}');
-    }
-  } catch (e) {
-    print('Error during HTTP request: $e');
+  } else {
+    print('User Key is null, cannot create colon folder.');
   }
 }
 
@@ -821,15 +830,19 @@ Future<void> showAddFolderDialog(
     context: context,
     builder: (context) {
       return AlertDialog(
+        backgroundColor: Colors.white,
         title: const Text(
           '새 폴더 만들기',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+          style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+              color: Color(0xFF545454)),
         ),
         content: TextField(
           controller: folderNameController,
           decoration: const InputDecoration(
             hintText: '폴더 이름',
-            hintStyle: TextStyle(color: Color(0xFF364B45)),
+            hintStyle: TextStyle(color: Color.fromRGBO(110, 110, 110, 1.0)),
           ),
         ),
         actions: <Widget>[
@@ -927,6 +940,77 @@ Future<void> showAddFolderDialog(
 //     );
 //   }
 // }
+
+class CustomCheckbox extends StatefulWidget {
+  final String label;
+  final bool isSelected;
+  final Function(bool) onChanged;
+
+  const CustomCheckbox({
+    super.key,
+    required this.label,
+    this.isSelected = false,
+    required this.onChanged,
+  });
+
+  @override
+  _CustomCheckboxState createState() => _CustomCheckboxState();
+}
+
+class _CustomCheckboxState extends State<CustomCheckbox> {
+  late bool isSelected;
+
+  @override
+  void initState() {
+    super.initState();
+    isSelected = widget.isSelected;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          isSelected = !isSelected;
+        });
+        widget.onChanged(isSelected);
+      },
+      child: Row(
+        children: [
+          Container(
+            width: 18,
+            height: 18,
+            decoration: BoxDecoration(
+              color: isSelected ? Colors.teal : Colors.transparent,
+              border: Border.all(
+                color: const Color.fromARGB(255, 80, 80, 80), // 테두리 색상
+                width: 1.6,
+              ),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: isSelected
+                ? const Icon(
+                    Icons.check,
+                    size: 14,
+                    color: Colors.white,
+                  )
+                : null,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            widget.label,
+            style: const TextStyle(
+              fontSize: 16, // 텍스트 크기 지정
+              fontFamily: 'DM Sans',
+              color: Color.fromARGB(255, 70, 70, 70), // 텍스트 색상 지정
+              fontWeight: FontWeight.w500, // 텍스트 두께 지정
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 // Checkbox2 위젯
 class Checkbox2 extends StatefulWidget {
@@ -1058,7 +1142,7 @@ class LectureExample extends StatelessWidget {
                   child: GestureDetector(
                     child: const Icon(
                       Icons.more_vert,
-                      color: Color(0xFF36AE92), // Icon color
+                      color: Color.fromARGB(255, 48, 48, 48), // Icon color
                     ),
                     onTap: () {
                       showCustomMenu(context, onRename, onDelete, onMove);
@@ -1073,7 +1157,7 @@ class LectureExample extends StatelessWidget {
     );
   }
 }
-// lecture 1
+//lecture 1
 // class LectureExample extends StatelessWidget {
 //   final String lectureName;
 //   final String date;

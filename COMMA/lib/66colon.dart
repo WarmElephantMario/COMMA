@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '60prepare.dart';
 import 'components.dart';
-import 'package:intl/intl.dart';
 
 class ColonPage extends StatefulWidget {
-  final String folderName; // 폴더 이름 추가
+  final String folderName; // 폴더 이름 가져오기 사용
   final String noteName; // 노트 이름 추가
   final String lectureName; // 강의 자료 이름 추가
   final dynamic createdAt; // 생성 날짜 및 시간 추가
@@ -22,7 +22,6 @@ class ColonPage extends StatefulWidget {
 
 class _ColonPageState extends State<ColonPage> {
   int _selectedIndex = 2; // 학습 시작 탭이 기본 선택되도록 설정
-  //late String formattedDate;
 
   @override
   void initState() {
