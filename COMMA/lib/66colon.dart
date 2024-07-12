@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '60prepare.dart';
 import 'components.dart';
+import 'api/api.dart';
 
 class ColonPage extends StatefulWidget {
   final String folderName; // 폴더 이름 가져오기 사용
@@ -65,7 +66,7 @@ class _ColonPageState extends State<ColonPage> {
                   child: const Text(
                     '종료',
                     style: TextStyle(
-                      color: Colors.orange,
+                      color: Color(0xFFFFA17A),
                       fontSize: 16,
                     ),
                   ),
