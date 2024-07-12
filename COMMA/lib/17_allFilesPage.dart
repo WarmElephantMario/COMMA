@@ -52,12 +52,15 @@ class _AllFilesPageState extends State<AllFilesPage> {
   }
 
   // 강의 파일 클릭 이벤트에서 폴더 이름 조회
-  void fetchFolderAndNavigate(BuildContext context, int folderId, String fileType, Map<String, dynamic> file) async {
+  void fetchFolderAndNavigate(BuildContext context, int folderId,
+      String fileType, Map<String, dynamic> file) async {
     try {
-      final response = await http.get(Uri.parse('${API.baseUrl}/api/getFolderName/$fileType/$folderId'));
+      final response = await http.get(
+          Uri.parse('${API.baseUrl}/api/getFolderName/$fileType/$folderId'));
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
-        navigateToPage(context, data['folder_name'] ?? 'Unknown Folder', file, fileType);
+        navigateToPage(
+            context, data['folder_name'] ?? 'Unknown Folder', file, fileType);
       } else {
         print('Failed to load folder name: ${response.statusCode}');
         navigateToPage(context, 'Unknown Folder', file, fileType);
@@ -69,12 +72,14 @@ class _AllFilesPageState extends State<AllFilesPage> {
   }
 
   // 강의 파일 또는 콜론 파일 페이지로 네비게이션
-  void navigateToPage(BuildContext context, String folderName, Map<String, dynamic> file, String fileType) {
+  void navigateToPage(BuildContext context, String folderName,
+      Map<String, dynamic> file, String fileType) {
     Widget page = fileType == 'lecture'
         ? RecordPage(
             selectedFolderId: file['folder_id'].toString(),
             noteName: file['file_name'] ?? 'Unknown Note',
-            fileUrl: file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
+            fileUrl:
+                file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
             folderName: folderName,
             recordingState: RecordingState.recorded,
             lectureName: file['lecture_name'] ?? 'Unknown Lecture',
@@ -106,7 +111,8 @@ class _AllFilesPageState extends State<AllFilesPage> {
 
                 // null 값을 처리하여 기본값을 설정
                 final fileName = file['file_name'] ?? 'Unknown Note';
-                final fileUrl = file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt';
+                final fileUrl = file['file_url'] ??
+                    'https://defaulturl.com/defaultfile.txt';
                 final lectureName = file['lecture_name'] ?? 'Unknown Lecture';
                 final createdAt = file['created_at'] ?? 'Unknown Date';
                 final folderId = file['folder_id'] ?? 0;
@@ -115,7 +121,8 @@ class _AllFilesPageState extends State<AllFilesPage> {
                 return GestureDetector(
                   onTap: () {
                     print('File $fileName is clicked');
-                    fetchFolderAndNavigate(context, folderId, fileType, file); // 파일을 탭하면 열기
+                    fetchFolderAndNavigate(
+                        context, folderId, fileType, file); // 파일을 탭하면 열기
                   },
                   child: LectureExample(
                     lectureName: fileName,

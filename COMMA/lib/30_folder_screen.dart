@@ -128,6 +128,7 @@ class _FolderScreenState extends State<FolderScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white, // 배경 색상을 흰색으로 설정
+      appBar: AppBar(toolbarHeight: 0),
       body: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           return SingleChildScrollView(

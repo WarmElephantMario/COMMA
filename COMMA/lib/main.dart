@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:file_picker/file_picker.dart';
-import 'dart:io' show Platform, File;
 import 'components.dart';
-import '60prepare.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
-import 'components.dart';
 import '1_Splash_green.dart';
 import 'model/user_provider.dart';
 
@@ -39,7 +34,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        home: SplashScreen());
+        home: const SplashScreen());
   }
 }
 
