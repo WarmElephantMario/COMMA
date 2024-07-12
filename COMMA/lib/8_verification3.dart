@@ -2,20 +2,6 @@ import 'package:flutter/material.dart';
 import 'components.dart';
 import '9_signin.dart';
 
-// class FigmaToCodeApp extends StatelessWidget {
-//   const FigmaToCodeApp({super.key});
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       theme: ThemeData.dark().copyWith(
-//         scaffoldBackgroundColor: const Color.fromARGB(255, 18, 32, 47),
-//       ),
-//       home: Verification_screen(),
-//     );
-//   }
-// }
-
 class Verification_Complete_screen extends StatelessWidget {
   const Verification_Complete_screen({super.key});
 

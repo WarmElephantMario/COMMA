@@ -4,6 +4,7 @@ const mysql = require('mysql2');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 
 const app = express();
 const port = 3000;
@@ -197,7 +198,7 @@ app.get('/api/:fileType-files/:folderId', (req, res) => {
     });
 });
 
-// 회원가입_전화번호 중복확인
+// 회원가입_이메일 중복확인
 app.post('/api/validate_email', (req, res) => {
     const userEmail = req.body.user_email;
 
@@ -221,6 +222,57 @@ app.post('/api/validate_email', (req, res) => {
             res.json({ existEmail: false });
         }
     });
+});
+
+
+// 이메일 전송 설정
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'warmelephantmario@gmail.com',
+        pass: 'yfqu msgv zqwq kuja',
+    },
+});
+
+// 인증 코드 저장을 위한 메모리 저장소 
+const verificationCodes = {};
+
+
+//회원가입_인증번호 전송
+app.post('/api/send_verification_code', (req, res) => {
+    const userEmail = req.body.user_email;
+    const verificationCode = Math.floor(100000 + Math.random() * 900000); // 6자리 랜덤 코드 생성
+
+    const mailOptions = {
+      from: 'warmelephantmario@gmail.com',
+      to: userEmail,
+      subject: 'Your Verification Code',
+      text: `Your verification code is ${verificationCode}`,
+    };
+  
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error('Error sending email: ', error);
+        return res.status(500).json({ success: false, error: error.toString() });
+      } else {
+        console.log('Email sent: ' + info.response);
+        verificationCodes[userEmail] = verificationCode; 
+        return res.status(200).json({ success: true });
+      }
+    });
+  });
+
+  // 회원가입_인증번호 확인
+app.post('/api/verify_code', (req, res) => {
+    const { user_email, verification_code } = req.body;
+
+    // 저장된 인증 코드와 비교
+    if (verificationCodes[user_email] && verificationCodes[user_email] == verification_code) {
+        delete verificationCodes[user_email]; // 사용된 인증 코드는 삭제
+        return res.status(200).json({ success: true });
+    } else {
+        return res.status(400).json({ success: false, error: 'Invalid verification code' });
+    }
 });
 
 
@@ -372,18 +424,30 @@ app.post('/api/delete_user', async (req, res) => {
 
 //회원 닉네임 변경하기
 app.put('/api/update_nickname', (req, res) => {
-    const userKey = req.body.user_id;
+    const userKey = req.body.userKey;
     const newNickname = req.body.user_nickname;
 
+    console.log(`Received request to update nickname for userKey: ${userKey} to newNickname: ${newNickname}`);
+
     // 데이터베이스 업데이트 쿼리
-    const query = 'UPDATE user_table SET user_nickname = ? WHERE user_id = ?';
+    const query = 'UPDATE user_table SET user_nickname = ? WHERE userKey = ?';
     db.query(query, [newNickname, userKey], (err, result) => {
         if (err) {
+            console.error(`Error updating nickname for userKey: ${userKey} - ${err.message}`);
             return res.status(500).send({ success: false, error: err.message });
         }
+
+        console.log(`Query Result: `, result);  // 쿼리 결과 로그 추가
+        if (result.affectedRows === 0) {
+            console.log(`No rows updated for userKey: ${userKey}`);
+            return res.status(404).send({ success: false, error: 'User not found' });
+        }
+
+        console.log(`Nickname updated successfully for userKey: ${userKey}`);
         res.send({ success: true });
     });
 });
+
 
 
 // 파일 이름 변경하기
