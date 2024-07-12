@@ -80,112 +80,128 @@ class _SigninPageState extends State<SigninPage> {
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: const Text('로그인'),
+        backgroundColor: Colors.white,
+        title: const Text(
+          '로그인',
+          style: TextStyle(
+              color: Color.fromARGB(255, 48, 48, 48),
+              fontFamily: 'DM Sans',
+              fontWeight: FontWeight.w700),
+        ),
+          iconTheme: IconThemeData(color: Color.fromARGB(255, 48, 48, 48))
       ),
-      body: Container(
-        width: size.width,
-        height: size.height,
-        color: Colors.white,
-        child: Stack(
-          children: [
-            Column(
-              children: [
-                SizedBox(height: size.height * 0.17),
-                const Text(
-                  '로그인',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 20,
-                    fontFamily: 'DM Sans',
-                    fontWeight: FontWeight.w700,
+      body: SingleChildScrollView(
+        child: Container(
+          width: size.width,
+          height: size.height,
+          color: Colors.white,
+          child: Stack(
+            children: [
+              Column(
+                children: [
+                  SizedBox(height: size.height * 0.17),
+                  const Text(
+                    '로그인',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 20,
+                      fontFamily: 'DM Sans',
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                ),
-                SizedBox(height: size.height * 0.02),
-                const Text(
-                  '로그인하고 오늘도\nCOMMA와 함께 힘차게 공부해요!',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Color(0xFF245B3A),
-                    fontSize: 14,
-                    fontFamily: 'DM Sans',
-                    fontWeight: FontWeight.w500,
+                  SizedBox(height: size.height * 0.02),
+                  const Text(
+                    '로그인하고 오늘도\nCOMMA와 함께 힘차게 공부해요!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Color(0xFF245B3A),
+                      fontSize: 14,
+                      fontFamily: 'DM Sans',
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                ),
-                SizedBox(height: size.height * 0.050),
-                Form(
-                  key: _formKey,
-                  child: Column(
+                  SizedBox(height: size.height * 0.050),
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        InputButton(
+                          label: 'Your ID',
+                          keyboardType: TextInputType.emailAddress,
+                          controller: idController,
+                        ),
+                        SizedBox(height: size.height * 0.025),
+                        InputButton(
+                          label: 'Password',
+                          obscureText: true,
+                          controller: passwordController,
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: size.height * 0.020),
+                  Row(
                     children: [
-                      InputButton(
-                        label: 'Your ID',
-                        keyboardType: TextInputType.emailAddress,
-                        controller: idController,
-                      ),
-                      SizedBox(height: size.height * 0.025),
-                      InputButton(
-                        label: 'Password',
-                        obscureText: true,
-                        controller: passwordController,
+                      SizedBox(width: size.width * 0.05),
+                      CustomCheckbox(
+                        label: '자동 로그인',
+                        onChanged: (bool value) {},
                       ),
                     ],
                   ),
-                ),
-                SizedBox(height: size.height * 0.020),
-                Checkbox2(
-                  label: '자동 로그인',
-                  onChanged: (bool value) {},
-                ),
-                SizedBox(height: size.height * 0.060),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: size.width * 0.05),
-                  child: GestureDetector(
-                    onTap: () async {
-                      print("im here");
-                      if (_formKey.currentState!.validate()) {
-                        User? userInfo = await userLogin(context);
-                        print("im here2");
-                        if (userInfo != null) {
-                          print("im here3");
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const MainPage()),
-                          );
+                  SizedBox(height: size.height * 0.060),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: size.width * 0.05),
+                    child: GestureDetector(
+                      onTap: () async {
+                        print("im here");
+                        if (_formKey.currentState!.validate()) {
+                          User? userInfo = await userLogin(context);
+                          print("im here2");
+                          if (userInfo != null) {
+                            print("im here3");
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const MainPage()),
+                            );
+                          }
                         }
-                      }
-                    },
-                    child: Container(
-                      width: size.width * 0.9,
-                      height: size.height * 0.065,
-                      decoration: ShapeDecoration(
-                        color: const Color.fromRGBO(54, 174, 146, 1.0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            '로그인',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontFamily: 'DM Sans',
-                              fontWeight: FontWeight.w700,
-                            ),
+                      },
+                      child: Container(
+                        width: size.width * 0.9,
+                        height: size.height * 0.065,
+                        decoration: ShapeDecoration(
+                          color: const Color.fromRGBO(54, 174, 146, 1.0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                        ],
+                        ),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '로그인',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'DM Sans',
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

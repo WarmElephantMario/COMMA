@@ -144,13 +144,12 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: Text(widget.title),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
+        title: Text(widget.title,
+          style: TextStyle(
+              color: Color.fromARGB(255, 48, 48, 48),
+              fontFamily: 'DM Sans',
+              fontWeight: FontWeight.w600),
+          ),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 30),
@@ -174,6 +173,7 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
             ),
           ),
         ],
+          iconTheme: IconThemeData(color: Color.fromARGB(255, 48, 48, 48))
       ),
       backgroundColor: Colors.white,
       body: LayoutBuilder(
