@@ -159,13 +159,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: const Text('프로필 정보'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+        title: const Text('프로필 정보',
+          style: TextStyle(
+              color: Color.fromARGB(255, 48, 48, 48),
+              fontFamily: 'DM Sans',
+              fontWeight: FontWeight.w600),
         ),
+        iconTheme: IconThemeData(color: Color.fromARGB(255, 48, 48, 48))
       ),
       backgroundColor: Colors.white,
       body: LayoutBuilder(
