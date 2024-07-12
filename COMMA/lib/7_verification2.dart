@@ -1,26 +1,118 @@
 import 'package:flutter/material.dart';
 import 'components.dart';
 import '8_verification3.dart';
-
-// class FigmaToCodeApp extends StatelessWidget {
-//   const FigmaToCodeApp({super.key});
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       theme: ThemeData.dark().copyWith(
-//         scaffoldBackgroundColor: const Color.fromARGB(255, 18, 32, 47),
-//       ),
-//       home: Verification_screen(),
-//     );
-//   }
-// }
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'api/api.dart';
+import 'model/user.dart';
+import 'dart:math';
 
 class Verification_write_screen extends StatelessWidget {
-  const Verification_write_screen({super.key});
+  final String userEmail; // 추가된 부분
+  final String userId; // 추가된 부분
+  final String userPassword; // 추가된 부분
+
+  const Verification_write_screen({
+    super.key,
+    required this.userEmail, // 추가된 부분
+    required this.userId, // 추가된 부분
+    required this.userPassword, // 추가된 부분
+  });
+
+  Future<void> _verifyAndSignup(BuildContext context, String verificationCode) async {
+    try {
+      var response = await http.post(
+        Uri.parse('${API.baseUrl}/api/verify_code'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'user_email': userEmail,
+          'verification_code': verificationCode,
+        }),
+      );
+
+      print(response.statusCode);
+      if (response.statusCode == 200) {
+        var responseBody = jsonDecode(response.body);
+
+        if (responseBody['success']) {
+          // 인증 성공 시 회원가입 정보 저장
+          String randomNickname = generateRandomNickname();
+
+          User userModel = User(
+            1,
+            userId,
+            userEmail,
+            userPassword,
+            randomNickname,
+          );
+
+          var signupResponse = await http.post(
+            Uri.parse('${API.baseUrl}/api/signup_info'),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode(userModel.toJson()),
+          );
+
+          print('Request body: ${jsonEncode(userModel.toJson())}');
+          print('Response status: ${signupResponse.statusCode}');
+          print('Response body: ${signupResponse.body}');
+
+          if (signupResponse.statusCode == 200) {
+            var signupResponseBody = jsonDecode(signupResponse.body);
+            if (signupResponseBody['success'] == true) {
+              Fluttertoast.showToast(msg: 'Signup successfully');
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const Verification_Complete_screen(),
+                ),
+              );
+            } else {
+              Fluttertoast.showToast(msg: 'Error occurred. Please try again.');
+            }
+          } else {
+            Fluttertoast.showToast(msg: 'Error: ${signupResponse.statusCode}');
+          }
+        } else {
+          Fluttertoast.showToast(msg: 'Invalid verification code.');
+        }
+      } else {
+        Fluttertoast.showToast(msg: 'Verification failed.');
+      }
+    } catch (e) {
+      print('Error: ${e.toString()}');
+      Fluttertoast.showToast(msg: 'Error: ${e.toString()}');
+    }
+  }
+
+  String generateRandomNickname() {
+    const adjectives = [
+      "짱멋진", "성실한", "용감한", "힘찬", "다정한", "밝은", "행복한", "씩씩한", "진지한", "유쾌한", "즐거운", "똑똑한",
+      "솔직한", "온화한", "강한", "상냥한", "따뜻한", "열정적인", "활기찬", "근면한", "눈부신", "친절한", "충실한", "차분한",
+      "훈훈한", "강인한", "열정가득", "행복가득", "참신한", "당당한", "맑은", "희망찬", "강력한", "부지런한", "긍정적인",
+      "명랑한", "순수한"
+    ];
+    const nouns = [
+      "짜빠구리", "고등어", "눈사람", "사자", "호랑이", "독수리", "코끼리", "팬더", "고래", "돌고래", "늑대", "독수리",
+      "코알라", "부엉이", "고양이", "강아지", "햄스터", "다람쥐", "원숭이", "앵무새", "바나나", "파인애플", "복숭아",
+      "오렌지", "토마토", "브로콜리", "고구마", "시금치", "콩나물", "해바라기", "코스모스", "민들레", "진달래"
+    ];
+    final random = Random();
+
+    final adjective = adjectives[random.nextInt(adjectives.length)];
+    final noun = nouns[random.nextInt(nouns.length)];
+
+    return "$adjective $noun";
+  }
 
   @override
   Widget build(BuildContext context) {
+    TextEditingController codeController = TextEditingController();
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -37,8 +129,14 @@ class Verification_write_screen extends StatelessWidget {
       ),
       body: ListView(
         padding: const EdgeInsets.only(top: 0),
-        children: const [
-          Information(),
+        children: [
+          Information(
+            userEmail: userEmail, // 추가된 부분
+            userId: userId, // 추가된 부분
+            userPassword: userPassword, // 추가된 부분
+            codeController: codeController, // 추가된 부분
+            onVerifyAndSignup: () => _verifyAndSignup(context, codeController.text), // 추가된 부분
+          ),
         ],
       ),
     );
@@ -46,7 +144,20 @@ class Verification_write_screen extends StatelessWidget {
 }
 
 class Information extends StatelessWidget {
-  const Information({super.key});
+  final String userEmail; // 추가된 부분
+  final String userId; // 추가된 부분
+  final String userPassword; // 추가된 부분
+  final TextEditingController codeController; // 추가된 부분
+  final VoidCallback onVerifyAndSignup; // 추가된 부분
+
+  const Information({
+    super.key,
+    required this.userEmail, // 추가된 부분
+    required this.userId, // 추가된 부분
+    required this.userPassword, // 추가된 부분
+    required this.codeController, // 추가된 부분
+    required this.onVerifyAndSignup, // 추가된 부분
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -86,18 +197,12 @@ class Information extends StatelessWidget {
               InputButton(
                 label: '인증코드를 입력해주세요',
                 keyboardType: TextInputType.emailAddress,
-                controller: TextEditingController(),
+                controller: codeController, // 수정된 부분
               ),
               SizedBox(height: size.height * 0.07),
               ClickButton(
                 text: '인증 완료하기',
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              const Verification_Complete_screen()));
-                },
+                onPressed: onVerifyAndSignup, // 수정된 부분
               ),
               const SizedBox(height: 200),
               Row(
