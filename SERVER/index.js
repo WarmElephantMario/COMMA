@@ -12,7 +12,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 const db = mysql.createConnection({
-    host: '10.240.67.197',
+    host: 'database-comma.cx4q2cgwkin7.us-east-2.rds.amazonaws.com',
     user: 'comma',
     password: 'comma0812!',
     database: 'comma'
@@ -309,7 +309,7 @@ app.post('/api/delete_user', async (req, res) => {
 
     const userKey = req.body.userKey;
     console.log('Received userKey:', userKey);
-    
+
     if (!userKey) {
         console.log('No userKey provided');
         return res.status(400).json({ success: false, error: "사용자를 찾을 수 없습니다" });
