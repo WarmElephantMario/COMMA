@@ -41,7 +41,7 @@ class _RecordPageState extends State<RecordPage> {
   dynamic _createdAt;
   bool _isColonFileExists = false;
   bool _isPDF = false;
-  late PdfController _pdfController;
+  PdfController? _pdfController;
   Uint8List? _fileBytes;
 
   @override
@@ -438,31 +438,35 @@ class _RecordPageState extends State<RecordPage> {
                 ),
               if (isAlternativeTextEnabled &&
                   _recordingState == RecordingState.initial)
-                Padding(
-                  padding: const EdgeInsets.only(top: 20),
-                  child: _isPDF
-                      ? SizedBox(
-                          height: 600,
-                          child: PdfView(
-                            controller: _pdfController,
+                if (_isPDF && _fileBytes != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 20),
+                    child: SizedBox(
+                      height: 600,
+                      child: PdfView(
+                        controller: _pdfController!,
+                      ),
+                    ),
+                  )
+                else if (!_isPDF)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 20),
+                    child: Image.network(
+                      widget.fileUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Center(
+                          child: Text(
+                            '이미지를 불러올 수 없습니다.',
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontSize: 16,
+                            ),
                           ),
-                        )
-                      : Image.network(
-                          widget.fileUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return const Center(
-                              child: Text(
-                                '이미지를 불러올 수 없습니다.',
-                                style: TextStyle(
-                                  color: Colors.red,
-                                  fontSize: 16,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                ),
+                        );
+                      },
+                    ),
+                  ),
               if (_recordingState == RecordingState.recorded)
                 const Text(
                   '실시간 자막',
