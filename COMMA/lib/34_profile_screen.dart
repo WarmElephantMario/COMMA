@@ -39,6 +39,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     nickname = userProvider.user?.user_nickname ?? "-";
     email = userProvider.user?.user_email ?? "-";
+    id = userProvider.user?.user_id ?? "-";
   }
 
   void _showEditNameDialog() {
