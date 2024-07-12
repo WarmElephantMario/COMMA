@@ -57,7 +57,9 @@ class _LearningPreparationState extends State<LearningPreparation> {
         if (fileName.endsWith('.pdf')) {
           mimeType = 'application/pdf';
           _isPDF = true;
-        } else if (fileName.endsWith('.png') || fileName.endsWith('.jpg') || fileName.endsWith('.jpeg')) {
+        } else if (fileName.endsWith('.png') ||
+            fileName.endsWith('.jpg') ||
+            fileName.endsWith('.jpeg')) {
           mimeType = 'image/png'; // or 'image/jpeg' based on the file extension
           _isPDF = false;
         }
@@ -72,7 +74,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
         Reference storageRef = FirebaseStorage.instance
             .ref()
             .child('uploads/${userProvider.user!.userKey}/$fileName');
-        UploadTask uploadTask = storageRef.putData(fileBytes!, metadata);
+        UploadTask uploadTask = storageRef.putData(fileBytes, metadata);
 
         TaskSnapshot taskSnapshot = await uploadTask;
         String downloadURL = await taskSnapshot.ref.getDownloadURL();
@@ -146,9 +148,20 @@ class _LearningPreparationState extends State<LearningPreparation> {
                   text: _isMaterialEmbedded ? '강의 자료 학습 시작하기' : '강의 자료를 임베드하세요',
                   onPressed: _isMaterialEmbedded
                       ? () {
-                          print("Starting learning with file: $_selectedFileName");
+                          print(
+                              "Starting learning with file: $_selectedFileName");
                           print("대체텍스트 선택 여부: $isAlternativeTextEnabled");
-                          showLearningDialog(context, _selectedFileName!, _downloadURL!); // 파일 이름과 URL을 전달하여 showLearningDialog 호출
+                          // 파일 이름과 URL을 전달하여 showLearningDialog 호출
+                          if (_selectedFileName != null &&
+                              _downloadURL != null &&
+                              _isMaterialEmbedded == true) {
+                            showLearningDialog(
+                                context, _selectedFileName!, _downloadURL!);
+                          } else {
+                            // 예외 처리 또는 사용자에게 알림을 표시
+                            print(
+                                'Error: File name, URL, or embedded material is missing.');
+                          }
                         }
                       : _pickFile,
                   width: MediaQuery.of(context).size.width * 0.5,
@@ -170,7 +183,8 @@ class _LearningPreparationState extends State<LearningPreparation> {
                   padding: const EdgeInsets.all(8),
                   child: Row(
                     children: [
-                      Icon(_isPDF ? Icons.picture_as_pdf : Icons.image, color: _isPDF ? Colors.red : Colors.blue, size: 40),
+                      Icon(_isPDF ? Icons.picture_as_pdf : Icons.image,
+                          color: _isPDF ? Colors.red : Colors.blue, size: 40),
                       const SizedBox(width: 15),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -211,7 +225,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
                         print('Stack trace: $stackTrace');
                         print('Image URL: $_downloadURL');
 
-                        return Center(
+                        return const Center(
                           child: Text(
                             '이미지를 불러올 수 없습니다.',
                             style: TextStyle(
@@ -225,7 +239,8 @@ class _LearningPreparationState extends State<LearningPreparation> {
                   ),
         ],
       ),
-      bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
+      bottomNavigationBar:
+          buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }
