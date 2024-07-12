@@ -19,7 +19,7 @@ BottomNavigationBar buildBottomNavigationBar(
     const MainPage(),
     const FolderScreen(),
     const LearningPreparation(),
-    MyPageScreen(),
+    const MyPageScreen(),
   ];
 
   void handleItemTap(int index) {
