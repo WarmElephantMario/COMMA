@@ -309,7 +309,7 @@ app.post('/api/delete_user', async (req, res) => {
 
     const userKey = req.body.userKey;
     console.log('Received userKey:', userKey);
-    
+
     if (!userKey) {
         console.log('No userKey provided');
         return res.status(400).json({ success: false, error: "사용자를 찾을 수 없습니다" });
