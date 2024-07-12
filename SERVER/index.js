@@ -12,9 +12,9 @@ app.use(bodyParser.json());
 app.use(cors());
 
 const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'password',
+    host: '10.240.67.197',
+    user: 'comma',
+    password: 'comma0812!',
     database: 'comma'
 });
 
@@ -302,6 +302,73 @@ app.post('/api/login', (req, res) => {
         }
     });
 });
+
+// 회원 탈퇴
+app.post('/api/delete_user', async (req, res) => {
+    console.log('API 요청 수신: /api/delete_user');
+
+    const userKey = req.body.userKey;
+    console.log('Received userKey:', userKey);
+    
+    if (!userKey) {
+        console.log('No userKey provided');
+        return res.status(400).json({ success: false, error: "사용자를 찾을 수 없습니다" });
+    }
+
+    db.beginTransaction(async (err) => {
+        if (err) {
+            console.error('Transaction error:', err);
+            return res.status(500).json({ success: false, error: 'Transaction error' });
+        }
+
+        try {
+            // Delete related lecturefiles
+            const [lectureFilesResult] = await db.promise().query(
+                'DELETE FROM lecturefiles WHERE folder_id IN (SELECT id FROM lecturefolders WHERE userKey = ?)',
+                [userKey]
+            );
+            console.log('Deleted lecturefiles:', lectureFilesResult.affectedRows);
+
+            // Delete related colonfiles
+            const [colonFilesResult] = await db.promise().query(
+                'DELETE FROM colonfiles WHERE folder_id IN (SELECT id FROM colonfolders WHERE userKey = ?)',
+                [userKey]
+            );
+            console.log('Deleted colonfiles:', colonFilesResult.affectedRows);
+
+            // Delete related lecturefolders
+            const [lectureFoldersResult] = await db.promise().query('DELETE FROM lecturefolders WHERE userKey = ?', [userKey]);
+            console.log('Deleted lecturefolders:', lectureFoldersResult.affectedRows);
+
+            // Delete related colonfolders
+            const [colonFoldersResult] = await db.promise().query('DELETE FROM colonfolders WHERE userKey = ?', [userKey]);
+            console.log('Deleted colonfolders:', colonFoldersResult.affectedRows);
+
+            // Delete the user
+            const [userResult] = await db.promise().query('DELETE FROM user_table WHERE userKey = ?', [userKey]);
+            console.log('Deleted user:', userResult.affectedRows);
+
+            db.commit((commitErr) => {
+                if (commitErr) {
+                    db.rollback(() => {
+                        console.error('Commit error:', commitErr);
+                        return res.status(500).json({ success: false, error: 'Commit error' });
+                    });
+                } else {
+                    console.log('User and related data deleted successfully.');
+                    res.json({ success: true });
+                }
+            });
+        } catch (error) {
+            db.rollback(() => {
+                console.error('Transaction error:', error);
+                res.status(500).json({ success: false, error: 'Database error' });
+            });
+        }
+    });
+});
+
+
 
 //회원 닉네임 변경하기
 app.put('/api/update_nickname', (req, res) => {
