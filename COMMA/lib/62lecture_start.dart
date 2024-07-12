@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import 'components.dart';
 import '63record.dart';
 import 'package:provider/provider.dart';
-import 'model/user.dart';
 import 'model/user_provider.dart';
 import 'api/api.dart';
 
@@ -12,7 +11,8 @@ class LectureStartPage extends StatefulWidget {
   final String fileName;
   final String fileURL;
 
-  LectureStartPage({required this.fileName, required this.fileURL});
+  const LectureStartPage(
+      {super.key, required this.fileName, required this.fileURL});
 
   @override
   _LectureStartPageState createState() => _LectureStartPageState();
@@ -36,6 +36,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
       _selectedIndex = index;
     });
   }
+
   Future<void> fetchFolderList() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userKey = userProvider.user?.userKey;
@@ -50,14 +51,16 @@ class _LectureStartPageState extends State<LectureStartPage> {
           final List<dynamic> folderData = json.decode(response.body);
 
           setState(() {
-            folderList = folderData.map((folder) => {
-              'id': folder['id'],
-              'folder_name': folder['folder_name'],
-              'selected': false
-            }).toList();
+            folderList = folderData
+                .map((folder) => {
+                      'id': folder['id'],
+                      'folder_name': folder['folder_name'],
+                      'selected': false
+                    })
+                .toList();
 
             var defaultFolder = folderList.firstWhere(
-                    (folder) => folder['folder_name'] == '기본 폴더',
+                (folder) => folder['folder_name'] == '기본 폴더',
                 orElse: () => <String, dynamic>{});
             if (defaultFolder.isNotEmpty) {
               _selectFolder(defaultFolder['folder_name']);
@@ -73,6 +76,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
       print('User Key is null, cannot fetch folders.');
     }
   }
+
   void _selectFolder(String folderName) {
     setState(() {
       _selectedFolder = folderName;
@@ -87,7 +91,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
 
       if (response.statusCode == 200) {
         List<Map<String, dynamic>> fetchedFolders =
-        List<Map<String, dynamic>>.from(jsonDecode(response.body));
+            List<Map<String, dynamic>>.from(jsonDecode(response.body));
 
         setState(() {
           folderList = fetchedFolders;
@@ -99,21 +103,23 @@ class _LectureStartPageState extends State<LectureStartPage> {
       }
     } catch (e) {
       print('Error fetching other folders: $e');
-      throw e;
+      rethrow;
     }
   }
+
   Future<void> renameItem(String newName) async {
     setState(() {
       _noteName = newName;
     });
   }
 
-int getFolderIdByName(String folderName) {
-    return folderList
-        .firstWhere((folder) => folder['folder_name'] == folderName)['id'];
+  int getFolderIdByName(String folderName) {
+    return folderList.firstWhere(
+        (folder) => folder['folder_name'] == folderName,
+        orElse: () => {'id': -1})['id'];
   }
 
- void showQuickMenu(
+  void showQuickMenu(
       BuildContext context,
       Future<void> Function() fetchOtherFolders,
       List<Map<String, dynamic>> folders,
@@ -175,7 +181,7 @@ int getFolderIdByName(String folderName) {
                       TextButton(
                         onPressed: () async {
                           final selectedFolder = updatedFolders.firstWhere(
-                                  (folder) => folder['selected'] == true,
+                              (folder) => folder['selected'] == true,
                               orElse: () => {});
                           if (selectedFolder.isNotEmpty) {
                             selectFolder(selectedFolder['folder_name']);
@@ -217,8 +223,9 @@ int getFolderIdByName(String folderName) {
                           isSelected: folder['selected'] ?? false,
                           onChanged: (bool isSelected) {
                             setState(() {
-                              updatedFolders
-                                  .forEach((f) => f['selected'] = false);
+                              for (var f in updatedFolders) {
+                                f['selected'] = false;
+                              }
                               folder['selected'] = isSelected;
                             });
                             print('Folder selected: ${folder['folder_name']}');
@@ -235,15 +242,16 @@ int getFolderIdByName(String folderName) {
       },
     );
   }
+
   // 파일 이름 바꾸기 다이얼로그
   void showRenameDialog2(
-      BuildContext context,
-      String currentName,
-      Future<void> Function(String) renameItem,
-      void Function(VoidCallback) setState,
-      String title,
-      String fieldName,
-      ) {
+    BuildContext context,
+    String currentName,
+    Future<void> Function(String) renameItem,
+    void Function(VoidCallback) setState,
+    String title,
+    String fieldName,
+  ) {
     final TextEditingController textController = TextEditingController();
     textController.text = currentName;
 
@@ -251,26 +259,30 @@ int getFolderIdByName(String folderName) {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(title,
+          title: Text(
+            title,
             style: const TextStyle(
               color: Color(0xFF545454),
               fontSize: 14,
               fontFamily: 'DM Sans',
               fontWeight: FontWeight.bold,
-            ),),
+            ),
+          ),
           content: TextField(
             controller: textController,
-            decoration: InputDecoration(hintText: "새 이름 입력"),
+            decoration: const InputDecoration(hintText: "새 이름 입력"),
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('취소',style: TextStyle(color: Color(0xFFFFA17A))),
+              child:
+                  const Text('취소', style: TextStyle(color: Color(0xFFFFA17A))),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('저장', style: TextStyle(color: Color(0xFF545454))),
+              child:
+                  const Text('저장', style: TextStyle(color: Color(0xFF545454))),
               onPressed: () async {
                 String newName = textController.text;
                 await renameItem(newName);
@@ -285,6 +297,7 @@ int getFolderIdByName(String folderName) {
       },
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -354,11 +367,12 @@ int getFolderIdByName(String folderName) {
             const SizedBox(height: 15),
             GestureDetector(
               onTap: () {
-                int currentFolderId = folderList.isNotEmpty ? folderList.first['id'] : 0;
+                int currentFolderId =
+                    folderList.isNotEmpty ? folderList.first['id'] : 0;
                 // showQuickMenu 호출
                 showQuickMenu(
                   context,
-                      () => fetchOtherFolders('lecture', currentFolderId),
+                  () => fetchOtherFolders('lecture', currentFolderId),
                   folderList,
                   _selectFolder,
                 );
@@ -394,7 +408,7 @@ int getFolderIdByName(String folderName) {
                     setState,
                     "파일 이름 바꾸기", // 다이얼로그 제목
                     "file_name" // 변경할 항목 타입
-                );
+                    );
               },
               child: Row(
                 children: [
@@ -440,7 +454,7 @@ int getFolderIdByName(String folderName) {
                 height: 50.0,
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
           ],
         ),
       ),

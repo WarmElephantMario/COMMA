@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '60prepare.dart';
 import 'components.dart';
-import 'api/api.dart';
 
 class ColonPage extends StatefulWidget {
   final String folderName; // 폴더 이름 가져오기 사용
@@ -10,13 +9,12 @@ class ColonPage extends StatefulWidget {
   final String lectureName; // 강의 자료 이름 추가
   final dynamic createdAt; // 생성 날짜 및 시간 추가
 
-  const ColonPage({
-    super.key,
-    required this.folderName,
-    required this.noteName,
-    required this.lectureName,
-    required this.createdAt
-  });
+  const ColonPage(
+      {super.key,
+      required this.folderName,
+      required this.noteName,
+      required this.lectureName,
+      required this.createdAt});
 
   @override
   _ColonPageState createState() => _ColonPageState();
@@ -61,8 +59,7 @@ class _ColonPageState extends State<ColonPage> {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const LearningPreparation()
-                      ),
+                          builder: (context) => const LearningPreparation()),
                     );
                   },
                   child: const Text(
@@ -141,7 +138,8 @@ class _ColonPageState extends State<ColonPage> {
           ],
         ),
       ),
-      bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
+      bottomNavigationBar:
+          buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }

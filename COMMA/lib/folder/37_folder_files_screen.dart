@@ -159,13 +159,12 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: Text(widget.folderName),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
+        title: Text(widget.folderName,
+        style: TextStyle(
+          color: Color.fromARGB(255, 48, 48, 48),
+          fontWeight: FontWeight.w600
+        ),),
+        iconTheme: IconThemeData(color: Color.fromARGB(255, 48, 48, 48))
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
