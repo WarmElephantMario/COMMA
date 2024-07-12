@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:typed_data';
-import 'components.dart'; // components.dart 파일을 임포트
+import 'dart:io';
+import 'package:pdfx/pdfx.dart';
+import 'components.dart';
 import 'model/user_provider.dart';
 import 'package:provider/provider.dart';
-import 'dart:io';
+
+bool isAlternativeTextEnabled = false;
 
 class LearningPreparation extends StatefulWidget {
   const LearningPreparation({super.key});
@@ -16,12 +19,14 @@ class LearningPreparation extends StatefulWidget {
 
 class _LearningPreparationState extends State<LearningPreparation> {
   String? _selectedFileName;
-  String? _downloadURL; // 다운로드 URL을 저장할 변수 추가
+  String? _downloadURL;
   bool _isMaterialEmbedded = false;
   bool _isIconVisible = true;
   Uint8List? _fileBytes;
+  bool _isPDF = false;
+  late PdfController _pdfController;
 
-  int _selectedIndex = 2; // 학습 시작 탭이 기본 선택되도록 설정
+  int _selectedIndex = 2;
 
   void _onItemTapped(int index) {
     setState(() {
@@ -30,63 +35,64 @@ class _LearningPreparationState extends State<LearningPreparation> {
   }
 
   Future<void> _pickFile() async {
-    print("File picker opened.");
     FilePickerResult? result = await FilePicker.platform.pickFiles();
 
     if (result != null) {
-      print(
-          "File picker result: ${result.files.map((file) => file.name).toList()}"); // 결과 전체 로그 출력
-
       Uint8List? fileBytes = result.files.first.bytes;
+      String fileName = result.files.first.name;
+
       if (fileBytes == null) {
-        // If fileBytes is null, read the file as bytes from its path
         String? filePath = result.files.first.path;
-        print(filePath);
         if (filePath != null) {
           File file = File(filePath);
           fileBytes = await file.readAsBytes();
         } else {
-          print("File path is null");
           return;
         }
       }
 
-      setState(() {
-        // _fileBytes = result.files.first.bytes;
-        _fileBytes = fileBytes;
-        _selectedFileName = result.files.first.name;
-        _isMaterialEmbedded = true;
-        _isIconVisible = false;
-      });
+      try {
+        // Determine MIME type
+        String mimeType = 'application/octet-stream';
+        if (fileName.endsWith('.pdf')) {
+          mimeType = 'application/pdf';
+          _isPDF = true;
+        } else if (fileName.endsWith('.png') || fileName.endsWith('.jpg') || fileName.endsWith('.jpeg')) {
+          mimeType = 'image/png'; // or 'image/jpeg' based on the file extension
+          _isPDF = false;
+        }
 
-      print(
-          "File picked: $_selectedFileName, bytes length: ${_fileBytes?.length}");
-      await _uploadFileToFirebase(_fileBytes!, _selectedFileName!);
-    } else {
-      print("File picking cancelled.");
-    }
-  }
+        // Define metadata
+        final metadata = SettableMetadata(
+          contentType: mimeType,
+        );
 
-  Future<void> _uploadFileToFirebase(
-      Uint8List fileBytes, String fileName) async {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    try {
-      print("Starting file upload...");
-      Reference storageRef = FirebaseStorage.instance
-          .ref()
-          .child('uploads/${userProvider.user!.userKey}/$fileName');
-      UploadTask uploadTask = storageRef.putData(fileBytes);
+        // Upload file with metadata
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        Reference storageRef = FirebaseStorage.instance
+            .ref()
+            .child('uploads/${userProvider.user!.userKey}/$fileName');
+        UploadTask uploadTask = storageRef.putData(fileBytes!, metadata);
 
-      TaskSnapshot taskSnapshot = await uploadTask;
-      String downloadURL = await taskSnapshot.ref.getDownloadURL();
+        TaskSnapshot taskSnapshot = await uploadTask;
+        String downloadURL = await taskSnapshot.ref.getDownloadURL();
 
-      setState(() {
-        _downloadURL = downloadURL; // 다운로드 URL 설정
-      });
+        setState(() {
+          _selectedFileName = fileName;
+          _downloadURL = downloadURL;
+          _isMaterialEmbedded = true;
+          _isIconVisible = false;
+          if (_isPDF) {
+            _pdfController = PdfController(
+              document: PdfDocument.openData(fileBytes!),
+            );
+          }
+        });
 
-      print('File uploaded successfully! Download URL: $downloadURL');
-    } catch (e) {
-      print('File upload failed: $e');
+        print('File uploaded successfully: $downloadURL');
+      } catch (e) {
+        print('File upload failed: $e');
+      }
     }
   }
 
@@ -120,10 +126,12 @@ class _LearningPreparationState extends State<LearningPreparation> {
           const SizedBox(height: 30),
           CustomCheckbox(
             label: '대체텍스트 생성',
-            onChanged: (bool value) {},
-          ),
-          const SizedBox(
-            height: 15,
+            isSelected: isAlternativeTextEnabled,
+            onChanged: (bool value) {
+              setState(() {
+                isAlternativeTextEnabled = value;
+              });
+            },
           ),
           CustomCheckbox(
             label: '실시간 자막 생성',
@@ -138,10 +146,9 @@ class _LearningPreparationState extends State<LearningPreparation> {
                   text: _isMaterialEmbedded ? '강의 자료 학습 시작하기' : '강의 자료를 임베드하세요',
                   onPressed: _isMaterialEmbedded
                       ? () {
-                          print(
-                              "Starting learning with file: $_selectedFileName");
-                          showLearningDialog(context, _selectedFileName!,
-                              _downloadURL!); // 파일 이름과 URL을 전달하여 showLearningDialog 호출
+                          print("Starting learning with file: $_selectedFileName");
+                          print("대체텍스트 선택 여부: $isAlternativeTextEnabled");
+                          showLearningDialog(context, _selectedFileName!, _downloadURL!); // 파일 이름과 URL을 전달하여 showLearningDialog 호출
                         }
                       : _pickFile,
                   width: MediaQuery.of(context).size.width * 0.5,
@@ -163,8 +170,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
                   padding: const EdgeInsets.all(8),
                   child: Row(
                     children: [
-                      const Icon(Icons.picture_as_pdf,
-                          color: Colors.red, size: 40),
+                      Icon(_isPDF ? Icons.picture_as_pdf : Icons.image, color: _isPDF ? Colors.red : Colors.blue, size: 40),
                       const SizedBox(width: 15),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -186,10 +192,40 @@ class _LearningPreparationState extends State<LearningPreparation> {
                 ),
               ],
             ),
+          if (_downloadURL != null)
+            _isPDF
+                ? SizedBox(
+                    height: 600,
+                    child: PdfView(
+                      controller: _pdfController,
+                    ),
+                  )
+                : Padding(
+                    padding: const EdgeInsets.only(top: 20),
+                    child: Image.network(
+                      _downloadURL!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        // 에러 로그 출력
+                        print('Error loading image: $error');
+                        print('Stack trace: $stackTrace');
+                        print('Image URL: $_downloadURL');
+
+                        return Center(
+                          child: Text(
+                            '이미지를 불러올 수 없습니다.',
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontSize: 16,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
         ],
       ),
-      bottomNavigationBar:
-          buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
+      bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }
