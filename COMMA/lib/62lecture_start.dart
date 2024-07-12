@@ -218,7 +218,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
                     children: updatedFolders.map((folder) {
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 5),
-                        child: Checkbox2(
+                        child: CustomCheckbox(
                           label: folder['folder_name'],
                           isSelected: folder['selected'] ?? false,
                           onChanged: (bool isSelected) {

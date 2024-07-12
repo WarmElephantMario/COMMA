@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_plugin/components.dart';
 
 class HelpPage extends StatefulWidget {
+  const HelpPage({super.key});
+
   @override
   _HelpPageState createState() => _HelpPageState();
 }
@@ -21,19 +23,20 @@ class _HelpPageState extends State<HelpPage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        iconTheme: IconThemeData(color: Color.fromARGB(255, 48, 48, 48)),
-        title: Text(
+        iconTheme: const IconThemeData(color: Color.fromARGB(255, 48, 48, 48)),
+        title: const Text(
           '도움말',
-        style: TextStyle(
-          color: Color.fromARGB(255, 48, 48, 48),
-          fontFamily: 'DM Sans',
-          fontWeight: FontWeight.w600),
+          style: TextStyle(
+              color: Color.fromARGB(255, 48, 48, 48),
+              fontFamily: 'DM Sans',
+              fontWeight: FontWeight.w600),
         ),
       ),
-      body: Center(
+      body: const Center(
         child: Text('도움말 페이지 내용'),
       ),
-      bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
+      bottomNavigationBar:
+          buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }
