@@ -42,8 +42,7 @@ class _FolderScreenState extends State<FolderScreen> {
     if (userKey != null) {
       try {
         final lectureResponse = await http.get(
-          Uri.parse(
-              '${API.baseUrl}/api/lecture-folders?userKey=$userKey'),
+          Uri.parse('${API.baseUrl}/api/lecture-folders?userKey=$userKey'),
         );
         final colonResponse = await http.get(
           Uri.parse('${API.baseUrl}/api/colon-folders?userKey=$userKey'),
@@ -100,16 +99,38 @@ class _FolderScreenState extends State<FolderScreen> {
     final url = Uri.parse(
         '${API.baseUrl}/api/${folderType == 'lecture' ? 'lecture' : 'colon'}-folders/$id');
     try {
-      final response = await http.put(url,
-          body: jsonEncode({'folder_name': newName}),
-          headers: {'Content-Type': 'application/json'});
+      print('Sending PUT request to $url with name $newName');
+      final response = await http.put(
+        url,
+        body: jsonEncode({'folder_name': newName}),
+        headers: {'Content-Type': 'application/json'},
+      );
+
       if (response.statusCode != 200) {
+        print('Failed to rename folder: ${response.statusCode}');
         throw Exception('Failed to rename folder');
+      } else {
+        print('Folder renamed successfully');
       }
     } catch (e) {
-      print(e);
+      print('Error renaming folder: $e');
     }
   }
+
+  // Future<void> _renameFolder(String folderType, int id, String newName) async {
+  //   final url = Uri.parse(
+  //       '${API.baseUrl}/api/${folderType == 'lecture' ? 'lecture' : 'colon'}-folders/$id');
+  //   try {
+  //     final response = await http.put(url,
+  //         body: jsonEncode({'folder_name': newName}),
+  //         headers: {'Content-Type': 'application/json'});
+  //     if (response.statusCode != 200) {
+  //       throw Exception('Failed to rename folder');
+  //     }
+  //   } catch (e) {
+  //     print(e);
+  //   }
+  // }
 
   Future<void> _deleteFolder(String folderType, int id) async {
     final url = Uri.parse(
@@ -168,10 +189,11 @@ class _FolderScreenState extends State<FolderScreen> {
                         ),
                       );
                     },
-                    onRename: (index) => showRenameDialog(
+                    onRename: (index) => showRenameDialogVer2(
                         context,
                         index,
                         lectureFolders,
+                        'lecture',
                         _renameFolder,
                         setState,
                         "폴더 이름 바꾸기", // 다이얼로그 제목
@@ -222,10 +244,11 @@ class _FolderScreenState extends State<FolderScreen> {
                         ),
                       );
                     },
-                    onRename: (index) => showRenameDialog(
+                    onRename: (index) => showRenameDialogVer2(
                         context,
                         index,
                         colonFolders,
+                        'colon',
                         _renameFolder,
                         setState,
                         "폴더 이름 바꾸기", // 다이얼로그 제목

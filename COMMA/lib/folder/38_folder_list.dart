@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_plugin/components.dart';
-import '../components.dart';
-import '../api/api.dart';
 
 class FolderList extends StatelessWidget {
   final List<Map<String, dynamic>> folders;

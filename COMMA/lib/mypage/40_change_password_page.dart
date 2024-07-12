@@ -24,12 +24,13 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        iconTheme: IconThemeData(color: Color.fromARGB(255, 48, 48, 48)),
-        title: const Text('비밀번호 변경',
-        style: TextStyle(
-            color: Color.fromARGB(255, 48, 48, 48),
-            fontFamily: 'DM Sans',
-            fontWeight: FontWeight.w600),
+        iconTheme: const IconThemeData(color: Color.fromARGB(255, 48, 48, 48)),
+        title: const Text(
+          '비밀번호 변경',
+          style: TextStyle(
+              color: Color.fromARGB(255, 48, 48, 48),
+              fontFamily: 'DM Sans',
+              fontWeight: FontWeight.w600),
         ),
       ),
       body: Padding(
@@ -59,12 +60,12 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               },
               width: MediaQuery.of(context).size.width * 0.5, // 원하는 너비 설정
               height: 50.0, // 원하는 높이 설정
-
             ),
           ],
         ),
       ),
-      bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
+      bottomNavigationBar:
+          buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }
