@@ -12,7 +12,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 const db = mysql.createConnection({
-    host: '10.240.67.197',
+    host: 'database-comma.cx4q2cgwkin7.us-east-2.rds.amazonaws.com',
     user: 'comma',
     password: 'comma0812!',
     database: 'comma'
@@ -324,24 +324,24 @@ app.post('/api/delete_user', async (req, res) => {
         try {
             // Delete related lecturefiles
             const [lectureFilesResult] = await db.promise().query(
-                'DELETE FROM lecturefiles WHERE folder_id IN (SELECT id FROM lecturefolders WHERE userKey = ?)',
+                'DELETE FROM LectureFiles WHERE folder_id IN (SELECT id FROM LectureFolders WHERE userKey = ?)',
                 [userKey]
             );
             console.log('Deleted lecturefiles:', lectureFilesResult.affectedRows);
 
             // Delete related colonfiles
             const [colonFilesResult] = await db.promise().query(
-                'DELETE FROM colonfiles WHERE folder_id IN (SELECT id FROM colonfolders WHERE userKey = ?)',
+                'DELETE FROM ColonFiles WHERE folder_id IN (SELECT id FROM ColonFolders WHERE userKey = ?)',
                 [userKey]
             );
             console.log('Deleted colonfiles:', colonFilesResult.affectedRows);
 
             // Delete related lecturefolders
-            const [lectureFoldersResult] = await db.promise().query('DELETE FROM lecturefolders WHERE userKey = ?', [userKey]);
+            const [lectureFoldersResult] = await db.promise().query('DELETE FROM LectureFolders WHERE userKey = ?', [userKey]);
             console.log('Deleted lecturefolders:', lectureFoldersResult.affectedRows);
 
             // Delete related colonfolders
-            const [colonFoldersResult] = await db.promise().query('DELETE FROM colonfolders WHERE userKey = ?', [userKey]);
+            const [colonFoldersResult] = await db.promise().query('DELETE FROM ColonFolders WHERE userKey = ?', [userKey]);
             console.log('Deleted colonfolders:', colonFoldersResult.affectedRows);
 
             // Delete the user
