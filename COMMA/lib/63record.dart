@@ -59,7 +59,7 @@ class _RecordPageState extends State<RecordPage> {
   }
 
   void _checkFileType() {
-    final fileName = widget.noteName.toLowerCase();
+    final fileName = widget.lectureName.toLowerCase();
     if (fileName.endsWith('.pdf')) {
       setState(() {
         _isPDF = true;
