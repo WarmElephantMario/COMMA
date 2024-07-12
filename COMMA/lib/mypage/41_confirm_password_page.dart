@@ -25,13 +25,13 @@ class _ConfirmPasswordPageState extends State<ConfirmPasswordPage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+        iconTheme: IconThemeData(color: Color.fromARGB(255, 48, 48, 48)),
+        title: const Text('비밀번호 확인',
+        style: TextStyle(
+            color: Color.fromARGB(255, 48, 48, 48),
+            fontFamily: 'DM Sans',
+            fontWeight: FontWeight.w600),
         ),
-        title: const Text('비밀번호 확인'),
       ),
       body: Center(
         child: Padding(

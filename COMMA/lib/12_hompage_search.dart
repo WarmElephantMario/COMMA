@@ -7,7 +7,6 @@ import 'package:intl/intl.dart'; // 날짜 포맷을 위해 추가
 import '63record.dart';
 import '66colon.dart';
 
-
 class MainToSearchPage extends StatefulWidget {
   const MainToSearchPage({super.key});
 
@@ -27,17 +26,18 @@ class _MainToSearchPageState extends State<MainToSearchPage> {
   }
 
   Future<void> searchFiles(String query) async {
-    final response = await http.get(Uri.parse('${API.baseUrl}/api/searchFiles?query=$query'));
+    final response = await http
+        .get(Uri.parse('${API.baseUrl}/api/searchFiles?query=$query'));
 
     if (response.statusCode == 200) {
       setState(() {
-        searchResults = List<Map<String, dynamic>>.from(jsonDecode(response.body)['files']);
+        searchResults =
+            List<Map<String, dynamic>>.from(jsonDecode(response.body)['files']);
       });
     } else {
       throw Exception('Failed to search files');
     }
   }
-
 
   String formatDateTimeToKorean(String? dateTime) {
     if (dateTime == null || dateTime.isEmpty) return 'Unknown';
@@ -53,12 +53,15 @@ class _MainToSearchPageState extends State<MainToSearchPage> {
   }
 
   // 강의 파일 클릭 이벤트에서 폴더 이름 조회
-  void fetchFolderAndNavigate(BuildContext context, int folderId, String fileType, Map<String, dynamic> file) async {
+  void fetchFolderAndNavigate(BuildContext context, int folderId,
+      String fileType, Map<String, dynamic> file) async {
     try {
-      final response = await http.get(Uri.parse('${API.baseUrl}/api/getFolderName/$fileType/$folderId'));
+      final response = await http.get(
+          Uri.parse('${API.baseUrl}/api/getFolderName/$fileType/$folderId'));
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
-        navigateToPage(context, data['folder_name'] ?? 'Unknown Folder', file, fileType);
+        navigateToPage(
+            context, data['folder_name'] ?? 'Unknown Folder', file, fileType);
       } else {
         print('Failed to load folder name: ${response.statusCode}');
         navigateToPage(context, 'Unknown Folder', file, fileType);
@@ -70,12 +73,14 @@ class _MainToSearchPageState extends State<MainToSearchPage> {
   }
 
   // 강의 파일 또는 콜론 파일 페이지로 네비게이션
-  void navigateToPage(BuildContext context, String folderName, Map<String, dynamic> file, String fileType) {
+  void navigateToPage(BuildContext context, String folderName,
+      Map<String, dynamic> file, String fileType) {
     Widget page = fileType == 'lecture'
         ? RecordPage(
             selectedFolderId: file['folder_id'].toString(),
             noteName: file['file_name'] ?? 'Unknown Note',
-            fileUrl: file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
+            fileUrl:
+                file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
             folderName: folderName,
             recordingState: RecordingState.recorded,
             lectureName: file['lecture_name'] ?? 'Unknown Lecture',
@@ -95,53 +100,63 @@ class _MainToSearchPageState extends State<MainToSearchPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Row(
-          children: [
-            Expanded(
-              child: SizedBox(
-                height: 45,
-                child: TextField(
-                  style: TextStyle(color: Colors.grey[800]),
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: const Color.fromRGBO(228, 240, 231, 100),
-                    hintText: '검색할 파일명을 입력하세요.',
-                    hintStyle: const TextStyle(
-                      color: Color(0xFF36AE92),
-                      fontSize: 15,
+          backgroundColor: Colors.white,
+          elevation: 0,
+          title: Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 45,
+                  child: TextField(
+                    style: TextStyle(color: Colors.grey[800]),
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: const Color.fromRGBO(228, 240, 231, 100),
+                      hintText: '검색할 파일명을 입력하세요.',
+                      hintStyle: const TextStyle(
+                        color: Color(0xFF36AE92),
+                        fontSize: 15,
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.search,
+                        color: Color(0xFF36AE92),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding:
+                          const EdgeInsets.symmetric(vertical: 10.0),
                     ),
-                    prefixIcon: const Icon(
-                      Icons.search,
-                      color: Color(0xFF36AE92),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 10.0),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(width: 8),
-            ElevatedButton(
-              onPressed: () {
-                searchFiles(_searchController.text);
-              },
-              style: ElevatedButton.styleFrom(
-                iconColor: const Color(0xFF36AE92), // 검색 버튼 색상
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+              const SizedBox(width: 8),
+              SizedBox(
+                width: 75,
+                height: 40,
+                child: ElevatedButton(
+                  onPressed: () {
+                    searchFiles(_searchController.text);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF36AE92),
+                    // iconColor: const Color(0xFF36AE92), // 검색 버튼 색상
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text(
+                    '검색',
+                    style: TextStyle(color: Colors.white, fontSize: 14.5),
+                  ),
                 ),
               ),
-              child: const Text('검색'),
-            ),
-          ],
-        ),
-      ),
+            ],
+          ),
+          iconTheme:
+              const IconThemeData(color: Color.fromARGB(255, 48, 48, 48))),
       body: searchResults.isEmpty
           ? const SingleChildScrollView(
               child: Padding(
@@ -171,7 +186,8 @@ class _MainToSearchPageState extends State<MainToSearchPage> {
                 final file = searchResults[index];
                 // null 값을 처리하여 기본값을 설정
                 final fileName = file['file_name'] ?? 'Unknown Note';
-                final fileUrl = file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt';
+                final fileUrl = file['file_url'] ??
+                    'https://defaulturl.com/defaultfile.txt';
                 final lectureName = file['lecture_name'] ?? 'Unknown Lecture';
                 final createdAt = file['created_at'] ?? 'Unknown Date';
                 final folderId = file['folder_id'] ?? 0;
@@ -188,12 +204,14 @@ class _MainToSearchPageState extends State<MainToSearchPage> {
                   ),
                   onTap: () {
                     print('File $fileName is clicked');
-                    fetchFolderAndNavigate(context, folderId, fileType, file); // 파일을 탭하면 열기
+                    fetchFolderAndNavigate(
+                        context, folderId, fileType, file); // 파일을 탭하면 열기
                   },
                 );
               },
             ),
-      bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
+      bottomNavigationBar:
+          buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }

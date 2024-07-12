@@ -5,9 +5,7 @@ import 'dart:typed_data';
 import 'components.dart'; // components.dart 파일을 임포트
 import 'model/user_provider.dart';
 import 'package:provider/provider.dart';
-import '63record.dart'; // 추가: RecordPage 임포트
 import 'dart:io';
-import 'api/api.dart';
 
 class LearningPreparation extends StatefulWidget {
   const LearningPreparation({super.key});
@@ -36,23 +34,24 @@ class _LearningPreparationState extends State<LearningPreparation> {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
 
     if (result != null) {
-       print("File picker result: ${result.files.map((file) => file.name).toList()}"); // 결과 전체 로그 출력
+      print(
+          "File picker result: ${result.files.map((file) => file.name).toList()}"); // 결과 전체 로그 출력
 
       Uint8List? fileBytes = result.files.first.bytes;
-        if (fileBytes == null) {
+      if (fileBytes == null) {
         // If fileBytes is null, read the file as bytes from its path
         String? filePath = result.files.first.path;
         print(filePath);
-          if (filePath != null) {
-            File file = File(filePath);
-            fileBytes = await file.readAsBytes();
-          } else {
-            print("File path is null");
-            return;
-          }
+        if (filePath != null) {
+          File file = File(filePath);
+          fileBytes = await file.readAsBytes();
+        } else {
+          print("File path is null");
+          return;
         }
-      
-       setState(() {
+      }
+
+      setState(() {
         // _fileBytes = result.files.first.bytes;
         _fileBytes = fileBytes;
         _selectedFileName = result.files.first.name;
@@ -60,7 +59,8 @@ class _LearningPreparationState extends State<LearningPreparation> {
         _isIconVisible = false;
       });
 
-      print("File picked: $_selectedFileName, bytes length: ${_fileBytes?.length}");
+      print(
+          "File picked: $_selectedFileName, bytes length: ${_fileBytes?.length}");
       await _uploadFileToFirebase(_fileBytes!, _selectedFileName!);
     } else {
       print("File picking cancelled.");
@@ -118,11 +118,14 @@ class _LearningPreparationState extends State<LearningPreparation> {
             ),
           ),
           const SizedBox(height: 30),
-          Checkbox2(
+          CustomCheckbox(
             label: '대체텍스트 생성',
             onChanged: (bool value) {},
           ),
-          Checkbox2(
+          const SizedBox(
+            height: 15,
+          ),
+          CustomCheckbox(
             label: '실시간 자막 생성',
             onChanged: (bool value) {},
           ),
@@ -135,7 +138,8 @@ class _LearningPreparationState extends State<LearningPreparation> {
                   text: _isMaterialEmbedded ? '강의 자료 학습 시작하기' : '강의 자료를 임베드하세요',
                   onPressed: _isMaterialEmbedded
                       ? () {
-                          print("Starting learning with file: $_selectedFileName");
+                          print(
+                              "Starting learning with file: $_selectedFileName");
                           showLearningDialog(context, _selectedFileName!,
                               _downloadURL!); // 파일 이름과 URL을 전달하여 showLearningDialog 호출
                         }
