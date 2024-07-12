@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'dart:io';
 import 'components.dart';
+import 'model/user_provider.dart';
+import 'api/api.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -19,24 +25,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _selectedIndex = index;
     });
   }
-  String name = "이화연";
-  String email = "ewha.comma@gmail.com";
-  String phoneNumber = "010-1234-5678";
+
+  String email = "-";
+  String id = "-";
+  String nickname = "-";
   File? _image;
 
   final ImagePicker _picker = ImagePicker();
 
+  @override
+  void initState() {
+    super.initState();
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    nickname = userProvider.user?.user_nickname ?? "-";
+    email = userProvider.user?.user_email ?? "-";
+  }
+
   void _showEditNameDialog() {
-    final TextEditingController nameController =
-        TextEditingController(text: name);
+    final TextEditingController nicknameController = TextEditingController(text: nickname);
+
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('이름 바꾸기'),
+          title: const Text('닉네임 바꾸기'),
           content: TextField(
-            controller: nameController,
-            decoration: const InputDecoration(hintText: '새 이름을 입력하세요'),
+            controller: nicknameController,
+            decoration: const InputDecoration(hintText: '새 닉네임을 입력하세요'),
           ),
           actions: <Widget>[
             TextButton(
@@ -47,9 +62,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             TextButton(
               child: const Text('저장'),
-              onPressed: () {
+              onPressed: () async{
+                String newNickname = nicknameController.text;
+                await _updateNickname(newNickname);
                 setState(() {
-                  name = nameController.text;
+                  nickname = newNickname;
                 });
                 Navigator.of(context).pop();
               },
@@ -58,6 +75,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
         );
       },
     );
+  }
+
+    Future<void> _updateNickname(String newNickname) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userKey = userProvider.user?.userKey ?? 0;
+
+    final response = await http.put(
+      Uri.parse('${API.baseUrl}/api/update_nickname'),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'userKey': userKey,
+        'user_nickname': newNickname,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      var responseBody = jsonDecode(response.body);
+      if (responseBody['success']) {
+        userProvider.updateUserNickname(newNickname);
+        Fluttertoast.showToast(msg: '닉네임이 성공적으로 업데이트되었습니다.');
+      } else {
+        Fluttertoast.showToast(msg: '닉네임 업데이트 중 오류가 발생했습니다.');
+      }
+    } else {
+      Fluttertoast.showToast(msg: '서버 오류: 닉네임 업데이트 실패');
+    }
   }
 
   Future<void> _pickImage() async {
@@ -105,16 +150,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+
+    final userProvider = Provider.of<UserProvider>(context);
+
+    nickname = userProvider.user?.user_nickname ?? "-";
+    email = userProvider.user?.user_email ?? "-";
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: const Text('프로필 정보'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+        title: const Text('프로필 정보',
+          style: TextStyle(
+              color: Color.fromARGB(255, 48, 48, 48),
+              fontFamily: 'DM Sans',
+              fontWeight: FontWeight.w600),
         ),
+        iconTheme: IconThemeData(color: Color.fromARGB(255, 48, 48, 48))
       ),
       backgroundColor: Colors.white,
       body: LayoutBuilder(
@@ -153,9 +204,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  _buildProfileItem('이름', name, _showEditNameDialog),
+                  _buildProfileItem('닉네임', nickname, _showEditNameDialog),
+                  _buildProfileItem('아이디', id, null),
                   _buildProfileItem('이메일', email, null),
-                  _buildProfileItem('전화번호', phoneNumber, null),
+                  // _buildProfileItem('전화번호', phoneNumber, null),
                 ],
               ),
             ),

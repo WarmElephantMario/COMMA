@@ -10,4 +10,17 @@ class UserProvider with ChangeNotifier {
     _user = user;
     notifyListeners();
   }
+
+  void updateUserNickname(String newNickname) {
+    if (_user != null) {
+      _user = User(
+        _user!.userKey,
+        _user!.user_id,
+        _user!.user_email,
+        _user!.user_password,
+        newNickname,
+      );
+      notifyListeners();
+    }
+  }
 }

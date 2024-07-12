@@ -21,16 +21,13 @@ class _HelpPageState extends State<HelpPage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
+        iconTheme: IconThemeData(color: Color.fromARGB(255, 48, 48, 48)),
         title: Text(
           '도움말',
-          style: TextStyle(
-              color: Colors.black, fontSize: 24, fontWeight: FontWeight.bold),
+        style: TextStyle(
+          color: Color.fromARGB(255, 48, 48, 48),
+          fontFamily: 'DM Sans',
+          fontWeight: FontWeight.w600),
         ),
       ),
       body: Center(

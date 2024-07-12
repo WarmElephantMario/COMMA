@@ -4,8 +4,8 @@ import 'package:http/http.dart' as http;
 import 'components.dart';
 import '63record.dart';
 import 'package:provider/provider.dart';
-import 'model/user.dart';
 import 'model/user_provider.dart';
+import 'api/api.dart';
 
 class LectureStartPage extends StatefulWidget {
   final String fileName;
@@ -20,12 +20,10 @@ class LectureStartPage extends StatefulWidget {
 
 class _LectureStartPageState extends State<LectureStartPage> {
   int _selectedIndex = 2;
-  String _selectedFolder = '짱구';
+  String _selectedFolder = '폴더';
   String _noteName = '새로운 노트';
   List<Map<String, dynamic>> folderList = [];
-  List<Map<String, dynamic>> items = [
-    {'id': 1, 'file_name': '새로운 노트'},
-  ];
+  List<Map<String, dynamic>> items = [];
 
   @override
   void initState() {
@@ -39,84 +37,105 @@ class _LectureStartPageState extends State<LectureStartPage> {
     });
   }
 
-  void _selectFolder(String folder) {
-    setState(() {
-      _selectedFolder = folder;
-    });
-  }
-
   Future<void> fetchFolderList() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userId = userProvider.user?.user_id ?? '';
+    final userKey = userProvider.user?.userKey;
 
-    try {
-      final response = await http
-          .get(Uri.parse('http://localhost:3000/api/lecture-folders/$userId'));
-      if (response.statusCode == 200) {
-        final List<dynamic> folderData = json.decode(response.body);
-        setState(() {
-          folderList = folderData
-              .map((folder) => {
-                    'id': folder['id'],
-                    'folder_name': folder['folder_name'],
-                    'selected': false
-                  })
-              .toList();
-        });
-      } else {
-        throw Exception('Failed to load folders');
+    if (userKey != null) {
+      try {
+        final response = await http.get(
+          Uri.parse('${API.baseUrl}/api/lecture-folders?userKey=$userKey'),
+        );
+
+        if (response.statusCode == 200) {
+          final List<dynamic> folderData = json.decode(response.body);
+
+          setState(() {
+            folderList = folderData
+                .map((folder) => {
+                      'id': folder['id'],
+                      'folder_name': folder['folder_name'],
+                      'selected': false
+                    })
+                .toList();
+
+            var defaultFolder = folderList.firstWhere(
+                (folder) => folder['folder_name'] == '기본 폴더',
+                orElse: () => <String, dynamic>{});
+            if (defaultFolder.isNotEmpty) {
+              _selectFolder(defaultFolder['folder_name']);
+            }
+          });
+        } else {
+          throw Exception('Failed to load folders');
+        }
+      } catch (e) {
+        print('Folder list fetch failed: $e');
       }
-    } catch (e) {
-      print('폴더 목록 로드 실패: $e');
+    } else {
+      print('User Key is null, cannot fetch folders.');
     }
+  }
+
+  void _selectFolder(String folderName) {
+    setState(() {
+      _selectedFolder = folderName;
+    });
   }
 
   Future<void> fetchOtherFolders(String fileType, int currentFolderId) async {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userId = userProvider.user?.user_id ?? '';
+    try {
+      final uri = Uri.parse(
+          '${API.baseUrl}/api/getOtherFolders/$fileType/$currentFolderId');
+      final response = await http.get(uri);
 
-    final response = await http.get(Uri.parse(
-        'http://localhost:3000/api/getOtherFolders/$fileType/$currentFolderId?user_id=$userId'));
+      if (response.statusCode == 200) {
+        List<Map<String, dynamic>> fetchedFolders =
+            List<Map<String, dynamic>>.from(jsonDecode(response.body));
 
-    if (response.statusCode == 200) {
-      setState(() {
-        folderList = List<Map<String, dynamic>>.from(jsonDecode(response.body));
-        folderList.removeWhere((folder) => folder['id'] == currentFolderId);
-      });
-    } else {
-      throw Exception('Failed to load folders');
+        setState(() {
+          folderList = fetchedFolders;
+          folderList.removeWhere((folder) => folder['id'] == currentFolderId);
+        });
+      } else {
+        throw Exception(
+            'Failed to load folders with status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching other folders: $e');
+      rethrow;
     }
   }
 
-  Future<void> moveItem(
-      int fileId, int selectedFolderId, String fileType) async {
-    final response = await http.put(
-      Uri.parse('http://localhost:3000/api/$fileType-files/move/$fileId'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'folder_id': selectedFolderId}),
-    );
-
-    if (response.statusCode != 200) {
-      throw Exception('Failed to move file');
-    }
+  Future<void> renameItem(String newName) async {
+    setState(() {
+      _noteName = newName;
+    });
   }
 
-  Future<void> showQuickMenu(BuildContext context, int fileId, String fileType,
-      int currentFolderId) async {
-    setState(() {
-      folderList.clear();
-    });
+  int getFolderIdByName(String folderName) {
+    return folderList.firstWhere(
+        (folder) => folder['folder_name'] == folderName,
+        orElse: () => {'id': -1})['id'];
+  }
 
-    await fetchOtherFolders(fileType, currentFolderId);
+  void showQuickMenu(
+      BuildContext context,
+      Future<void> Function() fetchOtherFolders,
+      List<Map<String, dynamic>> folders,
+      Function(String) selectFolder) async {
+    print('Attempting to fetch other folders.');
+    await fetchOtherFolders();
+    print('Updating folders with selection state.');
+    var updatedFolders = folders.map((folder) {
+      bool isSelected = folder['folder_name'] == '기본 폴더';
+      return {
+        ...folder,
+        'selected': isSelected,
+      };
+    }).toList();
 
-    setState(() {
-      folderList = folderList.map((folder) {
-        return {
-          ...folder,
-          'selected': false,
-        };
-      }).toList();
-    });
+    print('Updated folders: $updatedFolders');
 
     showModalBottomSheet(
       context: context,
@@ -161,15 +180,12 @@ class _LectureStartPageState extends State<LectureStartPage> {
                       ),
                       TextButton(
                         onPressed: () async {
-                          final selectedFolder = folderList.firstWhere(
+                          final selectedFolder = updatedFolders.firstWhere(
                               (folder) => folder['selected'] == true,
-                              orElse: () => {
-                                    'id': -1,
-                                    'folder_name': '기본 폴더'
-                                  }); // 조건에 맞는 폴더가 없으면 기본값 반환
-                          final selectedFolderId = selectedFolder['id'];
-                          await moveItem(fileId, selectedFolderId, fileType);
-                          _selectFolder(selectedFolder['folder_name']);
+                              orElse: () => {});
+                          if (selectedFolder.isNotEmpty) {
+                            selectFolder(selectedFolder['folder_name']);
+                          }
                           Navigator.pop(context);
                         },
                         child: const Text(
@@ -186,7 +202,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
                   const SizedBox(height: 2),
                   const Center(
                     child: Text(
-                      '현재 위치 외 다른 폴더로 이동할 수 있어요.',
+                      '다른 폴더로 이동할 수 있어요.',
                       style: TextStyle(
                         color: Color(0xFF575757),
                         fontSize: 13,
@@ -199,7 +215,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
                   const SizedBox(height: 16),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.start,
-                    children: folderList.map((folder) {
+                    children: updatedFolders.map((folder) {
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 5),
                         child: Checkbox2(
@@ -207,11 +223,12 @@ class _LectureStartPageState extends State<LectureStartPage> {
                           isSelected: folder['selected'] ?? false,
                           onChanged: (bool isSelected) {
                             setState(() {
-                              for (var f in folderList) {
+                              for (var f in updatedFolders) {
                                 f['selected'] = false;
                               }
                               folder['selected'] = isSelected;
                             });
+                            print('Folder selected: ${folder['folder_name']}');
                           },
                         ),
                       );
@@ -226,27 +243,59 @@ class _LectureStartPageState extends State<LectureStartPage> {
     );
   }
 
-  Future<void> renameItem(int id, String newName) async {
-    final response = await http.put(
-      Uri.parse('http://localhost:3000/api/lecture-files/$id'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'file_name': newName}),
+  // 파일 이름 바꾸기 다이얼로그
+  void showRenameDialog2(
+    BuildContext context,
+    String currentName,
+    Future<void> Function(String) renameItem,
+    void Function(VoidCallback) setState,
+    String title,
+    String fieldName,
+  ) {
+    final TextEditingController textController = TextEditingController();
+    textController.text = currentName;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            title,
+            style: const TextStyle(
+              color: Color(0xFF545454),
+              fontSize: 14,
+              fontFamily: 'DM Sans',
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: TextField(
+            controller: textController,
+            decoration: const InputDecoration(hintText: "새 이름 입력"),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child:
+                  const Text('취소', style: TextStyle(color: Color(0xFFFFA17A))),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child:
+                  const Text('저장', style: TextStyle(color: Color(0xFF545454))),
+              onPressed: () async {
+                String newName = textController.text;
+                await renameItem(newName);
+                setState(() {
+                  _noteName = newName;
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
-
-    if (response.statusCode != 200) {
-      throw Exception('Failed to rename file');
-    }
-
-    setState(() {
-      _noteName = newName;
-    });
-  }
-
-  int getFolderIdByName(String folderName) {
-    return folderList.firstWhere(
-      (folder) => folder['folder_name'] == folderName,
-      orElse: () => {'id': -1}, // 조건에 맞는 폴더가 없을 때 기본값 반환
-    )['id'];
   }
 
   @override
@@ -318,8 +367,15 @@ class _LectureStartPageState extends State<LectureStartPage> {
             const SizedBox(height: 15),
             GestureDetector(
               onTap: () {
-                showQuickMenu(context, 10, 'lecture',
-                    18); // fileId, fileType, currentFolderId 적절히 수정
+                int currentFolderId =
+                    folderList.isNotEmpty ? folderList.first['id'] : 0;
+                // showQuickMenu 호출
+                showQuickMenu(
+                  context,
+                  () => fetchOtherFolders('lecture', currentFolderId),
+                  folderList,
+                  _selectFolder,
+                );
               },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -345,15 +401,14 @@ class _LectureStartPageState extends State<LectureStartPage> {
             const SizedBox(height: 10),
             GestureDetector(
               onTap: () {
-                showRenameDialog(
-                  context,
-                  0, // 인덱스 0으로 새로운 노트 항목을 선택
-                  items,
-                  renameItem,
-                  setState,
-                  '파일 이름 바꾸기',
-                  'file_name',
-                );
+                showRenameDialog2(
+                    context,
+                    _noteName,
+                    renameItem,
+                    setState,
+                    "파일 이름 바꾸기", // 다이얼로그 제목
+                    "file_name" // 변경할 항목 타입
+                    );
               },
               child: Row(
                 children: [
@@ -381,10 +436,6 @@ class _LectureStartPageState extends State<LectureStartPage> {
                 text: '강의실 입장하기',
                 onPressed: () {
                   int selectedFolderId = getFolderIdByName(_selectedFolder);
-                  if (selectedFolderId == -1) {
-                    print('Selected folder not found');
-                    return;
-                  }
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -403,6 +454,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
                 height: 50.0,
               ),
             ),
+            const SizedBox(height: 16),
           ],
         ),
       ),

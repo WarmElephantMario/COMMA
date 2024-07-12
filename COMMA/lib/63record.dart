@@ -4,6 +4,9 @@ import 'components.dart';
 import 'dart:convert';
 import '62lecture_start.dart';
 import 'package:intl/intl.dart';
+import 'model/user_provider.dart';
+import 'package:provider/provider.dart';
+import 'api/api.dart';
 
 enum RecordingState { initial, recording, recorded }
 
@@ -44,22 +47,30 @@ class _RecordPageState extends State<RecordPage> {
   }
 
   Future<void> _fetchCreatedAt() async {
-    var url = Uri.parse(
-        'http://localhost:3000/api/get-file-created-at?folderId=${widget.selectedFolderId}&fileName=${widget.noteName}');
-    try {
-      var response = await http.get(url);
-      if (response.statusCode == 200) {
-        var jsonResponse = jsonDecode(response.body);
-        setState(() {
-          _createdAt = jsonResponse['createdAt'];
-        });
-      } else {
-        print('Failed to fetch created_at: ${response.statusCode}');
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userKey = userProvider.user?.userKey;
+
+    if (userKey != null) {
+      var url = Uri.parse(
+          '${API.baseUrl}/api/get-file-created-at?folderId=${widget.selectedFolderId}&fileName=${widget.noteName}');
+      try {
+        var response = await http.get(url);
+        if (response.statusCode == 200) {
+          var jsonResponse = jsonDecode(response.body);
+          setState(() {
+            _createdAt = jsonResponse['createdAt'];
+          });
+        } else {
+          print('Failed to fetch created_at: ${response.statusCode}');
+        }
+      } catch (e) {
+        print('Error during HTTP request: $e');
       }
-    } catch (e) {
-      print('Error during HTTP request: $e');
+    } else {
+      print('User ID is null, cannot fetch created_at.');
     }
   }
+
 
   String _formatDate(dynamic dateStr) {
     DateTime dateTime = DateTime.parse(dateStr);
@@ -72,60 +83,72 @@ class _RecordPageState extends State<RecordPage> {
     });
   }
 
-  void _stopRecording() {
+  void _stopRecording() async {
     setState(() {
       _recordingState = RecordingState.recorded;
     });
+    await _fetchCreatedAt(); // 녹음 종료 후 created_at 값을 불러옵니다.
   }
 
   Future<void> _startRecording() async {
-    var url = 'http://localhost:3000/api/lecture-files';
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userKey = userProvider.user?.userKey;
 
-    var body = {
-      'folder_id': widget.selectedFolderId, // 선택한 폴더의 ID 사용
-      'file_name': widget.noteName,
-      'file_url': widget.fileUrl, // 다운로드 URL 사용
-      'lecture_name': widget.lectureName, // 강의자료 이름 추가
-    };
+    if (userKey != null) {
+      var url = '${API.baseUrl}/api/lecture-files';
 
-    // 확인용 로그 출력
-    print('Sending HTTP POST request with data:');
-    print('selectedFolderId: ${body['folder_id']}');
-    print('noteName: ${body['file_name']}');
-    print('fileUrl: ${body['file_url']}');
-    print('lectureName: ${body['lecture_name']}');
+      var body = {
+        'folder_id': widget.selectedFolderId, // 선택한 폴더의 ID 사용
+        'file_name': widget.noteName,
+        'file_url': widget.fileUrl, // 다운로드 URL 사용
+        'lecture_name': widget.lectureName, // 강의자료 이름 추가
+        'userKey': userKey,
+      };
 
-    try {
-      var response = await http.post(
-        Uri.parse(url),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(body), // Map을 JSON 문자열로 변환하여 전송
-      );
+      // 확인용 로그 출력
+      print('Sending HTTP POST request with data:');
+      print('selectedFolderId: ${body['folder_id']}');
+      print('noteName: ${body['file_name']}');
+      print('fileUrl: ${body['file_url']}');
+      print('lectureName: ${body['lecture_name']}');
+      print('userKey: ${body['userKey']}');
 
-      // HTTP 응답 확인을 위한 로그
-      print('HTTP Response Code: ${response.statusCode}');
-      print('HTTP Response Body: ${response.body}');
+      try {
+        var response = await http.post(
+          Uri.parse(url),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(body), // Map을 JSON 문자열로 변환하여 전송
+        );
 
-      if (response.statusCode == 200) {
-        // 성공적으로 추가된 경우 처리
-        print('File added successfully');
-        // TODO: 추가적으로 처리할 로직 추가
-      } else {
-        // 실패한 경우 처리
-        print('Failed to add file: ${response.statusCode}');
+        // HTTP 응답 확인을 위한 로그
+        print('HTTP Response Code: ${response.statusCode}');
+        print('HTTP Response Body: ${response.body}');
+
+        if (response.statusCode == 200) {
+          // 성공적으로 추가된 경우 처리
+          print('File added successfully');
+          // TODO: 추가적으로 처리할 로직 추가
+        } else {
+          // 실패한 경우 처리
+          print('Failed to add file: ${response.statusCode}');
+          // TODO: 실패 처리 로직 추가
+        }
+      } catch (e) {
+        // HTTP 요청 실패 시 처리
+        print('Error during HTTP request: $e');
         // TODO: 실패 처리 로직 추가
       }
-    } catch (e) {
-      // HTTP 요청 실패 시 처리
-      print('Error during HTTP request: $e');
-      // TODO: 실패 처리 로직 추가
+    } else {
+      print('User ID is null, cannot start recording.');
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, 
+      backgroundColor: Colors.white,
       appBar: AppBar(toolbarHeight: 0),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -142,7 +165,7 @@ class _RecordPageState extends State<RecordPage> {
                         context,
                         "정말 녹음을 종료하시겠습니까?", // 다이얼로그 제목
                         "녹음을 종료하면 다시 시작할 수 없습니다.", // 다이얼로그 내용
-                        () {
+                            () {
                           _stopRecording(); // 녹음을 종료상태
                         },
                       );
@@ -238,7 +261,7 @@ class _RecordPageState extends State<RecordPage> {
                             context,
                             "정말 녹음을 종료하시겠습니까?", // 다이얼로그 제목
                             "녹음을 종료하면 다시 시작할 수 없습니다.", // 다이얼로그 내용
-                            () {
+                                () {
                               _stopRecording(); // 녹음을 종료하는 함수 호출
                             },
                           );

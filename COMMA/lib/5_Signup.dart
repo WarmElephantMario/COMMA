@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_plugin/api/api.dart';
@@ -40,26 +41,43 @@ class SignUpPage extends StatefulWidget {
 class _SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
 
+  final TextEditingController idController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  Future<bool> checkUserPhone() async {
+
+  String generateRandomNickname() {
+    const adjectives = ["짱멋진", "성실한", "용감한", "힘찬", "다정한", "밝은", "행복한", "씩씩한", "진지한", "유쾌한", "즐거운", "똑똑한",
+                        "솔직한", "온화한", "강한", "상냥한", "따뜻한", "열정적인", "활기찬", "근면한", "눈부신", "친절한", "충실한", "차분한", "훈훈한", "강인한",
+                        "열정가득", "행복가득", "참신한", "당당한", "맑은", "희망찬", "강력한", "부지런한" ,"긍정적인", "명랑한", "순수한"];
+    const nouns = ["짜빠구리", "고등어", "눈사람", "사자", "호랑이", "독수리", "코끼리", "팬더", "고래", "돌고래", "늑대", "독수리", "코알라",
+                    "부엉이", "고양이", "강아지", "햄스터", "다람쥐", "원숭이", "앵무새", "바나나", "파인애플", "복숭아", "오렌지", "토마토", "브로콜리",
+                  "고구마", "시금치", "콩나물", "해바라기", "코스모스", "민들레", "진달래"];
+    final random = Random();
+
+    final adjective = adjectives[random.nextInt(adjectives.length)];
+    final noun = nouns[random.nextInt(nouns.length)];
+
+    return "$adjective $noun";
+  }
+
+
+  Future<bool> checkUserEmail() async {
     try {
       var response = await http.post(
-        Uri.parse('${API.baseUrl}/api/validate_phone'),
+        Uri.parse('${API.baseUrl}/api/validate_email'),
         headers: {
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({'user_phone': phoneController.text.trim()}),
+        body: jsonEncode({'user_email': emailController.text.trim()}),
       );
 
       print(response.statusCode);
       if (response.statusCode == 200) {
         var responseBody = jsonDecode(response.body);
 
-        if (responseBody['existPhone'] == true) {
-          Fluttertoast.showToast(msg: "This phone number is already in use.");
+        if (responseBody['existEmail'] == true) {
+          Fluttertoast.showToast(msg: "This Email Address is already in use.");
           return false;
         } else {
           print('validation success');
@@ -76,11 +94,14 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   Future<void> saveInfo() async {
+    String randomNickname = generateRandomNickname();
+
     User userModel = User(
       1,
+      idController.text.trim(),
       emailController.text.trim(),
-      phoneController.text.trim(),
       passwordController.text.trim(),
+      randomNickname,
     );
 
     try {
@@ -92,29 +113,37 @@ class _SignUpPageState extends State<SignUpPage> {
         body: jsonEncode(userModel.toJson()),
       );
 
+      print('Request body: ${jsonEncode(userModel.toJson())}'); // 요청 데이터 출력
+
+      print('Response status: ${res.statusCode}');
+      print('Response body: ${res.body}');
+
       if (res.statusCode == 200) {
         var resSignup = jsonDecode(res.body);
         if (resSignup['success'] == true) {
           Fluttertoast.showToast(msg: 'Signup successfully');
           setState(() {
+            idController.clear();
             emailController.clear();
             passwordController.clear();
-            phoneController.clear();
           });
         } else {
           Fluttertoast.showToast(msg: 'Error occurred. Please try again.');
         }
+      } else {
+        Fluttertoast.showToast(msg: 'Error: ${res.statusCode}');
       }
     } catch (e) {
-      print(e.toString());
-      Fluttertoast.showToast(msg: e.toString());
+      print('Error: ${e.toString()}');
+      Fluttertoast.showToast(msg: 'Error: ${e.toString()}');
     }
   }
 
+
   @override
   void dispose() {
+    idController.dispose();
     emailController.dispose();
-    phoneController.dispose();
     passwordController.dispose();
     super.dispose();
   }
@@ -160,9 +189,9 @@ class _SignUpPageState extends State<SignUpPage> {
                 child: Column(
                   children: [
                     InputButton(
-                      label: 'Email address',
-                      keyboardType: TextInputType.emailAddress,
-                      controller: emailController,
+                      label: 'Your ID',
+                      keyboardType: TextInputType.name,
+                      controller: idController,
                     ),
                     SizedBox(height: size.height * 0.035),
                     InputButton(
@@ -172,9 +201,9 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     SizedBox(height: size.height * 0.035),
                     InputButton(
-                      label: 'Phone number',
-                      keyboardType: TextInputType.phone,
-                      controller: phoneController,
+                      label: 'Email address',
+                      keyboardType: TextInputType.emailAddress,
+                      controller: emailController,
                     ),
                   ],
                 ),
@@ -199,8 +228,8 @@ class _SignUpPageState extends State<SignUpPage> {
                       GestureDetector(
                         onTap: () async {
                           if (_formKey.currentState!.validate()) {
-                            bool isPhoneValid = await checkUserPhone();
-                            if (isPhoneValid) {
+                            bool isEmailValid = await checkUserEmail();
+                            if (isEmailValid) {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
