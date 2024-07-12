@@ -78,7 +78,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-    Future<void> _updateNickname(String newNickname) async {
+Future<void> _updateNickname(String newNickname) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userKey = userProvider.user?.userKey ?? 0;
 
@@ -93,6 +93,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }),
     );
 
+    print('Request body: ${jsonEncode({
+        'userKey': userKey,
+        'user_nickname': newNickname,
+      })}');
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
+
     if (response.statusCode == 200) {
       var responseBody = jsonDecode(response.body);
       if (responseBody['success']) {
@@ -104,7 +111,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } else {
       Fluttertoast.showToast(msg: '서버 오류: 닉네임 업데이트 실패');
     }
-  }
+}
+
 
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
