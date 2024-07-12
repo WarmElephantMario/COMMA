@@ -84,7 +84,8 @@ class Information extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => Verification_write_screen()),
+                        builder: (context) =>
+                            const Verification_write_screen()),
                   );
                 },
               ),

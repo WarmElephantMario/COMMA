@@ -99,7 +99,14 @@ class _AllFilesPageState extends State<AllFilesPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(widget.fileType == 'lecture' ? '전체 강의 파일' : '전체 콜론 파일'),
+        iconTheme: const IconThemeData(color: Color.fromARGB(255, 48, 48, 48)),
+        title: Text(
+          widget.fileType == 'lecture' ? '전체 강의 파일' : '전체 콜론 파일',
+          style: const TextStyle(
+              color: Color.fromARGB(255, 48, 48, 48),
+              fontFamily: 'DM Sans',
+              fontWeight: FontWeight.w600),
+        ),
         backgroundColor: Colors.white,
       ),
       body: files.isEmpty
