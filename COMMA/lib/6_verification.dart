@@ -2,22 +2,17 @@ import 'package:flutter/material.dart';
 import '7_verification2.dart';
 import 'components.dart';
 
-// class FigmaToCodeApp extends StatelessWidget {
-//   const FigmaToCodeApp({super.key});
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       theme: ThemeData.dark().copyWith(
-//         scaffoldBackgroundColor: const Color.fromARGB(255, 18, 32, 47),
-//       ),
-//       home: Verification_screen(),
-//     );
-//   }
-// }
-
 class Verification_screen extends StatelessWidget {
-  const Verification_screen({super.key});
+  final String userEmail; // 추가된 부분
+  final String userId; // 추가된 부분
+  final String userPassword; // 추가된 부분
+
+  const Verification_screen({
+    super.key,
+    required this.userEmail, // 추가된 부분
+    required this.userId, // 추가된 부분
+    required this.userPassword, // 추가된 부분
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -37,8 +32,12 @@ class Verification_screen extends StatelessWidget {
       ),
       body: ListView(
         padding: const EdgeInsets.only(top: 0),
-        children: const [
-          Information(),
+        children: [
+          Information(
+            userEmail: userEmail, // 추가된 부분
+            userId: userId, // 추가된 부분
+            userPassword: userPassword, // 추가된 부분
+          ),
         ],
       ),
     );
@@ -46,7 +45,16 @@ class Verification_screen extends StatelessWidget {
 }
 
 class Information extends StatelessWidget {
-  const Information({super.key});
+  final String userEmail; // 추가된 부분
+  final String userId; // 추가된 부분
+  final String userPassword; // 추가된 부분
+
+  const Information({
+    super.key,
+    required this.userEmail, // 추가된 부분
+    required this.userId, // 추가된 부분
+    required this.userPassword, // 추가된 부분
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -84,8 +92,12 @@ class Information extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) =>
-                            const Verification_write_screen()),
+                      builder: (context) => Verification_write_screen(
+                        userEmail: userEmail, // 추가된 부분
+                        userId: userId, // 추가된 부분
+                        userPassword: userPassword, // 추가된 부분
+                      ),
+                    ),
                   );
                 },
               ),

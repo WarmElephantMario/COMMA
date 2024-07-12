@@ -146,11 +146,39 @@ class _SignUpPageState extends State<SignUpPage> {
           Fluttertoast.showToast(msg: "This Email Address is already in use.");
           return false;
         } else {
+
           print('validation success');
-          saveInfo();
-          return true;
+
+          //saveInfo();
+          
+          // 이메일 인증번호 전송 API 호출
+          var emailResponse = await http.post(
+            Uri.parse('${API.baseUrl}/api/send_verification_code'),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({'user_email': emailController.text.trim()}),
+          );
+
+          print(emailResponse.statusCode);
+          if (emailResponse.statusCode == 200) {        
+            // 인증번호 전송 완료 화면으로 이동
+            // Navigator.push(
+            //   context,
+            //   MaterialPageRoute(builder: (context) => Verification_screen(
+            //       userEmail: emailController.text.trim(),
+            //       userId: idController.text.trim(),
+            //       userPassword: passwordController.text.trim(),
+            //   )),
+            // );
+            return true;
+          } else {
+            Fluttertoast.showToast(msg: '인증번호 전송에 실패했습니다.');
+            return false;
+          }
         }
       }
+
     } catch (e) {
       print(e.toString());
       Fluttertoast.showToast(msg: e.toString());
@@ -297,9 +325,11 @@ class _SignUpPageState extends State<SignUpPage> {
                             if (isEmailValid) {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const Verification_screen()),
+                                MaterialPageRoute(builder: (context) => Verification_screen(
+                                    userEmail: emailController.text.trim(),
+                                    userId: idController.text.trim(),
+                                    userPassword: passwordController.text.trim(),
+                                )),
                               );
                             } else {
                               print("인증 실패함");
