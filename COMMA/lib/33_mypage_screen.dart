@@ -3,7 +3,12 @@ import 'components.dart';
 import '34_profile_screen.dart';
 import 'mypage/41_confirm_password_page.dart';
 import 'mypage/42_help_page.dart';
-
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'model/user_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'api/api.dart';
 
 // MyPageScreen 클래스 정의
 class MyPageScreen extends StatefulWidget {
@@ -37,6 +42,33 @@ class _MyPageScreenState extends State<MyPageScreen> {
         ),
       ),
     );
+  }
+
+    Future<void> deleteUser(BuildContext context) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userKey = userProvider.user?.userKey;
+    
+    final response = await http.post(Uri.parse('${API.baseUrl}/api/delete_user'),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({'userKey': userKey}),
+    );
+
+    print(response.statusCode);
+    print('Response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final responseBody = jsonDecode(response.body);
+      if (responseBody['success']) {
+        // Navigator.of(context).pushReplacementNamed('/'); // 회원 탈퇴 후 첫 화면으로 이동
+        Fluttertoast.showToast(msg: '회원 탈퇴가 완료되었습니다.');
+      } else {
+        Fluttertoast.showToast(msg: '회원 탈퇴 중 오류가 발생했습니다.');
+      }
+    } else {
+      Fluttertoast.showToast(msg: '서버 오류: 회원 탈퇴 실패');
+    }
   }
 
   @override
@@ -85,9 +117,9 @@ class _MyPageScreenState extends State<MyPageScreen> {
               context,
               '회원탈퇴',
               '회원탈퇴 하시겠어요?',
-              
-              () {
+              () async {
                 // TODO: 회원탈퇴처리 후 처음시작화면으로 이동
+                await deleteUser(context);
               },
             );
           }),
