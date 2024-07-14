@@ -50,6 +50,9 @@ dependencies:
   firebase_storage: ^11.0.0
   cloud_firestore: ^4.7.0
   intl: ^0.17.0
+  shared_preferences: ^2.2.3
+  dart_openai: ^3.0.0
+  envied: ^0.5.4+1
 
 dev_dependencies:
   flutter_test:
@@ -59,7 +62,6 @@ dev_dependencies:
   mysql1: ^0.19.2
   http: ^0.13.3
   fluttertoast: ^8.0.9
-  shared_preferences: ^2.0.15
 
 
   # The "flutter_lints" package below contains a set of recommended lints to
@@ -68,6 +70,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^3.0.0
+  envied_generator: ^0.5.4+1
+  build_runner: ^2.4.11
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
