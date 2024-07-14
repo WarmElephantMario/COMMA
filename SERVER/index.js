@@ -12,18 +12,21 @@ const port = 3000;
 app.use(bodyParser.json());
 app.use(cors());
 
-const db = mysql.createConnection({
+const db = mysql.createPool({
     host: 'database-comma.cx4q2cgwkin7.us-east-2.rds.amazonaws.com',
     user: 'comma',
     password: 'comma0812!',
     database: 'comma'
 });
 
-db.connect((err) => {
+// 확인용 연결 테스트 (쿼리를 사용하여 연결 확인)
+db.getConnection((err, connection) => {
     if (err) {
-        throw err;
+        console.error('Error connecting to MySQL:', err);
+        return;
     }
     console.log('MySQL Connected...');
+    connection.release(); // 연결 해제
 });
 
 // 사용자 ID 기반으로 강의 폴더 목록 가져오기

@@ -43,6 +43,8 @@ class _SigninPageState extends State<SigninPage> {
         }),
       );
 
+      print(res.statusCode);
+      print(res.body);
       if (res.statusCode == 200) {
         var resLogin = jsonDecode(res.body);
         print(resLogin);
@@ -157,12 +159,9 @@ class _SigninPageState extends State<SigninPage> {
                     padding: EdgeInsets.symmetric(horizontal: size.width * 0.05),
                     child: GestureDetector(
                       onTap: () async {
-                        print("im here");
                         if (_formKey.currentState!.validate()) {
                           User? userInfo = await userLogin(context);
-                          print("im here2");
                           if (userInfo != null) {
-                            print("im here3");
                             Navigator.push(
                               context,
                               MaterialPageRoute(
