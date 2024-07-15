@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_plugin/model/user.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'components.dart';
@@ -63,7 +64,8 @@ class _LectureStartPageState extends State<LectureStartPage> {
                 .map((folder) => {
                       'id': folder['id'],
                       'folder_name': folder['folder_name'],
-                      'selected': false
+                      'selected': false,
+                  
                     })
                 .toList();
 
@@ -91,10 +93,14 @@ class _LectureStartPageState extends State<LectureStartPage> {
     });
   }
 
-  Future<void> fetchOtherFolders(String fileType, int currentFolderId) async {
+ Future<void> fetchOtherFolders(String fileType, int currentFolderId) async {
+  final userProvider = Provider.of<UserProvider>(context, listen: false);
+  final userKey = userProvider.user?.userKey;
+
+  if (userKey != null) {
     try {
       final uri = Uri.parse(
-          '${API.baseUrl}/api/getOtherFolders/$fileType/$currentFolderId');
+          '${API.baseUrl}/api/getOtherFolders/$fileType/$currentFolderId?userKey=$userKey');
       final response = await http.get(uri);
 
       if (response.statusCode == 200) {
@@ -102,6 +108,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
             List<Map<String, dynamic>>.from(jsonDecode(response.body));
 
         setState(() {
+          // 기존의 폴더 리스트를 업데이트하는 대신, fetchedFolders를 사용합니다.
           folderList = fetchedFolders;
           folderList.removeWhere((folder) => folder['id'] == currentFolderId);
         });
@@ -113,7 +120,10 @@ class _LectureStartPageState extends State<LectureStartPage> {
       print('Error fetching other folders: $e');
       rethrow;
     }
+  } else {
+    print('User Key is null, cannot fetch folders.');
   }
+}
 
   Future<void> renameItem(String newName) async {
     setState(() {
