@@ -11,8 +11,12 @@ class LectureStartPage extends StatefulWidget {
   final String fileName;
   final String fileURL;
 
-  const LectureStartPage(
-      {super.key, required this.fileName, required this.fileURL});
+
+  const LectureStartPage({
+    Key? key,
+    required this.fileName,
+    required this.fileURL,
+  }) : super(key: key);
 
   @override
   _LectureStartPageState createState() => _LectureStartPageState();
