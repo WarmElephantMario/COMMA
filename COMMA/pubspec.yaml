@@ -40,6 +40,9 @@ dependencies:
   provider: ^6.1.2
   flutter_pdfview: ^1.0.4
   pdfx: ^2.6.0
+  speech_to_text: ^6.6.0
+  highlight_text: ^1.7.0
+  avatar_glow: ^3.0.1
 
 
   # The following adds the Cupertino Icons font to your application.
