@@ -717,6 +717,38 @@ app.get('/api/get-folder-name', (req, res) => {
     });
 });
 
+// 대체 텍스트 URL 가져오기
+app.get('/api/get-alternative-text-url', (req, res) => {
+    const folderId = req.query.folderId;
+    const fileName = req.query.fileName;
+
+    const lectureSql = 'SELECT alternative_text_url FROM LectureFiles WHERE folder_id = ? AND file_name = ?';
+    const colonSql = 'SELECT alternative_text_url FROM ColonFiles WHERE folder_id = ? AND file_name = ?';
+
+    db.query(lectureSql, [folderId, fileName], (err, lectureResult) => {
+        if (err) {
+            return res.status(500).json({ error: 'Failed to fetch alternative text URL' });
+        }
+
+        if (lectureResult.length > 0 && lectureResult[0].alternative_text_url) {
+            return res.status(200).json({ alternative_text_url: lectureResult[0].alternative_text_url });
+        }
+
+        db.query(colonSql, [folderId, fileName], (err, colonResult) => {
+            if (err) {
+                return res.status(500).json({ error: 'Failed to fetch alternative text URL' });
+            }
+
+            if (colonResult.length > 0 && colonResult[0].alternative_text_url) {
+                return res.status(200).json({ alternative_text_url: colonResult[0].alternative_text_url });
+            } else {
+                return res.status(404).json({ alternative_text_url: null });
+            }
+        });
+    });
+});
+
+
 
 app.listen(port, () => {
     console.log(`Server started on port ${port}`);
