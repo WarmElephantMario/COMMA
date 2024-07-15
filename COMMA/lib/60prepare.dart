@@ -6,7 +6,7 @@ import 'dart:io';
 import 'components.dart';
 import 'model/user_provider.dart';
 import 'package:provider/provider.dart';
-import '62_lecture_start.dart';
+import '62lecture_start.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_image/flutter_image.dart';
@@ -19,7 +19,7 @@ import 'package:dart_openai/dart_openai.dart';
 import 'dart:ui' as ui;
 
 bool isAlternativeTextEnabled = false;
-bool isLiveSubtitleEnabled = false;
+bool isRealTimeSttEnabled = false;
 
 class LearningPreparation extends StatefulWidget {
   const LearningPreparation({super.key});
@@ -187,7 +187,7 @@ Future<List<Uint8List>> convertPdfToImages(Uint8List pdfBytes) async {
         }),
       );
 
-      var responseBody = response.body;
+      var alternativeText = response.body;
 
   if (response.statusCode == 200) {
       var responseBody = utf8.decode(response.bodyBytes);
@@ -265,11 +265,11 @@ Future<List<String>> handlePdfUpload(Uint8List pdfBytes, int userKey) async {
           ),
           CustomCheckbox(
             label: '실시간 자막 생성',
-            isSelected: isLiveSubtitleEnabled,
+            isSelected: isRealTimeSttEnabled,
             onChanged: (bool value) {
-              setState((){
-                  isLiveSubtitleEnabled = value;
-                });
+              setState(() {
+                isRealTimeSttEnabled = value;
+              });
             },
           ),
           const SizedBox(height: 20),
@@ -284,6 +284,7 @@ Future<List<String>> handlePdfUpload(Uint8List pdfBytes, int userKey) async {
                       print("Starting learning with file: $_selectedFileName");
                       print("실시간 자막 선택 여부: $isLiveSubtitleEnabled");
                       print("대체텍스트 선택 여부: $isAlternativeTextEnabled");
+                      print("실시간자막 선택 여부: $isRealTimeSttEnabled");
                       if (_selectedFileName != null && _downloadURL != null && _isMaterialEmbedded == true) {
                           showLearningDialog(context, _selectedFileName!, _downloadURL!, _progressNotifier); // ValueNotifier 전달
                       try {
@@ -298,10 +299,10 @@ Future<List<String>> handlePdfUpload(Uint8List pdfBytes, int userKey) async {
                                       Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                              builder: (context) => LectureStartPage2(
+                                              builder: (context) => LectureStartPage(
                                                   fileName: _selectedFileName!,
                                                   fileURL: _downloadURL!,
-                                                  response: response,
+                                                 
                                               ),
                                           ),
                                       );
@@ -316,10 +317,10 @@ Future<List<String>> handlePdfUpload(Uint8List pdfBytes, int userKey) async {
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => LectureStartPage2(
+                                          builder: (context) => LectureStartPage(
                                               fileName: _selectedFileName!,
                                               fileURL: _downloadURL!,
-                                              response: response,
+                                              
                                           ),
                                       ),
                                   );
