@@ -1,5 +1,6 @@
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_plugin/60prepare.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
@@ -44,6 +45,9 @@ class _RecordPageState extends State<RecordPage> {
   bool _isPDF = false;
   PdfController? _pdfController;
   Uint8List? _fileBytes;
+  int _currentPage = 1;
+  Set<int> _blurredPages = {};
+  Map<int, String> pageTexts = {};
 
   late stt.SpeechToText _speech;
   bool _isListening = false;
@@ -63,6 +67,51 @@ class _RecordPageState extends State<RecordPage> {
       _insertInitialData();
     }
     _checkFileType();
+    _loadPageTexts(); // 대체 텍스트 URL 로드
+  }
+
+  Future<void> _loadPageTexts() async {
+  try {
+    final response = await http.get(Uri.parse(
+        '${API.baseUrl}/api/get-alternative-text-url?folderId=${widget.selectedFolderId}&fileName=${widget.noteName}'));
+    if (response.statusCode == 200) {
+      print('Response body: ${response.body}');
+      final fileData = jsonDecode(response.body);
+      final alternativeTextUrl = fileData['alternative_text_url'];
+      if (alternativeTextUrl != null) {
+        final textResponse = await http.get(Uri.parse(alternativeTextUrl));
+        if (textResponse.statusCode == 200) {
+          //print('Text response body: ${textResponse.body}');
+          // UTF-8 인코딩으로 텍스트 읽기
+          final textLines = utf8.decode(textResponse.bodyBytes).split('\n');
+          setState(() {
+            pageTexts = {
+              for (int i = 0; i < textLines.length; i++) i + 1: textLines[i]
+            };
+          });
+        } else {
+          print('Failed to fetch text file: ${textResponse.statusCode}');
+        }
+      } else {
+        print('Alternative text URL is null');
+      }
+    } else {
+      print('Failed to fetch alternative text URL: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Error occurred: $e');
+  }
+}
+
+
+  void _toggleBlur(int page) {
+    setState(() {
+      if (_blurredPages.contains(page)) {
+        _blurredPages.remove(page);
+      } else {
+        _blurredPages.add(page);
+      }
+    });
   }
 
   void _checkFileType() {
@@ -77,6 +126,7 @@ class _RecordPageState extends State<RecordPage> {
         fileName.endsWith('.jpeg')) {
       setState(() {
         _isPDF = false;
+        _loadImageFile(widget.fileUrl);
       });
     } else {
       setState(() {
@@ -86,7 +136,7 @@ class _RecordPageState extends State<RecordPage> {
   }
 
   void _loadPdfFile(String url) async {
-    final response = await http.get(Uri.parse(url));
+    final response = await http.get(Uri.parse(widget.fileUrl));
     if (response.statusCode == 200) {
       setState(() {
         _fileBytes = response.bodyBytes;
@@ -96,6 +146,17 @@ class _RecordPageState extends State<RecordPage> {
       });
     } else {
       print('Failed to load PDF file: ${response.statusCode}');
+    }
+  }
+
+  void _loadImageFile(String url) async {
+    final response = await http.get(Uri.parse(widget.fileUrl));
+    if (response.statusCode == 200) {
+      setState(() {
+        _fileBytes = response.bodyBytes;
+      });
+    } else {
+      print('Failed to load image file: ${response.statusCode}');
     }
   }
 
@@ -170,49 +231,21 @@ class _RecordPageState extends State<RecordPage> {
     });
   }
 
+  Future<void> _startRecording() async {
+    setState(() {
+      _recordingState = RecordingState.recording;
+    });
+
+    // _listen(); // 녹음이 시작될 때 리스닝 시작
+  }
+
   void _stopRecording() async {
     setState(() {
       _recordingState = RecordingState.recorded;
       _isListening = false;
     });
-    _speech.stop(); // Stop listening when recording stops
+    _speech.stop(); // 녹음이 중지될 때 리스닝 중지
     await _fetchCreatedAt();
-  }
-
-  Future<void> _startRecording() async {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userKey = userProvider.user?.userKey;
-
-    if (userKey != null) {
-      var url = '${API.baseUrl}/api/lecture-files';
-
-      var body = {
-        'folder_id': widget.selectedFolderId,
-        'file_name': widget.noteName,
-        'file_url': widget.fileUrl,
-        'lecture_name': widget.lectureName,
-        'userKey': userKey,
-      };
-
-      try {
-        var response = await http.post(
-          Uri.parse(url),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode(body),
-        );
-
-        if (response.statusCode == 200) {
-          print('File added successfully');
-        } else {
-          print('Failed to add file: ${response.statusCode}');
-        }
-      } catch (e) {
-        print('Error during HTTP request: $e');
-      }
-    } else {
-      print('User ID is null, cannot start recording.');
-    }
-    _listen(); // Start listening when recording starts
   }
 
   Future<bool> _checkColonFileExists(
@@ -260,7 +293,7 @@ class _RecordPageState extends State<RecordPage> {
         _speech.listen(
           onResult: (val) => setState(() {
             _recognizedText =
-                val.recognizedWords; // Update the text without appending
+                val.recognizedWords; // 텍스트 업데이트 (추가하지 않음)
             if (val.hasConfidenceRating && val.confidence > 0) {
               _confidence = val.confidence;
             }
@@ -304,7 +337,7 @@ class _RecordPageState extends State<RecordPage> {
                           MaterialPageRoute(
                               builder: (context) => LectureStartPage(
                                   fileName: widget.noteName,
-                                  fileURL: widget.fileUrl)),
+                                  fileURL: widget.fileUrl,)),
                         );
                       }
                     },
@@ -351,6 +384,7 @@ class _RecordPageState extends State<RecordPage> {
                   fontFamily: 'DM Sans',
                 ),
               ),
+              // 녹음 종료 후 시간 표시
               if (_recordingState == RecordingState.recorded &&
                   _createdAt != null)
                 Column(
@@ -374,10 +408,8 @@ class _RecordPageState extends State<RecordPage> {
                     ClickButton(
                       text: '녹음',
                       onPressed: () {
-                        setState(() {
-                          _recordingState = RecordingState.recording;
-                        });
                         _startRecording();
+                        _listen();
                       },
                       width: MediaQuery.of(context).size.width * 0.25,
                       height: 40.0,
@@ -423,7 +455,7 @@ class _RecordPageState extends State<RecordPage> {
                               ],
                             ),
                           ],
-                        ),
+                        )
                       ],
                     ),
                   if (_recordingState == RecordingState.recorded)
@@ -462,7 +494,50 @@ class _RecordPageState extends State<RecordPage> {
                 ],
               ),
               const SizedBox(height: 20),
-              if (_recordingState == RecordingState.recording)
+              if (isAlternativeTextEnabled)
+                GestureDetector(
+                  onTap: () {
+                    _toggleBlur(_currentPage);
+                  },
+                  child: Stack(
+                    children: [
+                      if (_isPDF)
+                        SizedBox(
+                          height: 600,
+                          child: PdfView(
+                            controller: _pdfController!,
+                            onPageChanged: (page) {
+                              setState(() {
+                                _currentPage = page;
+                              });
+                            },
+                          ),
+                        ),
+                      if (!_isPDF && _fileBytes != null)
+                        Image.memory(_fileBytes!),
+                      if (_blurredPages.contains(_currentPage))
+                        Container(
+                          height: 600,
+                          color: Colors.black.withOpacity(0.5),
+                          child: Center(
+                            child: Text(
+                              pageTexts.isNotEmpty
+                                  ? pageTexts[_currentPage] ??
+                                      '페이지 $_currentPage의 텍스트가 없습니다.'
+                                  : '텍스트가 없습니다.',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              const SizedBox(height: 20), // 녹음 상태와 관계없이 항상 표시
+              if (_recordingState == RecordingState.recording && isRealTimeSttEnabled == true)
                 Column(
                   children: [
                     const SizedBox(height: 10),
@@ -477,7 +552,7 @@ class _RecordPageState extends State<RecordPage> {
                     const SizedBox(height: 20),
                   ],
                 ),
-              if (_recordingState == RecordingState.recorded)
+                if (_recordingState == RecordingState.recorded && isRealTimeSttEnabled == true)
                 Column(
                   children: [
                     const SizedBox(height: 10),
@@ -492,9 +567,6 @@ class _RecordPageState extends State<RecordPage> {
                     const SizedBox(height: 20),
                   ],
                 ),
-              const SizedBox(
-                  height:
-                      20), // Add some space at the bottom to prevent overflow
             ],
           ),
         ),
