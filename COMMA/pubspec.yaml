@@ -43,6 +43,10 @@ dependencies:
   speech_to_text: ^6.6.0
   highlight_text: ^1.7.0
   avatar_glow: ^3.0.1
+  flutter_image: ^4.1.11
+  pdf: ^3.3.0
+  pdf_render: ^1.4.10
+  
 
 
   # The following adds the Cupertino Icons font to your application.
