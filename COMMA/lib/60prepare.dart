@@ -17,6 +17,10 @@ import 'package:pdf_render/pdf_render.dart' as pdfr;
 import 'env/env.dart';
 import 'package:dart_openai/dart_openai.dart';
 import 'dart:ui' as ui;
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
+import 'package:http/http.dart' as http;
+import './api/api.dart';
 
 bool isAlternativeTextEnabled = false;
 bool isRealTimeSttEnabled = false;
@@ -157,19 +161,19 @@ Future<List<Uint8List>> convertPdfToImages(Uint8List pdfBytes) async {
     return downloadUrls;
   }
 
-Future<String> callChatGPT4API(List<String> imageUrls, bool isAlternativeTextEnabled, bool isRealTimeSttEnabled) async {
+
+Future<String> callChatGPT4API(List<String> imageUrls, bool isAlternativeTextEnabled, bool isRealTimeSttEnabled, int userKey, String lectureFileName) async {
   const String apiKey = Env.apiKey;
-  final Uri apiUrl =
-      Uri.parse('https://api.openai.com/v1/chat/completions'); // 엔드포인트 수정
+  final Uri apiUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
 
   try {
     var messages = imageUrls.map((url) => {
       'role': 'user',
       'content': [
         {'type': 'text', 
-          'text': isAlternativeTextEnabled ? 
-          '각 강의 자료 화면에 대한 대체텍스트를 생성해 주세요. 시각장애인이 이 텍스트만 보고도 강의 자료의 내용을 충분히 파악할 수 있게, 어떤 내용이 강의 자료의 어느 부분에 위치해 있는지에 대한 설명을 포함해서 얘기해주세요. 본문을 해석할 필요까지는 없고, 스크린 리더가 인식 가능한 텍스트로 옮겨 적어주는 것만으로도 충분해요. 줄바꿈은 각 jpg 파일 하나에 대한 대체텍스트 설명이 끝났을 때만 넣어주세요.' 
-          : '이미지 속에 있는 키워드를 중복되지 않는 것으로 최대한 많이 말해주세요.'},
+        'text': isAlternativeTextEnabled ? 
+        '해당 강의 자료의 내용을 대체텍스트로 변환해주세요. 시각장애인이 이 텍스트를 읽고 강의 자료의 어느 위치에 어떠한 정보가 있는지 알 수 있어야 해요. 강의 자료에 보이는 글은 텍스트로 그대로 옮겨 적어주세요. 대체텍스트의 줄바꿈은 강의 자료의 페이지가 구분될 때에만 넣어주세요.' 
+        : '이미지 속에 있는 키워드를 중복되지 않는 것으로 최대한 많이 말해주세요. 줄바꿈 없이 단순히 키워드를 나열해주세요.'},
         {
           'type': 'image_url',
           'image_url': {'url': url}
@@ -184,16 +188,46 @@ Future<String> callChatGPT4API(List<String> imageUrls, bool isAlternativeTextEna
         'Authorization': 'Bearer $apiKey',
       },
       body: jsonEncode({
-        'model': 'gpt-4o', // 모델 변경
+        'model': 'gpt-4o',
         'messages': messages,
-        'max_tokens': 4096,
+        'max_tokens': 500,
       }),
     );
 
     if (response.statusCode == 200) {
       var responseBody = utf8.decode(response.bodyBytes);
       var decodedResponse = jsonDecode(responseBody);
-      return decodedResponse['choices'][0]['message']['content'];
+      var gptResponse = decodedResponse['choices'][0]['message']['content'];
+
+      if(isAlternativeTextEnabled){
+        // 대체텍스트일 때만 save response(.txt file) to Firebase
+
+          // Get temporary directory to store the file
+          final directory = await getTemporaryDirectory();
+          final filePath = path.join(directory.path, '${DateTime.now().millisecondsSinceEpoch}.txt');
+
+          // Write response to .txt file
+          final file = File(filePath);
+          await file.writeAsString(gptResponse);
+
+          // Define the storage path
+          final userProvider = Provider.of<UserProvider>(context, listen: false);
+          final storageRef = FirebaseStorage.instance
+              .ref()
+              .child('response/$userKey/$lectureFileName/${path.basename(filePath)}');
+          UploadTask uploadTask = storageRef.putFile(file);
+
+          TaskSnapshot taskSnapshot = await uploadTask;
+          String responseUrl = await taskSnapshot.ref.getDownloadURL();
+          print('${gptResponse}');
+          print('GPT Response stored URL: ${responseUrl}');
+
+          // Optionally delete the temporary file
+          await file.delete();
+          return responseUrl;    //.txt 저장한 url을 반환
+
+      }
+      return gptResponse; //대체텍스트 아니고 실시간 자막이면 그냥 로그를 반환
     } else {
       var responseBody = utf8.decode(response.bodyBytes);
       print('Error calling ChatGPT-4 API: ${response.statusCode}');
@@ -207,7 +241,9 @@ Future<String> callChatGPT4API(List<String> imageUrls, bool isAlternativeTextEna
 }
 
 
-Future<List<String>> handlePdfUpload(Uint8List pdfBytes, int userKey) async {
+
+Future<List<String>> 
+handlePdfUpload(Uint8List pdfBytes, int userKey) async {
     try {
         // PDF를 이미지로 변환
         print('Starting PDF to image conversion...'); 
@@ -281,66 +317,72 @@ Future<List<String>> handlePdfUpload(Uint8List pdfBytes, int userKey) async {
               children: [
                 ClickButton(
                   text: _isMaterialEmbedded ? '강의 자료 학습 시작하기' : '강의 자료를 임베드하세요',
-            onPressed: _isMaterialEmbedded
-                ? () async {
-                    print("Starting learning with file: $_selectedFileName");
-                    print("대체텍스트 선택 여부: $isAlternativeTextEnabled");
-                    print("실시간자막 선택 여부: $isRealTimeSttEnabled");
-                    if (_selectedFileName != null && _downloadURL != null && _isMaterialEmbedded == true) {
-                        showLearningDialog(context, _selectedFileName!, _downloadURL!, _progressNotifier); // ValueNotifier 전달
-                        try {
-                            final userProvider = Provider.of<UserProvider>(context, listen: false);
-                            if (_isPDF) {
-                                if (_fileBytes != null) { 
-                                    // PDF 파일을 이미지로 변환하고 Firebase에 업로드
-                                    handlePdfUpload(_fileBytes!, userProvider.user!.userKey).then((imageUrls) async {
-                                        final response = await callChatGPT4API(imageUrls, isAlternativeTextEnabled, isRealTimeSttEnabled);  // 이미지 URL 리스트 전달
-                                        print("GPT-4 Response: $response");
-                                        if (Navigator.canPop(context)) {
-                                            Navigator.of(context, rootNavigator: true).pop(); // Close the dialog
-                                        }
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) => LectureStartPage(
-                                                    fileName: _selectedFileName!,
-                                                    fileURL: _downloadURL!,
+                  onPressed: _isMaterialEmbedded
+                    ? () async {
+                        print("Starting learning with file: $_selectedFileName");
+                        print("대체텍스트 선택 여부: $isAlternativeTextEnabled");
+                        print("실시간자막 선택 여부: $isRealTimeSttEnabled");
+                        if (_selectedFileName != null && _downloadURL != null && _isMaterialEmbedded == true) {
+                            showLearningDialog(context, _selectedFileName!, _downloadURL!, _progressNotifier); // ValueNotifier 전달
+                            try {
+                                final userProvider = Provider.of<UserProvider>(context, listen: false);
+                                int type = isAlternativeTextEnabled ? 1 : 0;
+                                
+                                if (_isPDF) {
+                                    if (_fileBytes != null) { 
+                                        // PDF 파일을 이미지로 변환하고 Firebase에 업로드
+                                        handlePdfUpload(_fileBytes!, userProvider.user!.userKey).then((imageUrls) async {
+                                            final responseUrl= await callChatGPT4API(imageUrls, isAlternativeTextEnabled, isRealTimeSttEnabled, userProvider.user!.userKey, _selectedFileName!);  // 이미지 URL 리스트 전달
+                                            print("GPT-4 Response: $responseUrl");
+                                            if (Navigator.canPop(context)) {
+                                                Navigator.of(context, rootNavigator: true).pop(); // Close the dialog
+                                            }
+
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) => LectureStartPage(
+                                                        fileName: _selectedFileName!,
+                                                        fileURL: _downloadURL!,
+                                                        responseUrl: responseUrl,  //대체텍스트일 때는 response url 전달
+                                                        type: type,
+                                                    ),
                                                 ),
-                                            ),
-                                        );
-                                    });
+                                            );
+                                        });
+                                    } else {
+                                        print('Error: _fileBytes is null.');
+                                    }
                                 } else {
-                                    print('Error: _fileBytes is null.');
+                                    final response = await callChatGPT4API([_downloadURL!], isAlternativeTextEnabled, isRealTimeSttEnabled, userProvider.user!.userKey, _selectedFileName!);  // 단일 이미지 URL 리스트 전달
+                                    print("GPT-4 Response: $response");
+                                    if (Navigator.canPop(context)) {
+                                        Navigator.of(context, rootNavigator: true).pop(); // Close the dialog
+                                    }
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => LectureStartPage(
+                                                fileName: _selectedFileName!,
+                                                fileURL: _downloadURL!,
+                                                responseUrl: response, //실시간 자막일 때는 그냥 response 전달하고 안쓰면됨
+                                                type: type,
+                                            ),
+                                        ),
+                                    );
                                 }
-                            } else {
-                                final response = await callChatGPT4API([_downloadURL!], isAlternativeTextEnabled, isRealTimeSttEnabled);  // 단일 이미지 URL 리스트 전달
-                                print("GPT-4 Response: $response");
+                            } catch (e) {
                                 if (Navigator.canPop(context)) {
                                     Navigator.of(context, rootNavigator: true).pop(); // Close the dialog
                                 }
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => LectureStartPage(
-                                            fileName: _selectedFileName!,
-                                            fileURL: _downloadURL!,
-                                        ),
-                                    ),
-                                );
+                                print('Error: $e');
+                                // Handle the error or show an error message to the user
                             }
-                        } catch (e) {
-                            if (Navigator.canPop(context)) {
-                                Navigator.of(context, rootNavigator: true).pop(); // Close the dialog
-                            }
-                            print('Error: $e');
-                            // Handle the error or show an error message to the user
+                        } else {
+                            print('Error: File name, URL, or embedded material is missing.');
                         }
-                    } else {
-                        print('Error: File name, URL, or embedded material is missing.');
                     }
-                }
-                : _pickFile,
-
+                    : _pickFile,
                   width: MediaQuery.of(context).size.width * 0.5,
                   height: 50.0,
                   iconPath: _isIconVisible ? 'assets/Vector.png' : null,
