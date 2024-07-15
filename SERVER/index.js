@@ -30,14 +30,18 @@ db.getConnection((err, connection) => {
 });
 
 // 사용자 ID 기반으로 강의 폴더 목록 가져오기
-app.get('/api/lecture-folders/:userKey', (req, res) => {
-    const userKey = req.params.userKey;
-    const sql = 'SELECT id, folder_name FROM LectureFolders WHERE userKey = ?';
-    db.query(sql, [userKey], (err, result) => {
+app.get('/api/lecture-folders', (req, res) => {
+    const userKey = req.query.userKey;
+    const currentFolderId = req.query.currentFolderId;
+    const sql = 'SELECT id, folder_name FROM LectureFolders WHERE userKey = ? AND id != ?';
+    db.query(sql, [userKey, currentFolderId], (err, result) => {
         if (err) throw err;
         res.send(result);
     });
 });
+
+
+
 
 // 사용자 ID 기반으로 콜론 폴더 목록 가져오기
 app.get('/api/colon-folders/:userKey', (req, res) => {
@@ -503,14 +507,17 @@ app.put('/api/:fileType-files/move/:id', (req, res) => {
 app.get('/api/getOtherFolders/:fileType/:currentFolderId', (req, res) => {
     const fileType = req.params.fileType;
     const currentFolderId = req.params.currentFolderId;
+    const userKey = req.query.userKey; // 쿼리 파라미터로 userKey를 가져옴
     const tableName = fileType === 'lecture' ? 'LectureFolders' : 'ColonFolders';
-    const sql = `SELECT id, folder_name FROM ${tableName} WHERE id != ?`;
+    const sql = `SELECT id, folder_name FROM ${tableName} WHERE id != ? AND userKey = ?`;
 
-    db.query(sql, [currentFolderId], (err, result) => {
+    db.query(sql, [currentFolderId, userKey], (err, result) => {
         if (err) throw err;
         res.send(result);
     });
 });
+
+
 
 // 파일 검색 API
 app.get('/api/searchFiles', (req, res) => {
@@ -531,7 +538,7 @@ app.get('/api/searchFiles', (req, res) => {
     });
 });
 
-// 강의파일 생성 - 실시간 자막 (response url 저장하지 않음)
+// 강의파일 생성
 app.post('/api/lecture-files', (req, res) => {
     console.log('POST /api/lecture-files called');
     const { folder_id, file_name, file_url, lecture_name } = req.body;
@@ -546,25 +553,6 @@ app.post('/api/lecture-files', (req, res) => {
             return res.status(500).json({ success: false, error: err.message });
         }
         res.json({ success: true, id: result.insertId, folder_id, file_name, file_url, lecture_name });
-    });
-});
-
-// 강의파일 생성 - 대체텍스트 (response url 저장함)
-app.post('/api/lecture-files2', (req, res) => {
-    console.log('POST /api/lecture-files2 called');
-    // 'alternative_text_url': widget.responseUrl,
-    const { folder_id, file_name, file_url, lecture_name, alternative_text_url } = req.body;
-
-    if (!folder_id || !file_name) {
-        return res.status(400).json({ success: false, error: 'You must provide folder_id and file_name.' });
-    }
-
-    const sql = 'INSERT INTO LectureFiles (folder_id, file_name, file_url, lecture_name, alternative_text_url) VALUES (?, ?, ?, ?, ?)';
-    db.query(sql, [folder_id, file_name, file_url, lecture_name, alternative_text_url], (err, result) => {
-        if (err) {
-            return res.status(500).json({ success: false, error: err.message });
-        }
-        res.json({ success: true, id: result.insertId, folder_id, file_name, file_url, lecture_name, alternative_text_url });
     });
 });
 
@@ -718,7 +706,6 @@ app.get('/api/getColonFiles/:userKey', (req, res) => {
         }
     });
 });
-
 // 콜론 폴더 이름 가져오기
 app.get('/api/get-folder-name', (req, res) => {
     const { folderId } = req.query;
@@ -736,31 +723,6 @@ app.get('/api/get-folder-name', (req, res) => {
         }
     });
 });
-
-// 대체 텍스트 URL 가져오기
-app.get('/api/get-alternative-text-url', (req, res) => {
-    const { folderId, fileName } = req.query;
-
-    const sql = `
-        SELECT alternative_text_url
-        FROM LectureFiles
-        WHERE folder_id = ? AND file_name = ?
-    `;
-
-    db.query(sql, [folderId, fileName], (err, results) => {
-        if (err) {
-            return res.status(500).json({ success: false, error: err.message });
-        }
-
-        if (results.length > 0) {
-            res.status(200).json({ alternative_text_url: results[0].alternative_text_url });
-        } else {
-            res.status(404).json({ success: false, message: 'No matching record found' });
-        }
-    });
-});
-
-
 
 
 app.listen(port, () => {
