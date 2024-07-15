@@ -309,159 +309,159 @@ class _LectureStartPageState extends State<LectureStartPage> {
       appBar: AppBar(
         toolbarHeight: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+body: SingleChildScrollView(
+  padding: const EdgeInsets.all(16.0),
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const SizedBox(height: 15),
+      const Text(
+        '오늘의 학습 시작하기',
+        style: TextStyle(
+          color: Color(0xFF414141),
+          fontSize: 24,
+          fontFamily: 'DM Sans',
+          fontWeight: FontWeight.w700,
+          height: 1.2,
+        ),
+      ),
+      const SizedBox(height: 30),
+      const Text(
+        '업로드 한 강의 자료의 AI 학습이 완료되었어요!\n학습을 시작하려면 강의실에 입장하세요.',
+        style: TextStyle(
+          color: Color(0xFF575757),
+          fontSize: 14,
+          fontFamily: 'DM Sans',
+          fontWeight: FontWeight.w500,
+          height: 1.2,
+        ),
+      ),
+      const SizedBox(height: 30),
+      Container(
+        decoration: BoxDecoration(
+          color: Colors.teal.shade50,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        padding: const EdgeInsets.all(8),
+        child: Row(
           children: [
-            const SizedBox(height: 15),
-            const Text(
-              '오늘의 학습 시작하기',
-              style: TextStyle(
-                color: Color(0xFF414141),
-                fontSize: 24,
-                fontFamily: 'DM Sans',
-                fontWeight: FontWeight.w700,
-                height: 1.2,
-              ),
-            ),
-            const SizedBox(height: 30),
-            const Text(
-              '업로드 한 강의 자료의 AI 학습이 완료되었어요!\n학습을 시작하려면 강의실에 입장하세요.',
-              style: TextStyle(
-                color: Color(0xFF575757),
-                fontSize: 14,
-                fontFamily: 'DM Sans',
-                fontWeight: FontWeight.w500,
-                height: 1.2,
-              ),
-            ),
-            const SizedBox(height: 30),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.teal.shade50,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              padding: const EdgeInsets.all(8),
-              child: Row(
+            const Icon(Icons.picture_as_pdf, color: Colors.red, size: 40),
+            const SizedBox(width: 15),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.picture_as_pdf, color: Colors.red, size: 40),
-                  const SizedBox(width: 15),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.fileName,
-                          style: const TextStyle(
-                            color: Color(0xFF575757),
-                            fontSize: 15,
-                            fontFamily: 'DM Sans',
-                            fontWeight: FontWeight.w500,
-                            height: 1.2,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
+                  Text(
+                    widget.fileName,
+                    style: const TextStyle(
+                      color: Color(0xFF575757),
+                      fontSize: 15,
+                      fontFamily: 'DM Sans',
+                      fontWeight: FontWeight.w500,
+                      height: 1.2,
                     ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 15),
-            GestureDetector(
-              onTap: () {
-                int currentFolderId =
-                    folderList.isNotEmpty ? folderList.first['id'] : 0;
-                // showQuickMenu 호출
-                showQuickMenu(
-                  context,
-                  () => fetchOtherFolders('lecture', currentFolderId),
-                  folderList,
-                  _selectFolder,
-                );
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset('assets/folder_search.png'),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      '폴더 분류 > $_selectedFolder',
-                      style: const TextStyle(
-                        color: Color(0xFF575757),
-                        fontSize: 12,
-                        fontFamily: 'DM Sans',
-                        fontWeight: FontWeight.w500,
-                        height: 1.2,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
-            GestureDetector(
-              onTap: () {
-                showRenameDialog2(
-                    context,
-                    _noteName,
-                    renameItem,
-                    setState,
-                    "파일 이름 바꾸기", // 다이얼로그 제목
-                    "file_name" // 변경할 항목 타입
-                    );
-              },
-              child: Row(
-                children: [
-                  Image.asset('assets/text.png'),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      _noteName,
-                      style: const TextStyle(
-                        color: Color(0xFF575757),
-                        fontSize: 12,
-                        fontFamily: 'DM Sans',
-                        fontWeight: FontWeight.w500,
-                        height: 1.2,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 100),
-            Center(
-              child: ClickButton(
-                text: '강의실 입장하기',
-                onPressed: () {
-                  int selectedFolderId = getFolderIdByName(_selectedFolder);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => RecordPage(
-                        selectedFolderId: selectedFolderId.toString(),
-                        noteName: _noteName,
-                        fileUrl: widget.fileURL,
-                        folderName: _selectedFolder,
-                        recordingState: RecordingState.initial,
-                        lectureName: widget.fileName,
-                      ),
-                    ),
-                  );
-                },
-                width: MediaQuery.of(context).size.width * 0.5,
-                height: 50.0,
-              ),
-            ),
-            const SizedBox(height: 16),
           ],
         ),
       ),
+      const SizedBox(height: 15),
+      GestureDetector(
+        onTap: () {
+          int currentFolderId = folderList.isNotEmpty ? folderList.first['id'] : 0;
+          // showQuickMenu 호출
+          showQuickMenu(
+            context,
+            () => fetchOtherFolders('lecture', currentFolderId),
+            folderList,
+            _selectFolder,
+          );
+        },
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset('assets/folder_search.png'),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                '폴더 분류 > $_selectedFolder',
+                style: const TextStyle(
+                  color: Color(0xFF575757),
+                  fontSize: 12,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.w500,
+                  height: 1.2,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+      const SizedBox(height: 10),
+      GestureDetector(
+        onTap: () {
+          showRenameDialog2(
+              context,
+              _noteName,
+              renameItem,
+              setState,
+              "파일 이름 바꾸기", // 다이얼로그 제목
+              "file_name" // 변경할 항목 타입
+              );
+        },
+        child: Row(
+          children: [
+            Image.asset('assets/text.png'),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                _noteName,
+                style: const TextStyle(
+                  color: Color(0xFF575757),
+                  fontSize: 12,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.w500,
+                  height: 1.2,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+      const SizedBox(height: 100),
+      Center(
+        child: ClickButton(
+          text: '강의실 입장하기',
+          onPressed: () {
+            int selectedFolderId = getFolderIdByName(_selectedFolder);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => RecordPage(
+                  selectedFolderId: selectedFolderId.toString(),
+                  noteName: _noteName,
+                  fileUrl: widget.fileURL,
+                  folderName: _selectedFolder,
+                  recordingState: RecordingState.initial,
+                  lectureName: widget.fileName,
+                ),
+              ),
+            );
+          },
+          width: MediaQuery.of(context).size.width * 0.5,
+          height: 50.0,
+        ),
+      ),
+      const SizedBox(height: 16),
+    ],
+  ),
+),
+
       bottomNavigationBar:
           buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
