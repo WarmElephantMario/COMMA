@@ -282,7 +282,6 @@ Future<List<String>> handlePdfUpload(Uint8List pdfBytes, int userKey) async {
               onPressed: _isMaterialEmbedded
                   ? () async {
                       print("Starting learning with file: $_selectedFileName");
-                      print("실시간 자막 선택 여부: $isLiveSubtitleEnabled");
                       print("대체텍스트 선택 여부: $isAlternativeTextEnabled");
                       print("실시간자막 선택 여부: $isRealTimeSttEnabled");
                       if (_selectedFileName != null && _downloadURL != null && _isMaterialEmbedded == true) {
