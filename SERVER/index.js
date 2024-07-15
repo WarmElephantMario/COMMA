@@ -531,7 +531,7 @@ app.get('/api/searchFiles', (req, res) => {
     });
 });
 
-// 강의파일 생성
+// 강의파일 생성 - 실시간 자막 (response url 저장하지 않음)
 app.post('/api/lecture-files', (req, res) => {
     console.log('POST /api/lecture-files called');
     const { folder_id, file_name, file_url, lecture_name } = req.body;
@@ -546,6 +546,25 @@ app.post('/api/lecture-files', (req, res) => {
             return res.status(500).json({ success: false, error: err.message });
         }
         res.json({ success: true, id: result.insertId, folder_id, file_name, file_url, lecture_name });
+    });
+});
+
+// 강의파일 생성 - 대체텍스트 (response url 저장함)
+app.post('/api/lecture-files2', (req, res) => {
+    console.log('POST /api/lecture-files2 called');
+    // 'alternative_text_url': widget.responseUrl,
+    const { folder_id, file_name, file_url, lecture_name, alternative_text_url } = req.body;
+
+    if (!folder_id || !file_name) {
+        return res.status(400).json({ success: false, error: 'You must provide folder_id and file_name.' });
+    }
+
+    const sql = 'INSERT INTO LectureFiles (folder_id, file_name, file_url, lecture_name, alternative_text_url) VALUES (?, ?, ?, ?, ?)';
+    db.query(sql, [folder_id, file_name, file_url, lecture_name, alternative_text_url], (err, result) => {
+        if (err) {
+            return res.status(500).json({ success: false, error: err.message });
+        }
+        res.json({ success: true, id: result.insertId, folder_id, file_name, file_url, lecture_name, alternative_text_url });
     });
 });
 
@@ -699,6 +718,7 @@ app.get('/api/getColonFiles/:userKey', (req, res) => {
         }
     });
 });
+
 // 콜론 폴더 이름 가져오기
 app.get('/api/get-folder-name', (req, res) => {
     const { folderId } = req.query;
@@ -716,6 +736,31 @@ app.get('/api/get-folder-name', (req, res) => {
         }
     });
 });
+
+// 대체 텍스트 URL 가져오기
+app.get('/api/get-alternative-text-url', (req, res) => {
+    const { folderId, fileName } = req.query;
+
+    const sql = `
+        SELECT alternative_text_url
+        FROM LectureFiles
+        WHERE folder_id = ? AND file_name = ?
+    `;
+
+    db.query(sql, [folderId, fileName], (err, results) => {
+        if (err) {
+            return res.status(500).json({ success: false, error: err.message });
+        }
+
+        if (results.length > 0) {
+            res.status(200).json({ alternative_text_url: results[0].alternative_text_url });
+        } else {
+            res.status(404).json({ success: false, message: 'No matching record found' });
+        }
+    });
+});
+
+
 
 
 app.listen(port, () => {

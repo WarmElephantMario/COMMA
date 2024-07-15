@@ -149,6 +149,8 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
             folderName: folderName,
             recordingState: RecordingState.recorded,
             lectureName: file['lecture_name'] ?? 'Unknown Lecture',
+            responseUrl: 'https://defaulturl.com/defaultfile.txt', //수정 필요
+            type: 1, //수정 필요
           )
         : ColonPage(
             folderName: folderName,
