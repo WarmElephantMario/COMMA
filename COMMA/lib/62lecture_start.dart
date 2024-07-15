@@ -10,12 +10,16 @@ import 'api/api.dart';
 class LectureStartPage extends StatefulWidget {
   final String fileName;
   final String fileURL;
+  final String responseUrl;
+  final int type;
 
 
   const LectureStartPage({
     Key? key,
     required this.fileName,
     required this.fileURL,
+    required this.responseUrl,
+    required this.type,
   }) : super(key: key);
 
   @override
@@ -449,6 +453,8 @@ body: SingleChildScrollView(
                   folderName: _selectedFolder,
                   recordingState: RecordingState.initial,
                   lectureName: widget.fileName,
+                  responseUrl: widget.responseUrl,
+                  type: widget.type,
                 ),
               ),
             );
