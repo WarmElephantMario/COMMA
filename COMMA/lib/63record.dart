@@ -22,6 +22,8 @@ class RecordPage extends StatefulWidget {
   final String folderName;
   final RecordingState recordingState;
   final String lectureName;
+  final String responseUrl;
+  final int type;
 
   const RecordPage({
     super.key,
@@ -31,6 +33,8 @@ class RecordPage extends StatefulWidget {
     required this.folderName,
     required this.recordingState,
     required this.lectureName,
+    required this.responseUrl,
+    required this.type,
   });
 
   @override
@@ -67,11 +71,13 @@ class _RecordPageState extends State<RecordPage> {
       _insertInitialData();
     }
     _checkFileType();
-    _loadPageTexts(); // 대체 텍스트 URL 로드
+    // _loadPageTexts(); // 대체 텍스트 URL 로드
   }
 
   Future<void> _loadPageTexts() async {
   try {
+    // print('${widget.selectedFolderId}');
+    // print('${widget.noteName}');
     final response = await http.get(Uri.parse(
         '${API.baseUrl}/api/get-alternative-text-url?folderId=${widget.selectedFolderId}&fileName=${widget.noteName}'));
     if (response.statusCode == 200) {
@@ -97,6 +103,7 @@ class _RecordPageState extends State<RecordPage> {
       }
     } else {
       print('Failed to fetch alternative text URL: ${response.statusCode}');
+      print('Response body: ${response.body}');
     }
   } catch (e) {
     print('Error occurred: $e');
@@ -165,31 +172,64 @@ class _RecordPageState extends State<RecordPage> {
     final userKey = userProvider.user?.userKey;
 
     if (userKey != null) {
-      var url = '${API.baseUrl}/api/lecture-files';
 
-      var body = {
-        'folder_id': widget.selectedFolderId,
-        'file_name': widget.noteName,
-        'file_url': widget.fileUrl,
-        'lecture_name': widget.lectureName,
-        'userKey': userKey,
-      };
+      if (widget.type == 1){ //대체텍스트 파일이면, response url까지 삽입
+      print('대체텍스트 파일이니까 api 2로 갈께요');
+      print('전달받은 대체텍스트 url: ${widget.responseUrl}');
 
-      try {
-        var response = await http.post(
-          Uri.parse(url),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode(body),
-        );
+          var url = '${API.baseUrl}/api/lecture-files2';
+          var body = {
+            'folder_id': widget.selectedFolderId,
+            'file_name': widget.noteName,
+            'file_url': widget.fileUrl,
+            'lecture_name': widget.lectureName,
+            'alternative_text_url': widget.responseUrl,
+            'userKey': userKey,
+            
+          };
+          try {
+            var response = await http.post(
+              Uri.parse(url),
+              headers: {'Content-Type': 'application/json'},
+              body: jsonEncode(body),
+            );
+            if (response.statusCode == 200) {
+              print('자 sql에 삽입까지 잘 됐으니까 이제 로드한다!!!!!!!!!!!!!!!!!!!!');
+              _loadPageTexts(); // 대체 텍스트 URL 로드
+            } else {
+              print('Failed to add file: ${response.statusCode}');
+              print('${response.body}');
+            }
+          } catch (e) {
+            print('Error during HTTP request: $e');
+          }
 
-        if (response.statusCode == 200) {
-          print('File added successfully');
-        } else {
-          print('Failed to add file: ${response.statusCode}');
-        }
-      } catch (e) {
-        print('Error during HTTP request: $e');
+      } else { //실시간 자막 파일이면, response url은 삽입할 필요 없음
+      //const { folder_id, file_name, file_url, lecture_name } = req.body;
+          var url = '${API.baseUrl}/api/lecture-files';
+          var body = {
+            'folder_id': widget.selectedFolderId,
+            'file_name': widget.noteName,
+            'file_url': widget.fileUrl,
+            'lecture_name': widget.lectureName,
+            'userKey': userKey,
+          };
+          try {
+            var response = await http.post(
+              Uri.parse(url),
+              headers: {'Content-Type': 'application/json'},
+              body: jsonEncode(body),
+            );
+            if (response.statusCode == 200) {
+              print('File added successfully');
+            } else {
+              print('Failed to add file: ${response.statusCode}');
+            }
+          } catch (e) {
+            print('Error during HTTP request: $e');
+          }
       }
+
     } else {
       print('User ID is null, cannot insert initial data.');
     }
@@ -337,7 +377,10 @@ class _RecordPageState extends State<RecordPage> {
                           MaterialPageRoute(
                               builder: (context) => LectureStartPage(
                                   fileName: widget.noteName,
-                                  fileURL: widget.fileUrl,)),
+                                  fileURL: widget.fileUrl,
+                                  responseUrl: widget.responseUrl,
+                                  type: widget.type,
+                                  )),
                         );
                       }
                     },
