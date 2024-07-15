@@ -19,6 +19,7 @@ import 'package:dart_openai/dart_openai.dart';
 import 'dart:ui' as ui;
 
 bool isAlternativeTextEnabled = false;
+bool isLiveSubtitleEnabled = false;
 
 class LearningPreparation extends StatefulWidget {
   const LearningPreparation({super.key});
@@ -35,6 +36,9 @@ class _LearningPreparationState extends State<LearningPreparation> {
   Uint8List? _fileBytes;
   bool _isPDF = false;
   late pdfx.PdfController _pdfController;
+  // double _progress = 0.0;
+  ValueNotifier<double> _progressNotifier = ValueNotifier<double>(0.0); // 진행률 관리용 ValueNotifier 추가
+
 
   int _selectedIndex = 2;
 
@@ -43,6 +47,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
       _selectedIndex = index;
     });
   }
+
 
   Future<void> _pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
@@ -138,6 +143,8 @@ Future<List<Uint8List>> convertPdfToImages(Uint8List pdfBytes) async {
     List<String> downloadUrls = [];
 
     for (int i = 0; i < images.length; i++) {
+      _progressNotifier.value = (i + 1) / images.length; // 진행률 업데이트
+
       final storageRef = FirebaseStorage.instance
           .ref()
           .child('uploads/$userKey/page_$i.jpg');
@@ -201,12 +208,12 @@ Future<List<Uint8List>> convertPdfToImages(Uint8List pdfBytes) async {
 Future<List<String>> handlePdfUpload(Uint8List pdfBytes, int userKey) async {
     try {
         // PDF를 이미지로 변환
-        print('Starting PDF to image conversion...');
+        print('Starting PDF to image conversion...'); 
         List<Uint8List> images = await convertPdfToImages(pdfBytes);
         print('PDF to image conversion completed. Number of images: ${images.length}');
 
         // 이미지를 Firebase에 업로드
-        print('Starting image upload to Firebase...');
+        print('Starting image upload to Firebase...');     
         List<String> imageUrls = await uploadImagesToFirebase(images, userKey);
         print('Image upload to Firebase completed. Number of image URLs: ${imageUrls.length}');
 
@@ -258,7 +265,12 @@ Future<List<String>> handlePdfUpload(Uint8List pdfBytes, int userKey) async {
           ),
           CustomCheckbox(
             label: '실시간 자막 생성',
-            onChanged: (bool value) {},
+            isSelected: isLiveSubtitleEnabled,
+            onChanged: (bool value) {
+              setState((){
+                  isLiveSubtitleEnabled = value;
+                });
+            },
           ),
           const SizedBox(height: 20),
           Center(
@@ -270,9 +282,10 @@ Future<List<String>> handlePdfUpload(Uint8List pdfBytes, int userKey) async {
               onPressed: _isMaterialEmbedded
                   ? () async {
                       print("Starting learning with file: $_selectedFileName");
+                      print("실시간 자막 선택 여부: $isLiveSubtitleEnabled");
                       print("대체텍스트 선택 여부: $isAlternativeTextEnabled");
                       if (_selectedFileName != null && _downloadURL != null && _isMaterialEmbedded == true) {
-                          showLearningDialog(context, _selectedFileName!, _downloadURL!);
+                          showLearningDialog(context, _selectedFileName!, _downloadURL!, _progressNotifier); // ValueNotifier 전달
                       try {
                           final userProvider = Provider.of<UserProvider>(context, listen: false);
                           if (_isPDF) {
@@ -281,7 +294,7 @@ Future<List<String>> handlePdfUpload(Uint8List pdfBytes, int userKey) async {
                                   handlePdfUpload(_fileBytes!, userProvider.user!.userKey).then((imageUrls) async {
                                       final response = await callChatGPT4API(imageUrls);  // 이미지 URL 리스트 전달
                                       print("GPT-4 Response: $response");
-                                      Navigator.of(context).pop();
+                                      Navigator.of(context).pop(); // Close the dialog
                                       Navigator.push(
                                           context,
                                           MaterialPageRoute(
@@ -299,7 +312,7 @@ Future<List<String>> handlePdfUpload(Uint8List pdfBytes, int userKey) async {
                           } else {
                                   final response = await callChatGPT4API([_downloadURL!]);  // 단일 이미지 URL 리스트 전달
                                   print("GPT-4 Response: $response");
-                                  Navigator.of(context).pop();
+                                  Navigator.of(context).pop(); // Close the dialog
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
@@ -312,7 +325,7 @@ Future<List<String>> handlePdfUpload(Uint8List pdfBytes, int userKey) async {
                                   );
                               }
                           } catch (e) {
-                              Navigator.of(context).pop();
+                              Navigator.of(context).pop(); // Close the dialog
                               print('Error: $e');
                               // Handle the error or show an error message to the user
                           }
@@ -321,6 +334,7 @@ Future<List<String>> handlePdfUpload(Uint8List pdfBytes, int userKey) async {
                       }
                   }
                   : _pickFile,
+
                   width: MediaQuery.of(context).size.width * 0.5,
                   height: 50.0,
                   iconPath: _isIconVisible ? 'assets/Vector.png' : null,
