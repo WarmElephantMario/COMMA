@@ -7,13 +7,14 @@ import 'package:pdfx/pdfx.dart';
 import 'components.dart';
 import 'model/user_provider.dart';
 import 'package:provider/provider.dart';
-import '62_lecture_start.dart';
+import '62lecture_start.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'env/env.dart';
 import 'package:dart_openai/dart_openai.dart';
 
 bool isAlternativeTextEnabled = false;
+bool isRealTimeSttEnabled = false;
 
 class LearningPreparation extends StatefulWidget {
   const LearningPreparation({super.key});
@@ -133,14 +134,14 @@ class _LearningPreparationState extends State<LearningPreparation> {
         }),
       );
 
-      var responseBody = response.body;
+      var alternativeText = response.body;
 
       if (response.statusCode == 200) {
         var responseBody = jsonDecode(response.body);
         return responseBody['choices'][0]['message']['content'];
       } else {
         print('Error calling ChatGPT-4o API: ${response.statusCode}');
-        print('Response body: $responseBody'); // 응답 본문 출력
+        print('Response body: $alternativeText'); // 응답 본문 출력
         return 'Error: ${response.statusCode}';
       }
     } catch (e) {
@@ -188,7 +189,12 @@ class _LearningPreparationState extends State<LearningPreparation> {
           ),
           CustomCheckbox(
             label: '실시간 자막 생성',
-            onChanged: (bool value) {},
+            isSelected: isRealTimeSttEnabled,
+            onChanged: (bool value) {
+              setState(() {
+                isRealTimeSttEnabled = value;
+              });
+            },
           ),
           const SizedBox(height: 20),
           Center(
@@ -202,23 +208,23 @@ class _LearningPreparationState extends State<LearningPreparation> {
                           print(
                               "Starting learning with file: $_selectedFileName");
                           print("대체텍스트 선택 여부: $isAlternativeTextEnabled");
+                          print("실시간자막 선택 여부: $isRealTimeSttEnabled");
                           if (_selectedFileName != null &&
                               _downloadURL != null &&
-                              _isMaterialEmbedded == true) {
+                              _isMaterialEmbedded == true ) {
                             showLearningDialog(
                                 context, _selectedFileName!, _downloadURL!);
                             try {
-                              final response = await callChatGPT4API(
+                              final alternativeText = await callChatGPT4API(
                                   _selectedFileName!, _downloadURL!);
-                              print("GPT-4 Response: $response");
+                              print("GPT-4 Response: $alternativeText");
                               Navigator.of(context).pop();
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => LectureStartPage2(
+                                  builder: (context) => LectureStartPage(
                                     fileName: _selectedFileName!,
                                     fileURL: _downloadURL!,
-                                    response: response,
                                   ),
                                 ),
                               );
