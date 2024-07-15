@@ -13,7 +13,6 @@ import 'package:http/http.dart' as http;
 import 'env/env.dart';
 import 'package:dart_openai/dart_openai.dart';
 
-
 bool isAlternativeTextEnabled = false;
 
 class LearningPreparation extends StatefulWidget {
@@ -104,55 +103,51 @@ class _LearningPreparationState extends State<LearningPreparation> {
     }
   }
 
-Future<String> callChatGPT4API(String fileName, String fileURL) async {
-  final String apiKey = Env.apiKey;
-  final Uri apiUrl = Uri.parse('https://api.openai.com/v1/chat/completions'); // 엔드포인트 수정
+  Future<String> callChatGPT4API(String fileName, String fileURL) async {
+    const String apiKey = Env.apiKey;
+    final Uri apiUrl =
+        Uri.parse('https://api.openai.com/v1/chat/completions'); // 엔드포인트 수정
 
-  try {
-    var response = await http.post(
-      apiUrl,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $apiKey',
-      },
-      body: jsonEncode({
-        'model': 'gpt-4o', // 모델 변경
-        'messages': [
-          {
-            'role': 'user',
-            'content': [
-              {
-                'type': 'text',
-                'text': 'What’s in this image?'
-              },
-              {
-                'type': 'image_url',
-                'image_url': {
-                  'url': fileURL
+    try {
+      var response = await http.post(
+        apiUrl,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $apiKey',
+        },
+        body: jsonEncode({
+          'model': 'gpt-4o', // 모델 변경
+          'messages': [
+            {
+              'role': 'user',
+              'content': [
+                {'type': 'text', 'text': 'What’s in this image?'},
+                {
+                  'type': 'image_url',
+                  'image_url': {'url': fileURL}
                 }
-              }
-            ]
-          }
-        ],
-        'max_tokens': 100,
-      }),
-    );
+              ]
+            }
+          ],
+          'max_tokens': 100,
+        }),
+      );
 
-    var responseBody = response.body;
+      var responseBody = response.body;
 
-    if (response.statusCode == 200) {
-      var responseBody = jsonDecode(response.body);
-      return responseBody['choices'][0]['message']['content'];
-    } else {
-      print('Error calling ChatGPT-4o API: ${response.statusCode}');
-      print('Response body: $responseBody'); // 응답 본문 출력
-      return 'Error: ${response.statusCode}';
+      if (response.statusCode == 200) {
+        var responseBody = jsonDecode(response.body);
+        return responseBody['choices'][0]['message']['content'];
+      } else {
+        print('Error calling ChatGPT-4o API: ${response.statusCode}');
+        print('Response body: $responseBody'); // 응답 본문 출력
+        return 'Error: ${response.statusCode}';
+      }
+    } catch (e) {
+      print('Error: $e');
+      return 'Error: $e';
     }
-  } catch (e) {
-    print('Error: $e');
-    return 'Error: $e';
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -210,9 +205,11 @@ Future<String> callChatGPT4API(String fileName, String fileURL) async {
                           if (_selectedFileName != null &&
                               _downloadURL != null &&
                               _isMaterialEmbedded == true) {
-                            showLearningDialog(context, _selectedFileName!, _downloadURL!);
+                            showLearningDialog(
+                                context, _selectedFileName!, _downloadURL!);
                             try {
-                              final response = await callChatGPT4API(_selectedFileName!, _downloadURL!);
+                              final response = await callChatGPT4API(
+                                  _selectedFileName!, _downloadURL!);
                               print("GPT-4 Response: $response");
                               Navigator.of(context).pop();
                               Navigator.push(
@@ -231,7 +228,8 @@ Future<String> callChatGPT4API(String fileName, String fileURL) async {
                               // Handle the error or show an error message to the user
                             }
                           } else {
-                            print('Error: File name, URL, or embedded material is missing.');
+                            print(
+                                'Error: File name, URL, or embedded material is missing.');
                           }
                         }
                       : _pickFile,

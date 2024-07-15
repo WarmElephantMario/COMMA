@@ -1,3 +1,4 @@
+import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -5,11 +6,11 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:pdfx/pdfx.dart';
 import 'dart:typed_data';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'components.dart';
 import 'api/api.dart';
 import 'model/user_provider.dart';
 import '62lecture_start.dart';
-import '60prepare.dart';
 
 enum RecordingState { initial, recording, recorded }
 
@@ -44,10 +45,16 @@ class _RecordPageState extends State<RecordPage> {
   PdfController? _pdfController;
   Uint8List? _fileBytes;
 
+  late stt.SpeechToText _speech;
+  bool _isListening = false;
+  String _recognizedText = '';
+  double _confidence = 1.0;
+
   @override
   void initState() {
     super.initState();
     _recordingState = widget.recordingState;
+    _speech = stt.SpeechToText();
     if (_recordingState == RecordingState.recorded) {
       _fetchCreatedAt();
     }
@@ -166,7 +173,9 @@ class _RecordPageState extends State<RecordPage> {
   void _stopRecording() async {
     setState(() {
       _recordingState = RecordingState.recorded;
+      _isListening = false;
     });
+    _speech.stop(); // Stop listening when recording stops
     await _fetchCreatedAt();
   }
 
@@ -203,6 +212,7 @@ class _RecordPageState extends State<RecordPage> {
     } else {
       print('User ID is null, cannot start recording.');
     }
+    _listen(); // Start listening when recording starts
   }
 
   Future<bool> _checkColonFileExists(
@@ -235,6 +245,31 @@ class _RecordPageState extends State<RecordPage> {
       setState(() {
         _isColonFileExists = exists;
       });
+    }
+  }
+
+  void _listen() async {
+    if (!_isListening) {
+      bool available = await _speech.initialize(
+        onStatus: (val) => print('onStatus: $val'),
+        onError: (val) => print('onError: $val'),
+        // options: [stt.SpeechToText.optionAndroidLocale, 'ko_KR'],
+      );
+      if (available) {
+        setState(() => _isListening = true);
+        _speech.listen(
+          onResult: (val) => setState(() {
+            _recognizedText =
+                val.recognizedWords; // Update the text without appending
+            if (val.hasConfidenceRating && val.confidence > 0) {
+              _confidence = val.confidence;
+            }
+          }),
+        );
+      }
+    } else {
+      setState(() => _isListening = false);
+      _speech.stop();
     }
   }
 
@@ -428,53 +463,34 @@ class _RecordPageState extends State<RecordPage> {
               ),
               const SizedBox(height: 20),
               if (_recordingState == RecordingState.recording)
-                const Text(
-                  '실시간 자막생성 중...',
-                  style: TextStyle(
-                    color: Color(0xFF414141),
-                    fontSize: 16,
-                    fontFamily: 'DM Sans',
-                  ),
-                ),
-              if (isAlternativeTextEnabled &&
-                  _recordingState == RecordingState.initial)
-                if (_isPDF && _fileBytes != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20),
-                    child: SizedBox(
-                      height: 600,
-                      child: PdfView(
-                        controller: _pdfController!,
+                Column(
+                  children: [
+                    const SizedBox(height: 10),
+                    Text(
+                      _recognizedText,
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 16,
+                        fontFamily: 'DM Sans',
                       ),
                     ),
-                  )
-                else if (!_isPDF)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20),
-                    child: Image.network(
-                      widget.fileUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Center(
-                          child: Text(
-                            '이미지를 불러올 수 없습니다.',
-                            style: TextStyle(
-                              color: Colors.red,
-                              fontSize: 16,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
               if (_recordingState == RecordingState.recorded)
-                const Text(
-                  '실시간 자막',
-                  style: TextStyle(
-                    color: Color(0xFF414141),
-                    fontSize: 16,
-                    fontFamily: 'DM Sans',
-                  ),
+                Column(
+                  children: [
+                    const SizedBox(height: 10),
+                    Text(
+                      _recognizedText,
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 16,
+                        fontFamily: 'DM Sans',
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
                 ),
               const SizedBox(
                   height:
