@@ -452,23 +452,11 @@ void showColonCreatedDialog(BuildContext context, String folderName,
 }
 
 // Learning - 강의 자료 학습중 팝업
-void showLearningDialog(BuildContext context, String fileName, String fileURL) {
+void showLearningDialog(BuildContext context, String fileName, String fileURL, ValueNotifier<double> progressNotifier) {
   showDialog(
     context: context,
     barrierDismissible: false,
     builder: (BuildContext context) {
-      // Navigate to LectureStartPage after 1 second
-      Future.delayed(const Duration(seconds: 1), () {
-        Navigator.of(context).pop(); // Close the dialog
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>
-                LectureStartPage(fileName: fileName, fileURL: fileURL),
-          ),
-        );
-      });
-
       return AlertDialog(
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(
@@ -494,10 +482,10 @@ void showLearningDialog(BuildContext context, String fileName, String fileURL) {
             ),
           ],
         ),
-        content: const Column(
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
+            const Text(
               '강의 자료 학습중입니다',
               style: TextStyle(
                 color: Color(0xFF414141),
@@ -506,20 +494,25 @@ void showLearningDialog(BuildContext context, String fileName, String fileURL) {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 16),
-            CircularProgressIndicator(
+            const SizedBox(height: 16),
+            const CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF36AE92)),
               strokeWidth: 4.0,
             ),
-            SizedBox(height: 16),
-            Text(
-              '75%',
-              style: TextStyle(
-                color: Color(0xFF414141),
-                fontSize: 16,
-                fontFamily: 'DM Sans',
-                fontWeight: FontWeight.bold,
-              ),
+            const SizedBox(height: 16),
+            ValueListenableBuilder<double>(
+              valueListenable: progressNotifier,
+              builder: (context, value, child) {
+                return Text(
+                  '${(value * 100).toStringAsFixed(0)}%', // 진행률을 퍼센트로 표시
+                  style: const TextStyle(
+                    color: Color(0xFF414141),
+                    fontSize: 16,
+                    fontFamily: 'DM Sans',
+                    fontWeight: FontWeight.bold,
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -527,6 +520,8 @@ void showLearningDialog(BuildContext context, String fileName, String fileURL) {
     },
   );
 }
+
+
 
 //alarm
 //delete alarm
