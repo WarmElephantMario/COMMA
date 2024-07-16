@@ -30,10 +30,11 @@ db.getConnection((err, connection) => {
 });
 
 // 사용자 ID 기반으로 강의 폴더 목록 가져오기
-app.get('/api/lecture-folders/:userKey', (req, res) => {
-    const userKey = req.params.userKey;
-    const sql = 'SELECT id, folder_name FROM LectureFolders WHERE userKey = ?';
-    db.query(sql, [userKey], (err, result) => {
+app.get('/api/lecture-folders', (req, res) => {
+    const userKey = req.query.userKey;
+    const currentFolderId = req.query.currentFolderId;
+    const sql = 'SELECT id, folder_name FROM LectureFolders WHERE userKey = ? AND id != ?';
+    db.query(sql, [userKey, currentFolderId], (err, result) => {
         if (err) throw err;
         res.send(result);
     });
@@ -503,10 +504,11 @@ app.put('/api/:fileType-files/move/:id', (req, res) => {
 app.get('/api/getOtherFolders/:fileType/:currentFolderId', (req, res) => {
     const fileType = req.params.fileType;
     const currentFolderId = req.params.currentFolderId;
+    const userKey = req.query.userKey; // 쿼리 파라미터로 userKey를 가져옴
     const tableName = fileType === 'lecture' ? 'LectureFolders' : 'ColonFolders';
-    const sql = `SELECT id, folder_name FROM ${tableName} WHERE id != ?`;
+    const sql = `SELECT id, folder_name FROM ${tableName} WHERE id != ? AND userKey = ?`;
 
-    db.query(sql, [currentFolderId], (err, result) => {
+    db.query(sql, [currentFolderId, userKey], (err, result) => {
         if (err) throw err;
         res.send(result);
     });

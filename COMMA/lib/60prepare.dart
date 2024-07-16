@@ -19,7 +19,6 @@ import 'package:dart_openai/dart_openai.dart';
 import 'dart:ui' as ui;
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
-import 'package:http/http.dart' as http;
 import './api/api.dart';
 
 
