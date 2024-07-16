@@ -2,7 +2,7 @@
 
 - folder_search 이미지 안 뜨는 것 해결
 - 학습 시작 페이지에서 '대체텍스트 생성', '실시간 자막 생성' 중 하나만 선택 가능하도록 수정
-- CheckRadioButton 추가
+- CustomRadioButton 추가
 
 
 **데이터베이스 테이블 구조**
