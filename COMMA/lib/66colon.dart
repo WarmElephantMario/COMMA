@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import '60prepare.dart';
 import 'components.dart';
@@ -75,7 +77,7 @@ class _ColonPageState extends State<ColonPage> {
             ),
             Row(
               children: [
-                const ImageIcon(AssetImage('assets/folder_search.png')),
+                Image.asset('assets/folder_search.png'),
                 const SizedBox(width: 8),
                 Text(
                   '폴더 분류 > ${widget.folderName}', // 폴더 이름 사용

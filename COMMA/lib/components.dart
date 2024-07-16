@@ -452,7 +452,8 @@ void showColonCreatedDialog(BuildContext context, String folderName,
 }
 
 // Learning - 강의 자료 학습중 팝업
-void showLearningDialog(BuildContext context, String fileName, String fileURL, ValueNotifier<double> progressNotifier) {
+void showLearningDialog(BuildContext context, String fileName, String fileURL,
+    ValueNotifier<double> progressNotifier) {
   showDialog(
     context: context,
     barrierDismissible: false,
@@ -520,8 +521,6 @@ void showLearningDialog(BuildContext context, String fileName, String fileURL, V
     },
   );
 }
-
-
 
 //alarm
 //delete alarm
@@ -1053,6 +1052,70 @@ class _CustomCheckboxState extends State<CustomCheckbox> {
               fontFamily: 'DM Sans',
               color: Color.fromARGB(255, 70, 70, 70), // 텍스트 색상 지정
               fontWeight: FontWeight.w500, // 텍스트 두께 지정
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class CustomRadioButton extends StatefulWidget {
+  final String label;
+  final bool value;
+  final bool groupValue;
+  final Function(bool?) onChanged;
+
+  const CustomRadioButton({
+    super.key,
+    required this.label,
+    required this.value,
+    required this.groupValue,
+    required this.onChanged,
+  });
+
+  @override
+  _CustomRadioButtonState createState() => _CustomRadioButtonState();
+}
+
+class _CustomRadioButtonState extends State<CustomRadioButton> {
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        widget.onChanged(widget.value);
+      },
+      child: Row(
+        children: [
+          Container(
+            width: 18,
+            height: 18,
+            decoration: BoxDecoration(
+              color: widget.value == widget.groupValue
+                  ? Colors.teal
+                  : Colors.transparent,
+              border: Border.all(
+                color: const Color.fromARGB(255, 80, 80, 80),
+                width: 1.6,
+              ),
+              borderRadius: BorderRadius.circular(9),
+            ),
+            child: widget.value == widget.groupValue
+                ? const Icon(
+                    Icons.check,
+                    size: 14,
+                    color: Colors.white,
+                  )
+                : null,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            widget.label,
+            style: const TextStyle(
+              fontSize: 16,
+              fontFamily: 'DM Sans',
+              color: Color.fromARGB(255, 70, 70, 70),
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
