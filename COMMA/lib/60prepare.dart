@@ -22,6 +22,7 @@ import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
 import './api/api.dart';
 
+
 bool isAlternativeTextEnabled = false;
 bool isRealTimeSttEnabled = false;
 
