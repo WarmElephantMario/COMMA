@@ -174,7 +174,7 @@ class _RecordPageState extends State<RecordPage> {
     if (userKey != null) {
 
       if (widget.type == 1){ //대체텍스트 파일이면, response url까지 삽입
-      print('대체텍스트 파일이니까 api 2로 갈께요');
+      print('대체텍스트 파일이니까 api 2로 갈게요');
       print('전달받은 대체텍스트 url: ${widget.responseUrl}');
 
           var url = '${API.baseUrl}/api/lecture-files2';
