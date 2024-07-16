@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:path_provider/path_provider.dart'; // path_provider 임포트
+import 'dart:io'; // Directory 사용을 위해 추가
 import 'components.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
@@ -26,15 +28,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("Initializing MaterialApp with theme: ${ThemeData(
-      visualDensity: VisualDensity.adaptivePlatformDensity,
-    )}");
     return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-        ),
-        home: const SplashScreen());
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
+      home: const SplashScreen(),
+    );
   }
 }
 
@@ -47,6 +47,24 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
+  String? _tempDirPath;
+
+  @override
+  void initState() {
+    super.initState();
+    _initTempDir();
+  }
+
+  Future<void> _initTempDir() async {
+    try {
+      Directory tempDir = await getTemporaryDirectory();
+      setState(() {
+        _tempDirPath = tempDir.path;
+      });
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -57,34 +75,14 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Path Provider Example'),
+      ),
+      body: Center(
+        child: Text('Temporary Directory: $_tempDirPath'),
+      ),
       bottomNavigationBar:
           buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }
-
-// import 'package:flutter/material.dart';
-// import 'package:get/get.dart';
-// import '1_Splash_green.dart';
-// import '5_Signup.dart';
-
-// void main() {
-//   WidgetsFlutterBinding.ensureInitialized();
-//   runApp(const FigmaToCodeApp());
-// }
-
-// class FigmaToCodeApp extends StatelessWidget {
-//   const FigmaToCodeApp({super.key});
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return GetMaterialApp(
-//       theme: ThemeData.dark().copyWith(
-//         scaffoldBackgroundColor: const Color.fromRGBO(54, 174, 146, 1.0),
-//       ),
-//       home: Scaffold(
-//         body: SplashScreen(),
-//       ),
-//     );
-//   }
-// }
