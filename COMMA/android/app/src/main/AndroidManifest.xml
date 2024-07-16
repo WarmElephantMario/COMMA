@@ -14,6 +14,7 @@ package="com.comma.myapp">
     </queries>
 
     <application
+        
         android:label="flutter_plugin"
 
         android:name="${applicationName}"
