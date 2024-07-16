@@ -76,7 +76,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Path Provider Example'),
+        title: const Text('Path Provider Example'),
       ),
       body: Center(
         child: Text('Temporary Directory: $_tempDirPath'),
