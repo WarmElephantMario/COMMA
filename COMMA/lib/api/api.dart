@@ -1,5 +1,5 @@
 class API {
-  static const baseUrl = 'http://192.168.45.8:3000';
+  static const baseUrl = 'http://172.30.124.253:3000';
 
   static const hostConnect = "http://192.168.45.8/api_new_members";
   static const hostConnect2 = "http://192.168.45.8/api_new_lectures";
