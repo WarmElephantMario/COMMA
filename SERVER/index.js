@@ -778,6 +778,7 @@ app.get('/api/get-folder-name', (req, res) => {
 // 대체 텍스트 URL 가져오기
 app.get('/api/get-alternative-text-url', (req, res) => {
     const { lecturefileId } = req.query;
+    console.log(`Received lecturefileId: ${lecturefileId}`);
 
     const sql = `
         SELECT alternative_text_url
@@ -789,6 +790,8 @@ app.get('/api/get-alternative-text-url', (req, res) => {
         if (err) {
             return res.status(500).json({ success: false, error: err.message });
         }
+
+        console.log(`Query results: ${JSON.stringify(results)}`);
 
         if (results.length > 0) {
             res.status(200).json({ alternative_text_url: results[0].alternative_text_url });

@@ -77,6 +77,7 @@ class _MainToSearchPageState extends State<MainToSearchPage> {
       Map<String, dynamic> file, String fileType) {
     Widget page = fileType == 'lecture'
         ? RecordPage(
+            lecturefileId: file['id'],
             selectedFolderId: file['folder_id'].toString(),
             noteName: file['file_name'] ?? 'Unknown Note',
             fileUrl:
