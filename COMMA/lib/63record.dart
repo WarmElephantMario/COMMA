@@ -53,6 +53,7 @@ class _RecordPageState extends State<RecordPage> {
   int _currentPage = 1;
   final Set<int> _blurredPages = {};
   Map<int, String> pageTexts = {};
+  int? _lecturefileId;
 
 
 
@@ -190,6 +191,7 @@ Future<void> _insertInitialData() async {
       if (response.statusCode == 200) {
         var responseData = jsonDecode(response.body);
         var lecturefileId = responseData['id'];
+        _lecturefileId = responseData['id'];
         print('Lecture File added successfully');
 
         // 대체텍스트 타입일 때만 Alt_table에 추가로 데이터 저장
@@ -489,6 +491,7 @@ Future<void> _insertInitialData() async {
                                       widget.noteName,
                                       widget.lectureName,
                                       widget.fileUrl,
+                                      _lecturefileId!
                                       );
                                 },
                           width: MediaQuery.of(context).size.width * 0.3,
