@@ -19,7 +19,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 enum RecordingState { initial, recording, recorded }
 
 class RecordPage extends StatefulWidget {
-  final int? lecturefileId; 
+  final int? lecturefileId;
   final String selectedFolderId;
   final String noteName;
   final String fileUrl;
@@ -38,7 +38,6 @@ class RecordPage extends StatefulWidget {
     required this.folderName,
     required this.recordingState,
     required this.lectureName,
-    
     this.responseUrl,
     required this.type,
   });
@@ -58,8 +57,7 @@ class _RecordPageState extends State<RecordPage> {
   final Set<int> _blurredPages = {};
   Map<int, String> pageTexts = {};
   int? _lecturefileId;
-
-
+  bool _isColonCreated = false; // 추가: 콜론 생성 상태를 나타내는 프로퍼티
 
   late stt.SpeechToText _speech;
   bool _isListening = false;
@@ -79,80 +77,110 @@ class _RecordPageState extends State<RecordPage> {
     }
     _checkFileType();
     _loadPageTexts2(); // 대체 텍스트 URL 로드
+    _checkExistColon(); // 추가: 콜론 존재 여부 확인
+  }
+
+  Future<void> _checkExistColon() async {
+    var url =
+        '${API.baseUrl}/api/check-exist-colon?lecturefileId=${widget.lecturefileId}';
+    var response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      var jsonResponse = jsonDecode(response.body);
+      var existColon = jsonResponse['existColon'];
+
+      setState(() {
+        _isColonCreated = existColon != null;
+      });
+
+      // existColon이 null이 아닌 경우 showColonCreatedDialog 호출
+      if (existColon == null) {
+        showColonCreatedDialog(
+          context,
+          widget.folderName,
+          widget.noteName,
+          widget.lectureName,
+          widget.fileUrl,
+          _lecturefileId!,
+        );
+      } else {
+        print('이미 생성된 콜론이 존재합니다. 콜론 생성 다이얼로그를 실행하지 않습니다.');
+      }
+    } else {
+      print('Failed to check existColon: ${response.statusCode}');
+      print(response.body);
+    }
   }
 
   Future<void> _loadPageTexts2() async {
-  try {
+    try {
+      final response = await http.get(Uri.parse(
+          '${API.baseUrl}/api/get-alternative-text-url?lecturefileId=${widget.lecturefileId}'));
 
-    final response = await http.get(Uri.parse(
-        '${API.baseUrl}/api/get-alternative-text-url?lecturefileId=${widget.lecturefileId}'));
+      if (response.statusCode == 200) {
+        print('Response body: ${response.body}');
 
-    if (response.statusCode == 200) {
-      print('Response body: ${response.body}');
+        final fileData = jsonDecode(response.body);
+        final alternativeTextUrl = fileData['alternative_text_url'];
 
-      final fileData = jsonDecode(response.body);
-      final alternativeTextUrl = fileData['alternative_text_url'];
-      
-      if (alternativeTextUrl != null) {
-        final textResponse = await http.get(Uri.parse(alternativeTextUrl));
-        if (textResponse.statusCode == 200) {
-          final textLines = utf8.decode(textResponse.bodyBytes).split('\n');
-          setState(() {
-            pageTexts = {
-              for (int i = 0; i < textLines.length; i++) i + 1: textLines[i]
-            };
-          });
+        if (alternativeTextUrl != null) {
+          final textResponse = await http.get(Uri.parse(alternativeTextUrl));
+          if (textResponse.statusCode == 200) {
+            final textLines = utf8.decode(textResponse.bodyBytes).split('\n');
+            setState(() {
+              pageTexts = {
+                for (int i = 0; i < textLines.length; i++) i + 1: textLines[i]
+              };
+            });
+          } else {
+            print('Failed to fetch text file: ${textResponse.statusCode}');
+          }
         } else {
-          print('Failed to fetch text file: ${textResponse.statusCode}');
+          print('Alternative text URL is null');
         }
       } else {
-        print('Alternative text URL is null');
+        print('Failed to fetch alternative text URL: ${response.statusCode}');
+        print('Response body: ${response.body}');
       }
-    } else {
-      print('Failed to fetch alternative text URL: ${response.statusCode}');
-      print('Response body: ${response.body}');
+    } catch (e) {
+      print('Error occurred: $e');
     }
-  } catch (e) {
-    print('Error occurred: $e');
   }
-}
 
-Future<void> _loadPageTexts() async {
-  try {
+  Future<void> _loadPageTexts() async {
+    try {
+      final response = await http.get(Uri.parse(
+          '${API.baseUrl}/api/get-alternative-text-url?lecturefileId=$_lecturefileId'));
 
-    final response = await http.get(Uri.parse(
-        '${API.baseUrl}/api/get-alternative-text-url?lecturefileId=$_lecturefileId'));
+      if (response.statusCode == 200) {
+        print('Response body: ${response.body}');
 
-    if (response.statusCode == 200) {
-      print('Response body: ${response.body}');
+        final fileData = jsonDecode(response.body);
+        final alternativeTextUrl = fileData['alternative_text_url'];
 
-      final fileData = jsonDecode(response.body);
-      final alternativeTextUrl = fileData['alternative_text_url'];
-      
-      if (alternativeTextUrl != null) {
-        final textResponse = await http.get(Uri.parse(alternativeTextUrl));
-        if (textResponse.statusCode == 200) {
-          final textLines = utf8.decode(textResponse.bodyBytes).split('\n');
-          setState(() {
-            pageTexts = {
-              for (int i = 0; i < textLines.length; i++) i + 1: textLines[i]
-            };
-          });
+        if (alternativeTextUrl != null) {
+          final textResponse = await http.get(Uri.parse(alternativeTextUrl));
+          if (textResponse.statusCode == 200) {
+            final textLines = utf8.decode(textResponse.bodyBytes).split('\n');
+            setState(() {
+              pageTexts = {
+                for (int i = 0; i < textLines.length; i++) i + 1: textLines[i]
+              };
+            });
+          } else {
+            print('Failed to fetch text file: ${textResponse.statusCode}');
+          }
         } else {
-          print('Failed to fetch text file: ${textResponse.statusCode}');
+          print('Alternative text URL is null');
         }
       } else {
-        print('Alternative text URL is null');
+        print('Failed to fetch alternative text URL: ${response.statusCode}');
+        print('Response body: ${response.body}');
       }
-    } else {
-      print('Failed to fetch alternative text URL: ${response.statusCode}');
-      print('Response body: ${response.body}');
+    } catch (e) {
+      print('Error occurred: $e');
     }
-  } catch (e) {
-    print('Error occurred: $e');
   }
-}
-
 
   void _toggleBlur(int page) {
     setState(() {
@@ -210,73 +238,74 @@ Future<void> _loadPageTexts() async {
     }
   }
 
-Future<void> _insertInitialData() async {
-  final userProvider = Provider.of<UserProvider>(context, listen: false);
-  final userKey = userProvider.user?.userKey;
+  Future<void> _insertInitialData() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userKey = userProvider.user?.userKey;
 
-  if (userKey != null) {
-    var url = '${API.baseUrl}/api/lecture-files';
-    var body = {
-      'folder_id': widget.selectedFolderId,
-      'file_name': widget.noteName,
-      'file_url': widget.fileUrl,
-      'lecture_name': widget.lectureName,
-      'type': widget.type, // 대체인지 실시간인지
-      'userKey': userKey,
-    };
+    if (userKey != null) {
+      var url = '${API.baseUrl}/api/lecture-files';
+      var body = {
+        'folder_id': widget.selectedFolderId,
+        'file_name': widget.noteName,
+        'file_url': widget.fileUrl,
+        'lecture_name': widget.lectureName,
+        'type': widget.type, // 대체인지 실시간인지
+        'userKey': userKey,
+      };
 
-    try {
-      var response = await http.post(
-        Uri.parse(url),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(body),
-      );
+      try {
+        var response = await http.post(
+          Uri.parse(url),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(body),
+        );
 
-      if (response.statusCode == 200) {
-        var responseData = jsonDecode(response.body);
-        var lecturefileId = responseData['id'];  //sql에 집어넣어서 파일 생성, 이제 file id 받아옴
-        _lecturefileId = responseData['id'];     //전역변수에 넣어줌
-        print('Lecture File added successfully');
+        if (response.statusCode == 200) {
+          var responseData = jsonDecode(response.body);
+          var lecturefileId =
+              responseData['id']; //sql에 집어넣어서 파일 생성, 이제 file id 받아옴
+          _lecturefileId = responseData['id']; //전역변수에 넣어줌
+          print('Lecture File added successfully');
 
-        // 대체텍스트 타입일 때만 Alt_table에 추가로 데이터 저장
-        if (widget.type == 0) {
-          print('Alt_table에 대체텍스트 url 저장하겠습니다');
+          // 대체텍스트 타입일 때만 Alt_table에 추가로 데이터 저장
+          if (widget.type == 0) {
+            print('Alt_table에 대체텍스트 url 저장하겠습니다');
 
-          var altTableUrl = '${API.baseUrl}/api/alt-table';
-          var altTableBody = {
-            'lecturefile_id': lecturefileId,
-            'colonfile_id': null, // 필요 시 적절한 colonfile_id 값을 제공
-            'alternative_text_url': widget.responseUrl,
-          };
+            var altTableUrl = '${API.baseUrl}/api/alt-table';
+            var altTableBody = {
+              'lecturefile_id': lecturefileId,
+              'colonfile_id': null, // 필요 시 적절한 colonfile_id 값을 제공
+              'alternative_text_url': widget.responseUrl,
+            };
 
-          var altTableResponse = await http.post(
-            Uri.parse(altTableUrl),
-            headers: {'Content-Type': 'application/json'},
-            body: jsonEncode(altTableBody),
-          );
+            var altTableResponse = await http.post(
+              Uri.parse(altTableUrl),
+              headers: {'Content-Type': 'application/json'},
+              body: jsonEncode(altTableBody),
+            );
 
-          if (altTableResponse.statusCode == 200) {
-            print('Alt_table에 대체텍스트 url 저장 완료');
-            print('대체텍스트 url 로드하겠습니다');
-            await _loadPageTexts(); // 대체텍스트 로드
-            print('대체텍스트 url 로드 완료');
-          } else {
-            print('Failed to add alt table entry: ${altTableResponse.statusCode}');
-            print(altTableResponse.body);
+            if (altTableResponse.statusCode == 200) {
+              print('Alt_table에 대체텍스트 url 저장 완료');
+              print('대체텍스트 url 로드하겠습니다');
+              await _loadPageTexts(); // 대체텍스트 로드
+              print('대체텍스트 url 로드 완료');
+            } else {
+              print(
+                  'Failed to add alt table entry: ${altTableResponse.statusCode}');
+              print(altTableResponse.body);
+            }
           }
+        } else {
+          print('Failed to add file: ${response.statusCode}');
+          print(response.body);
         }
-      } else {
-        print('Failed to add file: ${response.statusCode}');
-        print(response.body);
+      } catch (e) {
+        print('Error during HTTP request: $e');
       }
-    } catch (e) {
-      print('Error during HTTP request: $e');
+    } else {
+      print('User ID is null, cannot insert initial data.');
     }
-  } else {
-    print('User ID is null, cannot insert initial data.');
   }
-}
-
 
   Future<void> _fetchCreatedAt() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
@@ -332,7 +361,6 @@ Future<void> _insertInitialData() async {
     await _fetchCreatedAt();
   }
 
-
   void _listen() async {
     if (!_isListening) {
       bool available = await _speech.initialize(
@@ -359,7 +387,6 @@ Future<void> _insertInitialData() async {
 
   // 파이어베이스에 자막 txt 저장
   Future<void> _saveTranscript() async {
-
     try {
       Uint8List fileBytes = Uint8List.fromList(utf8.encode(_recognizedText));
 
@@ -369,7 +396,8 @@ Future<void> _insertInitialData() async {
         final storageRef = FirebaseStorage.instance.ref().child(
             'record/$userKey/${widget.selectedFolderId}/${_lecturefileId}/자막.txt');
 
-        UploadTask uploadTask = storageRef.putData(fileBytes, SettableMetadata(contentType: 'text/plain; charset=utf-8'));
+        UploadTask uploadTask = storageRef.putData(fileBytes,
+            SettableMetadata(contentType: 'text/plain; charset=utf-8'));
 
         TaskSnapshot taskSnapshot = await uploadTask;
         String downloadURL = await taskSnapshot.ref.getDownloadURL();
@@ -417,7 +445,9 @@ Future<void> _insertInitialData() async {
                               builder: (context) => LectureStartPage(
                                     fileName: widget.noteName,
                                     fileURL: widget.fileUrl,
-                                    responseUrl: widget.responseUrl != null ? widget.responseUrl : null,
+                                    responseUrl: widget.responseUrl != null
+                                        ? widget.responseUrl
+                                        : null,
                                     type: widget.type,
                                   )),
                         );
@@ -550,19 +580,20 @@ Future<void> _insertInitialData() async {
                           height: 40.0,
                           iconData: Icons.mic_off,
                           iconColor: Colors.white,
-                          backgroundColor: const Color(0xFF9FACBD),
+                          backgroundColor: Colors.grey,
                         ),
                         const SizedBox(width: 2),
                         // 콜론 생성 버튼 클릭 시 로직 추가 부분
                         ClickButton(
                           text: '콜론 생성(:)',
+                          backgroundColor: _isColonCreated ? Colors.grey : null,
                           onPressed: () async {
                             print('콜론 생성 버튼 클릭됨');
                             print('LecturefileId:${widget.lecturefileId}');
 
-
                             // 현재 lecturefile에 existColon 값 확인
-                            var url = '${API.baseUrl}/api/check-exist-colon?lecturefileId=${widget.lecturefileId}';
+                            var url =
+                                '${API.baseUrl}/api/check-exist-colon?lecturefileId=${widget.lecturefileId}';
                             var response = await http.get(Uri.parse(url));
 
                             if (response.statusCode == 200) {
@@ -580,17 +611,18 @@ Future<void> _insertInitialData() async {
                                   _lecturefileId!,
                                 );
                               } else {
-                                print('이미 생성된 콜론이 존재합니다. 콜론 생성 다이얼로그를 실행하지 않습니다.');
+                                print(
+                                    '이미 생성된 콜론이 존재합니다. 콜론 생성 다이얼로그를 실행하지 않습니다.');
                               }
                             } else {
-                              print('Failed to check existColon: ${response.statusCode}');
+                              print(
+                                  'Failed to check existColon: ${response.statusCode}');
                               print(response.body);
                             }
                           },
                           width: MediaQuery.of(context).size.width * 0.3,
                           height: 40.0,
                         ),
-
                       ],
                     ),
                 ],
