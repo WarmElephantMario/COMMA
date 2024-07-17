@@ -13,6 +13,8 @@ import 'components.dart';
 import 'api/api.dart';
 import 'model/user_provider.dart';
 import '62lecture_start.dart';
+import 'package:path/path.dart' as path;
+import 'package:firebase_storage/firebase_storage.dart';
 
 enum RecordingState { initial, recording, recorded }
 
@@ -284,6 +286,7 @@ Future<void> _insertInitialData() async {
       _isListening = false;
     });
     _speech.stop(); // 녹음이 중지될 때 리스닝 중지
+    await _saveTranscript(); // 녹음 종료 시 텍스트 파일로 저장 및 업로드
     await _fetchCreatedAt();
   }
 
@@ -309,6 +312,34 @@ Future<void> _insertInitialData() async {
     } else {
       setState(() => _isListening = false);
       _speech.stop();
+    }
+  }
+
+  // 파이어베이스에 자막 txt 저장
+  Future<void> _saveTranscript() async {
+
+    try {
+      Uint8List fileBytes = Uint8List.fromList(utf8.encode(_recognizedText));
+
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final userKey = userProvider.user?.userKey;
+      if (userKey != null) {
+        final storageRef = FirebaseStorage.instance.ref().child(
+            'record/$userKey/${widget.selectedFolderId}/${_lecturefileId}/자막.txt');
+
+        UploadTask uploadTask = storageRef.putData(fileBytes, SettableMetadata(contentType: 'text/plain; charset=utf-8'));
+
+        TaskSnapshot taskSnapshot = await uploadTask;
+        String downloadURL = await taskSnapshot.ref.getDownloadURL();
+        print('Transcript uploaded: $downloadURL');
+
+        // Record_Table에 데이터 추가
+        // await _insertRecordData(userKey, downloadURL);
+      } else {
+        print('User ID is null, cannot save transcript.');
+      }
+    } catch (e) {
+      print('Error saving transcript: $e');
     }
   }
 
