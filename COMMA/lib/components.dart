@@ -300,7 +300,7 @@ void showConfirmationDialog(
 // 콜론 폴더 생성 및 파일 생성 함수
 Future<int> createColonFolder(String folderName, String noteName,
     String fileUrl, String lectureName, int userKey) async {
-  var url = '${API.baseUrl}/api/create-colon-folder';
+  var url = '${API.baseUrl}/api/create-colon';
 
   var body = {
     'folderName': folderName,
@@ -311,6 +311,8 @@ Future<int> createColonFolder(String folderName, String noteName,
   };
 
   try {
+    print('Sending request to $url with body: $body');
+
     var response = await http.post(
       Uri.parse(url),
       headers: {'Content-Type': 'application/json'},
@@ -323,6 +325,7 @@ Future<int> createColonFolder(String folderName, String noteName,
       return jsonResponse['folder_id'];
     } else {
       print('Failed to create folder and file: ${response.statusCode}');
+      print('Response body: ${response.body}');
       return -1;
     }
   } catch (e) {
@@ -330,6 +333,7 @@ Future<int> createColonFolder(String folderName, String noteName,
     return -1;
   }
 }
+
 
 
 // 콜론 생성 다이얼로그 함수
