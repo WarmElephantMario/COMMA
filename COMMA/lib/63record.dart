@@ -34,6 +34,7 @@ class RecordPage extends StatefulWidget {
     required this.folderName,
     required this.recordingState,
     required this.lectureName,
+    
     required this.responseUrl,
     required this.type,
   });
