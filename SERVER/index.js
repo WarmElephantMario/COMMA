@@ -533,42 +533,46 @@ app.get('/api/searchFiles', (req, res) => {
     });
 });
 
-// 강의파일 생성 - 실시간 자막 (response url 저장하지 않음)
+// 강의 파일 생성 (실시간 자막, 대체텍스트 동일)
+// id(PK), folder_id, file_name, file_url, lecture_name, created_at, type, existColon (id) 저장함
+// type은 0이면 대체, 1이면 실시간 자막.
+// existColon은 처음엔 무조건 NULL로 삽입함
 app.post('/api/lecture-files', (req, res) => {
     console.log('POST /api/lecture-files called');
-    const { folder_id, file_name, file_url, lecture_name } = req.body;
+    const { folder_id, file_name, file_url, lecture_name, type } = req.body;
 
     if (!folder_id || !file_name) {
         return res.status(400).json({ success: false, error: 'You must provide folder_id and file_name.' });
     }
 
-    const sql = 'INSERT INTO LectureFiles (folder_id, file_name, file_url, lecture_name) VALUES (?, ?, ?, ?)';
-    db.query(sql, [folder_id, file_name, file_url, lecture_name], (err, result) => {
+    const sql = 'INSERT INTO LectureFiles (folder_id, file_name, file_url, lecture_name, type) VALUES (?, ?, ?, ?, ?)';
+    db.query(sql, [folder_id, file_name, file_url, lecture_name, type], (err, result) => {
         if (err) {
             return res.status(500).json({ success: false, error: err.message });
         }
-        res.json({ success: true, id: result.insertId, folder_id, file_name, file_url, lecture_name });
+        res.json({ success: true, id: result.insertId, folder_id, file_name, file_url, lecture_name, type });
     });
 });
 
-// 강의파일 생성 - 대체텍스트 (response url 저장함)
-app.post('/api/lecture-files2', (req, res) => {
-    console.log('POST /api/lecture-files2 called');
-    // 'alternative_text_url': widget.responseUrl,
-    const { folder_id, file_name, file_url, lecture_name, alternative_text_url } = req.body;
 
-    if (!folder_id || !file_name) {
-        return res.status(400).json({ success: false, error: 'You must provide folder_id and file_name.' });
+//대체텍스트 파일 생성 시 responseUrl 저장
+app.post('/api/alt-table', (req, res) => {
+    console.log('POST /api/alt-table called');
+    const { lecturefile_id, colonfile_id, alternative_text_url } = req.body;
+
+    if (!lecturefile_id || !alternative_text_url) {
+        return res.status(400).json({ success: false, error: 'You must provide lecturefile_id and alternative_text_url.' });
     }
 
-    const sql = 'INSERT INTO LectureFiles (folder_id, file_name, file_url, lecture_name, alternative_text_url) VALUES (?, ?, ?, ?, ?)';
-    db.query(sql, [folder_id, file_name, file_url, lecture_name, alternative_text_url], (err, result) => {
+    const sql = 'INSERT INTO Alt_table (lecturefile_id, colonfile_id, alternative_text_url) VALUES (?, ?, ?)';
+    db.query(sql, [lecturefile_id, colonfile_id, alternative_text_url], (err, result) => {
         if (err) {
             return res.status(500).json({ success: false, error: err.message });
         }
-        res.json({ success: true, id: result.insertId, folder_id, file_name, file_url, lecture_name, alternative_text_url });
+        res.json({ success: true, lecturefile_id, colonfile_id, alternative_text_url });
     });
 });
+
 
 
 //콜론 폴더 생성
@@ -741,15 +745,15 @@ app.get('/api/get-folder-name', (req, res) => {
 
 // 대체 텍스트 URL 가져오기
 app.get('/api/get-alternative-text-url', (req, res) => {
-    const { folderId, fileName } = req.query;
+    const { lecturefileId } = req.query;
 
     const sql = `
         SELECT alternative_text_url
-        FROM LectureFiles
-        WHERE folder_id = ? AND file_name = ?
+        FROM Alt_table
+        WHERE lecturefile_id = ?
     `;
 
-    db.query(sql, [folderId, fileName], (err, results) => {
+    db.query(sql, [lecturefileId], (err, results) => {
         if (err) {
             return res.status(500).json({ success: false, error: err.message });
         }
@@ -761,6 +765,7 @@ app.get('/api/get-alternative-text-url', (req, res) => {
         }
     });
 });
+
 
 
 

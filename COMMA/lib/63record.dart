@@ -33,6 +33,7 @@ class RecordPage extends StatefulWidget {
     required this.folderName,
     required this.recordingState,
     required this.lectureName,
+    
     required this.responseUrl,
     required this.type,
   });
@@ -72,41 +73,38 @@ class _RecordPageState extends State<RecordPage> {
     // _loadPageTexts(); // 대체 텍스트 URL 로드
   }
 
-  Future<void> _loadPageTexts() async {
-    try {
-      // print('${widget.selectedFolderId}');
-      // print('${widget.noteName}');
-      final response = await http.get(Uri.parse(
-          '${API.baseUrl}/api/get-alternative-text-url?folderId=${widget.selectedFolderId}&fileName=${widget.noteName}'));
-      if (response.statusCode == 200) {
-        print('Response body: ${response.body}');
-        final fileData = jsonDecode(response.body);
-        final alternativeTextUrl = fileData['alternative_text_url'];
-        if (alternativeTextUrl != null) {
-          final textResponse = await http.get(Uri.parse(alternativeTextUrl));
-          if (textResponse.statusCode == 200) {
-            //print('Text response body: ${textResponse.body}');
-            // UTF-8 인코딩으로 텍스트 읽기
-            final textLines = utf8.decode(textResponse.bodyBytes).split('\n');
-            setState(() {
-              pageTexts = {
-                for (int i = 0; i < textLines.length; i++) i + 1: textLines[i]
-              };
-            });
-          } else {
-            print('Failed to fetch text file: ${textResponse.statusCode}');
-          }
+Future<void> _loadPageTexts(int lecturefileId) async {
+  try {
+    final response = await http.get(Uri.parse(
+        '${API.baseUrl}/api/get-alternative-text-url?lecturefileId=$lecturefileId'));
+    if (response.statusCode == 200) {
+      print('Response body: ${response.body}');
+      final fileData = jsonDecode(response.body);
+      final alternativeTextUrl = fileData['alternative_text_url'];
+      if (alternativeTextUrl != null) {
+        final textResponse = await http.get(Uri.parse(alternativeTextUrl));
+        if (textResponse.statusCode == 200) {
+          final textLines = utf8.decode(textResponse.bodyBytes).split('\n');
+          setState(() {
+            pageTexts = {
+              for (int i = 0; i < textLines.length; i++) i + 1: textLines[i]
+            };
+          });
         } else {
-          print('Alternative text URL is null');
+          print('Failed to fetch text file: ${textResponse.statusCode}');
         }
       } else {
-        print('Failed to fetch alternative text URL: ${response.statusCode}');
-        print('Response body: ${response.body}');
+        print('Alternative text URL is null');
       }
-    } catch (e) {
-      print('Error occurred: $e');
+    } else {
+      print('Failed to fetch alternative text URL: ${response.statusCode}');
+      print('Response body: ${response.body}');
     }
+  } catch (e) {
+    print('Error occurred: $e');
   }
+}
+
 
   void _toggleBlur(int page) {
     setState(() {
@@ -169,18 +167,19 @@ class _RecordPageState extends State<RecordPage> {
     final userKey = userProvider.user?.userKey;
 
     if (userKey != null) {
-      if (widget.type == 1) {
-        //대체텍스트 파일이면, response url까지 삽입
-        print('대체텍스트 파일이니까 api 2로 갈께요');
-        print('전달받은 대체텍스트 url: ${widget.responseUrl}');
 
-        var url = '${API.baseUrl}/api/lecture-files2';
+      //대체텍스트 파일, type=0 저장 후 대체텍스트도 Alt_table에 저장하고 load까지
+      if (widget.type == 0){ 
+        print('대체텍스트 파일이라고 전달 받았습니다');
+        print('대체텍스트 텍스트파일 업로드 url: ${widget.responseUrl}');
+
+        var url = '${API.baseUrl}/api/lecture-files';
         var body = {
           'folder_id': widget.selectedFolderId,
           'file_name': widget.noteName,
           'file_url': widget.fileUrl,
           'lecture_name': widget.lectureName,
-          'alternative_text_url': widget.responseUrl,
+          'type' : 1,
           'userKey': userKey,
         };
         try {
@@ -190,8 +189,35 @@ class _RecordPageState extends State<RecordPage> {
             body: jsonEncode(body),
           );
           if (response.statusCode == 200) {
-            print('자 sql에 삽입까지 잘 됐으니까 이제 로드한다!!!!!!!!!!!!!!!!!!!!');
-            _loadPageTexts(); // 대체 텍스트 URL 로드
+            var responseData = jsonDecode(response.body);
+            var lecturefileId = responseData['id'];
+            print('Alt_table에 대체텍스트 url 저장하겠습니다');
+
+            // Alt_table에 데이터 저장
+            var altTableUrl = '${API.baseUrl}/api/alt-table';
+            var altTableBody = {
+              'lecturefile_id': lecturefileId,
+              'colonfile_id': null, // 필요 시 적절한 colonfile_id 값을 제공
+              'alternative_text_url': widget.responseUrl,
+            };
+            
+            var altTableResponse = await http.post(
+              Uri.parse(altTableUrl),
+                headers: {'Content-Type': 'application/json'},
+                body: jsonEncode(altTableBody),
+            );
+            
+            if (altTableResponse.statusCode == 200) {
+              print('Alt_table에 대체텍스트 url 저장 완료');
+            } else {
+              print('Failed to add alt table entry: ${altTableResponse.statusCode}');
+              print(altTableResponse.body);
+            }
+
+            print('대체텍스트 url 로드하겠습니다');
+            await _loadPageTexts(lecturefileId); // 대체텍스트 로드
+            print('대체텍스트 url 로드 완료');
+
           } else {
             print('Failed to add file: ${response.statusCode}');
             print(response.body);
@@ -200,14 +226,14 @@ class _RecordPageState extends State<RecordPage> {
           print('Error during HTTP request: $e');
         }
       } else {
-        //실시간 자막 파일이면, response url은 삽입할 필요 없음
-        //const { folder_id, file_name, file_url, lecture_name } = req.body;
+        //실시간 자막 파일, type=1 저장 
         var url = '${API.baseUrl}/api/lecture-files';
         var body = {
           'folder_id': widget.selectedFolderId,
           'file_name': widget.noteName,
           'file_url': widget.fileUrl,
           'lecture_name': widget.lectureName,
+          'type' : 1,
           'userKey': userKey,
         };
         try {

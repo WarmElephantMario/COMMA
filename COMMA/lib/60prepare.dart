@@ -165,24 +165,20 @@ class _LearningPreparationState extends State<LearningPreparation> {
     const String apiKey = Env.apiKey;
     final Uri apiUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
 
-    try {
-      var messages = imageUrls
-          .map((url) => {
-                'role': 'user',
-                'content': [
-                  {
-                    'type': 'text',
-                    'text': isAlternativeTextEnabled
-                        ? '해당 강의 자료의 내용을 대체텍스트로 변환해주세요. 시각장애인이 이 텍스트를 읽고 강의 자료의 어느 위치에 어떠한 정보가 있는지 알 수 있어야 해요. 강의 자료에 보이는 글은 텍스트로 그대로 옮겨 적어주세요. 대체텍스트의 줄바꿈은 강의 자료의 페이지가 구분될 때에만 넣어주세요.'
-                        : '이미지 속에 있는 키워드를 중복되지 않는 것으로 최대한 많이 말해주세요. 줄바꿈 없이 단순히 키워드를 나열해주세요.'
-                  },
-                  {
-                    'type': 'image_url',
-                    'image_url': {'url': url}
-                  }
-                ]
-              })
-          .toList();
+  try {
+    var messages = imageUrls.map((url) => {
+      'role': 'user',
+      'content': [
+        {'type': 'text', 
+        'text': isAlternativeTextEnabled ? 
+        '해당 강의 자료의 내용을 대체텍스트로 변환해주세요. 시각장애인이 이 텍스트를 읽고 강의 자료의 어느 위치에 어떠한 정보가 있는지 알 수 있어야 해요. 강의 자료에 보이는 글은 텍스트로 그대로 옮겨 적어주세요. 줄바꿈 없는 줄글로 쭉 적어주되, 줄바꿈은 오직 강의 자료의 페이지가 구분될 때에만 넣어주세요.' 
+        : '이미지 속에 있는 키워드를 중복되지 않는 것으로 최대한 많이 말해주세요. 줄바꿈 없이 단순히 키워드를 나열해주세요.'},
+        {
+          'type': 'image_url',
+          'image_url': {'url': url}
+        }
+      ]
+    }).toList();
 
       var response = await http.post(
         apiUrl,
@@ -339,7 +335,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
                               final userProvider = Provider.of<UserProvider>(
                                   context,
                                   listen: false);
-                              int type = isAlternativeTextEnabled ? 1 : 0;
+                              int type = isAlternativeTextEnabled ? 0 : 1; //대체면 0, 실시간이면 1
 
                               if (_isPDF) {
                                 if (_fileBytes != null) {
@@ -365,7 +361,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
                                           fileName: _selectedFileName!,
                                           fileURL: _downloadURL!,
                                           responseUrl: responseUrl,
-                                          type: type,
+                                          type: type, //대체인지 실시간인지 전달해줌
                                         ),
                                       ),
                                     );
