@@ -553,24 +553,44 @@ Future<void> _insertInitialData() async {
                           backgroundColor: const Color(0xFF9FACBD),
                         ),
                         const SizedBox(width: 2),
+                        // 콜론 생성 버튼 클릭 시 로직 추가 부분
                         ClickButton(
                           text: '콜론 생성(:)',
-                          onPressed: 
-                              () {
-                                  print('콜론 생성 버튼 클릭됨');
-                                  showColonCreatedDialog(
-                                      context,
-                                      widget.folderName,
-                                      widget.noteName,
-                                      widget.lectureName,
-                                      widget.fileUrl,
-                                      _lecturefileId!
-                                      );
-                                },
+                          onPressed: () async {
+                            print('콜론 생성 버튼 클릭됨');
+                            print('LecturefileId:${widget.lecturefileId}');
+
+
+                            // 현재 lecturefile에 existColon 값 확인
+                            var url = '${API.baseUrl}/api/check-exist-colon?lecturefileId=${widget.lecturefileId}';
+                            var response = await http.get(Uri.parse(url));
+
+                            if (response.statusCode == 200) {
+                              var jsonResponse = jsonDecode(response.body);
+                              var existColon = jsonResponse['existColon'];
+
+                              // existColon이 null이 아닌 경우 showColonCreatedDialog 호출
+                              if (existColon == null) {
+                                showColonCreatedDialog(
+                                  context,
+                                  widget.folderName,
+                                  widget.noteName,
+                                  widget.lectureName,
+                                  widget.fileUrl,
+                                  _lecturefileId!,
+                                );
+                              } else {
+                                print('이미 생성된 콜론이 존재합니다. 콜론 생성 다이얼로그를 실행하지 않습니다.');
+                              }
+                            } else {
+                              print('Failed to check existColon: ${response.statusCode}');
+                              print(response.body);
+                            }
+                          },
                           width: MediaQuery.of(context).size.width * 0.3,
                           height: 40.0,
-      
                         ),
+
                       ],
                     ),
                 ],
