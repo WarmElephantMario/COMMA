@@ -555,6 +555,7 @@ app.post('/api/lecture-files', (req, res) => {
 });
 
 
+
 //대체텍스트 파일 생성 시 responseUrl 저장
 app.post('/api/alt-table', (req, res) => {
     console.log('POST /api/alt-table called');
@@ -573,13 +574,13 @@ app.post('/api/alt-table', (req, res) => {
     });
 });
 
-
-
-//콜론 폴더 생성
-app.post('/api/create-colon-folder', (req, res) => {
+//콜론파일 폴더 생성 및 파일 생성
+//아직 lecturefile에는 삽입전
+app.post('/api/create-colon', (req, res) => {
     const { folderName, noteName, fileUrl, lectureName, userKey } = req.body;
 
     console.log('Received request to create colon folder:', { folderName, noteName, fileUrl, lectureName, userKey });
+
     // Check if the folder already exists for the same user
     const checkFolderQuery = 'SELECT id FROM ColonFolders WHERE folder_name = ? AND userKey = ?';
     db.query(checkFolderQuery, [folderName, userKey], (err, results) => {
@@ -588,19 +589,27 @@ app.post('/api/create-colon-folder', (req, res) => {
             return res.status(500).json({ error: 'Failed to check folder existence' });
         }
 
-        if (results.length > 0) {
-            // Folder exists, use the existing folder id
-            const folderId = results[0].id;
-
-            // Insert file into the existing folder
+        const insertFileAndReturnId = (folderId) => {
+            // Insert file into the folder
             const insertFileQuery = 'INSERT INTO ColonFiles (folder_id, file_name, file_url, lecture_name, created_at) VALUES (?, ?, ?, ?, NOW())';
             db.query(insertFileQuery, [folderId, noteName, fileUrl, lectureName], (err, result) => {
                 if (err) {
                     console.error('Failed to add file to folder:', err);
                     return res.status(500).json({ error: 'Failed to add file to folder' });
                 }
-                res.status(200).json({ message: 'File added to existing folder successfully', folder_id: folderId });
+                const colonFileId = result.insertId;
+                console.log('File added to ColonFiles, file ID:', colonFileId);
+
+                // Return the colonFileId instead of inserting into LectureFiles
+                res.status(200).json({ message: 'File added to ColonFiles successfully', colonFileId: colonFileId, folder_id: folderId });
             });
+        };
+
+        if (results.length > 0) {
+            // Folder exists, use the existing folder id
+            const folderId = results[0].id;
+            console.log('Folder exists, using existing folder ID:', folderId);
+            insertFileAndReturnId(folderId);
         } else {
             // Folder does not exist, create a new folder
             const createFolderQuery = 'INSERT INTO ColonFolders (folder_name, userKey) VALUES (?, ?)';
@@ -610,18 +619,23 @@ app.post('/api/create-colon-folder', (req, res) => {
                     return res.status(500).json({ error: 'Failed to create folder' });
                 }
                 const folderId = result.insertId;
-
-                // Insert file into the new folder
-                const insertFileQuery = 'INSERT INTO ColonFiles (folder_id, file_name, file_url, lecture_name, created_at) VALUES (?, ?, ?, ?, NOW())';
-                db.query(insertFileQuery, [folderId, noteName, fileUrl, lectureName], (err, result) => {
-                    if (err) {
-                        console.error('Failed to add file to new folder:', err);
-                        return res.status(500).json({ error: 'Failed to add file to new folder' });
-                    }
-                    res.status(200).json({ message: 'Folder and file created successfully', folder_id: folderId });
-                });
+                console.log('Folder created successfully, new folder ID:', folderId);
+                insertFileAndReturnId(folderId);
             });
         }
+    });
+});
+
+app.post('/api/update-lecture-file', (req, res) => {
+    const { lectureFileId, colonFileId } = req.body;
+
+    const updateQuery = 'UPDATE LectureFiles SET existColon = ? WHERE id = ?';
+    db.query(updateQuery, [colonFileId, lectureFileId], (err, result) => {
+        if (err) {
+            console.error('Failed to update lecture file:', err);
+            return res.status(500).json({ error: 'Failed to update lecture file' });
+        }
+        res.status(200).json({ message: 'Lecture file updated successfully' });
     });
 });
 
