@@ -36,9 +36,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
   @override
   void initState() {
     super.initState();
-    // 기본 폴더 ID를 설정 (예: -1)
-    int currentFolderId = -1;
-    fetchFolderList(currentFolderId);
+    fetchFolderList();
   }
 
   void _onItemTapped(int index) {
@@ -47,47 +45,46 @@ class _LectureStartPageState extends State<LectureStartPage> {
     });
   }
 
-  Future<void> fetchFolderList(int currentFolderId) async {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userKey = userProvider.user?.userKey;
+  Future<void> fetchFolderList() async {
+  final userProvider = Provider.of<UserProvider>(context, listen: false);
+  final userKey = userProvider.user?.userKey;
 
-    if (userKey != null) {
-      try {
-        // currentFolderId를 쿼리 파라미터로 포함
-        final uri = Uri.parse(
-            '${API.baseUrl}/api/lecture-folders?userKey=$userKey&currentFolderId=$currentFolderId');
-        final response = await http.get(uri);
+  if (userKey != null) {
+    try {
+      // currentFolderId를 쿼리 파라미터로 포함
+      final uri = Uri.parse('${API.baseUrl}/api/lecture-folders?userKey=$userKey');
+      final response = await http.get(uri);
 
-        if (response.statusCode == 200) {
-          final List<dynamic> folderData = json.decode(response.body);
+      if (response.statusCode == 200) {
+        final List<dynamic> folderData = json.decode(response.body);
 
-          setState(() {
-            // 현재 선택된 폴더를 제외하고 나머지 폴더 목록 업데이트
-            folderList = folderData
-                .map((folder) => {
-                      'id': folder['id'],
-                      'folder_name': folder['folder_name'],
-                      'selected': false,
-                    })
-                .toList();
+        setState(() {
+          // 현재 선택된 폴더를 제외하고 나머지 폴더 목록 업데이트
+          folderList = folderData
+              .map((folder) => {
+                    'id': folder['id'],
+                    'folder_name': folder['folder_name'],
+                    'selected': false,
+                  })
+              .toList();
 
-            var defaultFolder = folderList.firstWhere(
-                (folder) => folder['folder_name'] == '기본 폴더',
-                orElse: () => <String, dynamic>{});
-            if (defaultFolder.isNotEmpty) {
-              _selectFolder(defaultFolder['folder_name']);
-            }
-          });
-        } else {
-          throw Exception('Failed to load folders');
-        }
-      } catch (e) {
-        print('Folder list fetch failed: $e');
+          var defaultFolder = folderList.firstWhere(
+              (folder) => folder['folder_name'] == '기본 폴더',
+              orElse: () => <String, dynamic>{});
+          if (defaultFolder.isNotEmpty) {
+            _selectFolder(defaultFolder['folder_name']);
+          }
+        });
+      } else {
+        throw Exception('Failed to load folders');
       }
-    } else {
-      print('User Key is null, cannot fetch folders.');
+    } catch (e) {
+      print('Folder list fetch failed: $e');
     }
+  } else {
+    print('User Key is null, cannot fetch folders.');
   }
+}
 
   void _selectFolder(String folderName) {
     setState(() {
@@ -96,37 +93,35 @@ class _LectureStartPageState extends State<LectureStartPage> {
   }
 
   Future<void> fetchOtherFolders(String fileType, int currentFolderId) async {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userKey = userProvider.user?.userKey;
+  final userProvider = Provider.of<UserProvider>(context, listen: false);
+  final userKey = userProvider.user?.userKey;
 
-    if (userKey != null) {
-      try {
-        final uri = Uri.parse(
-            '${API.baseUrl}/api/getOtherFolders/$fileType/$currentFolderId?userKey=$userKey');
-        final response = await http.get(uri);
+  if (userKey != null) {
+    try {
+      final uri = Uri.parse(
+          '${API.baseUrl}/api/getOtherFolders/$fileType/$userKey=$userKey');
+      final response = await http.get(uri);
 
-        if (response.statusCode == 200) {
-          List<Map<String, dynamic>> fetchedFolders =
-              List<Map<String, dynamic>>.from(jsonDecode(response.body));
+      if (response.statusCode == 200) {
+        List<Map<String, dynamic>> fetchedFolders =
+            List<Map<String, dynamic>>.from(jsonDecode(response.body));
 
-          setState(() {
-            // 기존의 폴더 리스트를 업데이트하는 대신, fetchedFolders를 사용합니다.
-            folderList = fetchedFolders;
-            folderList.removeWhere((folder) => folder['id'] == currentFolderId);
-          });
-        } else {
-          throw Exception(
-              'Failed to load folders with status code: ${response.statusCode}');
-        }
-      } catch (e) {
-        print('Error fetching other folders: $e');
-        rethrow;
+        setState(() {
+          // 기존의 폴더 리스트를 업데이트하는 대신, fetchedFolders를 사용합니다.
+          folderList = fetchedFolders;
+        });
+      } else {
+        throw Exception(
+            'Failed to load folders with status code: ${response.statusCode}');
       }
-    } else {
-      print('User Key is null, cannot fetch folders.');
+    } catch (e) {
+      print('Error fetching other folders: $e');
+      rethrow;
     }
+  } else {
+    print('User Key is null, cannot fetch folders.');
   }
-
+}
   Future<void> renameItem(String newName) async {
     setState(() {
       _noteName = newName;
@@ -240,7 +235,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
                     children: updatedFolders.map((folder) {
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 5),
-                        child: CustomCheckbox(
+                        child: CustomRadioButton2(
                           label: folder['folder_name'],
                           isSelected: folder['selected'] ?? false,
                           onChanged: (bool isSelected) {
@@ -484,6 +479,61 @@ class _LectureStartPageState extends State<LectureStartPage> {
       ),
       bottomNavigationBar:
           buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
+    );
+  }
+}
+
+class CustomRadioButton2 extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final ValueChanged<bool> onChanged;
+
+  const CustomRadioButton2({
+    super.key,
+    required this.label,
+    required this.isSelected,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        onChanged(!isSelected);
+      },
+      child: Row(
+        children: [
+          Container(
+            width: 18,
+            height: 18,
+            decoration: BoxDecoration(
+              color: isSelected ? Colors.teal : Colors.transparent,
+              border: Border.all(
+                color: const Color.fromARGB(255, 80, 80, 80),
+                width: 1.6,
+              ),
+              borderRadius: BorderRadius.circular(9),
+            ),
+            child: isSelected
+                ? const Icon(
+                    Icons.check,
+                    size: 14,
+                    color: Colors.white,
+                  )
+                : null,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 16,
+              fontFamily: 'DM Sans',
+              color: Color.fromARGB(255, 70, 70, 70),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
