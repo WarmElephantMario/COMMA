@@ -1,5 +1,6 @@
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_plugin/60prepare.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -52,6 +53,8 @@ class _RecordPageState extends State<RecordPage> {
   int _currentPage = 1;
   final Set<int> _blurredPages = {};
   Map<int, String> pageTexts = {};
+
+
 
   late stt.SpeechToText _speech;
   bool _isListening = false;
@@ -485,7 +488,8 @@ Future<void> _insertInitialData() async {
                                       widget.folderName,
                                       widget.noteName,
                                       widget.lectureName,
-                                      widget.fileUrl);
+                                      widget.fileUrl,
+                                      );
                                 },
                           width: MediaQuery.of(context).size.width * 0.3,
                           height: 40.0,
