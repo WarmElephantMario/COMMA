@@ -317,6 +317,7 @@ Future<void> _insertInitialData() async {
 
   // 파이어베이스에 자막 txt 저장
   Future<void> _saveTranscript() async {
+
     try {
       Uint8List fileBytes = Uint8List.fromList(utf8.encode(_recognizedText));
 
@@ -324,7 +325,7 @@ Future<void> _insertInitialData() async {
       final userKey = userProvider.user?.userKey;
       if (userKey != null) {
         final storageRef = FirebaseStorage.instance.ref().child(
-            'record/$userKey/${widget.selectedFolderId}/${widget.noteName}/${widget.lectureName} 자막.txt');
+            'record/$userKey/${widget.selectedFolderId}/${_lecturefileId}/자막.txt');
 
         UploadTask uploadTask = storageRef.putData(fileBytes, SettableMetadata(contentType: 'text/plain; charset=utf-8'));
 
@@ -333,7 +334,7 @@ Future<void> _insertInitialData() async {
         print('Transcript uploaded: $downloadURL');
 
         // Record_Table에 데이터 추가
-        await _insertRecordData(userKey, downloadURL);
+        // await _insertRecordData(userKey, downloadURL);
       } else {
         print('User ID is null, cannot save transcript.');
       }
