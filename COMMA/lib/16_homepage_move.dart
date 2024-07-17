@@ -207,29 +207,44 @@ class _MainPageState extends State<MainPage> {
   }
 
 // 강의 파일 또는 콜론 파일 페이지로 네비게이션
-  void navigateToPage(BuildContext context, String folderName,
-      Map<String, dynamic> file, String fileType) {
-    Widget page = fileType == 'lecture'
-        ? RecordPage(
-            selectedFolderId: file['folder_id'].toString(),
-            noteName: file['file_name'] ?? 'Unknown Note',
-            fileUrl:
-                file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
-            folderName: folderName,
-            recordingState: RecordingState.recorded,
-            lectureName: file['lecture_name'] ?? 'Unknown Lecture',
-            responseUrl: 'https://defaulturl.com/defaultfile.txt', //수정 필요
-            type: 1, //수정 필요
-          )
-        : ColonPage(
-            folderName: folderName,
-            noteName: file['file_name'] ?? 'Unknown Note',
-            lectureName: file['lecture_name'] ?? 'Unknown Lecture',
-            createdAt: file['created_at'] ?? 'Unknown Date',
-          );
-
-    Navigator.push(context, MaterialPageRoute(builder: (context) => page));
+void navigateToPage(BuildContext context, String folderName,
+    Map<String, dynamic> file, String fileType) {
+  Widget page;
+  if (fileType == 'lecture') { //강의 파일인 경우
+    if (file['type'] == 0) { //강의 파일 + 대체텍스트인 경우 
+      page = RecordPage(
+        selectedFolderId: file['folder_id'].toString(),
+        noteName: file['file_name'] ?? 'Unknown Note',
+        fileUrl: file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
+        folderName: folderName,
+        recordingState: RecordingState.recorded,
+        lectureName: file['lecture_name'] ?? 'Unknown Lecture',
+        responseUrl: file['alternative_text_url'] ?? 'https://defaulturl.com/defaultfile.txt', // 대체텍스트 url 전달
+        type: file['type'],
+      );
+    } else { //강의 파일 + 실시간 자막인 경우
+      page = RecordPage(
+        selectedFolderId: file['folder_id'].toString(),
+        noteName: file['file_name'] ?? 'Unknown Note',
+        fileUrl: file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
+        folderName: folderName,
+        recordingState: RecordingState.recorded,
+        lectureName: file['lecture_name'] ?? 'Unknown Lecture',
+        type: file['type'],
+      );
+    }
+  } else { //콜론 파일인 경우
+    page = ColonPage(
+      folderName: folderName,
+      noteName: file['file_name'] ?? 'Unknown Note',
+      lectureName: file['lecture_name'] ?? 'Unknown Lecture',
+      createdAt: file['created_at'] ?? 'Unknown Date',
+    );
   }
+
+  Navigator.push(context, MaterialPageRoute(builder: (context) => page));
+}
+
 
   @override
   Widget build(BuildContext context) {

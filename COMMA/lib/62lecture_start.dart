@@ -11,14 +11,14 @@ import 'api/api.dart';
 class LectureStartPage extends StatefulWidget {
   final String fileName;
   final String fileURL;
-  final String responseUrl;
+  final String? responseUrl;
   final int type;
 
   const LectureStartPage({
     super.key,
     required this.fileName,
     required this.fileURL,
-    required this.responseUrl,
+    this.responseUrl,
     required this.type,
   });
 
@@ -464,7 +464,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
                         folderName: _selectedFolder,
                         recordingState: RecordingState.initial,
                         lectureName: widget.fileName,
-                        responseUrl: widget.responseUrl,
+                        responseUrl: widget.responseUrl != null ? widget.responseUrl : null,
                         type: widget.type, //대체인지 실시간인지 전달해줌
                       ),
                     ),
