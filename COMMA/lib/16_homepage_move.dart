@@ -213,6 +213,7 @@ void navigateToPage(BuildContext context, String folderName,
   if (fileType == 'lecture') { //강의 파일인 경우
     if (file['type'] == 0) { //강의 파일 + 대체텍스트인 경우 
       page = RecordPage(
+        lecturefileId: file['id'],
         selectedFolderId: file['folder_id'].toString(),
         noteName: file['file_name'] ?? 'Unknown Note',
         fileUrl: file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
@@ -224,6 +225,7 @@ void navigateToPage(BuildContext context, String folderName,
       );
     } else { //강의 파일 + 실시간 자막인 경우
       page = RecordPage(
+        lecturefileId: file['id'],
         selectedFolderId: file['folder_id'].toString(),
         noteName: file['file_name'] ?? 'Unknown Note',
         fileUrl: file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
