@@ -335,7 +335,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
                               final userProvider = Provider.of<UserProvider>(
                                   context,
                                   listen: false);
-                              int type = isAlternativeTextEnabled ? 1 : 0;
+                              int type = isAlternativeTextEnabled ? 0 : 1; //대체면 0, 실시간이면 1
 
                               if (_isPDF) {
                                 if (_fileBytes != null) {
@@ -361,7 +361,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
                                           fileName: _selectedFileName!,
                                           fileURL: _downloadURL!,
                                           responseUrl: responseUrl,
-                                          type: type,
+                                          type: type, //대체인지 실시간인지 전달해줌
                                         ),
                                       ),
                                     );
