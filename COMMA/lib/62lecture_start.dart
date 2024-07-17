@@ -465,7 +465,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
                         recordingState: RecordingState.initial,
                         lectureName: widget.fileName,
                         responseUrl: widget.responseUrl,
-                        type: widget.type,
+                        type: widget.type, //대체인지 실시간인지 전달해줌
                       ),
                     ),
                   );
