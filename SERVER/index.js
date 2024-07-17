@@ -574,12 +574,11 @@ app.post('/api/alt-table', (req, res) => {
 });
 
 
-
-//콜론 폴더 생성
-app.post('/api/create-colon-folder', (req, res) => {
+app.post('/api/create-colon', (req, res) => {
     const { folderName, noteName, fileUrl, lectureName, userKey } = req.body;
 
     console.log('Received request to create colon folder:', { folderName, noteName, fileUrl, lectureName, userKey });
+
     // Check if the folder already exists for the same user
     const checkFolderQuery = 'SELECT id FROM ColonFolders WHERE folder_name = ? AND userKey = ?';
     db.query(checkFolderQuery, [folderName, userKey], (err, results) => {
@@ -588,19 +587,33 @@ app.post('/api/create-colon-folder', (req, res) => {
             return res.status(500).json({ error: 'Failed to check folder existence' });
         }
 
-        if (results.length > 0) {
-            // Folder exists, use the existing folder id
-            const folderId = results[0].id;
-
-            // Insert file into the existing folder
+        const insertFileAndLinkLecture = (folderId) => {
+            // Insert file into the folder
             const insertFileQuery = 'INSERT INTO ColonFiles (folder_id, file_name, file_url, lecture_name, created_at) VALUES (?, ?, ?, ?, NOW())';
             db.query(insertFileQuery, [folderId, noteName, fileUrl, lectureName], (err, result) => {
                 if (err) {
                     console.error('Failed to add file to folder:', err);
                     return res.status(500).json({ error: 'Failed to add file to folder' });
                 }
-                res.status(200).json({ message: 'File added to existing folder successfully', folder_id: folderId });
+                const fileId = result.insertId;
+
+                // Insert into LectureFiles with existColon as the fileId from ColonFiles
+                const insertLectureFileQuery = 'INSERT INTO LectureFiles (existColon) VALUES (?)';
+                db.query(insertLectureFileQuery, [folderId, noteName, fileUrl, lectureName, fileId], (err, result) => {
+                    if (err) {
+                        console.error('Failed to add entry to LectureFiles:', err);
+                        return res.status(500).json({ error: 'Failed to add entry to LectureFiles' });
+                    }
+                    res.status(200).json({ message: 'File added to folder and LectureFiles successfully', folder_id: folderId });
+                });
             });
+        };
+
+        if (results.length > 0) {
+            // Folder exists, use the existing folder id
+            const folderId = results[0].id;
+            console.log('Folder exists, using existing folder ID:', folderId);
+            insertFileAndLinkLecture(folderId);
         } else {
             // Folder does not exist, create a new folder
             const createFolderQuery = 'INSERT INTO ColonFolders (folder_name, userKey) VALUES (?, ?)';
@@ -610,20 +623,14 @@ app.post('/api/create-colon-folder', (req, res) => {
                     return res.status(500).json({ error: 'Failed to create folder' });
                 }
                 const folderId = result.insertId;
-
-                // Insert file into the new folder
-                const insertFileQuery = 'INSERT INTO ColonFiles (folder_id, file_name, file_url, lecture_name, created_at) VALUES (?, ?, ?, ?, NOW())';
-                db.query(insertFileQuery, [folderId, noteName, fileUrl, lectureName], (err, result) => {
-                    if (err) {
-                        console.error('Failed to add file to new folder:', err);
-                        return res.status(500).json({ error: 'Failed to add file to new folder' });
-                    }
-                    res.status(200).json({ message: 'Folder and file created successfully', folder_id: folderId });
-                });
+                console.log('Folder created successfully, new folder ID:', folderId);
+                insertFileAndLinkLecture(folderId);
             });
         }
     });
 });
+
+
 
 
 
