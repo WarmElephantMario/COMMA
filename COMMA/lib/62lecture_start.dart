@@ -458,6 +458,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => RecordPage(
+                        // lecturefileId: widget.lecturefileId, << 지금은 만들어지기 전이니까 전달 X
                         selectedFolderId: selectedFolderId.toString(),
                         noteName: _noteName,
                         fileUrl: widget.fileURL,
