@@ -10,6 +10,7 @@ import 'dart:convert';
 import 'model/user_provider.dart';
 import 'package:provider/provider.dart';
 import 'api/api.dart';
+import 'package:intl/intl.dart';
 
 BottomNavigationBar buildBottomNavigationBar(
     BuildContext context, int currentIndex, Function(int) onItemTapped) {
@@ -330,16 +331,17 @@ Future<int> createColonFolder(String folderName, String noteName,
   }
 }
 
+
 // 콜론 생성 다이얼로그 함수
 void showColonCreatedDialog(BuildContext context, String folderName,
-    String noteName, String lectureName) {
+    String noteName, String lectureName, String fileUrl) {
   final userProvider = Provider.of<UserProvider>(context, listen: false);
   final userKey = userProvider.user?.userKey;
 
   if (userKey != null) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return AlertDialog(
           backgroundColor: Colors.white,
           title: Column(
@@ -385,7 +387,7 @@ void showColonCreatedDialog(BuildContext context, String folderName,
                 children: [
                   TextButton(
                     onPressed: () {
-                      Navigator.of(context).pop();
+                      Navigator.of(dialogContext).pop();
                     },
                     child: const Text(
                       '취소',
@@ -400,33 +402,31 @@ void showColonCreatedDialog(BuildContext context, String folderName,
                   const SizedBox(width: 16),
                   TextButton(
                     onPressed: () async {
-                      Navigator.of(context).pop();
-                      int folderId = await createColonFolder("$folderName (:)",
-                          "$noteName (:)", '', lectureName, userKey);
+                      Navigator.of(dialogContext).pop();
 
+                      // 폴더 및 파일 생성
+                      int folderId = await createColonFolder("$folderName (:)",
+                          "$noteName (:)", fileUrl, lectureName, userKey);
+
+                      if (folderId == -1) {
+                        print('Failed to create folder and file');
+                        return;
+                      }
                       // Fetch the created_at value after creating the folder and file
                       var fetchUrl =
-                          '${API.baseUrl}/api/get-colon-file?folderName=${"$folderName (:)"}&userKey=$userKey';
+                          '${API.baseUrl}/api/get-colon-file?folderName=${Uri.encodeComponent("$folderName (:)")}&userKey=$userKey';
                       var fetchResponse = await http.get(Uri.parse(fetchUrl));
 
                       if (fetchResponse.statusCode == 200) {
                         var data = jsonDecode(fetchResponse.body);
-                        String createdAt = data['created_at'];
+                        String newCreatedAt = data['created_at'];
 
-                        // Navigate to ColonPage with created_at and noteName
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ColonPage(
-                                folderName: "$folderName (:)",
-                                noteName: "$noteName (:)",
-                                lectureName: lectureName,
-                                createdAt: createdAt),
-                          ),
-                        );
+                        // 다이얼로그가 닫힌 후에 네비게이션을 실행
+                        Future.delayed(Duration(milliseconds: 300), () {
+                          _navigateToColonPage(context, folderName, noteName, lectureName, newCreatedAt);
+                        });
                       } else {
-                        print(
-                            'Failed to fetch colon file details: ${fetchResponse.statusCode}');
+                        print('Failed to fetch colon file details: ${fetchResponse.statusCode}');
                       }
                     },
                     child: const Text(
@@ -450,6 +450,28 @@ void showColonCreatedDialog(BuildContext context, String folderName,
     print('User Key is null, cannot create colon folder.');
   }
 }
+
+
+
+
+void _navigateToColonPage(BuildContext context, String folderName, String noteName, String lectureName, String createdAt) {
+  try {
+    print('Navigating to ColonPage'); // 로그 추가
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => ColonPage(
+          folderName: "$folderName (:)",
+          noteName: "$noteName (:)",
+          lectureName: lectureName,
+          createdAt: createdAt,
+        ),
+      ),
+    );
+  } catch (e) {
+    print('Navigation error: $e');
+  }
+}
+
 
 // Learning - 강의 자료 학습중 팝업
 void showLearningDialog(BuildContext context, String fileName, String fileURL,
