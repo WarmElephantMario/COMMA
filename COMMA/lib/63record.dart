@@ -45,7 +45,6 @@ class _RecordPageState extends State<RecordPage> {
   late RecordingState _recordingState;
   int _selectedIndex = 2;
   dynamic _createdAt;
-  bool _isColonFileExists = false;
   bool _isPDF = false;
   PdfController? _pdfController;
   Uint8List? _fileBytes;
@@ -66,7 +65,6 @@ class _RecordPageState extends State<RecordPage> {
     if (_recordingState == RecordingState.recorded) {
       _fetchCreatedAt();
     }
-    _checkColonFile();
     if (_recordingState == RecordingState.initial) {
       _insertInitialData();
     }
@@ -285,38 +283,6 @@ class _RecordPageState extends State<RecordPage> {
     await _fetchCreatedAt();
   }
 
-  Future<bool> _checkColonFileExists(
-      String folderName, String noteName, int userKey) async {
-    var fetchUrl =
-        '${API.baseUrl}/api/check-colon-file?folderName=$folderName&noteName=$noteName&userKey=$userKey';
-    try {
-      var fetchResponse = await http.get(Uri.parse(fetchUrl));
-      if (fetchResponse.statusCode == 200) {
-        var data = jsonDecode(fetchResponse.body);
-        return data['exists'];
-      } else {
-        print(
-            'Failed to check colon file existence: ${fetchResponse.statusCode}');
-        return false;
-      }
-    } catch (e) {
-      print('Error during HTTP request: $e');
-      return false;
-    }
-  }
-
-  Future<void> _checkColonFile() async {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userKey = userProvider.user?.userKey;
-
-    if (userKey != null) {
-      bool exists = await _checkColonFileExists(
-          widget.folderName, widget.noteName, userKey);
-      setState(() {
-        _isColonFileExists = exists;
-      });
-    }
-  }
 
   void _listen() async {
     if (!_isListening) {
@@ -512,21 +478,19 @@ class _RecordPageState extends State<RecordPage> {
                         const SizedBox(width: 2),
                         ClickButton(
                           text: '콜론 생성(:)',
-                          onPressed: _isColonFileExists
-                              ? () {}
-                              : () {
+                          onPressed: 
+                              () {
                                   print('콜론 생성 버튼 클릭됨');
                                   showColonCreatedDialog(
                                       context,
                                       widget.folderName,
                                       widget.noteName,
-                                      widget.lectureName);
+                                      widget.lectureName,
+                                      widget.fileUrl);
                                 },
                           width: MediaQuery.of(context).size.width * 0.3,
                           height: 40.0,
-                          backgroundColor: _isColonFileExists
-                              ? Colors.grey
-                              : const Color.fromRGBO(54, 174, 146, 1.0),
+      
                         ),
                       ],
                     ),
