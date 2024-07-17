@@ -83,11 +83,16 @@ class _LearningPreparationState extends State<LearningPreparation> {
           contentType: mimeType,
         );
 
+        // 파일명 유니크하게 만들기
+        int timestamp = DateTime.now().millisecondsSinceEpoch;
+        int f_id = timestamp ~/ fileName.length;
+        int id = f_id ~/ fileName.length;
+
         // Upload file with metadata
         final userProvider = Provider.of<UserProvider>(context, listen: false);
         Reference storageRef = FirebaseStorage.instance
             .ref()
-            .child('uploads/${userProvider.user!.userKey}/$fileName');
+            .child('uploads/${userProvider.user!.userKey}/${fileName}_${id}');
         UploadTask uploadTask = storageRef.putData(fileBytes, metadata);
 
         TaskSnapshot taskSnapshot = await uploadTask;
@@ -138,7 +143,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
   }
 
   Future<List<String>> uploadImagesToFirebase(
-      List<Uint8List> images, int userKey) async {
+    List<Uint8List> images, int userKey) async {
     List<String> downloadUrls = [];
 
     for (int i = 0; i < images.length; i++) {

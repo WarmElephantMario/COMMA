@@ -704,6 +704,24 @@ app.get('/api/getFolderName/:fileType/:folderId', (req, res) => {
 
 });
 
+// 강의파일 아이디 가져오기
+app.get('/api/getFileId', (req, res) => {
+    const fileUrl = req.query.file_url;
+    const sql = 'SELECT id FROM LectureFiles WHERE file_url = ?';
+    
+    db.query(sql, [fileUrl], (err, results) => {
+      if (err) {
+        res.status(500).send(err);
+      } else {
+        if (results.length > 0) {
+          res.json({ id: results[0].id });
+        } else {
+          res.status(404).send({ message: 'File not found' });
+        }
+      }
+    });
+  });
+
 // 사용자별 최신 강의 파일을 가져오는 API 엔드포인트
 app.get('/api/getLectureFiles/:userKey', (req, res) => {
     const userKey = req.params.userKey;
