@@ -19,9 +19,16 @@ class SigninPage extends StatefulWidget {
 
 class _SigninPageState extends State<SigninPage> {
   final _formKey = GlobalKey<FormState>();
+  bool isAutoLoginEnabled = false;
 
   final TextEditingController idController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
+  void _onAutoLoginChanged(bool isSelected) {
+    setState(() {
+      isAutoLoginEnabled = isSelected;
+    });
+  }
 
   @override
   void dispose() {
@@ -38,7 +45,7 @@ class _SigninPageState extends State<SigninPage> {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          'user_id' : idController.text.trim(),
+          'user_id': idController.text.trim(),
           'user_password': passwordController.text.trim(),
         }),
       );
@@ -84,16 +91,16 @@ class _SigninPageState extends State<SigninPage> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: const Text(
-          '로그인',
-          style: TextStyle(
-              color: Color.fromARGB(255, 48, 48, 48),
-              fontFamily: 'DM Sans',
-              fontWeight: FontWeight.w700),
-        ),
-          iconTheme: IconThemeData(color: Color.fromARGB(255, 48, 48, 48))
-      ),
+          backgroundColor: Colors.white,
+          title: const Text(
+            '로그인',
+            style: TextStyle(
+                color: Color.fromARGB(255, 48, 48, 48),
+                fontFamily: 'DM Sans',
+                fontWeight: FontWeight.w700),
+          ),
+          iconTheme:
+              const IconThemeData(color: Color.fromARGB(255, 48, 48, 48))),
       body: SingleChildScrollView(
         child: Container(
           width: size.width,
@@ -150,13 +157,15 @@ class _SigninPageState extends State<SigninPage> {
                       SizedBox(width: size.width * 0.05),
                       CustomCheckbox(
                         label: '자동 로그인',
-                        onChanged: (bool value) {},
+                        isSelected: isAutoLoginEnabled,
+                        onChanged: _onAutoLoginChanged,
                       ),
                     ],
                   ),
                   SizedBox(height: size.height * 0.060),
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: size.width * 0.05),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: size.width * 0.05),
                     child: GestureDetector(
                       onTap: () async {
                         if (_formKey.currentState!.validate()) {
