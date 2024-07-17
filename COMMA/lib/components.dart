@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_plugin/16_homepage_move.dart';
 import '66colon.dart';
 import '62lecture_start.dart';
+import '63record.dart';
 import '30_folder_screen.dart';
 import '33_mypage_screen.dart';
 import '60prepare.dart';
@@ -300,7 +301,7 @@ void showConfirmationDialog(
 // 콜론 폴더 생성 및 파일 생성 함수
 Future<int> createColonFolder(String folderName, String noteName,
     String fileUrl, String lectureName, int userKey) async {
-  var url = '${API.baseUrl}/api/create-colon-folder';
+  var url = '${API.baseUrl}/api/create-colon';
 
   var body = {
     'folderName': folderName,
@@ -311,6 +312,8 @@ Future<int> createColonFolder(String folderName, String noteName,
   };
 
   try {
+    print('Sending request to $url with body: $body');
+
     var response = await http.post(
       Uri.parse(url),
       headers: {'Content-Type': 'application/json'},
@@ -320,9 +323,12 @@ Future<int> createColonFolder(String folderName, String noteName,
     if (response.statusCode == 200) {
       var jsonResponse = jsonDecode(response.body);
       print('Folder and file created successfully');
-      return jsonResponse['folder_id'];
+      print('Colon File ID: ${jsonResponse['colonFileId']}');
+      return jsonResponse['colonFileId'];
+      //return jsonResponse['folder_id'];
     } else {
       print('Failed to create folder and file: ${response.statusCode}');
+      print('Response body: ${response.body}');
       return -1;
     }
   } catch (e) {
@@ -331,10 +337,9 @@ Future<int> createColonFolder(String folderName, String noteName,
   }
 }
 
-
 // 콜론 생성 다이얼로그 함수
 void showColonCreatedDialog(BuildContext context, String folderName,
-    String noteName, String lectureName, String fileUrl) {
+    String noteName, String lectureName, String fileUrl, int lectureFileId) {
   final userProvider = Provider.of<UserProvider>(context, listen: false);
   final userKey = userProvider.user?.userKey;
 
@@ -405,28 +410,36 @@ void showColonCreatedDialog(BuildContext context, String folderName,
                       Navigator.of(dialogContext).pop();
 
                       // 폴더 및 파일 생성
-                      int folderId = await createColonFolder("$folderName (:)",
-                          "$noteName (:)", fileUrl, lectureName, userKey);
+                      int colonFileId = await createColonFolder(
+                          "$folderName (:)",
+                          "$noteName (:)",
+                          fileUrl,
+                          lectureName,
+                          userKey
+                      );
+                      if (colonFileId != -1) {
+                        // Update LectureFiles with colonFileId
+                        //_lectureFileId를 가져와야 함
+                        await updateLectureFileWithColonId(lectureFileId, colonFileId);
 
-                      if (folderId == -1) {
-                        print('Failed to create folder and file');
-                        return;
-                      }
-                      // Fetch the created_at value after creating the folder and file
-                      var fetchUrl =
-                          '${API.baseUrl}/api/get-colon-file?folderName=${Uri.encodeComponent("$folderName (:)")}&userKey=$userKey';
-                      var fetchResponse = await http.get(Uri.parse(fetchUrl));
+                        // Fetch the created_at value after creating the folder and file
+                        var fetchUrl =
+                            '${API.baseUrl}/api/get-colon-file?folderName=${Uri.encodeComponent("$folderName (:)")}&userKey=$userKey';
+                        var fetchResponse = await http.get(Uri.parse(fetchUrl));
 
-                      if (fetchResponse.statusCode == 200) {
-                        var data = jsonDecode(fetchResponse.body);
-                        String newCreatedAt = data['created_at'];
+                        if (fetchResponse.statusCode == 200) {
+                          var data = jsonDecode(fetchResponse.body);
+                          String newCreatedAt = data['created_at'];
 
-                        // 다이얼로그가 닫힌 후에 네비게이션을 실행
-                        Future.delayed(Duration(milliseconds: 300), () {
-                          _navigateToColonPage(context, folderName, noteName, lectureName, newCreatedAt);
-                        });
+                          // 다이얼로그가 닫힌 후에 네비게이션을 실행
+                          Future.delayed(Duration(milliseconds: 300), () {
+                            _navigateToColonPage(context, folderName, noteName, lectureName, newCreatedAt);
+                          });
+                        } else {
+                          print('Failed to fetch colon file details: ${fetchResponse.statusCode}');
+                        }
                       } else {
-                        print('Failed to fetch colon file details: ${fetchResponse.statusCode}');
+                        print('Failed to create colon file');
                       }
                     },
                     child: const Text(
@@ -448,6 +461,33 @@ void showColonCreatedDialog(BuildContext context, String folderName,
     );
   } else {
     print('User Key is null, cannot create colon folder.');
+  }
+}
+
+
+Future<void> updateLectureFileWithColonId(int lectureFileId, int colonFileId) async {
+  var url = '${API.baseUrl}/api/update-lecture-file';
+
+  var body = {
+    'lectureFileId': lectureFileId,
+    'colonFileId': colonFileId,
+  };
+
+  try {
+    var response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 200) {
+      print('Lecture file updated successfully with colonFileId');
+    } else {
+      print('Failed to update lecture file: ${response.statusCode}');
+      print('Response body: ${response.body}');
+    }
+  } catch (e) {
+    print('Error during HTTP request: $e');
   }
 }
 
