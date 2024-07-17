@@ -22,7 +22,7 @@ class RecordPage extends StatefulWidget {
   final String folderName;
   final RecordingState recordingState;
   final String lectureName;
-  final String responseUrl;
+  final String? responseUrl;
   final int type;
 
   const RecordPage({
@@ -34,7 +34,7 @@ class RecordPage extends StatefulWidget {
     required this.recordingState,
     required this.lectureName,
     
-    required this.responseUrl,
+    this.responseUrl,
     required this.type,
   });
 
@@ -162,99 +162,72 @@ Future<void> _loadPageTexts(int lecturefileId) async {
     }
   }
 
-  Future<void> _insertInitialData() async {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userKey = userProvider.user?.userKey;
+Future<void> _insertInitialData() async {
+  final userProvider = Provider.of<UserProvider>(context, listen: false);
+  final userKey = userProvider.user?.userKey;
 
-    if (userKey != null) {
+  if (userKey != null) {
+    var url = '${API.baseUrl}/api/lecture-files';
+    var body = {
+      'folder_id': widget.selectedFolderId,
+      'file_name': widget.noteName,
+      'file_url': widget.fileUrl,
+      'lecture_name': widget.lectureName,
+      'type': widget.type, // 대체인지 실시간인지
+      'userKey': userKey,
+    };
 
-      //대체텍스트 파일, type=0 저장 후 대체텍스트도 Alt_table에 저장하고 load까지
-      if (widget.type == 0){ 
-        print('대체텍스트 파일이라고 전달 받았습니다');
-        print('대체텍스트 텍스트파일 업로드 url: ${widget.responseUrl}');
+    try {
+      var response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(body),
+      );
 
-        var url = '${API.baseUrl}/api/lecture-files';
-        var body = {
-          'folder_id': widget.selectedFolderId,
-          'file_name': widget.noteName,
-          'file_url': widget.fileUrl,
-          'lecture_name': widget.lectureName,
-          'type' : 1,
-          'userKey': userKey,
-        };
-        try {
-          var response = await http.post(
-            Uri.parse(url),
+      if (response.statusCode == 200) {
+        var responseData = jsonDecode(response.body);
+        var lecturefileId = responseData['id'];
+        print('Lecture File added successfully');
+
+        // 대체텍스트 타입일 때만 Alt_table에 추가로 데이터 저장
+        if (widget.type == 0) {
+          print('Alt_table에 대체텍스트 url 저장하겠습니다');
+
+          var altTableUrl = '${API.baseUrl}/api/alt-table';
+          var altTableBody = {
+            'lecturefile_id': lecturefileId,
+            'colonfile_id': null, // 필요 시 적절한 colonfile_id 값을 제공
+            'alternative_text_url': widget.responseUrl,
+          };
+
+          var altTableResponse = await http.post(
+            Uri.parse(altTableUrl),
             headers: {'Content-Type': 'application/json'},
-            body: jsonEncode(body),
+            body: jsonEncode(altTableBody),
           );
-          if (response.statusCode == 200) {
-            var responseData = jsonDecode(response.body);
-            var lecturefileId = responseData['id'];
-            print('Alt_table에 대체텍스트 url 저장하겠습니다');
 
-            // Alt_table에 데이터 저장
-            var altTableUrl = '${API.baseUrl}/api/alt-table';
-            var altTableBody = {
-              'lecturefile_id': lecturefileId,
-              'colonfile_id': null, // 필요 시 적절한 colonfile_id 값을 제공
-              'alternative_text_url': widget.responseUrl,
-            };
-            
-            var altTableResponse = await http.post(
-              Uri.parse(altTableUrl),
-                headers: {'Content-Type': 'application/json'},
-                body: jsonEncode(altTableBody),
-            );
-            
-            if (altTableResponse.statusCode == 200) {
-              print('Alt_table에 대체텍스트 url 저장 완료');
-            } else {
-              print('Failed to add alt table entry: ${altTableResponse.statusCode}');
-              print(altTableResponse.body);
-            }
-
+          if (altTableResponse.statusCode == 200) {
+            print('Alt_table에 대체텍스트 url 저장 완료');
             print('대체텍스트 url 로드하겠습니다');
             await _loadPageTexts(lecturefileId); // 대체텍스트 로드
             print('대체텍스트 url 로드 완료');
-
           } else {
-            print('Failed to add file: ${response.statusCode}');
-            print(response.body);
+            print('Failed to add alt table entry: ${altTableResponse.statusCode}');
+            print(altTableResponse.body);
           }
-        } catch (e) {
-          print('Error during HTTP request: $e');
         }
       } else {
-        //실시간 자막 파일, type=1 저장 
-        var url = '${API.baseUrl}/api/lecture-files';
-        var body = {
-          'folder_id': widget.selectedFolderId,
-          'file_name': widget.noteName,
-          'file_url': widget.fileUrl,
-          'lecture_name': widget.lectureName,
-          'type' : 1,
-          'userKey': userKey,
-        };
-        try {
-          var response = await http.post(
-            Uri.parse(url),
-            headers: {'Content-Type': 'application/json'},
-            body: jsonEncode(body),
-          );
-          if (response.statusCode == 200) {
-            print('File added successfully');
-          } else {
-            print('Failed to add file: ${response.statusCode}');
-          }
-        } catch (e) {
-          print('Error during HTTP request: $e');
-        }
+        print('Failed to add file: ${response.statusCode}');
+        print(response.body);
       }
-    } else {
-      print('User ID is null, cannot insert initial data.');
+    } catch (e) {
+      print('Error during HTTP request: $e');
     }
+  } else {
+    print('User ID is null, cannot insert initial data.');
   }
+}
+
 
   Future<void> _fetchCreatedAt() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
@@ -366,7 +339,7 @@ Future<void> _loadPageTexts(int lecturefileId) async {
                               builder: (context) => LectureStartPage(
                                     fileName: widget.noteName,
                                     fileURL: widget.fileUrl,
-                                    responseUrl: widget.responseUrl,
+                                    responseUrl: widget.responseUrl != null ? widget.responseUrl : null,
                                     type: widget.type,
                                   )),
                         );
