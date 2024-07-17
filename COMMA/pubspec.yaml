@@ -96,6 +96,7 @@ flutter:
   assets:
     - ./assets/
     - assets/navigation_bar/
+    - assets/folder_search.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

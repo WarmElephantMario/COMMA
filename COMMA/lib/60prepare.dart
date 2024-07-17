@@ -21,8 +21,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import './api/api.dart';
 
-
-bool isAlternativeTextEnabled = false;
+bool isAlternativeTextEnabled = true;
 bool isRealTimeSttEnabled = false;
 
 class LearningPreparation extends StatefulWidget {
@@ -40,9 +39,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
   Uint8List? _fileBytes;
   bool _isPDF = false;
   late pdfx.PdfController _pdfController;
-  // double _progress = 0.0;
-  ValueNotifier<double> _progressNotifier = ValueNotifier<double>(0.0); // 진행률 관리용 ValueNotifier 추가
-
+  final ValueNotifier<double> _progressNotifier = ValueNotifier<double>(0.0);
 
   int _selectedIndex = 2;
 
@@ -51,7 +48,6 @@ class _LearningPreparationState extends State<LearningPreparation> {
       _selectedIndex = index;
     });
   }
-
 
   Future<void> _pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
@@ -71,7 +67,6 @@ class _LearningPreparationState extends State<LearningPreparation> {
       }
 
       try {
-        // Determine MIME type
         String mimeType = 'application/octet-stream';
         if (fileName.endsWith('.pdf')) {
           mimeType = 'application/pdf';
@@ -79,9 +74,10 @@ class _LearningPreparationState extends State<LearningPreparation> {
         } else if (fileName.endsWith('.png') ||
             fileName.endsWith('.jpg') ||
             fileName.endsWith('.jpeg')) {
-          mimeType = 'image/png'; // or 'image/jpeg' based on the file extension
+          mimeType = 'image/png';
           _isPDF = false;
         }
+
         // Define metadata
         final metadata = SettableMetadata(
           contentType: mimeType,
@@ -118,41 +114,40 @@ class _LearningPreparationState extends State<LearningPreparation> {
     }
   }
 
-Future<List<Uint8List>> convertPdfToImages(Uint8List pdfBytes) async {
-  final document = await pdfr.PdfDocument.openData(pdfBytes);
-  final pageCount = document.pageCount;
-  List<Uint8List> images = [];
+  Future<List<Uint8List>> convertPdfToImages(Uint8List pdfBytes) async {
+    final document = await pdfr.PdfDocument.openData(pdfBytes);
+    final pageCount = document.pageCount;
+    List<Uint8List> images = [];
 
-  for (int i = 0; i < pageCount; i++) {
-    final page = await document.getPage(i + 1);
-    final pageImage = await page.render(
-      width: page.width.toInt(), // double to int
-      height: page.height.toInt(), // double to int
-      x: 0,
-      y: 0,
-    );
-    
-    if (pageImage != null) {
+    for (int i = 0; i < pageCount; i++) {
+      final page = await document.getPage(i + 1);
+      final pageImage = await page.render(
+        width: page.width.toInt(),
+        height: page.height.toInt(),
+        x: 0,
+        y: 0,
+      );
+
       final image = await pageImage.createImageIfNotAvailable();
       final imageData = await image.toByteData(format: ui.ImageByteFormat.png);
       if (imageData != null) {
         images.add(imageData.buffer.asUint8List());
       }
     }
+    return images;
   }
-  return images;
-}
 
-  Future<List<String>> uploadImagesToFirebase(List<Uint8List> images, int userKey) async {
+  Future<List<String>> uploadImagesToFirebase(
+      List<Uint8List> images, int userKey) async {
     List<String> downloadUrls = [];
 
     for (int i = 0; i < images.length; i++) {
       _progressNotifier.value = (i + 1) / images.length; // 진행률 업데이트
 
-      final storageRef = FirebaseStorage.instance
-          .ref()
-          .child('uploads/$userKey/page_$i.jpg');
-      final uploadTask = storageRef.putData(images[i], SettableMetadata(contentType: 'image/jpeg'));
+      final storageRef =
+          FirebaseStorage.instance.ref().child('uploads/$userKey/page_$i.jpg');
+      final uploadTask = storageRef.putData(
+          images[i], SettableMetadata(contentType: 'image/jpeg'));
       final taskSnapshot = await uploadTask;
       final downloadUrl = await taskSnapshot.ref.getDownloadURL();
       downloadUrls.add(downloadUrl);
@@ -161,10 +156,14 @@ Future<List<Uint8List>> convertPdfToImages(Uint8List pdfBytes) async {
     return downloadUrls;
   }
 
-
-Future<String> callChatGPT4API(List<String> imageUrls, bool isAlternativeTextEnabled, bool isRealTimeSttEnabled, int userKey, String lectureFileName) async {
-  const String apiKey = Env.apiKey;
-  final Uri apiUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
+  Future<String> callChatGPT4API(
+      List<String> imageUrls,
+      bool isAlternativeTextEnabled,
+      bool isRealTimeSttEnabled,
+      int userKey,
+      String lectureFileName) async {
+    const String apiKey = Env.apiKey;
+    final Uri apiUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
 
   try {
     var messages = imageUrls.map((url) => {
@@ -181,88 +180,95 @@ Future<String> callChatGPT4API(List<String> imageUrls, bool isAlternativeTextEna
       ]
     }).toList();
 
-    var response = await http.post(
-      apiUrl,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $apiKey',
-      },
-      body: jsonEncode({
-        'model': 'gpt-4o',
-        'messages': messages,
-        'max_tokens': 500,
-      }),
-    );
+      var response = await http.post(
+        apiUrl,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $apiKey',
+        },
+        body: jsonEncode({
+          'model': 'gpt-4o',
+          'messages': messages,
+          'max_tokens': 500,
+        }),
+      );
 
-    if (response.statusCode == 200) {
-      var responseBody = utf8.decode(response.bodyBytes);
-      var decodedResponse = jsonDecode(responseBody);
-      var gptResponse = decodedResponse['choices'][0]['message']['content'];
+      if (response.statusCode == 200) {
+        var responseBody = utf8.decode(response.bodyBytes);
+        var decodedResponse = jsonDecode(responseBody);
+        var gptResponse = decodedResponse['choices'][0]['message']['content'];
 
-      if(isAlternativeTextEnabled){
-        // 대체텍스트일 때만 save response(.txt file) to Firebase
+        if (isAlternativeTextEnabled) {
+          // 대체텍스트일 때만 save response(.txt file) to Firebase
 
           // Get temporary directory to store the file
           final directory = await getTemporaryDirectory();
-          final filePath = path.join(directory.path, '${DateTime.now().millisecondsSinceEpoch}.txt');
+          final filePath = path.join(
+              directory.path, '${DateTime.now().millisecondsSinceEpoch}.txt');
 
           // Write response to .txt file
           final file = File(filePath);
           await file.writeAsString(gptResponse);
 
           // Define the storage path
-          final userProvider = Provider.of<UserProvider>(context, listen: false);
-          final storageRef = FirebaseStorage.instance
-              .ref()
-              .child('response/$userKey/$lectureFileName/${path.basename(filePath)}');
+          final userProvider =
+              Provider.of<UserProvider>(context, listen: false);
+          final storageRef = FirebaseStorage.instance.ref().child(
+              'response/$userKey/$lectureFileName/${path.basename(filePath)}');
           UploadTask uploadTask = storageRef.putFile(file);
 
           TaskSnapshot taskSnapshot = await uploadTask;
           String responseUrl = await taskSnapshot.ref.getDownloadURL();
-          print('${gptResponse}');
-          print('GPT Response stored URL: ${responseUrl}');
+          print('$gptResponse');
+          print('GPT Response stored URL: $responseUrl');
 
           // Optionally delete the temporary file
           await file.delete();
-          return responseUrl;    //.txt 저장한 url을 반환
-
+          return responseUrl; //.txt 저장한 url을 반환
+        }
+        return gptResponse; //대체텍스트 아니고 실시간 자막이면 그냥 로그를 반환
+      } else {
+        var responseBody = utf8.decode(response.bodyBytes);
+        print('Error calling ChatGPT-4 API: ${response.statusCode}');
+        print('Response body: $responseBody');
+        return 'Error: ${response.statusCode}';
       }
-      return gptResponse; //대체텍스트 아니고 실시간 자막이면 그냥 로그를 반환
-    } else {
-      var responseBody = utf8.decode(response.bodyBytes);
-      print('Error calling ChatGPT-4 API: ${response.statusCode}');
-      print('Response body: $responseBody'); 
-      return 'Error: ${response.statusCode}';
-    }
-  } catch (e) {
-    print('Error: $e');
-    return 'Error: $e';
-  }
-}
-
-
-
-Future<List<String>> 
-handlePdfUpload(Uint8List pdfBytes, int userKey) async {
-    try {
-        // PDF를 이미지로 변환
-        print('Starting PDF to image conversion...'); 
-        List<Uint8List> images = await convertPdfToImages(pdfBytes);
-        print('PDF to image conversion completed. Number of images: ${images.length}');
-
-        // 이미지를 Firebase에 업로드
-        print('Starting image upload to Firebase...');     
-        List<String> imageUrls = await uploadImagesToFirebase(images, userKey);
-        print('Image upload to Firebase completed. Number of image URLs: ${imageUrls.length}');
-
-        // 이미지 URL 리스트 반환
-        return imageUrls;
     } catch (e) {
-        print('Error: $e');
-        return [];
+      print('Error: $e');
+      return 'Error: $e';
     }
-}
+  }
 
+  Future<List<String>> handlePdfUpload(Uint8List pdfBytes, int userKey) async {
+    try {
+      // PDF를 이미지로 변환
+      print('Starting PDF to image conversion...');
+      List<Uint8List> images = await convertPdfToImages(pdfBytes);
+      print(
+          'PDF to image conversion completed. Number of images: ${images.length}');
+
+      // 이미지를 Firebase에 업로드
+      print('Starting image upload to Firebase...');
+      List<String> imageUrls = await uploadImagesToFirebase(images, userKey);
+      print(
+          'Image upload to Firebase completed. Number of image URLs: ${imageUrls.length}');
+
+      // 이미지 URL 리스트 반환
+      return imageUrls;
+    } catch (e) {
+      print('Error: $e');
+      return [];
+    }
+  }
+
+  void _onLearningTypeChanged(bool? isAlternativeText) {
+    if (isAlternativeText != null) {
+      setState(() {
+        isAlternativeTextEnabled = isAlternativeText;
+        isRealTimeSttEnabled = !isAlternativeText;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -292,23 +298,20 @@ handlePdfUpload(Uint8List pdfBytes, int userKey) async {
             ),
           ),
           const SizedBox(height: 30),
-          CustomCheckbox(
+          CustomRadioButton(
             label: '대체텍스트 생성',
-            isSelected: isAlternativeTextEnabled,
-            onChanged: (bool value) {
-              setState(() {
-                isAlternativeTextEnabled = value;
-              });
-            },
+            value: true,
+            groupValue: isAlternativeTextEnabled,
+            onChanged: _onLearningTypeChanged,
           ),
-          CustomCheckbox(
+          const SizedBox(
+            height: 10,
+          ),
+          CustomRadioButton(
             label: '실시간 자막 생성',
-            isSelected: isRealTimeSttEnabled,
-            onChanged: (bool value) {
-              setState(() {
-                isRealTimeSttEnabled = value;
-              });
-            },
+            value: false,
+            groupValue: isAlternativeTextEnabled,
+            onChanged: _onLearningTypeChanged,
           ),
           const SizedBox(height: 20),
           Center(
@@ -318,71 +321,92 @@ handlePdfUpload(Uint8List pdfBytes, int userKey) async {
                 ClickButton(
                   text: _isMaterialEmbedded ? '강의 자료 학습 시작하기' : '강의 자료를 임베드하세요',
                   onPressed: _isMaterialEmbedded
-                    ? () async {
-                        print("Starting learning with file: $_selectedFileName");
-                        print("대체텍스트 선택 여부: $isAlternativeTextEnabled");
-                        print("실시간자막 선택 여부: $isRealTimeSttEnabled");
-                        if (_selectedFileName != null && _downloadURL != null && _isMaterialEmbedded == true) {
-                            showLearningDialog(context, _selectedFileName!, _downloadURL!, _progressNotifier); // ValueNotifier 전달
+                      ? () async {
+                          print(
+                              "Starting learning with file: $_selectedFileName");
+                          print("대체텍스트 선택 여부: $isAlternativeTextEnabled");
+                          print("실시간자막 선택 여부: $isRealTimeSttEnabled");
+                          if (_selectedFileName != null &&
+                              _downloadURL != null &&
+                              _isMaterialEmbedded == true) {
+                            showLearningDialog(context, _selectedFileName!,
+                                _downloadURL!, _progressNotifier);
                             try {
-                                final userProvider = Provider.of<UserProvider>(context, listen: false);
-                                int type = isAlternativeTextEnabled ? 1 : 0;
-                                
-                                if (_isPDF) {
-                                    if (_fileBytes != null) { 
-                                        // PDF 파일을 이미지로 변환하고 Firebase에 업로드
-                                        handlePdfUpload(_fileBytes!, userProvider.user!.userKey).then((imageUrls) async {
-                                            final responseUrl= await callChatGPT4API(imageUrls, isAlternativeTextEnabled, isRealTimeSttEnabled, userProvider.user!.userKey, _selectedFileName!);  // 이미지 URL 리스트 전달
-                                            print("GPT-4 Response: $responseUrl");
-                                            if (Navigator.canPop(context)) {
-                                                Navigator.of(context, rootNavigator: true).pop(); // Close the dialog
-                                            }
+                              final userProvider = Provider.of<UserProvider>(
+                                  context,
+                                  listen: false);
+                              int type = isAlternativeTextEnabled ? 1 : 0;
 
-                                            Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (context) => LectureStartPage(
-                                                        fileName: _selectedFileName!,
-                                                        fileURL: _downloadURL!,
-                                                        responseUrl: responseUrl,  //대체텍스트일 때는 response url 전달
-                                                        type: type,
-                                                    ),
-                                                ),
-                                            );
-                                        });
-                                    } else {
-                                        print('Error: _fileBytes is null.');
-                                    }
-                                } else {
-                                    final response = await callChatGPT4API([_downloadURL!], isAlternativeTextEnabled, isRealTimeSttEnabled, userProvider.user!.userKey, _selectedFileName!);  // 단일 이미지 URL 리스트 전달
-                                    print("GPT-4 Response: $response");
+                              if (_isPDF) {
+                                if (_fileBytes != null) {
+                                  handlePdfUpload(_fileBytes!,
+                                          userProvider.user!.userKey)
+                                      .then((imageUrls) async {
+                                    final responseUrl = await callChatGPT4API(
+                                        imageUrls,
+                                        isAlternativeTextEnabled,
+                                        isRealTimeSttEnabled,
+                                        userProvider.user!.userKey,
+                                        _selectedFileName!);
+                                    print("GPT-4 Response: $responseUrl");
                                     if (Navigator.canPop(context)) {
-                                        Navigator.of(context, rootNavigator: true).pop(); // Close the dialog
+                                      Navigator.of(context, rootNavigator: true)
+                                          .pop();
                                     }
+
                                     Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => LectureStartPage(
-                                                fileName: _selectedFileName!,
-                                                fileURL: _downloadURL!,
-                                                responseUrl: response, //실시간 자막일 때는 그냥 response 전달하고 안쓰면됨
-                                                type: type,
-                                            ),
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => LectureStartPage(
+                                          fileName: _selectedFileName!,
+                                          fileURL: _downloadURL!,
+                                          responseUrl: responseUrl,
+                                          type: type,
                                         ),
+                                      ),
                                     );
+                                  });
+                                } else {
+                                  print('Error: _fileBytes is null.');
                                 }
-                            } catch (e) {
+                              } else {
+                                final response = await callChatGPT4API(
+                                    [_downloadURL!],
+                                    isAlternativeTextEnabled,
+                                    isRealTimeSttEnabled,
+                                    userProvider.user!.userKey,
+                                    _selectedFileName!);
+                                print("GPT-4 Response: $response");
                                 if (Navigator.canPop(context)) {
-                                    Navigator.of(context, rootNavigator: true).pop(); // Close the dialog
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pop();
                                 }
-                                print('Error: $e');
-                                // Handle the error or show an error message to the user
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => LectureStartPage(
+                                      fileName: _selectedFileName!,
+                                      fileURL: _downloadURL!,
+                                      responseUrl:
+                                          response, //실시간 자막일 때는 그냥 response 전달하고 안쓰면됨
+                                      type: type,
+                                    ),
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              if (Navigator.canPop(context)) {
+                                Navigator.of(context, rootNavigator: true)
+                                    .pop();
+                              }
+                              print('Error: $e');
                             }
-                        } else {
-                            print('Error: File name, URL, or embedded material is missing.');
+                          } else {
+                            print(
+                                'Error: File name, URL, or embedded material is missing.');
+                          }
                         }
-                    }
-                    : _pickFile,
+                      : _pickFile,
                   width: MediaQuery.of(context).size.width * 0.5,
                   height: 50.0,
                   iconPath: _isIconVisible ? 'assets/Vector.png' : null,
@@ -439,7 +463,6 @@ handlePdfUpload(Uint8List pdfBytes, int userKey) async {
                       _downloadURL!,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
-                        // 에러 로그 출력
                         print('Error loading image: $error');
                         print('Stack trace: $stackTrace');
                         print('Image URL: $_downloadURL');
