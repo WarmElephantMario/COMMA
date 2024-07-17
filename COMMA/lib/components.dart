@@ -1450,24 +1450,26 @@ class InputButton extends StatelessWidget {
 //ClickButton
 class ClickButton extends StatelessWidget {
   final String text;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final double width;
   final double height;
   final String? iconPath;
   final IconData? iconData;
   final Color? iconColor;
-  final Color backgroundColor;
+  final Color? backgroundColor;
+  final bool isDisabled;
 
   const ClickButton({
     super.key,
     required this.text,
-    required this.onPressed,
+    this.onPressed,
     this.width = double.infinity,
     this.height = 50.0,
     this.iconPath,
     this.iconData,
     this.iconColor,
-    this.backgroundColor = const Color.fromRGBO(54, 174, 146, 1.0), // 기본 배경색 설정
+    this.backgroundColor,
+    this.isDisabled = false,
   });
 
   @override
@@ -1475,12 +1477,12 @@ class ClickButton extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: GestureDetector(
-        onTap: onPressed,
+        onTap: isDisabled ? null : onPressed,
         child: Container(
           width: width,
           height: height,
           decoration: ShapeDecoration(
-            color: backgroundColor,
+            color: isDisabled ? Colors.grey : (backgroundColor ?? const Color.fromRGBO(54, 174, 146, 1.0)),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
@@ -1521,6 +1523,7 @@ class ClickButton extends StatelessWidget {
     );
   }
 }
+
 
 // 폴더 리스트
 class FolderListItem extends StatelessWidget {

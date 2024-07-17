@@ -642,6 +642,7 @@ app.post('/api/update-lecture-file', (req, res) => {
 // 특정 lecturefileId에 해당하는 existColon 값 확인 API 엔드포인트
 app.get('/api/check-exist-colon', (req, res) => {
     const lecturefileId = req.query.lecturefileId;
+    console.log(`Received lecturefileId: ${lecturefileId}`);
 
     if (!lecturefileId || isNaN(parseInt(lecturefileId, 10))) {
         return res.status(400).json({ error: 'Invalid lecturefileId' });
