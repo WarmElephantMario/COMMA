@@ -13,7 +13,6 @@ import 'api/api.dart';
 import 'model/user_provider.dart';
 import '62lecture_start.dart';
 
-
 enum RecordingState { initial, recording, recorded }
 
 class RecordPage extends StatefulWidget {
@@ -47,12 +46,11 @@ class _RecordPageState extends State<RecordPage> {
   late RecordingState _recordingState;
   int _selectedIndex = 2;
   dynamic _createdAt;
-  bool _isColonFileExists = false;
   bool _isPDF = false;
   PdfController? _pdfController;
   Uint8List? _fileBytes;
   int _currentPage = 1;
-  Set<int> _blurredPages = {};
+  final Set<int> _blurredPages = {};
   Map<int, String> pageTexts = {};
 
   late stt.SpeechToText _speech;
@@ -68,7 +66,6 @@ class _RecordPageState extends State<RecordPage> {
     if (_recordingState == RecordingState.recorded) {
       _fetchCreatedAt();
     }
-    _checkColonFile();
     if (_recordingState == RecordingState.initial) {
       _insertInitialData();
     }
@@ -77,41 +74,40 @@ class _RecordPageState extends State<RecordPage> {
   }
 
   Future<void> _loadPageTexts() async {
-  try {
-    // print('${widget.selectedFolderId}');
-    // print('${widget.noteName}');
-    final response = await http.get(Uri.parse(
-        '${API.baseUrl}/api/get-alternative-text-url?folderId=${widget.selectedFolderId}&fileName=${widget.noteName}'));
-    if (response.statusCode == 200) {
-      print('Response body: ${response.body}');
-      final fileData = jsonDecode(response.body);
-      final alternativeTextUrl = fileData['alternative_text_url'];
-      if (alternativeTextUrl != null) {
-        final textResponse = await http.get(Uri.parse(alternativeTextUrl));
-        if (textResponse.statusCode == 200) {
-          //print('Text response body: ${textResponse.body}');
-          // UTF-8 인코딩으로 텍스트 읽기
-          final textLines = utf8.decode(textResponse.bodyBytes).split('\n');
-          setState(() {
-            pageTexts = {
-              for (int i = 0; i < textLines.length; i++) i + 1: textLines[i]
-            };
-          });
+    try {
+      // print('${widget.selectedFolderId}');
+      // print('${widget.noteName}');
+      final response = await http.get(Uri.parse(
+          '${API.baseUrl}/api/get-alternative-text-url?folderId=${widget.selectedFolderId}&fileName=${widget.noteName}'));
+      if (response.statusCode == 200) {
+        print('Response body: ${response.body}');
+        final fileData = jsonDecode(response.body);
+        final alternativeTextUrl = fileData['alternative_text_url'];
+        if (alternativeTextUrl != null) {
+          final textResponse = await http.get(Uri.parse(alternativeTextUrl));
+          if (textResponse.statusCode == 200) {
+            //print('Text response body: ${textResponse.body}');
+            // UTF-8 인코딩으로 텍스트 읽기
+            final textLines = utf8.decode(textResponse.bodyBytes).split('\n');
+            setState(() {
+              pageTexts = {
+                for (int i = 0; i < textLines.length; i++) i + 1: textLines[i]
+              };
+            });
+          } else {
+            print('Failed to fetch text file: ${textResponse.statusCode}');
+          }
         } else {
-          print('Failed to fetch text file: ${textResponse.statusCode}');
+          print('Alternative text URL is null');
         }
       } else {
-        print('Alternative text URL is null');
+        print('Failed to fetch alternative text URL: ${response.statusCode}');
+        print('Response body: ${response.body}');
       }
-    } else {
-      print('Failed to fetch alternative text URL: ${response.statusCode}');
-      print('Response body: ${response.body}');
+    } catch (e) {
+      print('Error occurred: $e');
     }
-  } catch (e) {
-    print('Error occurred: $e');
   }
-}
-
 
   void _toggleBlur(int page) {
     setState(() {
@@ -179,59 +175,57 @@ class _RecordPageState extends State<RecordPage> {
       print('대체텍스트 파일이니까 api 2로 갈게요');
       print('전달받은 대체텍스트 url: ${widget.responseUrl}');
 
-          var url = '${API.baseUrl}/api/lecture-files2';
-          var body = {
-            'folder_id': widget.selectedFolderId,
-            'file_name': widget.noteName,
-            'file_url': widget.fileUrl,
-            'lecture_name': widget.lectureName,
-            'alternative_text_url': widget.responseUrl,
-            'userKey': userKey,
-            
-          };
-          try {
-            var response = await http.post(
-              Uri.parse(url),
-              headers: {'Content-Type': 'application/json'},
-              body: jsonEncode(body),
-            );
-            if (response.statusCode == 200) {
-              print('자 sql에 삽입까지 잘 됐으니까 이제 로드한다!!!!!!!!!!!!!!!!!!!!');
-              _loadPageTexts(); // 대체 텍스트 URL 로드
-            } else {
-              print('Failed to add file: ${response.statusCode}');
-              print('${response.body}');
-            }
-          } catch (e) {
-            print('Error during HTTP request: $e');
+        var url = '${API.baseUrl}/api/lecture-files2';
+        var body = {
+          'folder_id': widget.selectedFolderId,
+          'file_name': widget.noteName,
+          'file_url': widget.fileUrl,
+          'lecture_name': widget.lectureName,
+          'alternative_text_url': widget.responseUrl,
+          'userKey': userKey,
+        };
+        try {
+          var response = await http.post(
+            Uri.parse(url),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode(body),
+          );
+          if (response.statusCode == 200) {
+            print('자 sql에 삽입까지 잘 됐으니까 이제 로드한다!!!!!!!!!!!!!!!!!!!!');
+            _loadPageTexts(); // 대체 텍스트 URL 로드
+          } else {
+            print('Failed to add file: ${response.statusCode}');
+            print(response.body);
           }
-
-      } else { //실시간 자막 파일이면, response url은 삽입할 필요 없음
-      //const { folder_id, file_name, file_url, lecture_name } = req.body;
-          var url = '${API.baseUrl}/api/lecture-files';
-          var body = {
-            'folder_id': widget.selectedFolderId,
-            'file_name': widget.noteName,
-            'file_url': widget.fileUrl,
-            'lecture_name': widget.lectureName,
-            'userKey': userKey,
-          };
-          try {
-            var response = await http.post(
-              Uri.parse(url),
-              headers: {'Content-Type': 'application/json'},
-              body: jsonEncode(body),
-            );
-            if (response.statusCode == 200) {
-              print('File added successfully');
-            } else {
-              print('Failed to add file: ${response.statusCode}');
-            }
-          } catch (e) {
-            print('Error during HTTP request: $e');
+        } catch (e) {
+          print('Error during HTTP request: $e');
+        }
+      } else {
+        //실시간 자막 파일이면, response url은 삽입할 필요 없음
+        //const { folder_id, file_name, file_url, lecture_name } = req.body;
+        var url = '${API.baseUrl}/api/lecture-files';
+        var body = {
+          'folder_id': widget.selectedFolderId,
+          'file_name': widget.noteName,
+          'file_url': widget.fileUrl,
+          'lecture_name': widget.lectureName,
+          'userKey': userKey,
+        };
+        try {
+          var response = await http.post(
+            Uri.parse(url),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode(body),
+          );
+          if (response.statusCode == 200) {
+            print('File added successfully');
+          } else {
+            print('Failed to add file: ${response.statusCode}');
           }
+        } catch (e) {
+          print('Error during HTTP request: $e');
+        }
       }
-
     } else {
       print('User ID is null, cannot insert initial data.');
     }
@@ -290,38 +284,6 @@ class _RecordPageState extends State<RecordPage> {
     await _fetchCreatedAt();
   }
 
-  Future<bool> _checkColonFileExists(
-      String folderName, String noteName, int userKey) async {
-    var fetchUrl =
-        '${API.baseUrl}/api/check-colon-file?folderName=$folderName&noteName=$noteName&userKey=$userKey';
-    try {
-      var fetchResponse = await http.get(Uri.parse(fetchUrl));
-      if (fetchResponse.statusCode == 200) {
-        var data = jsonDecode(fetchResponse.body);
-        return data['exists'];
-      } else {
-        print(
-            'Failed to check colon file existence: ${fetchResponse.statusCode}');
-        return false;
-      }
-    } catch (e) {
-      print('Error during HTTP request: $e');
-      return false;
-    }
-  }
-
-  Future<void> _checkColonFile() async {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userKey = userProvider.user?.userKey;
-
-    if (userKey != null) {
-      bool exists = await _checkColonFileExists(
-          widget.folderName, widget.noteName, userKey);
-      setState(() {
-        _isColonFileExists = exists;
-      });
-    }
-  }
 
   void _listen() async {
     if (!_isListening) {
@@ -334,8 +296,7 @@ class _RecordPageState extends State<RecordPage> {
         setState(() => _isListening = true);
         _speech.listen(
           onResult: (val) => setState(() {
-            _recognizedText =
-                val.recognizedWords; // 텍스트 업데이트 (추가하지 않음)
+            _recognizedText = val.recognizedWords; // 텍스트 업데이트 (추가하지 않음)
             if (val.hasConfidenceRating && val.confidence > 0) {
               _confidence = val.confidence;
             }
@@ -378,10 +339,10 @@ class _RecordPageState extends State<RecordPage> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => LectureStartPage(
-                                  fileName: widget.noteName,
-                                  fileURL: widget.fileUrl,
-                                  responseUrl: widget.responseUrl,
-                                  type: widget.type,
+                                    fileName: widget.noteName,
+                                    fileURL: widget.fileUrl,
+                                    responseUrl: widget.responseUrl,
+                                    type: widget.type,
                                   )),
                         );
                       }
@@ -398,7 +359,7 @@ class _RecordPageState extends State<RecordPage> {
               ),
               Row(
                 children: [
-                  const ImageIcon(AssetImage('assets/folder_search.png')),
+                  Image.asset('assets/folder_search.png'),
                   const SizedBox(width: 8),
                   Text(
                     '폴더 분류 > ${widget.folderName}',
@@ -518,21 +479,19 @@ class _RecordPageState extends State<RecordPage> {
                         const SizedBox(width: 2),
                         ClickButton(
                           text: '콜론 생성(:)',
-                          onPressed: _isColonFileExists
-                              ? () {}
-                              : () {
+                          onPressed: 
+                              () {
                                   print('콜론 생성 버튼 클릭됨');
                                   showColonCreatedDialog(
                                       context,
                                       widget.folderName,
                                       widget.noteName,
-                                      widget.lectureName);
+                                      widget.lectureName,
+                                      widget.fileUrl);
                                 },
                           width: MediaQuery.of(context).size.width * 0.3,
                           height: 40.0,
-                          backgroundColor: _isColonFileExists
-                              ? Colors.grey
-                              : const Color.fromRGBO(54, 174, 146, 1.0),
+      
                         ),
                       ],
                     ),
@@ -582,7 +541,8 @@ class _RecordPageState extends State<RecordPage> {
                   ),
                 ),
               const SizedBox(height: 20), // 녹음 상태와 관계없이 항상 표시
-              if (_recordingState == RecordingState.recording && isRealTimeSttEnabled == true)
+              if (_recordingState == RecordingState.recording &&
+                  isRealTimeSttEnabled == true)
                 Column(
                   children: [
                     const SizedBox(height: 10),
@@ -597,7 +557,8 @@ class _RecordPageState extends State<RecordPage> {
                     const SizedBox(height: 20),
                   ],
                 ),
-                if (_recordingState == RecordingState.recorded && isRealTimeSttEnabled == true)
+              if (_recordingState == RecordingState.recorded &&
+                  isRealTimeSttEnabled == true)
                 Column(
                   children: [
                     const SizedBox(height: 10),
