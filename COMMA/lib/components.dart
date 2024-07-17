@@ -420,6 +420,7 @@ void showColonCreatedDialog(BuildContext context, String folderName,
                       if (colonFileId != -1) {
                         // Update LectureFiles with colonFileId
                         //_lectureFileId를 가져와야 함
+                        
                         await updateLectureFileWithColonId(lectureFileId, colonFileId);
 
                         // Fetch the created_at value after creating the folder and file
