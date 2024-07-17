@@ -1,8 +1,8 @@
 class API {
-  static const baseUrl = 'http://192.168.45.8:3000';
+  static const baseUrl = 'http://10.240.87.18:3000';
 
-  static const hostConnect = "http://192.168.45.8/api_new_members";
-  static const hostConnect2 = "http://192.168.45.8/api_new_lectures";
+  static const hostConnect = "http://10.240.87.18/api_new_members";
+  static const hostConnect2 = "http://10.240.87.18/api_new_lectures";
 
   static const hostConnectUser = "$hostConnect/user";
   static const hostConnectLectureFile = "$hostConnect2/lecture_folder";
