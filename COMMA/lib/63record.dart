@@ -1,5 +1,6 @@
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_plugin/60prepare.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -52,6 +53,9 @@ class _RecordPageState extends State<RecordPage> {
   int _currentPage = 1;
   final Set<int> _blurredPages = {};
   Map<int, String> pageTexts = {};
+  int? _lecturefileId;
+
+
 
   late stt.SpeechToText _speech;
   bool _isListening = false;
@@ -187,6 +191,7 @@ Future<void> _insertInitialData() async {
       if (response.statusCode == 200) {
         var responseData = jsonDecode(response.body);
         var lecturefileId = responseData['id'];
+        _lecturefileId = responseData['id'];
         print('Lecture File added successfully');
 
         // 대체텍스트 타입일 때만 Alt_table에 추가로 데이터 저장
@@ -485,7 +490,9 @@ Future<void> _insertInitialData() async {
                                       widget.folderName,
                                       widget.noteName,
                                       widget.lectureName,
-                                      widget.fileUrl);
+                                      widget.fileUrl,
+                                      _lecturefileId!
+                                      );
                                 },
                           width: MediaQuery.of(context).size.width * 0.3,
                           height: 40.0,
