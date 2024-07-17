@@ -19,6 +19,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 enum RecordingState { initial, recording, recorded }
 
 class RecordPage extends StatefulWidget {
+  final int? lecturefileId; 
   final String selectedFolderId;
   final String noteName;
   final String fileUrl;
@@ -30,6 +31,7 @@ class RecordPage extends StatefulWidget {
 
   const RecordPage({
     super.key,
+    this.lecturefileId,
     required this.selectedFolderId,
     required this.noteName,
     required this.fileUrl,
@@ -76,17 +78,57 @@ class _RecordPageState extends State<RecordPage> {
       _insertInitialData();
     }
     _checkFileType();
-    // _loadPageTexts(); // 대체 텍스트 URL 로드
+    _loadPageTexts2(); // 대체 텍스트 URL 로드
   }
 
-Future<void> _loadPageTexts(int lecturefileId) async {
+  Future<void> _loadPageTexts2() async {
   try {
+
     final response = await http.get(Uri.parse(
-        '${API.baseUrl}/api/get-alternative-text-url?lecturefileId=$lecturefileId'));
+        '${API.baseUrl}/api/get-alternative-text-url?lecturefileId=${widget.lecturefileId}'));
+
     if (response.statusCode == 200) {
       print('Response body: ${response.body}');
+
       final fileData = jsonDecode(response.body);
       final alternativeTextUrl = fileData['alternative_text_url'];
+      
+      if (alternativeTextUrl != null) {
+        final textResponse = await http.get(Uri.parse(alternativeTextUrl));
+        if (textResponse.statusCode == 200) {
+          final textLines = utf8.decode(textResponse.bodyBytes).split('\n');
+          setState(() {
+            pageTexts = {
+              for (int i = 0; i < textLines.length; i++) i + 1: textLines[i]
+            };
+          });
+        } else {
+          print('Failed to fetch text file: ${textResponse.statusCode}');
+        }
+      } else {
+        print('Alternative text URL is null');
+      }
+    } else {
+      print('Failed to fetch alternative text URL: ${response.statusCode}');
+      print('Response body: ${response.body}');
+    }
+  } catch (e) {
+    print('Error occurred: $e');
+  }
+}
+
+Future<void> _loadPageTexts() async {
+  try {
+
+    final response = await http.get(Uri.parse(
+        '${API.baseUrl}/api/get-alternative-text-url?lecturefileId=$_lecturefileId'));
+
+    if (response.statusCode == 200) {
+      print('Response body: ${response.body}');
+
+      final fileData = jsonDecode(response.body);
+      final alternativeTextUrl = fileData['alternative_text_url'];
+      
       if (alternativeTextUrl != null) {
         final textResponse = await http.get(Uri.parse(alternativeTextUrl));
         if (textResponse.statusCode == 200) {
@@ -192,8 +234,8 @@ Future<void> _insertInitialData() async {
 
       if (response.statusCode == 200) {
         var responseData = jsonDecode(response.body);
-        var lecturefileId = responseData['id'];
-        _lecturefileId = responseData['id'];
+        var lecturefileId = responseData['id'];  //sql에 집어넣어서 파일 생성, 이제 file id 받아옴
+        _lecturefileId = responseData['id'];     //전역변수에 넣어줌
         print('Lecture File added successfully');
 
         // 대체텍스트 타입일 때만 Alt_table에 추가로 데이터 저장
@@ -216,7 +258,7 @@ Future<void> _insertInitialData() async {
           if (altTableResponse.statusCode == 200) {
             print('Alt_table에 대체텍스트 url 저장 완료');
             print('대체텍스트 url 로드하겠습니다');
-            await _loadPageTexts(lecturefileId); // 대체텍스트 로드
+            await _loadPageTexts(); // 대체텍스트 로드
             print('대체텍스트 url 로드 완료');
           } else {
             print('Failed to add alt table entry: ${altTableResponse.statusCode}');
