@@ -168,7 +168,6 @@ class _LectureStartPageState extends State<LectureStartPage> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => RecordPage(
-                        // lecturefileId: widget.lecturefileId, << 지금은 만들어지기 전이니까 전달 X
                         selectedFolderId: widget.selectedFolder.toString(),
                         noteName: widget.noteName!,
                         fileUrl: widget.fileURL,
@@ -177,6 +176,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
                         lectureName: widget.lectureName,
                         responseUrl: widget.responseUrl != null ? widget.responseUrl : null,
                         type: widget.type, //대체인지 실시간인지 전달해줌
+                        lecturefileId: widget.lecturefileId,
                       ),
                     ),
                   );
