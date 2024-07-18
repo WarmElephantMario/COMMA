@@ -1186,6 +1186,61 @@ class _CustomRadioButtonState extends State<CustomRadioButton> {
     );
   }
 }
+class CustomRadioButton2 extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final ValueChanged<bool> onChanged;
+
+  const CustomRadioButton2({
+    super.key,
+    required this.label,
+    required this.isSelected,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        onChanged(!isSelected);
+      },
+      child: Row(
+        children: [
+          Container(
+            width: 18,
+            height: 18,
+            decoration: BoxDecoration(
+              color: isSelected ? Colors.teal : Colors.transparent,
+              border: Border.all(
+                color: const Color.fromARGB(255, 80, 80, 80),
+                width: 1.6,
+              ),
+              borderRadius: BorderRadius.circular(9),
+            ),
+            child: isSelected
+                ? const Icon(
+                    Icons.check,
+                    size: 14,
+                    color: Colors.white,
+                  )
+                : null,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 16,
+              fontFamily: 'DM Sans',
+              color: Color.fromARGB(255, 70, 70, 70),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 
 // Checkbox2 위젯
 // class Checkbox2 extends StatefulWidget {

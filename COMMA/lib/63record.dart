@@ -246,68 +246,35 @@ class _RecordPageState extends State<RecordPage> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userKey = userProvider.user?.userKey;
 
-    if (userKey != null) {
-      var url = '${API.baseUrl}/api/lecture-files';
-      var body = {
-        'folder_id': widget.selectedFolderId,
-        'file_name': widget.noteName,
-        'file_url': widget.fileUrl,
-        'lecture_name': widget.lectureName,
-        'type': widget.type, // 대체인지 실시간인지
-        'userKey': userKey,
+    //_lecturefileId = responseData['id']; //전역변수에 넣어줌
+    //print('Lecture File added successfully');
+
+    // 대체텍스트 타입일 때만 Alt_table에 추가로 데이터 저장
+    if (widget.type == 0) {
+      print('Alt_table에 대체텍스트 url 저장하겠습니다');
+
+      var altTableUrl = '${API.baseUrl}/api/alt-table';
+      var altTableBody = {
+        'lecturefile_id': widget.lecturefileId,
+        'colonfile_id': null, // 필요 시 적절한 colonfile_id 값을 제공
+        'alternative_text_url': widget.responseUrl,
       };
 
-      try {
-        var response = await http.post(
-          Uri.parse(url),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode(body),
-        );
+      var altTableResponse = await http.post(
+        Uri.parse(altTableUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(altTableBody),
+      );
 
-        if (response.statusCode == 200) {
-          var responseData = jsonDecode(response.body);
-          var lecturefileId =
-              responseData['id']; //sql에 집어넣어서 파일 생성, 이제 file id 받아옴
-          _lecturefileId = responseData['id']; //전역변수에 넣어줌
-          print('Lecture File added successfully');
-
-          // 대체텍스트 타입일 때만 Alt_table에 추가로 데이터 저장
-          if (widget.type == 0) {
-            print('Alt_table에 대체텍스트 url 저장하겠습니다');
-
-            var altTableUrl = '${API.baseUrl}/api/alt-table';
-            var altTableBody = {
-              'lecturefile_id': lecturefileId,
-              'colonfile_id': null, // 필요 시 적절한 colonfile_id 값을 제공
-              'alternative_text_url': widget.responseUrl,
-            };
-
-            var altTableResponse = await http.post(
-              Uri.parse(altTableUrl),
-              headers: {'Content-Type': 'application/json'},
-              body: jsonEncode(altTableBody),
-            );
-
-            if (altTableResponse.statusCode == 200) {
-              print('Alt_table에 대체텍스트 url 저장 완료');
-              print('대체텍스트 url 로드하겠습니다');
-              await _loadPageTexts(); // 대체텍스트 로드
-              print('대체텍스트 url 로드 완료');
-            } else {
-              print(
-                  'Failed to add alt table entry: ${altTableResponse.statusCode}');
-              print(altTableResponse.body);
-            }
-          }
-        } else {
-          print('Failed to add file: ${response.statusCode}');
-          print(response.body);
-        }
-      } catch (e) {
-        print('Error during HTTP request: $e');
+      if (altTableResponse.statusCode == 200) {
+        print('Alt_table에 대체텍스트 url 저장 완료');
+        print('대체텍스트 url 로드하겠습니다');
+        await _loadPageTexts(); // 대체텍스트 로드
+        print('대체텍스트 url 로드 완료');
+      } else {
+        print('Failed to add alt table entry: ${altTableResponse.statusCode}');
+        print(altTableResponse.body);
       }
-    } else {
-      print('User ID is null, cannot insert initial data.');
     }
   }
 
@@ -447,7 +414,7 @@ class _RecordPageState extends State<RecordPage> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => LectureStartPage(
-                                    fileName: widget.noteName,
+                                    lectureName: widget.noteName,
                                     fileURL: widget.fileUrl,
                                     responseUrl: widget.responseUrl != null
                                         ? widget.responseUrl
