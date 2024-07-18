@@ -429,6 +429,9 @@ void showColonCreatedDialog(
 
                         await updateLectureFileWithColonId(lectureFileId, colonFileId);
 
+                         // Record_Table 업데이트
+                        await _updateRecordTableWithColonId(lectureFileId, colonFileId);
+
                         // `ColonPage`로 이동전 콜론 정보 가져오기
                         var colonDetails = await _fetchColonDetails(colonFileId);
 
@@ -465,6 +468,31 @@ void showColonCreatedDialog(
   }
 }
 
+// Record_Table 업데이트 함수
+Future<void> _updateRecordTableWithColonId(int? lecturefileId, int colonfileId) async {
+  final updateUrl = '${API.baseUrl}/api/update-record-table';
+  final updateBody = {
+    'lecturefile_id': lecturefileId,
+    'colonfile_id': colonfileId,
+  };
+
+  try {
+    final updateResponse = await http.post(
+      Uri.parse(updateUrl),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(updateBody),
+    );
+
+    if (updateResponse.statusCode == 200) {
+      print('Record table updated successfully with colon file ID');
+    } else {
+      print('Failed to update record table: ${updateResponse.statusCode}');
+      print(updateResponse.body);
+    }
+  } catch (e) {
+    print('Error updating record table: $e');
+  }
+}
 
 Future<Map<String, dynamic>> _fetchColonDetails(int colonId) async {
   var url = '${API.baseUrl}/api/get-colon-details?colonId=$colonId';
