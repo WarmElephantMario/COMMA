@@ -554,6 +554,27 @@ app.post('/api/lecture-files', (req, res) => {
     });
 });
 
+// Lecture details 업데이트 엔드포인트
+app.post('/api/update-lecture-details', (req, res) => {
+    const { lecturefileId, file_url, lecture_name, type } = req.body;
+  
+    console.log('Received data:', { lecturefileId, file_url, lecture_name, type });
+  
+    if (!lecturefileId || !file_url || !lecture_name || type == null) {
+      return res.status(400).send({ error: 'Missing required fields' });
+    }
+  
+    const sql = 'UPDATE LectureFiles SET file_url = ?, lecture_name = ?, type = ? WHERE id = ?';
+    db.query(sql, [file_url, lecture_name, type, lecturefileId], (err, results) => {
+      if (err) {
+        console.error('Database query error:', err);
+        return res.status(500).send({ error: 'Database query error' });
+      }
+      res.send({ success: true, message: 'Lecture details updated successfully' });
+    });
+  });
+  
+
 
 
 //대체텍스트 파일 생성 시 responseUrl 저장
