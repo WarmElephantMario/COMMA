@@ -699,8 +699,8 @@ class _RecordPageState extends State<RecordPage> {
                                   : '텍스트가 없습니다.',
                               style: const TextStyle(
                                 color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                                fontWeight: FontWeight.normal,
                               ),
                             ),
                           ),
