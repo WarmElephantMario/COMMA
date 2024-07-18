@@ -901,6 +901,39 @@ app.get('/api/get-Colonfolder-name', (req, res) => {
     });
 });
 
+// 녹음종료 후 자막 스크립트 부분 데베에 저장
+app.post('/api/insertRecordData', (req, res) => {
+    const { lecturefile_id, colonfile_id, record_url } = req.body;
+
+    if (!lecturefile_id || !record_url) {
+        return res.status(400).json({ success: false, error: 'You must provide lecturefile_id and record_url.' });
+    }
+
+    const sql = 'INSERT INTO Record_table (lecturefile_id, colonfile_id, record_url) VALUES (?, ?, ?)';
+    db.query(sql, [lecturefile_id, colonfile_id, record_url], (err, result) => {
+        if (err) {
+            return res.status(500).json({ success: false, error: err.message });
+        }
+        res.json({ success: true, id: result.insertId, lecturefile_id, colonfile_id, record_url });
+    });
+});
+
+
+// 콜론 생성 후 Record_table 업데이트
+app.post('/api/update-record-table', (req, res) => {
+    const { lecturefile_id, colonfile_id } = req.body;
+    const sql = 'UPDATE Record_table SET colonfile_id = ? WHERE lecturefile_id = ?';
+
+    db.query(sql, [colonfile_id, lecturefile_id], (err, result) => {
+        if (err) {
+            console.error('Error updating record table:', err);
+            res.status(500).json({ error: 'Failed to update record table' });
+        } else {
+            res.status(200).json({ success: true });
+        }
+    });
+});
+
 
 
 
