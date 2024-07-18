@@ -642,15 +642,18 @@ app.post('/api/update-lecture-file', (req, res) => {
 // 특정 lecturefileId에 해당하는 existColon 값 확인 API 엔드포인트
 app.get('/api/check-exist-colon', (req, res) => {
     const lecturefileId = req.query.lecturefileId;
-    console.log(`Received lecturefileId: ${lecturefileId}`);
+    console.log(`Received lecturefileId in existcolon: ${lecturefileId}`);
 
     if (!lecturefileId || isNaN(parseInt(lecturefileId, 10))) {
+        console.log('Invalid lecturefileId');
         return res.status(400).json({ error: 'Invalid lecturefileId' });
     }
 
     const parsedLecturefileId = parseInt(lecturefileId, 10);
 
     const query = 'SELECT existColon FROM LectureFiles WHERE id = ?';
+    console.log(`Executing query: ${query} with lecturefileId: ${parsedLecturefileId}`);
+    
     db.query(query, [parsedLecturefileId], (err, results) => {
         if (err) {
             console.error('Failed to check existColon:', err);
@@ -658,8 +661,10 @@ app.get('/api/check-exist-colon', (req, res) => {
         }
 
         if (results.length > 0) {
+            console.log(`existColon value: ${results[0].existColon}`);
             res.status(200).json({ existColon: results[0].existColon });
         } else {
+            console.log('LectureFile not found');
             res.status(404).json({ error: 'LectureFile not found' });
         }
     });
