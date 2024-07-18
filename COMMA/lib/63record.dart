@@ -112,40 +112,6 @@ class _RecordPageState extends State<RecordPage> {
     }
   }
 
-  // Future<void> _loadPageTexts2() async {
-  //   try {
-  //     final response = await http.get(Uri.parse(
-  //         '${API.baseUrl}/api/get-alternative-text-url?lecturefileId=${widget.lecturefileId}'));
-
-  //     if (response.statusCode == 200) {
-  //       print('Response body: ${response.body}');
-
-  //       final fileData = jsonDecode(response.body);
-  //       final alternativeTextUrl = fileData['alternative_text_url'];
-
-  //       if (alternativeTextUrl != null) {
-  //         final textResponse = await http.get(Uri.parse(alternativeTextUrl));
-  //         if (textResponse.statusCode == 200) {
-  //           final textLines = utf8.decode(textResponse.bodyBytes).split('\n');
-  //           setState(() {
-  //             pageTexts = {
-  //               for (int i = 0; i < textLines.length; i++) i + 1: textLines[i]
-  //             };
-  //           });
-  //         } else {
-  //           print('Failed to fetch text file: ${textResponse.statusCode}');
-  //         }
-  //       } else {
-  //         print('Alternative text URL is null');
-  //       }
-  //     } else {
-  //       print('Failed to fetch alternative text URL: ${response.statusCode}');
-  //       print('Response body: ${response.body}');
-  //     }
-  //   } catch (e) {
-  //     print('Error occurred: $e');
-  //   }
-  // }
 
 
   Future<void> _loadPageTexts() async {
@@ -164,7 +130,7 @@ class _RecordPageState extends State<RecordPage> {
           if (alternativeTextUrl != null) {
             final textResponse = await http.get(Uri.parse(alternativeTextUrl));
             if (textResponse.statusCode == 200) {
-              final textLines = utf8.decode(textResponse.bodyBytes).split('\n');
+              final textLines = utf8.decode(textResponse.bodyBytes).split('//');
               setState(() {
                 pageTexts = {
                   for (int i = 0; i < textLines.length; i++) i + 1: textLines[i]
