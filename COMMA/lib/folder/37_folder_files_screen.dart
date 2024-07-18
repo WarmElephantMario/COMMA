@@ -143,7 +143,6 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
     Widget page = fileType == 'lecture'
         ? RecordPage(
             selectedFolderId: file['folder_id'].toString(),
-          
             noteName: file['file_name'] ?? 'Unknown Note',
             fileUrl:
                 file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
@@ -152,6 +151,7 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
             lectureName: file['lecture_name'] ?? 'Unknown Lecture',
             responseUrl: 'https://defaulturl.com/defaultfile.txt', //수정 필요
             type: 1, //수정 필요
+            lecturefileId: file['id'],
           )
         : ColonPage(
             folderName: folderName,
