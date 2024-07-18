@@ -56,7 +56,6 @@ class _RecordPageState extends State<RecordPage> {
   int _currentPage = 1;
   final Set<int> _blurredPages = {};
   Map<int, String> pageTexts = {};
-  int? _lecturefileId;
   bool _isColonCreated = false; // 추가: 콜론 생성 상태를 나타내는 프로퍼티
 
   late stt.SpeechToText _speech;
@@ -75,42 +74,36 @@ class _RecordPageState extends State<RecordPage> {
     if (_recordingState == RecordingState.initial) {
       _insertInitialData();
     }
+    if(_recordingState == RecordingState.recorded){
+       _checkExistColon(); // 추가: 콜론 존재 여부 확인
+    }
     _checkFileType();
     _loadPageTexts(); // 대체 텍스트 URL 로드
-    _checkExistColon(); // 추가: 콜론 존재 여부 확인
+   
   }
 
   Future<void> _checkExistColon() async {
-    var url =
-        '${API.baseUrl}/api/check-exist-colon?lecturefileId=${widget.lecturefileId}';
-    var response = await http.get(Uri.parse(url));
+  var url = '${API.baseUrl}/api/check-exist-colon?lecturefileId=${widget.lecturefileId}';
+  var response = await http.get(Uri.parse(url));
 
-    if (response.statusCode == 200) {
-      var jsonResponse = jsonDecode(response.body);
-      var existColon = jsonResponse['existColon'];
+  if (response.statusCode == 200) {
+    var jsonResponse = jsonDecode(response.body);
+    var existColon = jsonResponse['existColon'];
 
-      setState(() {
-        _isColonCreated = existColon != null;
-      });
+    setState(() {
+      _isColonCreated = existColon != null;
+    });
 
-      // existColon이 null이 아닌 경우 showColonCreatedDialog 호출
-      if (existColon == null) {
-        showColonCreatedDialog(
-          context,
-          widget.folderName,
-          widget.noteName,
-          widget.lectureName,
-          widget.fileUrl,
-          _lecturefileId!,
-        );
-      } else {
-        print('이미 생성된 콜론이 존재합니다. 콜론 생성 다이얼로그를 실행하지 않습니다.');
-      }
-    } else {
-      print('Failed to check existColon: ${response.statusCode}');
-      print(response.body);
-    }
+    if (existColon != null) {
+      print('이미 생성된 콜론이 존재합니다. 콜론 생성 다이얼로그를 비활성화합니다.');
+    } 
+
+  } else {
+    print('Failed to check existColon: ${response.statusCode}');
+    print(response.body);
   }
+}
+
 
 
 
@@ -153,7 +146,7 @@ class _RecordPageState extends State<RecordPage> {
       // print('지금???? 2 ${_lecturefileId}');
           try {
           final response = await http.get(Uri.parse(
-          '${API.baseUrl}/api/get-alternative-text-url?lecturefileId=${_lecturefileId}'));
+          '${API.baseUrl}/api/get-alternative-text-url?lecturefileId=${widget.lecturefileId}'));
 
       if (response.statusCode == 200) {
         print('Response body: ${response.body}');
@@ -365,7 +358,7 @@ class _RecordPageState extends State<RecordPage> {
       final userKey = userProvider.user?.userKey;
       if (userKey != null) {
         final storageRef = FirebaseStorage.instance.ref().child(
-            'record/$userKey/${widget.selectedFolderId}/${_lecturefileId}/자막.txt');
+            'record/$userKey/${widget.selectedFolderId}/${widget.lecturefileId}/자막.txt');
 
         UploadTask uploadTask = storageRef.putData(fileBytes,
             SettableMetadata(contentType: 'text/plain; charset=utf-8'));
@@ -559,68 +552,31 @@ class _RecordPageState extends State<RecordPage> {
                           text: '콜론 생성(:)',
                           backgroundColor: _isColonCreated ? Colors.grey : null,
                           onPressed: () async {
-                            print('콜론 생성 버튼 클릭됨');
-
-                            // 현재 lecturefile에 existColon 값 확인
-
-                            // 1) 이미 생성돼있던 파일 타고 들어온 거라면 widget.lecturefileId 사용
-                            if (widget.lecturefileId != null) {
-                              print(
-                                  '타고 들어온 LecturefileId:${widget.lecturefileId}');
-                              var url =
-                                  '${API.baseUrl}/api/check-exist-colon?lecturefileId=${widget.lecturefileId}';
-                              var response = await http.get(Uri.parse(url));
-                              if (response.statusCode == 200) {
-                                var jsonResponse = jsonDecode(response.body);
-                                var existColon = jsonResponse['existColon'];
-                                if (existColon == null) {
-                                  // existColon이 null이 아닌 경우 showColonCreatedDialog 호출
-                                  showColonCreatedDialog(
-                                    context,
-                                    widget.folderName,
-                                    widget.noteName,
-                                    widget.lectureName,
-                                    widget.fileUrl,
-                                    widget.lecturefileId,
-                                    // _lecturefileId!,
-                                  );
-                                } else {
-                                  print(
-                                      '이미 생성된 콜론이 존재합니다. 콜론 생성 다이얼로그를 실행하지 않습니다.');
-                                }
-                              } else {
-                                print(
-                                    'Failed to check existColon: ${response.statusCode}');
-                                print(response.body);
-                              }
+                            if (_isColonCreated) {
+                              print('이미 생성된 콜론이 존재합니다. 콜론 생성 다이얼로그를 실행하지 않습니다.');
                             } else {
-                              // 2) 지금 처음 만든 recordpage라면 _lecturefileId 사용
-                              print(
-                                  '지금 새로 만든 LecturefileId 2:${_lecturefileId!}');
-                              var url =
-                                  '${API.baseUrl}/api/check-exist-colon?lecturefileId=${_lecturefileId}';
+                              print('콜론 생성 버튼 클릭됨');
+                              var url = '${API.baseUrl}/api/check-exist-colon?lecturefileId=${widget.lecturefileId}';
                               var response = await http.get(Uri.parse(url));
+
                               if (response.statusCode == 200) {
                                 var jsonResponse = jsonDecode(response.body);
                                 var existColon = jsonResponse['existColon'];
+
                                 if (existColon == null) {
-                                  // existColon이 null이 아닌 경우 showColonCreatedDialog 호출
                                   showColonCreatedDialog(
                                     context,
                                     widget.folderName,
                                     widget.noteName,
                                     widget.lectureName,
                                     widget.fileUrl,
-                                    // widget.lecturefileId,
-                                    _lecturefileId!,
+                                    widget.lecturefileId!,
                                   );
                                 } else {
-                                  print(
-                                      '이미 생성된 콜론이 존재합니다. 콜론 생성 다이얼로그를 실행하지 않습니다.');
+                                  print('이미 생성된 콜론이 존재합니다. 콜론 생성 다이얼로그를 실행하지 않습니다.');
                                 }
                               } else {
-                                print(
-                                    'Failed to check existColon: ${response.statusCode}');
+                                print('Failed to check existColon: ${response.statusCode}');
                                 print(response.body);
                               }
                             }
@@ -628,6 +584,7 @@ class _RecordPageState extends State<RecordPage> {
                           width: MediaQuery.of(context).size.width * 0.3,
                           height: 40.0,
                         ),
+
                       ],
                     ),
                 ],
