@@ -76,7 +76,7 @@ class _RecordPageState extends State<RecordPage> {
       _insertInitialData();
     }
     _checkFileType();
-    _loadPageTexts2(); // 대체 텍스트 URL 로드
+    _loadPageTexts2(); // 대체 텍스트 URL 로드 (이미 생성된 파일로 들어와 조회하는 경우)
     _checkExistColon(); // 추가: 콜론 존재 여부 확인
   }
 
@@ -112,6 +112,8 @@ class _RecordPageState extends State<RecordPage> {
     }
   }
 
+  //이미 생성되어 있던 lecturefile을 조회하여 이 recordpage로 온 경우, 
+  // widget.lecturefileId를 전달해서 로드
   Future<void> _loadPageTexts2() async {
     try {
       final response = await http.get(Uri.parse(
@@ -147,6 +149,7 @@ class _RecordPageState extends State<RecordPage> {
     }
   }
 
+  //LectureFile 최초 생성하여 recordpage로 온 경우, 방금 생성된 _lecturefileId를 전달해야 함
   Future<void> _loadPageTexts() async {
     try {
       final response = await http.get(Uri.parse(
@@ -608,7 +611,8 @@ class _RecordPageState extends State<RecordPage> {
                                   widget.noteName,
                                   widget.lectureName,
                                   widget.fileUrl,
-                                  _lecturefileId!,
+                                  widget.lecturefileId,
+                                  // _lecturefileId!,
                                 );
                               } else {
                                 print(

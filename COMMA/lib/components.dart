@@ -339,7 +339,7 @@ Future<int> createColonFolder(String folderName, String noteName,
 
 // 콜론 생성 다이얼로그 함수
 void showColonCreatedDialog(BuildContext context, String folderName,
-    String noteName, String lectureName, String fileUrl, int lectureFileId) {
+    String noteName, String lectureName, String fileUrl, int? lectureFileId) {
   final userProvider = Provider.of<UserProvider>(context, listen: false);
   final userKey = userProvider.user?.userKey;
 
@@ -466,7 +466,7 @@ void showColonCreatedDialog(BuildContext context, String folderName,
 }
 
 
-Future<void> updateLectureFileWithColonId(int lectureFileId, int colonFileId) async {
+Future<void> updateLectureFileWithColonId(int? lectureFileId, int colonFileId) async {
   var url = '${API.baseUrl}/api/update-lecture-file';
 
   var body = {
