@@ -40,13 +40,295 @@ class _LearningPreparationState extends State<LearningPreparation> {
   bool _isPDF = false;
   late pdfx.PdfController _pdfController;
   final ValueNotifier<double> _progressNotifier = ValueNotifier<double>(0.0);
-
+  String _selectedFolder = '폴더';
+  String _noteName = '새로운 노트';
+  List<Map<String, dynamic>> folderList = [];
+  List<Map<String, dynamic>> items = [];
   int _selectedIndex = 2;
+  int? lecturefileId; // 
+
+  @override
+  void initState() {
+    super.initState();
+    fetchFolderList();
+  }
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  Future<void> fetchFolderList() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userKey = userProvider.user?.userKey;
+
+    if (userKey != null) {
+      try {
+        // currentFolderId를 쿼리 파라미터로 포함
+        final uri = Uri.parse('${API.baseUrl}/api/lecture-folders?userKey=$userKey');
+        final response = await http.get(uri);
+
+        if (response.statusCode == 200) {
+          final List<dynamic> folderData = json.decode(response.body);
+
+          setState(() {
+            // 현재 선택된 폴더를 제외하고 나머지 폴더 목록 업데이트
+            folderList = folderData
+                .map((folder) => {
+                      'id': folder['id'],
+                      'folder_name': folder['folder_name'],
+                      'selected': false,
+                    })
+                .toList();
+
+            var defaultFolder = folderList.firstWhere(
+                (folder) => folder['folder_name'] == '기본 폴더',
+                orElse: () => <String, dynamic>{});
+            if (defaultFolder.isNotEmpty) {
+              _selectFolder(defaultFolder['folder_name']);
+            }
+          });
+        } else {
+          throw Exception('Failed to load folders');
+        }
+      } catch (e) {
+        print('Folder list fetch failed: $e');
+      }
+    } else {
+      print('User Key is null, cannot fetch folders.');
+    }
+  }
+
+  void _selectFolder(String folderName) {
+    setState(() {
+      _selectedFolder = folderName;
+    });
+  }
+
+  Future<void> fetchOtherFolders(String fileType, int currentFolderId) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userKey = userProvider.user?.userKey;
+
+    if (userKey != null) {
+      try {
+        final uri = Uri.parse(
+            '${API.baseUrl}/api/getOtherFolders/$fileType/$userKey=$userKey');
+        final response = await http.get(uri);
+
+        if (response.statusCode == 200) {
+          List<Map<String, dynamic>> fetchedFolders =
+              List<Map<String, dynamic>>.from(jsonDecode(response.body));
+
+          setState(() {
+            // 기존의 폴더 리스트를 업데이트하는 대신, fetchedFolders를 사용합니다.
+            folderList = fetchedFolders;
+          });
+        } else {
+          throw Exception(
+              'Failed to load folders with status code: ${response.statusCode}');
+        }
+      } catch (e) {
+        print('Error fetching other folders: $e');
+        rethrow;
+      }
+    } else {
+      print('User Key is null, cannot fetch folders.');
+    }
+  }
+
+  Future<void> renameItem(String newName) async {
+    setState(() {
+      _noteName = newName;
+    });
+  }
+
+  int getFolderIdByName(String folderName) {
+    return folderList.firstWhere(
+        (folder) => folder['folder_name'] == folderName,
+        orElse: () => {'id': -1})['id'];
+  }
+
+  void showQuickMenu(
+      BuildContext context,
+      Future<void> Function() fetchOtherFolders,
+      List<Map<String, dynamic>> folders,
+      Function(String) selectFolder) async {
+    print('Attempting to fetch other folders.');
+    await fetchOtherFolders();
+    print('Updating folders with selection state.');
+
+    // updatedFolders는 fetchOtherFolders 호출 후 업데이트된 folderList를 사용합니다.
+    var updatedFolders = folderList.map((folder) {
+      bool isSelected = folder['folder_name'] == _selectedFolder;
+      return {
+        ...folder,
+        'selected': isSelected,
+      };
+    }).toList();
+
+    print('Updated folders: $updatedFolders');
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(20),
+        ),
+      ),
+      backgroundColor: Colors.white,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Text(
+                          '취소',
+                          style: TextStyle(
+                            color: Color.fromRGBO(84, 84, 84, 1),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      const Text(
+                        '다음으로 이동',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          final selectedFolder = updatedFolders.firstWhere(
+                              (folder) => folder['selected'] == true,
+                              orElse: () => {});
+                          if (selectedFolder.isNotEmpty) {
+                            selectFolder(selectedFolder['folder_name']);
+                          }
+                          Navigator.pop(context);
+                        },
+                        child: const Text(
+                          '이동',
+                          style: TextStyle(
+                            color: Color.fromRGBO(255, 161, 122, 1),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  const Center(
+                    child: Text(
+                      '다른 폴더로 이동할 수 있어요.',
+                      style: TextStyle(
+                        color: Color(0xFF575757),
+                        fontSize: 13,
+                        fontFamily: 'Raleway',
+                        fontWeight: FontWeight.w500,
+                        height: 1.5,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: updatedFolders.map((folder) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 5),
+                        child: CustomRadioButton2(
+                          label: folder['folder_name'],
+                          isSelected: folder['selected'] ?? false,
+                          onChanged: (bool isSelected) {
+                            setState(() {
+                              for (var f in updatedFolders) {
+                                f['selected'] = false;
+                              }
+                              folder['selected'] = isSelected;
+                            });
+                            print('Folder selected: ${folder['folder_name']}');
+                          },
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // 파일 이름 바꾸기 다이얼로그
+  void showRenameDialog2(
+    BuildContext context,
+    String currentName,
+    Future<void> Function(String) renameItem,
+    void Function(VoidCallback) setState,
+    String title,
+    String fieldName,
+  ) {
+    final TextEditingController textController = TextEditingController();
+    textController.text = currentName;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: Text(
+            title,
+            style: const TextStyle(
+              color: Color(0xFF545454),
+              fontSize: 14,
+              fontFamily: 'DM Sans',
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: TextField(
+            controller: textController,
+            decoration: const InputDecoration(hintText: "새 이름 입력"),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child:
+                  const Text('취소', style: TextStyle(color: Color(0xFFFFA17A))),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child:
+                  const Text('저장', style: TextStyle(color: Color(0xFF545454))),
+              onPressed: () async {
+                String newName = textController.text;
+                await renameItem(newName);
+                setState(() {
+                  _noteName = newName;
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _pickFile() async {
@@ -65,7 +347,6 @@ class _LearningPreparationState extends State<LearningPreparation> {
           return;
         }
       }
-
       try {
         String mimeType = 'application/octet-stream';
         if (fileName.endsWith('.pdf')) {
@@ -92,7 +373,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
         final userProvider = Provider.of<UserProvider>(context, listen: false);
         Reference storageRef = FirebaseStorage.instance
             .ref()
-            .child('uploads/${userProvider.user!.userKey}/${fileName}_${id}');
+            .child('uploads/${userProvider.user!.userKey}/${getFolderIdByName(_selectedFolder)}/$lecturefileId/show_handle/${fileName}_${id}');
         UploadTask uploadTask = storageRef.putData(fileBytes, metadata);
 
         TaskSnapshot taskSnapshot = await uploadTask;
@@ -150,7 +431,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
       _progressNotifier.value = (i + 1) / images.length; // 진행률 업데이트
 
       final storageRef =
-          FirebaseStorage.instance.ref().child('uploads/$userKey/page_$i.jpg');
+          FirebaseStorage.instance.ref().child('uploads/$userKey/${getFolderIdByName(_selectedFolder)}/$lecturefileId/pdf_handle/page_$i.jpg');
       final uploadTask = storageRef.putData(
           images[i], SettableMetadata(contentType: 'image/jpeg'));
       final taskSnapshot = await uploadTask;
@@ -291,6 +572,48 @@ class _LearningPreparationState extends State<LearningPreparation> {
       });
     }
   }
+//데베에 폴더id,파일이름을 삽입하는 함수 
+  Future<int> saveLectureFile({required int folderId, required String noteName}) async {
+    final response = await http.post(
+        Uri.parse('${API.baseUrl}/api/lecture-files'),
+        headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, dynamic>{
+            'folder_id': folderId,
+            'file_name': noteName,
+        }),
+    );
+
+    if (response.statusCode == 200) {
+        final responseBody = jsonDecode(response.body);
+        return responseBody['id'];
+    } else {
+        throw Exception('Failed to save lecture file');
+    }
+}
+// 데베 업데이트 file URL,lecture name,type 
+Future<void> updateLectureDetails(int lecturefileId, String fileUrl, String lectureName, int type) async {
+  final response = await http.post(
+    Uri.parse('${API.baseUrl}/api/update-lecture-details'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(<String, dynamic>{
+      'lecturefileId': lecturefileId,
+      'file_url': fileUrl,
+      'lecture_name': lectureName,
+      'type': type,
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    print('Lecture details updated successfully');
+  } else {
+    throw Exception('Failed to update lecture details');
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -337,105 +660,184 @@ class _LearningPreparationState extends State<LearningPreparation> {
           ),
           const SizedBox(height: 20),
           Center(
-            child: Row(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ClickButton(
-                  text: _isMaterialEmbedded ? '강의 자료 학습 시작하기' : '강의 자료를 임베드하세요',
-                  onPressed: _isMaterialEmbedded
-                      ? () async {
-                          print(
-                              "Starting learning with file: $_selectedFileName");
-                          print("대체텍스트 선택 여부: $isAlternativeTextEnabled");
-                          print("실시간자막 선택 여부: $isRealTimeSttEnabled");
-                          if (_selectedFileName != null &&
-                              _downloadURL != null &&
-                              _isMaterialEmbedded == true) {
-                            showLearningDialog(context, _selectedFileName!,
-                                _downloadURL!, _progressNotifier);
-                            try {
-                              final userProvider = Provider.of<UserProvider>(
-                                  context,
-                                  listen: false);
-                              int type = isAlternativeTextEnabled ? 0 : 1; //대체면 0, 실시간이면 1
-
-                              if (_isPDF) {
-                                if (_fileBytes != null) {
-                                  handlePdfUpload(_fileBytes!,
-                                          userProvider.user!.userKey)
-                                      .then((imageUrls) async {
-                                    final responseUrl = await callChatGPT4API(
-                                        imageUrls,
-                                        isAlternativeTextEnabled,
-                                        isRealTimeSttEnabled,
-                                        userProvider.user!.userKey,
-                                        _selectedFileName!);
-                                    print("GPT-4 Response: $responseUrl");
-                                    if (Navigator.canPop(context)) {
-                                      Navigator.of(context, rootNavigator: true)
-                                          .pop();
-                                    }
-
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => LectureStartPage(
-                                          fileName: _selectedFileName!,
-                                          fileURL: _downloadURL!,
-                                          responseUrl: responseUrl,
-                                          type: type, //대체인지 실시간인지 전달해줌
-                                        ),
-                                      ),
-                                    );
-                                  });
-                                } else {
-                                  print('Error: _fileBytes is null.');
-                                }
-                              } else {
-                                final response = await callChatGPT4API(
-                                    [_downloadURL!],
-                                    isAlternativeTextEnabled,
-                                    isRealTimeSttEnabled,
-                                    userProvider.user!.userKey,
-                                    _selectedFileName!);
-                                print("GPT-4 Response: $response");
-                                if (Navigator.canPop(context)) {
-                                  Navigator.of(context, rootNavigator: true)
-                                      .pop();
-                                }
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => LectureStartPage(
-                                      fileName: _selectedFileName!,
-                                      fileURL: _downloadURL!,
-                                      responseUrl:
-                                          response, //실시간 자막일 때는 그냥 response 전달하고 안쓰면됨
-                                      type: type,
-                                    ),
-                                  ),
-                                );
-                              }
-                            } catch (e) {
-                              if (Navigator.canPop(context)) {
-                                Navigator.of(context, rootNavigator: true)
-                                    .pop();
-                              }
-                              print('Error: $e');
-                            }
-                          } else {
-                            print(
-                                'Error: File name, URL, or embedded material is missing.');
-                          }
-                        }
-                      : _pickFile,
-                  width: MediaQuery.of(context).size.width * 0.5,
-                  height: 50.0,
-                  iconPath: _isIconVisible ? 'assets/Vector.png' : null,
+                GestureDetector(
+                  onTap: () {
+                    int currentFolderId =
+                        folderList.isNotEmpty ? folderList.first['id'] : 0;
+                    // showQuickMenu 호출
+                    showQuickMenu(
+                      context,
+                      () => fetchOtherFolders('lecture', currentFolderId),
+                      folderList,
+                      _selectFolder,
+                    );
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset('assets/folder_search.png'),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '폴더 분류 > $_selectedFolder',
+                          style: const TextStyle(
+                            color: Color(0xFF575757),
+                            fontSize: 12,
+                            fontFamily: 'DM Sans',
+                            fontWeight: FontWeight.w500,
+                            height: 1.2,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                GestureDetector(
+                  onTap: () {
+                    showRenameDialog2(
+                        context,
+                        _noteName,
+                        renameItem,
+                        setState,
+                        "파일 이름 바꾸기", // 다이얼로그 제목
+                        "file_name" // 변경할 항목 타입
+                        );
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset('assets/text.png'),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _noteName,
+                          style: const TextStyle(
+                            color: Color(0xFF575757),
+                            fontSize: 12,
+                            fontFamily: 'DM Sans',
+                            fontWeight: FontWeight.w500,
+                            height: 1.2,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
+          const SizedBox(height: 20),
+          Center(
+  child: ClickButton(
+    text: _isMaterialEmbedded ? '강의 자료 학습 시작하기' : '강의 자료를 임베드하세요',
+    onPressed: () async {
+      if (!_isMaterialEmbedded) {
+        print("Starting file upload");
+        try {
+          final userProvider = Provider.of<UserProvider>(context, listen: false);
+          // API 호출
+          lecturefileId = await saveLectureFile(
+            folderId: getFolderIdByName(_selectedFolder),
+            noteName: _noteName, //노트이름
+          );
+          print("Lecture file saved with ID: $lecturefileId");
+          await _pickFile(); // 파일 선택 후 업로드
+
+          setState(() {
+            _isMaterialEmbedded = true;
+          });
+        } catch (e) {
+          print('Error: $e');
+        }
+      } else {
+        print("Starting learning with file: $_selectedFileName");
+        print("대체텍스트 선택 여부: $isAlternativeTextEnabled");
+        print("실시간자막 선택 여부: $isRealTimeSttEnabled");
+        if (_selectedFileName != null && _downloadURL != null && _isMaterialEmbedded) {
+          showLearningDialog(context, _selectedFileName!, _downloadURL!, _progressNotifier);
+          try {
+            final userProvider = Provider.of<UserProvider>(context, listen: false);
+            int type = isAlternativeTextEnabled ? 0 : 1; // 대체면 0, 실시간이면 1
+            //데베에 fileUrl, lecturename, type
+            print(lecturefileId!);
+            print(type);
+            await updateLectureDetails(lecturefileId!, _downloadURL!, _selectedFileName!, type);
+            if (_isPDF && _fileBytes != null) {
+              handlePdfUpload(_fileBytes!, userProvider.user!.userKey).then((imageUrls) async {
+                final responseUrl = await callChatGPT4API(
+                  imageUrls,
+                  isAlternativeTextEnabled,
+                  isRealTimeSttEnabled,
+                  userProvider.user!.userKey,
+                  _selectedFileName!
+                );
+                print("GPT-4 Response: $responseUrl");
+                if (Navigator.canPop(context)) {
+                  Navigator.of(context, rootNavigator: true).pop();
+                }
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LectureStartPage(
+                      lectureName: _selectedFileName!,
+                      fileURL: _downloadURL!,
+                      responseUrl: responseUrl, // null일 경우 빈 문자열 전달
+                      type: type, // 대체인지 실시간인지 전달해줌
+                      lecturefileId: lecturefileId!, // Inserted ID 전달
+                    ),
+                  ),
+                );
+              });
+            } else {
+              final response = await callChatGPT4API(
+                [_downloadURL!],
+                isAlternativeTextEnabled,
+                isRealTimeSttEnabled,
+                userProvider.user!.userKey,
+                _selectedFileName!
+              );
+              print("GPT-4 Response: $response");
+              if (Navigator.canPop(context)) {
+                Navigator.of(context, rootNavigator: true).pop();
+              }
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => LectureStartPage(
+                    lectureName: _selectedFileName!,
+                    fileURL: _downloadURL!,
+                    responseUrl: response,// 실시간 자막일 때는 그냥 response 전달하고 안쓰면됨
+                    type: type,
+                    lecturefileId: lecturefileId!, // Inserted ID 전달
+                    selectedFolder: _selectedFolder,
+                    noteName: _noteName,
+                  ),
+                ),
+              );
+            }
+          } catch (e) {
+            if (Navigator.canPop(context)) {
+              Navigator.of(context, rootNavigator: true).pop();
+            }
+            print('Error: $e');
+          }
+        } else {
+          print('Error: File name, URL, or embedded material is missing.');
+        }
+      }
+    },
+    width: MediaQuery.of(context).size.width * 0.7,
+    height: 50.0,
+    iconPath: _isIconVisible ? 'assets/Vector.png' : null,
+  ),
+),
           if (_isMaterialEmbedded)
             Column(
               children: [
