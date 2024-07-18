@@ -76,7 +76,7 @@ class _RecordPageState extends State<RecordPage> {
       _insertInitialData();
     }
     _checkFileType();
-    _loadPageTexts2(); // 대체 텍스트 URL 로드
+    _loadPageTexts(); // 대체 텍스트 URL 로드
     _checkExistColon(); // 추가: 콜론 존재 여부 확인
   }
 
@@ -112,10 +112,48 @@ class _RecordPageState extends State<RecordPage> {
     }
   }
 
-  Future<void> _loadPageTexts2() async {
-    try {
-      final response = await http.get(Uri.parse(
-          '${API.baseUrl}/api/get-alternative-text-url?lecturefileId=${widget.lecturefileId}'));
+
+
+  Future<void> _loadPageTexts() async {
+    if (widget.lecturefileId != null) {   // 다른 페이지 타고 들어온 경우, widget.lecturefileId 사용하기
+      // print('지금???? 1 ${widget.lecturefileId}');
+      try {
+        final response = await http.get(Uri.parse(
+            '${API.baseUrl}/api/get-alternative-text-url?lecturefileId=${widget.lecturefileId}'));
+
+        if (response.statusCode == 200) {
+          print('Response body: ${response.body}');
+
+          final fileData = jsonDecode(response.body);
+          final alternativeTextUrl = fileData['alternative_text_url'];
+
+          if (alternativeTextUrl != null) {
+            final textResponse = await http.get(Uri.parse(alternativeTextUrl));
+            if (textResponse.statusCode == 200) {
+              final textLines = utf8.decode(textResponse.bodyBytes).split('//');
+              setState(() {
+                pageTexts = {
+                  for (int i = 0; i < textLines.length; i++) i + 1: textLines[i]
+                };
+              });
+            } else {
+              print('Failed to fetch text file: ${textResponse.statusCode}');
+            }
+          } else {
+            print('Alternative text URL is null');
+          }
+        } else {
+          print('Failed to fetch alternative text URL: ${response.statusCode}');
+          print('Response body: ${response.body}');
+        }
+      } catch (e) {
+        print('Error occurred: $e');
+      }
+    } else {     // 페이지 최초 생성한 경우, _lecturefileId 사용하기
+      // print('지금???? 2 ${_lecturefileId}');
+          try {
+          final response = await http.get(Uri.parse(
+          '${API.baseUrl}/api/get-alternative-text-url?lecturefileId=${_lecturefileId}'));
 
       if (response.statusCode == 200) {
         print('Response body: ${response.body}');
@@ -145,40 +183,6 @@ class _RecordPageState extends State<RecordPage> {
     } catch (e) {
       print('Error occurred: $e');
     }
-  }
-
-  Future<void> _loadPageTexts() async {
-    try {
-      final response = await http.get(Uri.parse(
-          '${API.baseUrl}/api/get-alternative-text-url?lecturefileId=$_lecturefileId'));
-
-      if (response.statusCode == 200) {
-        print('Response body: ${response.body}');
-
-        final fileData = jsonDecode(response.body);
-        final alternativeTextUrl = fileData['alternative_text_url'];
-
-        if (alternativeTextUrl != null) {
-          final textResponse = await http.get(Uri.parse(alternativeTextUrl));
-          if (textResponse.statusCode == 200) {
-            final textLines = utf8.decode(textResponse.bodyBytes).split('\n');
-            setState(() {
-              pageTexts = {
-                for (int i = 0; i < textLines.length; i++) i + 1: textLines[i]
-              };
-            });
-          } else {
-            print('Failed to fetch text file: ${textResponse.statusCode}');
-          }
-        } else {
-          print('Alternative text URL is null');
-        }
-      } else {
-        print('Failed to fetch alternative text URL: ${response.statusCode}');
-        print('Response body: ${response.body}');
-      }
-    } catch (e) {
-      print('Error occurred: $e');
     }
   }
 
@@ -589,35 +593,69 @@ class _RecordPageState extends State<RecordPage> {
                           backgroundColor: _isColonCreated ? Colors.grey : null,
                           onPressed: () async {
                             print('콜론 생성 버튼 클릭됨');
-                            print('LecturefileId:${widget.lecturefileId}');
 
                             // 현재 lecturefile에 existColon 값 확인
-                            var url =
-                                '${API.baseUrl}/api/check-exist-colon?lecturefileId=${widget.lecturefileId}';
-                            var response = await http.get(Uri.parse(url));
 
-                            if (response.statusCode == 200) {
-                              var jsonResponse = jsonDecode(response.body);
-                              var existColon = jsonResponse['existColon'];
-
-                              // existColon이 null이 아닌 경우 showColonCreatedDialog 호출
-                              if (existColon == null) {
-                                showColonCreatedDialog(
-                                  context,
-                                  widget.folderName,
-                                  widget.noteName,
-                                  widget.lectureName,
-                                  widget.fileUrl,
-                                  _lecturefileId!,
-                                );
+                            // 1) 이미 생성돼있던 파일 타고 들어온 거라면 widget.lecturefileId 사용
+                            if (widget.lecturefileId != null) {
+                              print(
+                                  '타고 들어온 LecturefileId:${widget.lecturefileId}');
+                              var url =
+                                  '${API.baseUrl}/api/check-exist-colon?lecturefileId=${widget.lecturefileId}';
+                              var response = await http.get(Uri.parse(url));
+                              if (response.statusCode == 200) {
+                                var jsonResponse = jsonDecode(response.body);
+                                var existColon = jsonResponse['existColon'];
+                                if (existColon == null) {
+                                  // existColon이 null이 아닌 경우 showColonCreatedDialog 호출
+                                  showColonCreatedDialog(
+                                    context,
+                                    widget.folderName,
+                                    widget.noteName,
+                                    widget.lectureName,
+                                    widget.fileUrl,
+                                    widget.lecturefileId,
+                                    // _lecturefileId!,
+                                  );
+                                } else {
+                                  print(
+                                      '이미 생성된 콜론이 존재합니다. 콜론 생성 다이얼로그를 실행하지 않습니다.');
+                                }
                               } else {
                                 print(
-                                    '이미 생성된 콜론이 존재합니다. 콜론 생성 다이얼로그를 실행하지 않습니다.');
+                                    'Failed to check existColon: ${response.statusCode}');
+                                print(response.body);
                               }
                             } else {
+                              // 2) 지금 처음 만든 recordpage라면 _lecturefileId 사용
                               print(
-                                  'Failed to check existColon: ${response.statusCode}');
-                              print(response.body);
+                                  '지금 새로 만든 LecturefileId 2:${_lecturefileId!}');
+                              var url =
+                                  '${API.baseUrl}/api/check-exist-colon?lecturefileId=${_lecturefileId}';
+                              var response = await http.get(Uri.parse(url));
+                              if (response.statusCode == 200) {
+                                var jsonResponse = jsonDecode(response.body);
+                                var existColon = jsonResponse['existColon'];
+                                if (existColon == null) {
+                                  // existColon이 null이 아닌 경우 showColonCreatedDialog 호출
+                                  showColonCreatedDialog(
+                                    context,
+                                    widget.folderName,
+                                    widget.noteName,
+                                    widget.lectureName,
+                                    widget.fileUrl,
+                                    // widget.lecturefileId,
+                                    _lecturefileId!,
+                                  );
+                                } else {
+                                  print(
+                                      '이미 생성된 콜론이 존재합니다. 콜론 생성 다이얼로그를 실행하지 않습니다.');
+                                }
+                              } else {
+                                print(
+                                    'Failed to check existColon: ${response.statusCode}');
+                                print(response.body);
+                              }
                             }
                           },
                           width: MediaQuery.of(context).size.width * 0.3,
@@ -661,8 +699,8 @@ class _RecordPageState extends State<RecordPage> {
                                   : '텍스트가 없습니다.',
                               style: const TextStyle(
                                 color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                                fontWeight: FontWeight.normal,
                               ),
                             ),
                           ),
