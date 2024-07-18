@@ -395,12 +395,38 @@ Future<String> _fetchColonFolderName(int folderId) async {
         print('Transcript uploaded: $downloadURL');
 
         // Record_Table에 데이터 추가
-        // await _insertRecordData(userKey, downloadURL);
+        await _insertRecordData(widget.lecturefileId, null, downloadURL);
       } else {
         print('User ID is null, cannot save transcript.');
       }
     } catch (e) {
       print('Error saving transcript: $e');
+    }
+  }
+
+  Future<void> _insertRecordData(int? lecturefileId, int? colonfileId, String downloadURL) async {
+    final url = '${API.baseUrl}/api/insertRecordData';
+    final body = {
+      'lecturefile_id': lecturefileId,
+      'colonfile_id': colonfileId,
+      'record_url': downloadURL,
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(body),
+      );
+
+      if (response.statusCode == 200) {
+        print('Record added successfully');
+      } else {
+        print('Failed to add record: ${response.statusCode}');
+        print(response.body);
+      }
+    } catch (e) {
+      print('Error adding record: $e');
     }
   }
 
