@@ -15,6 +15,7 @@ import 'model/user_provider.dart';
 import '62lecture_start.dart';
 import 'package:path/path.dart' as path;
 import 'package:firebase_storage/firebase_storage.dart';
+import '66colon.dart';
 
 enum RecordingState { initial, recording, recorded }
 
@@ -57,6 +58,7 @@ class _RecordPageState extends State<RecordPage> {
   final Set<int> _blurredPages = {};
   Map<int, String> pageTexts = {};
   bool _isColonCreated = false; // 추가: 콜론 생성 상태를 나타내는 프로퍼티
+  int? _existColon; // 추가: existColon 값을 저장할 프로퍼티
 
   late stt.SpeechToText _speech;
   bool _isListening = false;
@@ -82,7 +84,7 @@ class _RecordPageState extends State<RecordPage> {
    
   }
 
-  Future<void> _checkExistColon() async {
+Future<void> _checkExistColon() async {
   var url = '${API.baseUrl}/api/check-exist-colon?lecturefileId=${widget.lecturefileId}';
   var response = await http.get(Uri.parse(url));
 
@@ -92,18 +94,43 @@ class _RecordPageState extends State<RecordPage> {
 
     setState(() {
       _isColonCreated = existColon != null;
+      _existColon = existColon; // existColon 값 저장
+      print(_existColon);
     });
 
     if (existColon != null) {
-      print('이미 생성된 콜론이 존재합니다. 콜론 생성 다이얼로그를 비활성화합니다.');
+      print('이미 생성된 콜론이 존재합니다. 콜론 이동 버튼으로 변환합니다.');
     } 
-
   } else {
     print('Failed to check existColon: ${response.statusCode}');
     print(response.body);
   }
 }
 
+
+Future<Map<String, dynamic>> _fetchColonDetails(int colonId) async {
+  var url = '${API.baseUrl}/api/get-colon-details?colonId=$colonId';
+  var response = await http.get(Uri.parse(url));
+
+  if (response.statusCode == 200) {
+    var jsonResponse = jsonDecode(response.body);
+    return jsonResponse;
+  } else {
+    throw Exception('Failed to load colon details');
+  }
+}
+//콜론폴더 이름 확인하기 
+Future<String> _fetchColonFolderName(int folderId) async {
+  var url = '${API.baseUrl}/api/get-Colonfolder-name?folderId=$folderId';
+  var response = await http.get(Uri.parse(url));
+
+  if (response.statusCode == 200) {
+    var jsonResponse = jsonDecode(response.body);
+    return jsonResponse['folder_name'];
+  } else {
+    throw Exception('Failed to load folder name');
+  }
+}
 
 
 
@@ -549,11 +576,30 @@ class _RecordPageState extends State<RecordPage> {
                         const SizedBox(width: 2),
                         // 콜론 생성 버튼 클릭 시 로직 추가 부분
                         ClickButton(
-                          text: '콜론 생성(:)',
+                          text: _isColonCreated ? '콜론(:) 이동' : '콜론 생성(:)',
                           backgroundColor: _isColonCreated ? Colors.grey : null,
                           onPressed: () async {
                             if (_isColonCreated) {
-                              print('이미 생성된 콜론이 존재합니다. 콜론 생성 다이얼로그를 실행하지 않습니다.');
+                              print(_existColon);
+                              // `ColonPage`로 이동전 콜론 정보 가져오기
+                              var colonDetails = await _fetchColonDetails(_existColon!);
+                              //ColonFiles에 folder_id로 폴더 이름 가져오기
+                              var colonFolderName = await _fetchColonFolderName(colonDetails['folder_id']);
+                              //print('folderName: $colonFolderName');
+
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ColonPage(
+                                    folderName: colonFolderName,
+                                    noteName: colonDetails['file_name'],
+                                    lectureName: colonDetails['lecture_name'],
+                                    createdAt: colonDetails['created_at'],
+                                    //fileUrl: colonDetails['file_url'],
+                                  ),
+                                ),
+                              );
+
                             } else {
                               print('콜론 생성 버튼 클릭됨');
                               var url = '${API.baseUrl}/api/check-exist-colon?lecturefileId=${widget.lecturefileId}';
