@@ -592,8 +592,6 @@ class _RecordPageState extends State<RecordPage> {
                           backgroundColor: _isColonCreated ? Colors.grey : null,
                           onPressed: () async {
                             print('콜론 생성 버튼 클릭됨');
-                            print('타고 들어온 LecturefileId:${widget.lecturefileId}');
-                            print('지금 새로 만든 LecturefileId 2:${_lecturefileId!}');
 
                             // 현재 lecturefile에 existColon 값 확인
 
