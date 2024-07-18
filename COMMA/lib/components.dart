@@ -338,8 +338,14 @@ Future<int> createColonFolder(String folderName, String noteName,
 }
 
 // 콜론 생성 다이얼로그 함수
-void showColonCreatedDialog(BuildContext context, String folderName,
-    String noteName, String lectureName, String fileUrl, int? lectureFileId) {
+void showColonCreatedDialog(
+  BuildContext context,
+  String folderName,
+  String noteName,
+  String lectureName,
+  String fileUrl,
+  int? lectureFileId
+) {
   final userProvider = Provider.of<UserProvider>(context, listen: false);
   final userKey = userProvider.user?.userKey;
 
@@ -411,36 +417,30 @@ void showColonCreatedDialog(BuildContext context, String folderName,
 
                       // 폴더 및 파일 생성
                       int colonFileId = await createColonFolder(
-                          "$folderName (:)",
-                          "$noteName (:)",
-                          fileUrl,
-                          lectureName,
-                          userKey
+                        "$folderName (:)",
+                        "$noteName (:)",
+                        fileUrl,
+                        lectureName,
+                        userKey
                       );
                       if (colonFileId != -1) {
                         // Update LectureFiles with colonFileId
                         //_lectureFileId를 가져와야 함
-                        
+
                         await updateLectureFileWithColonId(lectureFileId, colonFileId);
 
-                        // Fetch the created_at value after creating the folder and file
-                        var fetchUrl =
-                            '${API.baseUrl}/api/get-colon-file?folderName=${Uri.encodeComponent("$folderName (:)")}&userKey=$userKey';
-                        var fetchResponse = await http.get(Uri.parse(fetchUrl));
+                        // `ColonPage`로 이동전 콜론 정보 가져오기
+                        var colonDetails = await _fetchColonDetails(colonFileId);
 
-                        if (fetchResponse.statusCode == 200) {
-                          var data = jsonDecode(fetchResponse.body);
-                          String newCreatedAt = data['created_at'];
+                        //ColonFiles에 folder_id로 폴더 이름 가져오기
+                        var colonFolderName = await _fetchColonFolderName(colonDetails['folder_id']);
 
-                          // 다이얼로그가 닫힌 후에 네비게이션을 실행
-                          Future.delayed(Duration(milliseconds: 300), () {
-                            _navigateToColonPage(context, folderName, noteName, lectureName, newCreatedAt);
-                          });
-                        } else {
-                          print('Failed to fetch colon file details: ${fetchResponse.statusCode}');
-                        }
+                        // 다이얼로그가 닫힌 후에 네비게이션을 실행
+                        Future.delayed(Duration(milliseconds: 200), () {
+                          _navigateToColonPage(context, colonFolderName, noteName, lectureName, colonDetails['created_at']);
+                        });
                       } else {
-                        print('Failed to create colon file');
+                        print('Failed to fetch colon file details:');
                       }
                     },
                     child: const Text(
@@ -465,6 +465,30 @@ void showColonCreatedDialog(BuildContext context, String folderName,
   }
 }
 
+
+Future<Map<String, dynamic>> _fetchColonDetails(int colonId) async {
+  var url = '${API.baseUrl}/api/get-colon-details?colonId=$colonId';
+  var response = await http.get(Uri.parse(url));
+
+  if (response.statusCode == 200) {
+    var jsonResponse = jsonDecode(response.body);
+    return jsonResponse;
+  } else {
+    throw Exception('Failed to load colon details');
+  }
+}
+//콜론폴더 이름 확인하기 
+Future<String> _fetchColonFolderName(int folderId) async {
+  var url = '${API.baseUrl}/api/get-Colonfolder-name?folderId=$folderId';
+  var response = await http.get(Uri.parse(url));
+
+  if (response.statusCode == 200) {
+    var jsonResponse = jsonDecode(response.body);
+    return jsonResponse['folder_name'];
+  } else {
+    throw Exception('Failed to load folder name');
+  }
+}
 
 Future<void> updateLectureFileWithColonId(int? lectureFileId, int colonFileId) async {
   var url = '${API.baseUrl}/api/update-lecture-file';
@@ -501,7 +525,7 @@ void _navigateToColonPage(BuildContext context, String folderName, String noteNa
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => ColonPage(
-          folderName: "$folderName (:)",
+          folderName: "$folderName",
           noteName: "$noteName (:)",
           lectureName: lectureName,
           createdAt: createdAt,
