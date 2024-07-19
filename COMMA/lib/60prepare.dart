@@ -45,7 +45,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
   List<Map<String, dynamic>> folderList = [];
   List<Map<String, dynamic>> items = [];
   int _selectedIndex = 2;
-  int? lecturefileId; // 
+  int? lecturefileId; 
 
   @override
   void initState() {
@@ -275,61 +275,70 @@ class _LearningPreparationState extends State<LearningPreparation> {
     );
   }
 
-  // 파일 이름 바꾸기 다이얼로그
   void showRenameDialog2(
-    BuildContext context,
-    String currentName,
-    Future<void> Function(String) renameItem,
-    void Function(VoidCallback) setState,
-    String title,
-    String fieldName,
-  ) {
-    final TextEditingController textController = TextEditingController();
-    textController.text = currentName;
+  BuildContext context,
+  String currentName,
+  Future<void> Function(String) renameItem,
+  void Function(VoidCallback) setState,
+  String title,
+  String fieldName,
+) {
+  final TextEditingController textController = TextEditingController();
+  textController.text = currentName;
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          title: Text(
-            title,
-            style: const TextStyle(
-              color: Color(0xFF545454),
-              fontSize: 14,
-              fontFamily: 'DM Sans',
-              fontWeight: FontWeight.bold,
-            ),
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        backgroundColor: Colors.white,
+        title: Text(
+          title,
+          style: const TextStyle(
+            color: Color(0xFF545454),
+            fontSize: 14,
+            fontFamily: 'DM Sans',
+            fontWeight: FontWeight.bold,
           ),
-          content: TextField(
-            controller: textController,
-            decoration: const InputDecoration(hintText: "새 이름 입력"),
+        ),
+        content: TextField(
+          controller: textController,
+          decoration: InputDecoration(
+            hintText: "새로운 노트",
+            hintStyle: TextStyle(color: Colors.grey),
           ),
-          actions: <Widget>[
-            TextButton(
-              child:
-                  const Text('취소', style: TextStyle(color: Color(0xFFFFA17A))),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child:
-                  const Text('저장', style: TextStyle(color: Color(0xFF545454))),
-              onPressed: () async {
-                String newName = textController.text;
-                await renameItem(newName);
-                setState(() {
-                  _noteName = newName;
-                });
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+          style: TextStyle(color: Color(0xFF545454)),  // 입력할 때 글자 색상 지정
+          onTap: () {
+            if (textController.text == currentName) {
+              textController.clear();
+            }
+          },
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('취소', style: TextStyle(color: Color(0xFFFFA17A))),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          TextButton(
+            child: const Text('저장', style: TextStyle(color: Color(0xFF545454))),
+            onPressed: () async {
+              String newName = textController.text;
+              await renameItem(newName);
+              setState(() {
+                _noteName = newName;
+              });
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+
+
 
   Future<void> _pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
