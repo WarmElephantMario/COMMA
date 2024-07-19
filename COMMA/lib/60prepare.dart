@@ -580,27 +580,24 @@ class _LearningPreparationState extends State<LearningPreparation> {
   }
 
 //데베에 폴더id,파일이름을 삽입하는 함수 
-Future<Map<String, int>> saveLectureFile({required int folderId, required String noteName}) async {
-  final response = await http.post(
-    Uri.parse('${API.baseUrl}/api/lecture-files'),
-    headers: <String, String>{
-      'Content-Type': 'application/json; charset=UTF-8',
-    },
-    body: jsonEncode(<String, dynamic>{
-      'folder_id': folderId,
-      'file_name': noteName,
-    }),
-  );
+  Future<int> saveLectureFile({required int folderId, required String noteName}) async {
+    final response = await http.post(
+        Uri.parse('${API.baseUrl}/api/lecture-files'),
+        headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, dynamic>{
+            'folder_id': folderId,
+            'file_name': noteName,
+        }),
+    );
 
-  if (response.statusCode == 200) {
-    final responseBody = jsonDecode(response.body);
-    return {
-      'id': responseBody['id'],
-      'folder_id': responseBody['folder_id']
-    };
-  } else {
-    throw Exception('Failed to save lecture file');
-  }
+    if (response.statusCode == 200) {
+        final responseBody = jsonDecode(response.body);
+        return responseBody['id'];
+    } else {
+        throw Exception('Failed to save lecture file');
+    }
 }
 
 // 데베 업데이트 file URL,lecture name,type 
@@ -752,17 +749,12 @@ Future<void> updateLectureDetails(int lecturefileId, String fileUrl, String lect
         print("Starting file upload");
         try {
           final userProvider = Provider.of<UserProvider>(context, listen: false);
-
-        final result = await saveLectureFile(
-              folderId: getFolderIdByName(_selectedFolder),
-              noteName: _noteName, //노트이름
-            );
-        final lecturefileId = result['id'];
-        final savedFolderId = result['folder_id'];
-
-        print("Lecture file saved with ID: $lecturefileId");
-        print("Lecture file saved in Folder : $savedFolderId");
-
+          // API 호출
+          lecturefileId = await saveLectureFile(
+            folderId: getFolderIdByName(_selectedFolder),
+            noteName: _noteName, //노트이름
+          );
+          print("Lecture file saved with ID: $lecturefileId");
           await _pickFile(); // 파일 선택 후 업로드
 
           setState(() {
