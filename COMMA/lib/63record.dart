@@ -624,7 +624,7 @@ class _RecordPageState extends State<RecordPage> {
                                     noteName: colonDetails['file_name'],
                                     lectureName: colonDetails['lecture_name'],
                                     createdAt: colonDetails['created_at'],
-                                    //fileUrl: colonDetails['file_url'],
+                                    fileUrl: colonDetails['file_url'],
                                   ),
                                 ),
                               );
