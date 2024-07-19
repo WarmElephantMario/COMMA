@@ -49,10 +49,6 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
         setState(() {
           folders = List<Map<String, dynamic>>.from(jsonDecode(response.body));
         });
-        //로그 출력 
-        for (var folder in folders) {
-        print("Folder: ${folder['folder_name']}, File Count: ${folder['file_count']}");
-}
       } else {
         throw Exception('Failed to load folders');
       }
@@ -189,8 +185,6 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
                 children: folders.asMap().entries.map((entry) {
                   int index = entry.key;
                   Map<String, dynamic> folder = entry.value;
-                  //로그 출력
-                  print("Folder: ${folder['folder_name']}, File Count: ${folder['file_count']}");
                   return GestureDetector(
                     onTap: () {
                       Navigator.push(
