@@ -575,8 +575,6 @@ app.post('/api/update-lecture-details', (req, res) => {
   });
   
 
-
-
 //대체텍스트 파일 생성 시 responseUrl 저장
 app.post('/api/alt-table', (req, res) => {
     console.log('POST /api/alt-table called');
@@ -695,6 +693,7 @@ app.get('/api/check-exist-colon', (req, res) => {
 
 
 
+
 //강의파일 created_at 가져오기
 app.get('/api/get-file-created-at', (req, res) => {
     const { folderId, fileName } = req.query;
@@ -714,27 +713,27 @@ app.get('/api/get-file-created-at', (req, res) => {
 
 //콜론 파일 created_at 가져오기
 // Get colon file details
-app.get('/api/get-colon-file', (req, res) => {
-    const { folderName } = req.query;
+// app.get('/api/get-colon-file', (req, res) => {
+//     const { folderName } = req.query;
 
-    const query = `
-        SELECT f.id, f.file_name, f.file_url, f.created_at
-        FROM ColonFiles f
-        JOIN ColonFolders c ON f.folder_id = c.id
-        WHERE c.folder_name = ?
-        ORDER BY f.created_at DESC
-        LIMIT 1`;
+//     const query = `
+//         SELECT f.id, f.file_name, f.file_url, f.created_at
+//         FROM ColonFiles f
+//         JOIN ColonFolders c ON f.folder_id = c.id
+//         WHERE c.folder_name = ?
+//         ORDER BY f.created_at DESC
+//         LIMIT 1`;
 
-    db.query(query, [folderName], (err, results) => {
-        if (err) {
-            return res.status(500).json({ error: 'Failed to fetch file details' });
-        }
-        if (results.length === 0) {
-            return res.status(404).json({ error: 'File not found' });
-        }
-        res.status(200).json(results[0]);
-    });
-});
+//     db.query(query, [folderName], (err, results) => {
+//         if (err) {
+//             return res.status(500).json({ error: 'Failed to fetch file details' });
+//         }
+//         if (results.length === 0) {
+//             return res.status(404).json({ error: 'File not found' });
+//         }
+//         res.status(200).json(results[0]);
+//     });
+// });
 
 // 폴더 이름 가져오기 - 강의 폴더 또는 콜론 폴더 구분
 app.get('/api/getFolderName/:fileType/:folderId', (req, res) => {
@@ -810,7 +809,7 @@ app.get('/api/getColonFiles/:userKey', (req, res) => {
     });
 });
 
-// 콜론 폴더 이름 가져오기
+// 강의 폴더 이름 가져오기
 app.get('/api/get-folder-name', (req, res) => {
     const { folderId } = req.query;
 
@@ -827,6 +826,7 @@ app.get('/api/get-folder-name', (req, res) => {
         }
     });
 });
+
 
 // 대체 텍스트 URL 가져오기
 app.get('/api/get-alternative-text-url', (req, res) => {
@@ -854,6 +854,85 @@ app.get('/api/get-alternative-text-url', (req, res) => {
     });
 });
 
+//해당 콜론파일 정보 가져오기
+app.get('/api/get-colon-details', (req, res) => {
+    const colonId = req.query.colonId;
+    console.log(`Received colonId: ${colonId}`);
+
+    if (!colonId || isNaN(parseInt(colonId, 10))) {
+        console.log('Invalid colonId');
+        return res.status(400).json({ error: 'Invalid colonId' });
+    }
+    const parsedColonId = parseInt(colonId, 10);
+
+    const query = 'SELECT folder_id, file_name, file_url, lecture_name, created_at FROM ColonFiles WHERE id = ?';
+    console.log(`Executing query: ${query} with colonId: ${parsedColonId}`);
+    
+    db.query(query, [parsedColonId], (err, results) => {
+        if (err) {
+            console.error('Failed to get colon details:', err);
+            return res.status(500).json({ error: 'Failed to get colon details' });
+        }
+
+        if (results.length > 0) {
+            console.log(`Colon details: ${JSON.stringify(results[0])}`);
+            res.status(200).json(results[0]);
+        } else {
+            console.log('Colonfile not found');
+            res.status(404).json({ error: 'Colonfile not found' });
+        }
+    });
+});
+
+// 콜론 폴더 이름 가져오기
+app.get('/api/get-Colonfolder-name', (req, res) => {
+    const { folderId } = req.query;
+    const sql = 'SELECT folder_name FROM ColonFolders WHERE id = ?';
+    db.query(sql, [folderId], (err, results) => {
+        if (err) {
+            return res.status(500).json({ success: false, error: err.message });
+        }
+
+        if (results.length > 0) {
+            res.status(200).json({ folder_name: results[0].folder_name });
+        } else {
+            res.status(404).json({ success: false, error: 'Folder not found' });
+        }
+    });
+});
+
+// 녹음종료 후 자막 스크립트 부분 데베에 저장
+app.post('/api/insertRecordData', (req, res) => {
+    const { lecturefile_id, colonfile_id, record_url } = req.body;
+
+    if (!lecturefile_id || !record_url) {
+        return res.status(400).json({ success: false, error: 'You must provide lecturefile_id and record_url.' });
+    }
+
+    const sql = 'INSERT INTO Record_table (lecturefile_id, colonfile_id, record_url) VALUES (?, ?, ?)';
+    db.query(sql, [lecturefile_id, colonfile_id, record_url], (err, result) => {
+        if (err) {
+            return res.status(500).json({ success: false, error: err.message });
+        }
+        res.json({ success: true, id: result.insertId, lecturefile_id, colonfile_id, record_url });
+    });
+});
+
+
+// 콜론 생성 후 Record_table 업데이트
+app.post('/api/update-record-table', (req, res) => {
+    const { lecturefile_id, colonfile_id } = req.body;
+    const sql = 'UPDATE Record_table SET colonfile_id = ? WHERE lecturefile_id = ?';
+
+    db.query(sql, [colonfile_id, lecturefile_id], (err, result) => {
+        if (err) {
+            console.error('Error updating record table:', err);
+            res.status(500).json({ error: 'Failed to update record table' });
+        } else {
+            res.status(200).json({ success: true });
+        }
+    });
+});
 
 
 
