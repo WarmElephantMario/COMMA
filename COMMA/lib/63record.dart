@@ -76,66 +76,65 @@ class _RecordPageState extends State<RecordPage> {
     if (_recordingState == RecordingState.initial) {
       _insertInitialData();
     }
-    if(_recordingState == RecordingState.recorded){
-       _checkExistColon(); // 추가: 콜론 존재 여부 확인
+    if (_recordingState == RecordingState.recorded) {
+      _checkExistColon(); // 추가: 콜론 존재 여부 확인
     }
     _checkFileType();
     _loadPageTexts(); // 대체 텍스트 URL 로드
-   
   }
 
-Future<void> _checkExistColon() async {
-  var url = '${API.baseUrl}/api/check-exist-colon?lecturefileId=${widget.lecturefileId}';
-  var response = await http.get(Uri.parse(url));
+  Future<void> _checkExistColon() async {
+    var url =
+        '${API.baseUrl}/api/check-exist-colon?lecturefileId=${widget.lecturefileId}';
+    var response = await http.get(Uri.parse(url));
 
-  if (response.statusCode == 200) {
-    var jsonResponse = jsonDecode(response.body);
-    var existColon = jsonResponse['existColon'];
+    if (response.statusCode == 200) {
+      var jsonResponse = jsonDecode(response.body);
+      var existColon = jsonResponse['existColon'];
 
-    setState(() {
-      _isColonCreated = existColon != null;
-      _existColon = existColon; // existColon 값 저장
-      print(_existColon);
-    });
+      setState(() {
+        _isColonCreated = existColon != null;
+        _existColon = existColon; // existColon 값 저장
+        print(_existColon);
+      });
 
-    if (existColon != null) {
-      print('이미 생성된 콜론이 존재합니다. 콜론 이동 버튼으로 변환합니다.');
-    } 
-  } else {
-    print('Failed to check existColon: ${response.statusCode}');
-    print(response.body);
+      if (existColon != null) {
+        print('이미 생성된 콜론이 존재합니다. 콜론 이동 버튼으로 변환합니다.');
+      }
+    } else {
+      print('Failed to check existColon: ${response.statusCode}');
+      print(response.body);
+    }
   }
-}
 
+  Future<Map<String, dynamic>> _fetchColonDetails(int colonId) async {
+    var url = '${API.baseUrl}/api/get-colon-details?colonId=$colonId';
+    var response = await http.get(Uri.parse(url));
 
-Future<Map<String, dynamic>> _fetchColonDetails(int colonId) async {
-  var url = '${API.baseUrl}/api/get-colon-details?colonId=$colonId';
-  var response = await http.get(Uri.parse(url));
-
-  if (response.statusCode == 200) {
-    var jsonResponse = jsonDecode(response.body);
-    return jsonResponse;
-  } else {
-    throw Exception('Failed to load colon details');
+    if (response.statusCode == 200) {
+      var jsonResponse = jsonDecode(response.body);
+      return jsonResponse;
+    } else {
+      throw Exception('Failed to load colon details');
+    }
   }
-}
-//콜론폴더 이름 확인하기 
-Future<String> _fetchColonFolderName(int folderId) async {
-  var url = '${API.baseUrl}/api/get-Colonfolder-name?folderId=$folderId';
-  var response = await http.get(Uri.parse(url));
 
-  if (response.statusCode == 200) {
-    var jsonResponse = jsonDecode(response.body);
-    return jsonResponse['folder_name'];
-  } else {
-    throw Exception('Failed to load folder name');
+//콜론폴더 이름 확인하기
+  Future<String> _fetchColonFolderName(int folderId) async {
+    var url = '${API.baseUrl}/api/get-Colonfolder-name?folderId=$folderId';
+    var response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      var jsonResponse = jsonDecode(response.body);
+      return jsonResponse['folder_name'];
+    } else {
+      throw Exception('Failed to load folder name');
+    }
   }
-}
-
-
 
   Future<void> _loadPageTexts() async {
-    if (widget.lecturefileId != null) {   // 다른 페이지 타고 들어온 경우, widget.lecturefileId 사용하기
+    if (widget.lecturefileId != null) {
+      // 다른 페이지 타고 들어온 경우, widget.lecturefileId 사용하기
       // print('지금???? 1 ${widget.lecturefileId}');
       try {
         final response = await http.get(Uri.parse(
@@ -169,40 +168,41 @@ Future<String> _fetchColonFolderName(int folderId) async {
       } catch (e) {
         print('Error occurred: $e');
       }
-    } else {     // 페이지 최초 생성한 경우, _lecturefileId 사용하기
+    } else {
+      // 페이지 최초 생성한 경우, _lecturefileId 사용하기
       // print('지금???? 2 ${_lecturefileId}');
-          try {
-          final response = await http.get(Uri.parse(
-          '${API.baseUrl}/api/get-alternative-text-url?lecturefileId=${widget.lecturefileId}'));
+      try {
+        final response = await http.get(Uri.parse(
+            '${API.baseUrl}/api/get-alternative-text-url?lecturefileId=${widget.lecturefileId}'));
 
-      if (response.statusCode == 200) {
-        print('Response body: ${response.body}');
+        if (response.statusCode == 200) {
+          print('Response body: ${response.body}');
 
-        final fileData = jsonDecode(response.body);
-        final alternativeTextUrl = fileData['alternative_text_url'];
+          final fileData = jsonDecode(response.body);
+          final alternativeTextUrl = fileData['alternative_text_url'];
 
-        if (alternativeTextUrl != null) {
-          final textResponse = await http.get(Uri.parse(alternativeTextUrl));
-          if (textResponse.statusCode == 200) {
-            final textLines = utf8.decode(textResponse.bodyBytes).split('\n');
-            setState(() {
-              pageTexts = {
-                for (int i = 0; i < textLines.length; i++) i + 1: textLines[i]
-              };
-            });
+          if (alternativeTextUrl != null) {
+            final textResponse = await http.get(Uri.parse(alternativeTextUrl));
+            if (textResponse.statusCode == 200) {
+              final textLines = utf8.decode(textResponse.bodyBytes).split('\n');
+              setState(() {
+                pageTexts = {
+                  for (int i = 0; i < textLines.length; i++) i + 1: textLines[i]
+                };
+              });
+            } else {
+              print('Failed to fetch text file: ${textResponse.statusCode}');
+            }
           } else {
-            print('Failed to fetch text file: ${textResponse.statusCode}');
+            print('Alternative text URL is null');
           }
         } else {
-          print('Alternative text URL is null');
+          print('Failed to fetch alternative text URL: ${response.statusCode}');
+          print('Response body: ${response.body}');
         }
-      } else {
-        print('Failed to fetch alternative text URL: ${response.statusCode}');
-        print('Response body: ${response.body}');
+      } catch (e) {
+        print('Error occurred: $e');
       }
-    } catch (e) {
-      print('Error occurred: $e');
-    }
     }
   }
 
@@ -401,7 +401,8 @@ Future<String> _fetchColonFolderName(int folderId) async {
     }
   }
 
-  Future<void> _insertRecordData(int? lecturefileId, int? colonfileId, String downloadURL) async {
+  Future<void> _insertRecordData(
+      int? lecturefileId, int? colonfileId, String downloadURL) async {
     final url = '${API.baseUrl}/api/insertRecordData';
     final body = {
       'lecturefile_id': lecturefileId,
@@ -456,14 +457,16 @@ Future<String> _fetchColonFolderName(int folderId) async {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => LectureStartPage(
-                                    lectureName: widget.noteName,
-                                    fileURL: widget.fileUrl,
-                                    responseUrl: widget.responseUrl != null
-                                        ? widget.responseUrl
-                                        : null,
-                                    type: widget.type,
-                                  )),
+                            builder: (context) => LectureStartPage(
+                              lecturefileId: widget.lecturefileId, // Inserted ID 전달
+                              lectureName: widget.lectureName,
+                              fileURL: widget.fileUrl,
+                              responseUrl: widget.responseUrl ?? '', // null일 경우 빈 문자열 전달
+                              type: widget.type, 
+                              selectedFolder: widget.folderName,
+                              noteName: widget.noteName,
+                            ),
+                          ),
                         );
                       }
                     },
@@ -598,6 +601,7 @@ Future<String> _fetchColonFolderName(int folderId) async {
                         ),
                         const SizedBox(width: 2),
                         // 콜론 생성 버튼 클릭 시 로직 추가 부분
+                        // >> 스크립트랑 강의자료 보내서 찢어달라고 요청하기
                         ClickButton(
                           text: _isColonCreated ? '콜론(:) 이동' : '콜론 생성(:)',
                           backgroundColor: _isColonCreated ? Colors.grey : null,
@@ -605,9 +609,11 @@ Future<String> _fetchColonFolderName(int folderId) async {
                             if (_isColonCreated) {
                               print(_existColon);
                               // `ColonPage`로 이동전 콜론 정보 가져오기
-                              var colonDetails = await _fetchColonDetails(_existColon!);
+                              var colonDetails =
+                                  await _fetchColonDetails(_existColon!);
                               //ColonFiles에 folder_id로 폴더 이름 가져오기
-                              var colonFolderName = await _fetchColonFolderName(colonDetails['folder_id']);
+                              var colonFolderName = await _fetchColonFolderName(
+                                  colonDetails['folder_id']);
                               //print('folderName: $colonFolderName');
 
                               Navigator.push(
@@ -622,10 +628,10 @@ Future<String> _fetchColonFolderName(int folderId) async {
                                   ),
                                 ),
                               );
-
                             } else {
                               print('콜론 생성 버튼 클릭됨');
-                              var url = '${API.baseUrl}/api/check-exist-colon?lecturefileId=${widget.lecturefileId}';
+                              var url =
+                                  '${API.baseUrl}/api/check-exist-colon?lecturefileId=${widget.lecturefileId}';
                               var response = await http.get(Uri.parse(url));
 
                               if (response.statusCode == 200) {
@@ -642,10 +648,12 @@ Future<String> _fetchColonFolderName(int folderId) async {
                                     widget.lecturefileId!,
                                   );
                                 } else {
-                                  print('이미 생성된 콜론이 존재합니다. 콜론 생성 다이얼로그를 실행하지 않습니다.');
+                                  print(
+                                      '이미 생성된 콜론이 존재합니다. 콜론 생성 다이얼로그를 실행하지 않습니다.');
                                 }
                               } else {
-                                print('Failed to check existColon: ${response.statusCode}');
+                                print(
+                                    'Failed to check existColon: ${response.statusCode}');
                                 print(response.body);
                               }
                             }
@@ -653,7 +661,6 @@ Future<String> _fetchColonFolderName(int folderId) async {
                           width: MediaQuery.of(context).size.width * 0.3,
                           height: 40.0,
                         ),
-
                       ],
                     ),
                 ],
