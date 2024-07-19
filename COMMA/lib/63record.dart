@@ -59,6 +59,7 @@ class _RecordPageState extends State<RecordPage> {
   Map<int, String> pageTexts = {};
   bool _isColonCreated = false; // 추가: 콜론 생성 상태를 나타내는 프로퍼티
   int? _existColon; // 추가: existColon 값을 저장할 프로퍼티
+    final ValueNotifier<double> _progressNotifier = ValueNotifier<double>(0.0);
 
   late stt.SpeechToText _speech;
   bool _isListening = false;
@@ -428,8 +429,123 @@ class _RecordPageState extends State<RecordPage> {
     }
   }
 
+  // 콜론 폴더 생성 및 파일 생성 함수
+  Future<int> createColonFolder(String folderName, String noteName,
+      String fileUrl, String lectureName, int type, int? userKey) async {
+  
+    var url = '${API.baseUrl}/api/create-colon';
+
+    var body = {
+      'folderName': folderName,
+      'noteName': noteName,
+      'fileUrl': fileUrl,
+      'lectureName': lectureName,
+      'type' : type,
+      'userKey': userKey,
+    };
+
+    try {
+      print('Sending request to $url with body: $body');
+
+      var response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(body),
+      );
+
+      if (response.statusCode == 200) {
+        var jsonResponse = jsonDecode(response.body);
+        print('Folder and file created successfully');
+        print('Colon File ID: ${jsonResponse['colonFileId']}');
+        return jsonResponse['colonFileId'];
+        //return jsonResponse['folder_id'];
+      } else {
+        print('Failed to create folder and file: ${response.statusCode}');
+        print('Response body: ${response.body}');
+        return -1;
+      }
+    } catch (e) {
+      print('Error during HTTP request: $e');
+      return -1;
+    }
+  }
+
+  Future<void> updateLectureFileWithColonId(int? lectureFileId, int colonFileId) async {
+  var url = '${API.baseUrl}/api/update-lecture-file';
+
+  var body = {
+    'lectureFileId': lectureFileId,
+    'colonFileId': colonFileId,
+  };
+
+  try {
+    var response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 200) {
+      print('Lecture file updated successfully with colonFileId');
+    } else {
+      print('Failed to update lecture file: ${response.statusCode}');
+      print('Response body: ${response.body}');
+    }
+  } catch (e) {
+    print('Error during HTTP request: $e');
+  }
+}
+
+// Record_Table 업데이트 함수
+Future<void> _updateRecordTableWithColonId(int? lecturefileId, int colonfileId) async {
+  final updateUrl = '${API.baseUrl}/api/update-record-table';
+  final updateBody = {
+    'lecturefile_id': lecturefileId,
+    'colonfile_id': colonfileId,
+  };
+
+  try {
+    final updateResponse = await http.post(
+      Uri.parse(updateUrl),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(updateBody),
+    );
+
+    if (updateResponse.statusCode == 200) {
+      print('Record table updated successfully with colon file ID');
+    } else {
+      print('Failed to update record table: ${updateResponse.statusCode}');
+      print(updateResponse.body);
+    }
+  } catch (e) {
+    print('Error updating record table: $e');
+  }
+}
+
+void _navigateToColonPage(BuildContext context, String folderName, String noteName, String lectureName, String createdAt) {
+  try {
+    print('Navigating to ColonPage'); // 로그 추가
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => ColonPage(
+          folderName: "$folderName",
+          noteName: "$noteName (:)",
+          lectureName: lectureName,
+          createdAt: createdAt,
+        ),
+      ),
+    );
+  } catch (e) {
+    print('Navigation error: $e');
+  }
+}
+
   @override
   Widget build(BuildContext context) {
+
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userKey = userProvider.user?.userKey;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(toolbarHeight: 0),
@@ -458,11 +574,13 @@ class _RecordPageState extends State<RecordPage> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => LectureStartPage(
-                              lecturefileId: widget.lecturefileId, // Inserted ID 전달
+                              lecturefileId:
+                                  widget.lecturefileId, // Inserted ID 전달
                               lectureName: widget.lectureName,
                               fileURL: widget.fileUrl,
-                              responseUrl: widget.responseUrl ?? '', // null일 경우 빈 문자열 전달
-                              type: widget.type, 
+                              responseUrl:
+                                  widget.responseUrl ?? '', // null일 경우 빈 문자열 전달
+                              type: widget.type,
                               selectedFolder: widget.folderName,
                               noteName: widget.noteName,
                             ),
@@ -600,8 +718,8 @@ class _RecordPageState extends State<RecordPage> {
                           backgroundColor: Colors.grey,
                         ),
                         const SizedBox(width: 2),
-                        // 콜론 생성 버튼 클릭 시 로직 추가 부분
-                        // >> 스크립트랑 강의자료 보내서 찢어달라고 요청하기
+                        
+                        // 콜론 생성 버튼 클릭 시 
                         ClickButton(
                           text: _isColonCreated ? '콜론(:) 이동' : '콜론 생성(:)',
                           backgroundColor: _isColonCreated ? Colors.grey : null,
@@ -638,7 +756,57 @@ class _RecordPageState extends State<RecordPage> {
                                 var jsonResponse = jsonDecode(response.body);
                                 var existColon = jsonResponse['existColon'];
 
+                                //기존에 colon이 없던 경우. 새로 생성함
                                 if (existColon == null) {
+
+                                  // (1) 바로 콜론 폴더 및 파일 생성하기
+                                  int colonFileId = await createColonFolder(
+                                      "${widget.folderName} (:)",
+                                      "${widget.noteName} (:)",
+                                      widget.fileUrl,
+                                      widget.lectureName,
+                                      widget.type,
+                                      userKey);
+
+                                  if (colonFileId != -1) { //colon folder와 file 성공적으로 생성 시                                
+                                    await updateLectureFileWithColonId(   //연관 강의파일-콜론파일 연결해줌
+                                        widget.lecturefileId, colonFileId);
+                                    await _updateRecordTableWithColonId(   //Record 테이블에 콜론 파일 id 저장
+                                        widget.lecturefileId, colonFileId);
+                                    var colonDetails =
+                                        await _fetchColonDetails(colonFileId);  // 새로 생성한 콜론 정보 가져오기 (fetch)
+                                    var colonFolderName =                       // folder_id로 ColonFile이 들어있는 폴더 이름 가져오기
+                                        await _fetchColonFolderName(
+                                            colonDetails['folder_id']);
+
+                                    // (2) showColonCreatingDialog 호출하기 (현황 보여주기)
+                                  showColonCreatingDialog(context, colonDetails['file_name'], colonDetails['file_url'], _progressNotifier);
+
+                                  } else {
+                                    print(
+                                        '콜론 파일이랑 폴더 생성 실패한듯요 ...');
+                                  }
+
+                                  
+
+                                  // (3) gpt 불러서 강의자료&자막 주고 찢어달라 하기 -> 파이어베이스 저장
+
+                                  // (4) 저장 url sql에 삽입하기
+
+                                  // (5) CreatingDialog pop 하고 CreatedDialog 호출하기.
+                                  //     이 안에서 생성된 콜론 화면으로 navigate
+                                  
+                                    // // 다이얼로그가 닫힌 후에 네비게이션을 실행
+                                    // Future.delayed(Duration(milliseconds: 200),
+                                    //     () {
+                                    //   _navigateToColonPage(
+                                    //       context,
+                                    //       colonFolderName,
+                                    //       widget.noteName,
+                                    //       widget.lectureName,
+                                    //       colonDetails['created_at']);
+                                    // });
+
                                   showColonCreatedDialog(
                                     context,
                                     widget.folderName,
@@ -648,6 +816,7 @@ class _RecordPageState extends State<RecordPage> {
                                     widget.lecturefileId!,
                                   );
                                 } else {
+                                  //기존에 콜론이 존재하던 경우.
                                   print(
                                       '이미 생성된 콜론이 존재합니다. 콜론 생성 다이얼로그를 실행하지 않습니다.');
                                 }
