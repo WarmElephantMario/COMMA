@@ -46,6 +46,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
   List<Map<String, dynamic>> items = [];
   int _selectedIndex = 2;
   int? lecturefileId; 
+  int? lectureFolderId;
 
   @override
   void initState() {
@@ -747,12 +748,15 @@ Future<void> updateLectureDetails(int lecturefileId, String fileUrl, String lect
     onPressed: () async {
       if (!_isMaterialEmbedded) {
         print("Starting file upload");
+        // `lectureFolderId` 설정
+       lectureFolderId = getFolderIdByName(_selectedFolder);
+
         try {
           final userProvider = Provider.of<UserProvider>(context, listen: false);
           // API 호출
           lecturefileId = await saveLectureFile(
-            folderId: getFolderIdByName(_selectedFolder),
-            noteName: _noteName, //노트이름
+          folderId: lectureFolderId!,
+          noteName: _noteName, //노트이름
           );
           print("Lecture file saved with ID: $lecturefileId");
           await _pickFile(); // 파일 선택 후 업로드
@@ -789,11 +793,12 @@ Future<void> updateLectureDetails(int lecturefileId, String fileUrl, String lect
                 if (Navigator.canPop(context)) {
                   Navigator.of(context, rootNavigator: true).pop();
                 }
-
+                
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => LectureStartPage(
+                      lectureFolderId : lectureFolderId!,
                       lecturefileId: lecturefileId!, // Inserted ID 전달
                       lectureName: _selectedFileName!,
                       fileURL: _downloadURL!,
