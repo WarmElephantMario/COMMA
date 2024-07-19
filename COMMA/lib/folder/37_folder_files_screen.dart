@@ -142,7 +142,7 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
       Map<String, dynamic> file, String fileType) {
     Widget page = fileType == 'lecture'
         ? RecordPage(
-            selectedFolderId: file['folder_id'],
+            lectureFolderId: file['folder_id'],
             noteName: file['file_name'] ?? 'Unknown Note',
             fileUrl:
                 file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
