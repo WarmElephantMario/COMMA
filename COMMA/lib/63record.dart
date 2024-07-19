@@ -266,9 +266,6 @@ Future<String> _fetchColonFolderName(int folderId) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userKey = userProvider.user?.userKey;
 
-    //_lecturefileId = responseData['id']; //전역변수에 넣어줌
-    //print('Lecture File added successfully');
-
     // 대체텍스트 타입일 때만 Alt_table에 추가로 데이터 저장
     if (widget.type == 0) {
       print('Alt_table에 대체텍스트 url 저장하겠습니다');
