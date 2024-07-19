@@ -78,7 +78,7 @@ class _MainToSearchPageState extends State<MainToSearchPage> {
     Widget page = fileType == 'lecture'
         ? RecordPage(
             lecturefileId: file['id'],
-            selectedFolderId: file['folder_id'].toString(),
+            selectedFolderId: file['folder_id'],
             noteName: file['file_name'] ?? 'Unknown Note',
             fileUrl:
                 file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',

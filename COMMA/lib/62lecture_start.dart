@@ -9,6 +9,7 @@ import 'model/user_provider.dart';
 import 'api/api.dart';
 
 class LectureStartPage extends StatefulWidget {
+  final int? lectureFolderId;
   final int? lecturefileId;
   final String lectureName;
   final String fileURL;
@@ -19,6 +20,7 @@ class LectureStartPage extends StatefulWidget {
 
   const LectureStartPage({
     super.key,
+    this.lectureFolderId,
     this.lecturefileId,
     required this.lectureName,
     required this.fileURL,
@@ -163,12 +165,31 @@ class _LectureStartPageState extends State<LectureStartPage> {
               child: ClickButton(
                 text: '강의실 입장하기',
                 onPressed: () {
-                  //int selectedFolderId = getFolderIdByName(_selectedFolder);
+                // int selectedFolderId = getFolderIdByName(_selectedFolder);
+                print("1");
+                print(widget.lectureFolderId);
+                print("2");
+                print(widget.noteName);
+                print("3");
+                print(widget.fileURL);
+                print("4");
+                print(widget.selectedFolder);
+                print("5");
+                print(RecordingState.initial);
+                print("6");
+                print(widget.lectureName);
+                print("7");
+                print(widget.responseUrl);
+                print("8");
+                print(widget.type);
+                print("9");
+                print(widget.lecturefileId);
+
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => RecordPage(
-                        selectedFolderId: widget.selectedFolder.toString(),
+                        selectedFolderId: widget.lectureFolderId!,
                         noteName: widget.noteName!,
                         fileUrl: widget.fileURL,
                         folderName: widget.selectedFolder!,
