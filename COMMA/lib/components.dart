@@ -1073,6 +1073,9 @@ Future<void> showAddFolderDialog(
             hintText: '폴더 이름',
             hintStyle: TextStyle(color: Color.fromRGBO(110, 110, 110, 1.0)),
           ),
+          style: const TextStyle(
+            color: Color(0xFF545454), 
+          ),
         ),
         actions: <Widget>[
           TextButton(
