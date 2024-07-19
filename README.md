@@ -56,5 +56,12 @@ CREATE TABLE ColonFiles (
     type int
 );
 
+CREATE TABLE DividedScript_Table (
+    colonfile_id INT PRIMARY KEY,
+    page INT,
+    url varchar(2048),
+    FOREIGN KEY (colonfile_id) REFERENCES ColonFiles(id) ON DELETE CASCADE
+);
+
 
 ```
