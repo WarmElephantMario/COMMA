@@ -440,7 +440,7 @@ void showColonCreatedDialog(
 
                         // 다이얼로그가 닫힌 후에 네비게이션을 실행
                         Future.delayed(Duration(milliseconds: 200), () {
-                          _navigateToColonPage(context, colonFolderName, noteName, lectureName, colonDetails['created_at']);
+                          _navigateToColonPage(context, colonFolderName, noteName, lectureName, colonDetails['created_at'],colonDetails['file_url']);
                         });
                       } else {
                         print('Failed to fetch colon file details:');
@@ -547,7 +547,7 @@ Future<void> updateLectureFileWithColonId(int? lectureFileId, int colonFileId) a
 
 
 
-void _navigateToColonPage(BuildContext context, String folderName, String noteName, String lectureName, String createdAt) {
+void _navigateToColonPage(BuildContext context, String folderName, String noteName, String lectureName, String createdAt, String fileUrl) {
   try {
     print('Navigating to ColonPage'); // 로그 추가
     Navigator.of(context).push(
@@ -557,6 +557,7 @@ void _navigateToColonPage(BuildContext context, String folderName, String noteNa
           noteName: "$noteName (:)",
           lectureName: lectureName,
           createdAt: createdAt,
+          fileUrl: fileUrl,
         ),
       ),
     );
