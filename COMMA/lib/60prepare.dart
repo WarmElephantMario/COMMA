@@ -795,11 +795,13 @@ Future<void> updateLectureDetails(int lecturefileId, String fileUrl, String lect
                   context,
                   MaterialPageRoute(
                     builder: (context) => LectureStartPage(
+                      lecturefileId: lecturefileId!, // Inserted ID 전달
                       lectureName: _selectedFileName!,
                       fileURL: _downloadURL!,
                       responseUrl: responseUrl ?? '', // null일 경우 빈 문자열 전달
                       type: type, // 대체인지 실시간인지 전달해줌
-                      lecturefileId: lecturefileId!, // Inserted ID 전달
+                      selectedFolder: _selectedFolder,
+                      noteName: _noteName,
                     ),
                   ),
                 );
@@ -820,11 +822,11 @@ Future<void> updateLectureDetails(int lecturefileId, String fileUrl, String lect
                 context,
                 MaterialPageRoute(
                   builder: (context) => LectureStartPage(
+                    lecturefileId: lecturefileId!, // Inserted ID 전달
                     lectureName: _selectedFileName!,
                     fileURL: _downloadURL!,
                     responseUrl: response,// 실시간 자막일 때는 그냥 response 전달하고 안쓰면됨
                     type: type,
-                    lecturefileId: lecturefileId!, // Inserted ID 전달
                     selectedFolder: _selectedFolder,
                     noteName: _noteName,
                   ),
