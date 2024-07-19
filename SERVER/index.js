@@ -596,9 +596,9 @@ app.post('/api/alt-table', (req, res) => {
 //콜론파일 폴더 생성 및 파일 생성
 //아직 lecturefile에는 삽입전
 app.post('/api/create-colon', (req, res) => {
-    const { folderName, noteName, fileUrl, lectureName, userKey } = req.body;
+    const { folderName, noteName, fileUrl, lectureName, type, userKey } = req.body;
 
-    console.log('Received request to create colon folder:', { folderName, noteName, fileUrl, lectureName, userKey });
+    console.log('Received request to create colon folder:', { folderName, noteName, fileUrl, lectureName, type, userKey });
 
     // Check if the folder already exists for the same user
     const checkFolderQuery = 'SELECT id FROM ColonFolders WHERE folder_name = ? AND userKey = ?';
@@ -610,8 +610,8 @@ app.post('/api/create-colon', (req, res) => {
 
         const insertFileAndReturnId = (folderId) => {
             // Insert file into the folder
-            const insertFileQuery = 'INSERT INTO ColonFiles (folder_id, file_name, file_url, lecture_name, created_at) VALUES (?, ?, ?, ?, NOW())';
-            db.query(insertFileQuery, [folderId, noteName, fileUrl, lectureName], (err, result) => {
+            const insertFileQuery = 'INSERT INTO ColonFiles (folder_id, file_name, file_url, lecture_name, created_at, type) VALUES (?, ?, ?, ?, NOW(), ?)';
+            db.query(insertFileQuery, [folderId, noteName, fileUrl, lectureName, type], (err, result) => {
                 if (err) {
                     console.error('Failed to add file to folder:', err);
                     return res.status(500).json({ error: 'Failed to add file to folder' });
