@@ -185,45 +185,36 @@ class _ColonPageState extends State<ColonPage> {
                   ),
                   if (widget.lectureName.endsWith('.pdf') &&
                       widget.fileUrl != null)
-                    CustomScrollView(
+                    ListView.builder(
                       shrinkWrap: true,
-                      slivers: [
-                        SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                              if (index.isEven) {
-                                final pageImage = pages[index ~/ 2];
-                                return Container(
-                                  width: double.infinity,
-                                  height: MediaQuery.of(context).size.height - 200, // 화면 높이에 맞춤
-                                  child: Image.memory(
-                                    pageImage.bytes,
-                                    fit: BoxFit.cover, // 이미지를 전체 화면에 맞춤
-                                  ),
-                                );
-                              } else {
-                                final pageIndex = (index ~/ 2) + 1;
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                                  child: Text(
-                                    pageTexts[pageIndex] ?? '페이지 $pageIndex의 텍스트가 없습니다.',
-                                    style: const TextStyle(
-                                      color: Color(0xFF414141),
-                                      fontSize: 16,
-                                      fontFamily: 'DM Sans',
-                                    ),
-                                  ),
-                                );
-                              }
-                            },
-                            childCount: pages.length * 2,
-                          ),
-                        ),
-                        SliverFillRemaining(
-                          hasScrollBody: false,
-                          child: Container(),
-                        ),
-                      ],
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: pages.length * 2,
+                      itemBuilder: (context, index) {
+                        if (index.isEven) {
+                          final pageImage = pages[index ~/ 2];
+                          return Container(
+                            width: double.infinity,
+                            height: MediaQuery.of(context).size.height - 200, // 화면 높이에 맞춤
+                            child: Image.memory(
+                              pageImage.bytes,
+                              fit: BoxFit.cover, // 이미지를 전체 화면에 맞춤
+                            ),
+                          );
+                        } else {
+                          final pageIndex = (index ~/ 2) + 1;
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Text(
+                              pageTexts[pageIndex] ?? '페이지 $pageIndex의 텍스트가 없습니다.',
+                              style: const TextStyle(
+                                color: Color(0xFF414141),
+                                fontSize: 16,
+                                fontFamily: 'DM Sans',
+                              ),
+                            ),
+                          );
+                        }
+                      },
                     ),
                   if ((widget.lectureName.endsWith('.png') ||
                       widget.lectureName.endsWith('.jpg') ||
