@@ -241,6 +241,7 @@ void navigateToPage(BuildContext context, String folderName,
       noteName: file['file_name'] ?? 'Unknown Note',
       lectureName: file['lecture_name'] ?? 'Unknown Lecture',
       createdAt: file['created_at'] ?? 'Unknown Date',
+      fileUrl: file['file_url'] ?? 'Unknown fileUrl',
     );
   }
 
