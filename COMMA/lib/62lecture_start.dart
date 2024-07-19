@@ -17,7 +17,6 @@ class LectureStartPage extends StatefulWidget {
   final int type;
   final String? selectedFolder;
   final String? noteName;
-  final int? savedFolderId;
 
   const LectureStartPage({
     super.key,
@@ -29,7 +28,6 @@ class LectureStartPage extends StatefulWidget {
     required this.type,
     this.selectedFolder,
     this.noteName,
-    this.savedFolderId
   });
 
   @override
@@ -191,7 +189,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => RecordPage(
-                        selectedFolderId: widget.lectureFolderId!,
+                        lectureFolderId: widget.lectureFolderId!,
                         noteName: widget.noteName!,
                         fileUrl: widget.fileURL,
                         folderName: widget.selectedFolder!,
@@ -200,7 +198,6 @@ class _LectureStartPageState extends State<LectureStartPage> {
                         responseUrl: widget.responseUrl != null ? widget.responseUrl : null,
                         type: widget.type, //대체인지 실시간인지 전달해줌
                         lecturefileId: widget.lecturefileId,
-                        savedFolderId: widget.savedFolderId, //해당 파일이 저장된 폴더 id
                       ),
                     ),
                   );

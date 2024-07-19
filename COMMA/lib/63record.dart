@@ -26,7 +26,7 @@ enum RecordingState { initial, recording, recorded }
 
 class RecordPage extends StatefulWidget {
   final int? lecturefileId;
-  final int? selectedFolderId;
+  final int? lectureFolderId;
   final String noteName;
   final String fileUrl;
   final String folderName;
@@ -34,12 +34,11 @@ class RecordPage extends StatefulWidget {
   final String lectureName;
   final String? responseUrl;
   final int type;
-  final int? savedFolderId;
 
   const RecordPage({
     super.key,
     this.lecturefileId,
-    required this.selectedFolderId,
+    required this.lectureFolderId,
     required this.noteName,
     required this.fileUrl,
     required this.folderName,
@@ -47,7 +46,6 @@ class RecordPage extends StatefulWidget {
     required this.lectureName,
     this.responseUrl,
     required this.type,
-    this.savedFolderId,
   });
 
   @override
@@ -230,6 +228,7 @@ class _RecordPageState extends State<RecordPage> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+        print('스크립트 잘 찾았어요 ${data['record_url']}');
         return data['record_url'];
       } else {
         throw Exception('Failed to fetch record URL');
@@ -335,7 +334,7 @@ class _RecordPageState extends State<RecordPage> {
 
     if (userKey != null) {
       var url = Uri.parse(
-          '${API.baseUrl}/api/get-file-created-at?folderId=${widget.selectedFolderId}&fileName=${widget.noteName}');
+          '${API.baseUrl}/api/get-file-created-at?folderId=${widget.lectureFolderId}&fileName=${widget.noteName}');
       try {
         var response = await http.get(url);
         if (response.statusCode == 200) {
@@ -416,7 +415,7 @@ class _RecordPageState extends State<RecordPage> {
       final userKey = userProvider.user?.userKey;
       if (userKey != null) {
         final storageRef = FirebaseStorage.instance.ref().child(
-            'record/$userKey/${widget.selectedFolderId}/${widget.lecturefileId}/자막.txt');
+            'record/$userKey/${widget.lectureFolderId}/${widget.lecturefileId}/자막.txt');
 
         UploadTask uploadTask = storageRef.putData(fileBytes,
             SettableMetadata(contentType: 'text/plain; charset=utf-8'));
@@ -556,82 +555,85 @@ class _RecordPageState extends State<RecordPage> {
     }
   }
 
-  Future<Map<String, String>> callChatGPT4API(
-      List<String> imageUrls,
-      String lectureScript,
-      String lectureFileName) async {
-    const String apiKey = Env.apiKey;
-    final Uri apiUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
+Future<Map<String, String>> callChatGPT4API(
+  List<String> imageUrls,
+  String lectureScript,
+  String lectureFileName
+) async {
+  const String apiKey = Env.apiKey;
+  final Uri apiUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
 
-    final String promptForPageScript = '''
-    당신은 이미지 분석 전문가입니다. 다음은 강의 자료의 페이지와 해당하는 스크립트입니다. 
-    각 페이지의 스크립트를 텍스트 파일로 분할해 주세요.
-    조건:
-    1. 각 페이지별로 텍스트 파일을 생성해 주세요.
-    2. 텍스트 파일의 이름은 page_{페이지 번호}.txt 형태로 해주세요.
-    3. 스크립트를 가능한 한 정확하게 분할해 주세요.
-  ''';
+  final String promptForPageScript = '''
+  당신은 이미지 분석 전문가입니다. 다음은 강의 자료의 페이지와 해당하는 스크립트입니다. 
+  각 페이지의 스크립트를 텍스트 파일로 분할해 주세요.
+  조건:
+  1. 각 페이지별로 텍스트 파일을 생성해 주세요.
+  2. 텍스트 파일의 이름은 page_{페이지 번호}.txt 형태로 해주세요.
+  3. 스크립트를 가능한 한 정확하게 분할해 주세요.
+''';
 
-    try {
-      // 메시지 구성
-      var messages = imageUrls.asMap().entries.map((entry) {
-        int index = entry.key;
-        String imageUrl = entry.value;
-        return {
-          'role': 'user',
-          'content': {
-            'type': 'image_url',
-            'image_url': imageUrl,
-            'script': lectureScript,
-            'instruction': '페이지 번호에 맞게 스크립트를 분할해 주세요.'
-          }
-        };
-      }).toList();
+  try {
+    // 메시지 구성
+    List<Map<String, String>> messages = [
+      {'role': 'system', 'content': promptForPageScript}
+    ];
 
-      var response = await http.post(
-        apiUrl,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $apiKey',
-        },
-        body: jsonEncode({
-          'model': 'gpt-4',
-          'messages': [
-            {'role': 'system', 'content': promptForPageScript},
-            ...messages
-          ],
-          'max_tokens': 500,
-        }),
-      );
+    for (int i = 0; i < imageUrls.length; i++) {
+      messages.add({
+        'role': 'user',
+        'content': '페이지 ${i + 1}\n이미지 URL: ${imageUrls[i]}\n스크립트:\n$lectureScript'
+      });
+    }
 
-      if (response.statusCode == 200) {
-        var responseBody = utf8.decode(response.bodyBytes);
-        var decodedResponse = jsonDecode(responseBody);
-        var gptResponse = decodedResponse['choices'][0]['message']['content'];
+    var response = await http.post(
+      apiUrl,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $apiKey',
+      },
+      body: jsonEncode({
+        'model': 'gpt-4',
+        'messages': messages,
+        'max_tokens': 500,
+      }),
+    );
 
-        // 응답을 페이지별 텍스트로 분할
-        var pageScripts = <String, String>{};
-        var matches =
-            RegExp(r'\[page_(\d+)\.txt\]\n(.+?)(?=\n\[|$)', dotAll: true)
-                .allMatches(gptResponse);
-        for (var match in matches) {
-          var pageIndex = match.group(1)!;
-          var scriptContent = match.group(2)!.trim();
-          pageScripts['page_$pageIndex.txt'] = scriptContent;
-        }
-        return pageScripts; // 페이지별 텍스트 파일 내용을 반환
+    if (response.statusCode == 200) {
+      var responseBody = utf8.decode(response.bodyBytes);
+      var decodedResponse = jsonDecode(responseBody);
+      var gptResponse = decodedResponse['choices'][0]['message']['content'];
 
-      } else {
-        var responseBody = utf8.decode(response.bodyBytes);
-        print('Error calling ChatGPT-4 API: ${response.statusCode}');
-        print('Response body: $responseBody');
-        return {};
+      print('GPT-4 response content:');
+      print(gptResponse);
+
+      // 응답을 페이지별 텍스트로 분할
+      var pageScripts = <String, String>{};
+      var matches =
+          RegExp(r'\[page_(\d+)\.txt\]\n(.+?)(?=\n\[|$)', dotAll: true)
+              .allMatches(gptResponse);
+      for (var match in matches) {
+        var pageIndex = match.group(1)!;
+        var scriptContent = match.group(2)!.trim();
+        pageScripts['page_$pageIndex.txt'] = scriptContent;
+
+         // 추가된 로그: 각 페이지의 스크립트를 추출한 후 이를 출력
+        print('Extracted script for page $pageIndex:');
+        print(scriptContent);
       }
-    } catch (e) {
-      print('Error: $e');
+      return pageScripts; // 페이지별 텍스트 파일 내용을 반환
+
+    } else {
+      var responseBody = utf8.decode(response.bodyBytes);
+      print('Error calling ChatGPT-4 API: ${response.statusCode}');
+      print('Response body: $responseBody');
       return {};
     }
+  } catch (e) {
+    print('Error: $e');
+    return {};
   }
+}
+
 
 //여기다 fileUrl 추가하라고.. ->
   void _navigateToColonPage(BuildContext context, String folderName,
@@ -911,19 +913,17 @@ class _RecordPageState extends State<RecordPage> {
 
                                     // Firebase Storage에서 강의 자료 사진 로드
                                     while (loadingImages) {
-                                      print('uploads/$userKey/${widget.savedFolderId}/${widget.lecturefileId}/pdf_handle/page_$pageIndex.jpg');
+                                      print('uploads/$userKey/${widget.lectureFolderId}/${widget.lecturefileId}/pdf_handle/page_$pageIndex.jpg');
                                       try {
                                         String imageUrl = await FirebaseStorage.instance
-                                          .ref('uploads/$userKey/${widget.savedFolderId}/${widget.lecturefileId}/pdf_handle/page_$pageIndex.jpg')
+                                          .ref('uploads/$userKey/${widget.lectureFolderId}/${widget.lecturefileId}/pdf_handle/page_$pageIndex.jpg')
                                           .getDownloadURL();
                                         imageUrls.add(imageUrl);
                                         pageIndex++;
                                       } catch (e) {
-                                        print('여기서오류났어요');
                                         loadingImages = false;
                                       }
                                     }
-
                                     print('Loaded image URLs: $imageUrls');
 
                                     // Record_table에서 강의 스크립트 .txt 파일 로드
