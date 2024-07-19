@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http; // HTTP 패키지 추가
 import '60prepare.dart';
 import 'components.dart';
 import 'api/api.dart';
+import 'dart:typed_data';
 
 class ColonPage extends StatefulWidget {
   final String folderName; // 폴더 이름 가져오기 사용
@@ -29,6 +30,7 @@ class ColonPage extends StatefulWidget {
 class _ColonPageState extends State<ColonPage> {
   bool isLoading = true;
   List<PdfPageImage> pages = [];
+  Uint8List? imageData;
   int _selectedIndex = 2;
   final Map<int, String> pageTexts = {
     1: '첫 번째 페이지의 텍스트',
@@ -40,7 +42,7 @@ class _ColonPageState extends State<ColonPage> {
   @override
   void initState() {
     super.initState();
-    _loadPdf();
+    _loadFile();
   }
 
   void _onItemTapped(int index) {
@@ -49,26 +51,32 @@ class _ColonPageState extends State<ColonPage> {
     });
   }
 
-  Future<void> _loadPdf() async {
-    if (widget.lectureName.endsWith('.pdf') && widget.fileUrl != null) {
+  Future<void> _loadFile() async {
+    if (widget.fileUrl != null) {
       final response = await http.get(Uri.parse(widget.fileUrl!));
       if (response.statusCode == 200) {
-        final document = await PdfDocument.openData(response.bodyBytes);
-        for (int i = 1; i <= document.pagesCount; i++) {
-          final page = await document.getPage(i);
-          final pageImage = await page.render(
-            width: page.width,
-            height: page.height,
-            format: PdfPageImageFormat.jpeg,
-          );
-          pages.add(pageImage!);
-          await page.close();
+        if (widget.lectureName.endsWith('.pdf')) {
+          final document = await PdfDocument.openData(response.bodyBytes);
+          for (int i = 1; i <= document.pagesCount; i++) {
+            final page = await document.getPage(i);
+            final pageImage = await page.render(
+              width: page.width,
+              height: page.height,
+              format: PdfPageImageFormat.jpeg,
+            );
+            pages.add(pageImage!);
+            await page.close();
+          }
+        } else if (widget.lectureName.endsWith('.png') ||
+            widget.lectureName.endsWith('.jpg') ||
+            widget.lectureName.endsWith('.jpeg')) {
+          imageData = response.bodyBytes;
         }
         setState(() {
           isLoading = false;
         });
       } else {
-        throw Exception('Failed to load PDF');
+        throw Exception('Failed to load file');
       }
     }
   }
@@ -174,8 +182,7 @@ class _ColonPageState extends State<ColonPage> {
                     ],
                   ),
                 ),
-                if (widget.lectureName.endsWith('.pdf') &&
-                    widget.fileUrl != null)
+                if (widget.lectureName.endsWith('.pdf') && widget.fileUrl != null)
                   Expanded(
                     child: CustomScrollView(
                       slivers: [
@@ -215,6 +222,18 @@ class _ColonPageState extends State<ColonPage> {
                           child: Container(),
                         ),
                       ],
+                    ),
+                  ),
+                if ((widget.lectureName.endsWith('.png') ||
+                        widget.lectureName.endsWith('.jpg') ||
+                        widget.lectureName.endsWith('.jpeg')) &&
+                    imageData != null)
+                  Expanded(
+                    child: Image.memory(
+                      imageData!,
+                      fit: BoxFit.cover, // 이미지를 전체 화면에 맞춤
+                      width: double.infinity,
+                      height: MediaQuery.of(context).size.height - 200, // 화면 높이에 맞춤
                     ),
                   ),
               ],
