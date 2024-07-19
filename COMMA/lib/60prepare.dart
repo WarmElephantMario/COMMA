@@ -337,9 +337,6 @@ class _LearningPreparationState extends State<LearningPreparation> {
   );
 }
 
-
-
-
   Future<void> _pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
 
@@ -526,7 +523,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
           final userProvider =
               Provider.of<UserProvider>(context, listen: false);
           final storageRef = FirebaseStorage.instance.ref().child(
-              'response/$userKey/$lectureFileName/${path.basename(filePath)}');
+              'response/${userProvider.user!.userKey}/${getFolderIdByName(_selectedFolder)}/${path.basename(filePath)}');
           UploadTask uploadTask = storageRef.putFile(file);
 
           TaskSnapshot taskSnapshot = await uploadTask;
