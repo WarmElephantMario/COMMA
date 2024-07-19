@@ -16,6 +16,7 @@ class LectureStartPage extends StatefulWidget {
   final int type;
   final String? selectedFolder;
   final String? noteName;
+  final int? savedFolderId;
 
   const LectureStartPage({
     super.key,
@@ -25,7 +26,8 @@ class LectureStartPage extends StatefulWidget {
     this.responseUrl,
     required this.type,
     this.selectedFolder,
-    this.noteName
+    this.noteName,
+    this.savedFolderId
   });
 
   @override
@@ -177,6 +179,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
                         responseUrl: widget.responseUrl != null ? widget.responseUrl : null,
                         type: widget.type, //대체인지 실시간인지 전달해줌
                         lecturefileId: widget.lecturefileId,
+                        savedFolderId: widget.savedFolderId, //해당 파일이 저장된 폴더 id
                       ),
                     ),
                   );

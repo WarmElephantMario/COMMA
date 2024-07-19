@@ -16,6 +16,11 @@ import '62lecture_start.dart';
 import 'package:path/path.dart' as path;
 import 'package:firebase_storage/firebase_storage.dart';
 import '66colon.dart';
+import 'env/env.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:file_picker/file_picker.dart';
+import 'dart:io';
+
 
 enum RecordingState { initial, recording, recorded }
 
@@ -29,6 +34,7 @@ class RecordPage extends StatefulWidget {
   final String lectureName;
   final String? responseUrl;
   final int type;
+  final int? savedFolderId;
 
   const RecordPage({
     super.key,
@@ -41,6 +47,7 @@ class RecordPage extends StatefulWidget {
     required this.lectureName,
     this.responseUrl,
     required this.type,
+    this.savedFolderId,
   });
 
   @override
@@ -59,7 +66,8 @@ class _RecordPageState extends State<RecordPage> {
   Map<int, String> pageTexts = {};
   bool _isColonCreated = false; // 추가: 콜론 생성 상태를 나타내는 프로퍼티
   int? _existColon; // 추가: existColon 값을 저장할 프로퍼티
-    final ValueNotifier<double> _progressNotifier = ValueNotifier<double>(0.0);
+  final ValueNotifier<double> _progressNotifier = ValueNotifier<double>(0.0);
+  List<Map<String, dynamic>> folderList = [];
 
   late stt.SpeechToText _speech;
   bool _isListening = false;
@@ -82,6 +90,12 @@ class _RecordPageState extends State<RecordPage> {
     }
     _checkFileType();
     _loadPageTexts(); // 대체 텍스트 URL 로드
+  }
+
+  int getFolderIdByName(String folderName) {
+    return folderList.firstWhere(
+        (folder) => folder['folder_name'] == folderName,
+        orElse: () => {'id': -1})['id'];
   }
 
   Future<void> _checkExistColon() async {
@@ -204,6 +218,24 @@ class _RecordPageState extends State<RecordPage> {
       } catch (e) {
         print('Error occurred: $e');
       }
+    }
+  }
+
+//강의 스크립트 저장된 것 가져오기
+  Future<String> fetchRecordUrl(int colonFileId) async {
+    try {
+      final response = await http.get(Uri.parse(
+          '${API.baseUrl}/api/get-record-url?colonfileId=$colonFileId'));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['record_url'];
+      } else {
+        throw Exception('Failed to fetch record URL');
+      }
+    } catch (e) {
+      print('Error occurred: $e');
+      throw e;
     }
   }
 
@@ -432,7 +464,6 @@ class _RecordPageState extends State<RecordPage> {
   // 콜론 폴더 생성 및 파일 생성 함수
   Future<int> createColonFolder(String folderName, String noteName,
       String fileUrl, String lectureName, int type, int? userKey) async {
-  
     var url = '${API.baseUrl}/api/create-colon';
 
     var body = {
@@ -440,7 +471,7 @@ class _RecordPageState extends State<RecordPage> {
       'noteName': noteName,
       'fileUrl': fileUrl,
       'lectureName': lectureName,
-      'type' : type,
+      'type': type,
       'userKey': userKey,
     };
 
@@ -470,79 +501,159 @@ class _RecordPageState extends State<RecordPage> {
     }
   }
 
-  Future<void> updateLectureFileWithColonId(int? lectureFileId, int colonFileId) async {
-  var url = '${API.baseUrl}/api/update-lecture-file';
+  Future<void> updateLectureFileWithColonId(
+      int? lectureFileId, int colonFileId) async {
+    var url = '${API.baseUrl}/api/update-lecture-file';
 
-  var body = {
-    'lectureFileId': lectureFileId,
-    'colonFileId': colonFileId,
-  };
+    var body = {
+      'lectureFileId': lectureFileId,
+      'colonFileId': colonFileId,
+    };
 
-  try {
-    var response = await http.post(
-      Uri.parse(url),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(body),
-    );
+    try {
+      var response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(body),
+      );
 
-    if (response.statusCode == 200) {
-      print('Lecture file updated successfully with colonFileId');
-    } else {
-      print('Failed to update lecture file: ${response.statusCode}');
-      print('Response body: ${response.body}');
+      if (response.statusCode == 200) {
+        print('Lecture file updated successfully with colonFileId');
+      } else {
+        print('Failed to update lecture file: ${response.statusCode}');
+        print('Response body: ${response.body}');
+      }
+    } catch (e) {
+      print('Error during HTTP request: $e');
     }
-  } catch (e) {
-    print('Error during HTTP request: $e');
   }
-}
 
 // Record_Table 업데이트 함수
-Future<void> _updateRecordTableWithColonId(int? lecturefileId, int colonfileId) async {
-  final updateUrl = '${API.baseUrl}/api/update-record-table';
-  final updateBody = {
-    'lecturefile_id': lecturefileId,
-    'colonfile_id': colonfileId,
-  };
+  Future<void> _updateRecordTableWithColonId(
+      int? lecturefileId, int colonfileId) async {
+    final updateUrl = '${API.baseUrl}/api/update-record-table';
+    final updateBody = {
+      'lecturefile_id': lecturefileId,
+      'colonfile_id': colonfileId,
+    };
 
-  try {
-    final updateResponse = await http.post(
-      Uri.parse(updateUrl),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(updateBody),
-    );
+    try {
+      final updateResponse = await http.post(
+        Uri.parse(updateUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(updateBody),
+      );
 
-    if (updateResponse.statusCode == 200) {
-      print('Record table updated successfully with colon file ID');
-    } else {
-      print('Failed to update record table: ${updateResponse.statusCode}');
-      print(updateResponse.body);
+      if (updateResponse.statusCode == 200) {
+        print('Record table updated successfully with colon file ID');
+      } else {
+        print('Failed to update record table: ${updateResponse.statusCode}');
+        print(updateResponse.body);
+      }
+    } catch (e) {
+      print('Error updating record table: $e');
     }
-  } catch (e) {
-    print('Error updating record table: $e');
   }
-}
 
-void _navigateToColonPage(BuildContext context, String folderName, String noteName, String lectureName, String createdAt) {
-  try {
-    print('Navigating to ColonPage'); // 로그 추가
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => ColonPage(
-          folderName: "$folderName",
-          noteName: "$noteName (:)",
-          lectureName: lectureName,
-          createdAt: createdAt,
-        ),
-      ),
-    );
-  } catch (e) {
-    print('Navigation error: $e');
+  Future<Map<String, String>> callChatGPT4API(
+      List<String> imageUrls,
+      String lectureScript,
+      String lectureFileName) async {
+    const String apiKey = Env.apiKey;
+    final Uri apiUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
+
+    final String promptForPageScript = '''
+    당신은 이미지 분석 전문가입니다. 다음은 강의 자료의 페이지와 해당하는 스크립트입니다. 
+    각 페이지의 스크립트를 텍스트 파일로 분할해 주세요.
+    조건:
+    1. 각 페이지별로 텍스트 파일을 생성해 주세요.
+    2. 텍스트 파일의 이름은 page_{페이지 번호}.txt 형태로 해주세요.
+    3. 스크립트를 가능한 한 정확하게 분할해 주세요.
+  ''';
+
+    try {
+      // 메시지 구성
+      var messages = imageUrls.asMap().entries.map((entry) {
+        int index = entry.key;
+        String imageUrl = entry.value;
+        return {
+          'role': 'user',
+          'content': {
+            'type': 'image_url',
+            'image_url': imageUrl,
+            'script': lectureScript,
+            'instruction': '페이지 번호에 맞게 스크립트를 분할해 주세요.'
+          }
+        };
+      }).toList();
+
+      var response = await http.post(
+        apiUrl,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $apiKey',
+        },
+        body: jsonEncode({
+          'model': 'gpt-4',
+          'messages': [
+            {'role': 'system', 'content': promptForPageScript},
+            ...messages
+          ],
+          'max_tokens': 500,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        var responseBody = utf8.decode(response.bodyBytes);
+        var decodedResponse = jsonDecode(responseBody);
+        var gptResponse = decodedResponse['choices'][0]['message']['content'];
+
+        // 응답을 페이지별 텍스트로 분할
+        var pageScripts = <String, String>{};
+        var matches =
+            RegExp(r'\[page_(\d+)\.txt\]\n(.+?)(?=\n\[|$)', dotAll: true)
+                .allMatches(gptResponse);
+        for (var match in matches) {
+          var pageIndex = match.group(1)!;
+          var scriptContent = match.group(2)!.trim();
+          pageScripts['page_$pageIndex.txt'] = scriptContent;
+        }
+        return pageScripts; // 페이지별 텍스트 파일 내용을 반환
+
+      } else {
+        var responseBody = utf8.decode(response.bodyBytes);
+        print('Error calling ChatGPT-4 API: ${response.statusCode}');
+        print('Response body: $responseBody');
+        return {};
+      }
+    } catch (e) {
+      print('Error: $e');
+      return {};
+    }
   }
-}
+
+//여기다 fileUrl 추가하라고.. ->
+  void _navigateToColonPage(BuildContext context, String folderName,
+      String noteName, String lectureName, String createdAt) {
+    try {
+      print('Navigating to ColonPage'); // 로그 추가
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => ColonPage(
+            folderName: "$folderName",
+            noteName: "$noteName (:)",
+            lectureName: lectureName,
+            createdAt: createdAt,
+          ),
+        ),
+      );
+    } catch (e) {
+      print('Navigation error: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userKey = userProvider.user?.userKey;
 
@@ -718,8 +829,8 @@ void _navigateToColonPage(BuildContext context, String folderName, String noteNa
                           backgroundColor: Colors.grey,
                         ),
                         const SizedBox(width: 2),
-                        
-                        // 콜론 생성 버튼 클릭 시 
+
+                        // 콜론 생성 버튼 클릭 시
                         ClickButton(
                           text: _isColonCreated ? '콜론(:) 이동' : '콜론 생성(:)',
                           backgroundColor: _isColonCreated ? Colors.grey : null,
@@ -758,9 +869,9 @@ void _navigateToColonPage(BuildContext context, String folderName, String noteNa
 
                                 //기존에 colon이 없던 경우. 새로 생성함
                                 if (existColon == null) {
-
                                   // (1) 바로 콜론 폴더 및 파일 생성하기
                                   int colonFileId = await createColonFolder(
+                                      //..이상하게 타입 추가가 안됨
                                       "${widget.folderName} (:)",
                                       "${widget.noteName} (:)",
                                       widget.fileUrl,
@@ -768,44 +879,114 @@ void _navigateToColonPage(BuildContext context, String folderName, String noteNa
                                       widget.type,
                                       userKey);
 
-                                  if (colonFileId != -1) { //colon folder와 file 성공적으로 생성 시                                
-                                    await updateLectureFileWithColonId(   //연관 강의파일-콜론파일 연결해줌
-                                        widget.lecturefileId, colonFileId);
-                                    await _updateRecordTableWithColonId(   //Record 테이블에 콜론 파일 id 저장
-                                        widget.lecturefileId, colonFileId);
-                                    var colonDetails =
-                                        await _fetchColonDetails(colonFileId);  // 새로 생성한 콜론 정보 가져오기 (fetch)
-                                    var colonFolderName =                       // folder_id로 ColonFile이 들어있는 폴더 이름 가져오기
+                                  if (colonFileId != -1) {
+                                    //colon folder와 file 성공적으로 생성 시
+                                    await updateLectureFileWithColonId(
+                                        //연관 강의파일-콜론파일 연결해줌
+                                        widget.lecturefileId,
+                                        colonFileId);
+                                    await _updateRecordTableWithColonId(
+                                        //Record 테이블에 콜론 파일 id 저장
+                                        widget.lecturefileId,
+                                        colonFileId);
+                                    var colonDetails = await _fetchColonDetails(
+                                        colonFileId); // 새로 생성한 콜론 정보 가져오기 (fetch)
+                                    var colonFolderName = // folder_id로 ColonFile이 들어있는 폴더 이름 가져오기
                                         await _fetchColonFolderName(
                                             colonDetails['folder_id']);
 
                                     // (2) showColonCreatingDialog 호출하기 (현황 보여주기)
-                                  showColonCreatingDialog(context, colonDetails['file_name'], colonDetails['file_url'], _progressNotifier);
+                                    showColonCreatingDialog(
+                                        context,
+                                        colonDetails['file_name'],
+                                        colonDetails['file_url'],
+                                        _progressNotifier);
 
-                                  } else {
-                                    print(
-                                        '콜론 파일이랑 폴더 생성 실패한듯요 ...');
-                                  }
+                                    // (3) gpt 불러서 강의자료&자막 주고 찢어달라 하기 -> 파이어베이스 저장
 
-                                  
+                                    List<String> imageUrls = [];
+                                    int pageIndex = 0;
+                                    bool loadingImages = true;
 
-                                  // (3) gpt 불러서 강의자료&자막 주고 찢어달라 하기 -> 파이어베이스 저장
+                                    // Firebase Storage에서 강의 자료 사진 로드
+                                    while (loadingImages) {
+                                      print('uploads/$userKey/${widget.savedFolderId}/${widget.lecturefileId}/pdf_handle/page_$pageIndex.jpg');
+                                      try {
+                                        String imageUrl = await FirebaseStorage.instance
+                                          .ref('uploads/$userKey/${widget.savedFolderId}/${widget.lecturefileId}/pdf_handle/page_$pageIndex.jpg')
+                                          .getDownloadURL();
+                                        imageUrls.add(imageUrl);
+                                        pageIndex++;
+                                      } catch (e) {
+                                        print('여기서오류났어요');
+                                        loadingImages = false;
+                                      }
+                                    }
+
+                                    print('Loaded image URLs: $imageUrls');
+
+                                    // Record_table에서 강의 스크립트 .txt 파일 로드
+                                    String scriptUrl =
+                                        await fetchRecordUrl(colonFileId);
+                                    String lectureScript = await http
+                                        .get(Uri.parse(scriptUrl))
+                                        .then((response) => response.body);
+
+                                  // 두 개 한꺼번에 주면서 gpt 호출 (찢어달라고 하기)
+                                  Map<String, String> pageScripts = await callChatGPT4API(
+                                    imageUrls,
+                                    lectureScript,
+                                    widget.lectureName
+                                );
+
+                                // Firebase에 페이지별 스크립트 저장 및 URL 수집
+                                for (var entry in pageScripts.entries) {
+                                  String fileName = entry.key;
+                                  String scriptContent = entry.value;
+
+                                  // Get temporary directory to store the file
+                                  final directory = await getTemporaryDirectory();
+                                  final filePath = path.join(directory.path, fileName);
+
+                                  // Write script content to .txt file
+                                  final file = File(filePath);
+                                  await file.writeAsString(scriptContent);
+
+                                  // Define the storage path
+                                  final userProvider = Provider.of<UserProvider>(context, listen: false);
+                                  final storageRef = FirebaseStorage.instance.ref().child(
+                                      'response2/$userKey/${colonDetails['folder_id']}/${path.basename(filePath)}');
+                                  UploadTask uploadTask = storageRef.putFile(file);
+
+                                  TaskSnapshot taskSnapshot = await uploadTask;
+                                  String responseUrl = await taskSnapshot.ref.getDownloadURL();
+                                  print('GPT Response stored URL: $responseUrl');
+
+                                  // Optionally delete the temporary file
+                                  await file.delete();
+                                }
 
                                   // (4) 저장 url sql에 삽입하기
 
                                   // (5) CreatingDialog pop 하고 CreatedDialog 호출하기.
                                   //     이 안에서 생성된 콜론 화면으로 navigate
-                                  
-                                    // // 다이얼로그가 닫힌 후에 네비게이션을 실행
-                                    // Future.delayed(Duration(milliseconds: 200),
-                                    //     () {
-                                    //   _navigateToColonPage(
-                                    //       context,
-                                    //       colonFolderName,
-                                    //       widget.noteName,
-                                    //       widget.lectureName,
-                                    //       colonDetails['created_at']);
-                                    // });
+
+                                  // // 다이얼로그가 닫힌 후에 네비게이션을 실행
+                                  // Future.delayed(Duration(milliseconds: 200),
+                                  //     () {
+                                  //   _navigateToColonPage(
+                                  //       context,
+                                  //       colonFolderName,
+                                  //       widget.noteName,
+                                  //       widget.lectureName,
+                                  //       colonDetails['created_at']);
+                                  //       fileUrl 추가해야 한다고 함 (예나 PR)
+                                  // });
+
+
+                                  } else {
+                                    print('콜론 파일이랑 폴더 생성 실패한듯요 ...');
+                                  }
 
                                   showColonCreatedDialog(
                                     context,

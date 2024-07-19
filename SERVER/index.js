@@ -554,6 +554,7 @@ app.post('/api/lecture-files', (req, res) => {
     });
 });
 
+
 // Lecture details 업데이트 엔드포인트
 app.post('/api/update-lecture-details', (req, res) => {
     const { lecturefileId, file_url, lecture_name, type } = req.body;
@@ -848,6 +849,32 @@ app.get('/api/get-alternative-text-url', (req, res) => {
 
         if (results.length > 0) {
             res.status(200).json({ alternative_text_url: results[0].alternative_text_url });
+        } else {
+            res.status(404).json({ success: false, message: 'No matching record found' });
+        }
+    });
+});
+
+// record_url을 가져오기
+app.get('/api/get-record-url', (req, res) => {
+    const { colonfileId } = req.query;
+    console.log(`Received colonfileId: ${colonfileId}`);
+
+    const sql = `
+        SELECT record_url
+        FROM Record_table
+        WHERE colonfile_id = ?
+    `;
+
+    db.query(sql, [colonfileId], (err, results) => {
+        if (err) {
+            return res.status(500).json({ success: false, error: err.message });
+        }
+
+        console.log(`Query results: ${JSON.stringify(results)}`);
+
+        if (results.length > 0) {
+            res.status(200).json({ record_url: results[0].record_url });
         } else {
             res.status(404).json({ success: false, message: 'No matching record found' });
         }
