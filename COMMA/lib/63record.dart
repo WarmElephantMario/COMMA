@@ -742,7 +742,7 @@ void _navigateToColonPage(BuildContext context, String folderName, String noteNa
                                     noteName: colonDetails['file_name'],
                                     lectureName: colonDetails['lecture_name'],
                                     createdAt: colonDetails['created_at'],
-                                    //fileUrl: colonDetails['file_url'],
+                                    fileUrl: colonDetails['file_url'],
                                   ),
                                 ),
                               );
