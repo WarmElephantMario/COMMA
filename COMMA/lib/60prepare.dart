@@ -750,7 +750,7 @@ Future<void> updateLectureDetails(int lecturefileId, String fileUrl, String lect
         print("Starting file upload");
         // `lectureFolderId` 설정
        lectureFolderId = getFolderIdByName(_selectedFolder);
-
+       //print(lectureFolderId);
         try {
           final userProvider = Provider.of<UserProvider>(context, listen: false);
           // API 호출
@@ -822,10 +822,13 @@ Future<void> updateLectureDetails(int lecturefileId, String fileUrl, String lect
               if (Navigator.canPop(context)) {
                 Navigator.of(context, rootNavigator: true).pop();
               }
+
+              
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => LectureStartPage(
+                    lectureFolderId: lectureFolderId,
                     lecturefileId: lecturefileId!, // Inserted ID 전달
                     lectureName: _selectedFileName!,
                     fileURL: _downloadURL!,
