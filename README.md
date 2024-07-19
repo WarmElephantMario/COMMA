@@ -37,6 +37,7 @@ CREATE TABLE ColonFolders (
 CREATE TABLE LectureFiles (
     id INT AUTO_INCREMENT PRIMARY KEY,
     folder_name VARCHAR(255) NOT NULL,
+    file_url VARCHAR(2048),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     userKey INT,
     type int,
@@ -49,7 +50,7 @@ CREATE TABLE ColonFiles (
     id INT PRIMARY KEY AUTO_INCREMENT,
     folder_id INT,
     file_name VARCHAR(255),
-    file_url VARCHAR(255),
+    file_url VARCHAR(2048),
     lecture_name VARCHAR(255),
     created_at DATETIME,
     type int
