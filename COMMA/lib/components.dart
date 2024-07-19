@@ -337,7 +337,7 @@ void showColonCreatingDialog(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
-              '강의 자료 학습중입니다',
+              '콜론 파일을 생성 중입니다',
               style: TextStyle(
                 color: Color(0xFF414141),
                 fontSize: 16,
