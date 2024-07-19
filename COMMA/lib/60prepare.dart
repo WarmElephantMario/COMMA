@@ -579,6 +579,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
       });
     }
   }
+
 //데베에 폴더id,파일이름을 삽입하는 함수 
   Future<int> saveLectureFile({required int folderId, required String noteName}) async {
     final response = await http.post(
@@ -599,6 +600,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
         throw Exception('Failed to save lecture file');
     }
 }
+
 // 데베 업데이트 file URL,lecture name,type 
 Future<void> updateLectureDetails(int lecturefileId, String fileUrl, String lectureName, int type) async {
   final response = await http.post(

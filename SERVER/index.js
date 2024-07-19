@@ -29,14 +29,12 @@ db.getConnection((err, connection) => {
     connection.release(); // 연결 해제
 });
 
-//로그 출력
 // 사용자 ID 기반으로 강의 폴더 목록 가져오기
-app.get('/api/lecture-folders/:userKey', (req, res) => {
+app.get('/api/lecture-folders', (req, res) => {
     const userKey = req.query.userKey;
-    //const currentFolderId = req.query.currentFolderId;
+    const currentFolderId = req.query.currentFolderId;
     const sql = 'SELECT id, folder_name FROM LectureFolders WHERE userKey = ?';
-    //db.query(sql, [userKey, currentFolderId], (err, result) => {
-    db.query(sql, [userKey], (err, result) => {
+    db.query(sql, [userKey, currentFolderId], (err, result) => {
         if (err) throw err;
         res.send(result);
     });
@@ -598,9 +596,9 @@ app.post('/api/alt-table', (req, res) => {
 //콜론파일 폴더 생성 및 파일 생성
 //아직 lecturefile에는 삽입전
 app.post('/api/create-colon', (req, res) => {
-    const { folderName, noteName, fileUrl, lectureName, userKey } = req.body;
+    const { folderName, noteName, fileUrl, lectureName, type, userKey } = req.body;
 
-    console.log('Received request to create colon folder:', { folderName, noteName, fileUrl, lectureName, userKey });
+    console.log('Received request to create colon folder:', { folderName, noteName, fileUrl, lectureName, type, userKey });
 
     // Check if the folder already exists for the same user
     const checkFolderQuery = 'SELECT id FROM ColonFolders WHERE folder_name = ? AND userKey = ?';
@@ -612,8 +610,8 @@ app.post('/api/create-colon', (req, res) => {
 
         const insertFileAndReturnId = (folderId) => {
             // Insert file into the folder
-            const insertFileQuery = 'INSERT INTO ColonFiles (folder_id, file_name, file_url, lecture_name, created_at) VALUES (?, ?, ?, ?, NOW())';
-            db.query(insertFileQuery, [folderId, noteName, fileUrl, lectureName], (err, result) => {
+            const insertFileQuery = 'INSERT INTO ColonFiles (folder_id, file_name, file_url, lecture_name, created_at, type) VALUES (?, ?, ?, ?, NOW(), ?)';
+            db.query(insertFileQuery, [folderId, noteName, fileUrl, lectureName, type], (err, result) => {
                 if (err) {
                     console.error('Failed to add file to folder:', err);
                     return res.status(500).json({ error: 'Failed to add file to folder' });
@@ -850,6 +848,32 @@ app.get('/api/get-alternative-text-url', (req, res) => {
 
         if (results.length > 0) {
             res.status(200).json({ alternative_text_url: results[0].alternative_text_url });
+        } else {
+            res.status(404).json({ success: false, message: 'No matching record found' });
+        }
+    });
+});
+
+// record_url을 가져오기
+app.get('/api/get-record-url', (req, res) => {
+    const { colonfileId } = req.query;
+    console.log(`Received colonfileId: ${colonfileId}`);
+
+    const sql = `
+        SELECT record_url
+        FROM Record_table
+        WHERE colonfile_id = ?
+    `;
+
+    db.query(sql, [colonfileId], (err, results) => {
+        if (err) {
+            return res.status(500).json({ success: false, error: err.message });
+        }
+
+        console.log(`Query results: ${JSON.stringify(results)}`);
+
+        if (results.length > 0) {
+            res.status(200).json({ record_url: results[0].record_url });
         } else {
             res.status(404).json({ success: false, message: 'No matching record found' });
         }

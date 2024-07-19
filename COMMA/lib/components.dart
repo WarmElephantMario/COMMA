@@ -298,44 +298,118 @@ void showConfirmationDialog(
   );
 }
 
-// 콜론 폴더 생성 및 파일 생성 함수
-Future<int> createColonFolder(String folderName, String noteName,
-    String fileUrl, String lectureName, int userKey) async {
-  var url = '${API.baseUrl}/api/create-colon';
-
-  var body = {
-    'folderName': folderName,
-    'noteName': noteName,
-    'fileUrl': fileUrl,
-    'lectureName': lectureName,
-    'userKey': userKey,
-  };
-
-  try {
-    print('Sending request to $url with body: $body');
-
-    var response = await http.post(
-      Uri.parse(url),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(body),
-    );
-
-    if (response.statusCode == 200) {
-      var jsonResponse = jsonDecode(response.body);
-      print('Folder and file created successfully');
-      print('Colon File ID: ${jsonResponse['colonFileId']}');
-      return jsonResponse['colonFileId'];
-      //return jsonResponse['folder_id'];
-    } else {
-      print('Failed to create folder and file: ${response.statusCode}');
-      print('Response body: ${response.body}');
-      return -1;
-    }
-  } catch (e) {
-    print('Error during HTTP request: $e');
-    return -1;
-  }
+// Creating - 콜론 파일 생성중 팝업
+void showColonCreatingDialog(
+  BuildContext context, 
+  String fileName, //생성된 콜론 파일 이름
+  String fileURL,  //강의자료 url
+  ValueNotifier<double> progressNotifier) {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        titlePadding: EdgeInsets.zero,
+        contentPadding: const EdgeInsets.symmetric(vertical: 16.0),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text(
+                '취소',
+                style: TextStyle(
+                  color: Colors.orange,
+                  fontSize: 16,
+                  fontFamily: 'DM Sans',
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              '콜론 파일을 생성 중입니다',
+              style: TextStyle(
+                color: Color(0xFF414141),
+                fontSize: 16,
+                fontFamily: 'DM Sans',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF36AE92)),
+              strokeWidth: 4.0,
+            ),
+            const SizedBox(height: 16),
+            ValueListenableBuilder<double>(
+              valueListenable: progressNotifier,
+              builder: (context, value, child) {
+                return Text(
+                  '${(value * 100).toStringAsFixed(0)}%', // 진행률을 퍼센트로 표시
+                  style: const TextStyle(
+                    color: Color(0xFF414141),
+                    fontSize: 16,
+                    fontFamily: 'DM Sans',
+                    fontWeight: FontWeight.bold,
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      );
+    },
+  );
 }
+
+// // 콜론 폴더 생성 및 파일 생성 함수
+// Future<int> createColonFolder(String folderName, String noteName,
+//     String fileUrl, String lectureName, int userKey) async {
+//   var url = '${API.baseUrl}/api/create-colon';
+
+//   var body = {
+//     'folderName': folderName,
+//     'noteName': noteName,
+//     'fileUrl': fileUrl,
+//     'lectureName': lectureName,
+//     'userKey': userKey,
+//   };
+
+//   try {
+//     print('Sending request to $url with body: $body');
+
+//     var response = await http.post(
+//       Uri.parse(url),
+//       headers: {'Content-Type': 'application/json'},
+//       body: jsonEncode(body),
+//     );
+
+//     if (response.statusCode == 200) {
+//       var jsonResponse = jsonDecode(response.body);
+//       print('Folder and file created successfully');
+//       print('Colon File ID: ${jsonResponse['colonFileId']}');
+//       return jsonResponse['colonFileId'];
+//       //return jsonResponse['folder_id'];
+//     } else {
+//       print('Failed to create folder and file: ${response.statusCode}');
+//       print('Response body: ${response.body}');
+//       return -1;
+//     }
+//   } catch (e) {
+//     print('Error during HTTP request: $e');
+//     return -1;
+//   }
+// }
 
 // 콜론 생성 다이얼로그 함수
 void showColonCreatedDialog(
@@ -415,36 +489,36 @@ void showColonCreatedDialog(
                     onPressed: () async {
                       Navigator.of(dialogContext).pop();
 
-                      // 폴더 및 파일 생성
-                      int colonFileId = await createColonFolder(
-                        "$folderName (:)",
-                        "$noteName (:)",
-                        fileUrl,
-                        lectureName,
-                        userKey
-                      );
-                      if (colonFileId != -1) {
-                        // Update LectureFiles with colonFileId
-                        //_lectureFileId를 가져와야 함
+                      // // 폴더 및 파일 생성
+                      // int colonFileId = await createColonFolder(
+                      //   "$folderName (:)",
+                      //   "$noteName (:)",
+                      //   fileUrl,
+                      //   lectureName,
+                      //   userKey
+                      // );
+                      // if (colonFileId != -1) {
+                      //   // Update LectureFiles with colonFileId
+                      //   //_lectureFileId를 가져와야 함
 
-                        await updateLectureFileWithColonId(lectureFileId, colonFileId);
+                      //   await updateLectureFileWithColonId(lectureFileId, colonFileId);
 
-                         // Record_Table 업데이트
-                        await _updateRecordTableWithColonId(lectureFileId, colonFileId);
+                      //    // Record_Table 업데이트 : 새로 생성된 colonFileId를 연결
+                      //   await _updateRecordTableWithColonId(lectureFileId, colonFileId);
 
-                        // `ColonPage`로 이동전 콜론 정보 가져오기
-                        var colonDetails = await _fetchColonDetails(colonFileId);
+                      //   // `ColonPage`로 이동전 콜론 정보 가져오기
+                      //   var colonDetails = await _fetchColonDetails(colonFileId);
 
-                        //ColonFiles에 folder_id로 폴더 이름 가져오기
-                        var colonFolderName = await _fetchColonFolderName(colonDetails['folder_id']);
+                      //   //ColonFiles에 folder_id로 폴더 이름 가져오기
+                      //   var colonFolderName = await _fetchColonFolderName(colonDetails['folder_id']);
 
-                        // 다이얼로그가 닫힌 후에 네비게이션을 실행
-                        Future.delayed(Duration(milliseconds: 200), () {
-                          _navigateToColonPage(context, colonFolderName, noteName, lectureName, colonDetails['created_at'],colonDetails['file_url']);
-                        });
-                      } else {
-                        print('Failed to fetch colon file details:');
-                      }
+                      //   // 다이얼로그가 닫힌 후에 네비게이션을 실행
+                      //   Future.delayed(Duration(milliseconds: 200), () {
+                      //     _navigateToColonPage(context, colonFolderName, noteName, lectureName, colonDetails['created_at']);
+                      //   });
+                      // } else {
+                      //   print('Failed to fetch colon file details:');
+                      // }
                     },
                     child: const Text(
                       '확인',
@@ -468,103 +542,100 @@ void showColonCreatedDialog(
   }
 }
 
-// Record_Table 업데이트 함수
-Future<void> _updateRecordTableWithColonId(int? lecturefileId, int colonfileId) async {
-  final updateUrl = '${API.baseUrl}/api/update-record-table';
-  final updateBody = {
-    'lecturefile_id': lecturefileId,
-    'colonfile_id': colonfileId,
-  };
+// // Record_Table 업데이트 함수
+// Future<void> _updateRecordTableWithColonId(int? lecturefileId, int colonfileId) async {
+//   final updateUrl = '${API.baseUrl}/api/update-record-table';
+//   final updateBody = {
+//     'lecturefile_id': lecturefileId,
+//     'colonfile_id': colonfileId,
+//   };
 
-  try {
-    final updateResponse = await http.post(
-      Uri.parse(updateUrl),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(updateBody),
-    );
+//   try {
+//     final updateResponse = await http.post(
+//       Uri.parse(updateUrl),
+//       headers: {'Content-Type': 'application/json'},
+//       body: jsonEncode(updateBody),
+//     );
 
-    if (updateResponse.statusCode == 200) {
-      print('Record table updated successfully with colon file ID');
-    } else {
-      print('Failed to update record table: ${updateResponse.statusCode}');
-      print(updateResponse.body);
-    }
-  } catch (e) {
-    print('Error updating record table: $e');
-  }
-}
+//     if (updateResponse.statusCode == 200) {
+//       print('Record table updated successfully with colon file ID');
+//     } else {
+//       print('Failed to update record table: ${updateResponse.statusCode}');
+//       print(updateResponse.body);
+//     }
+//   } catch (e) {
+//     print('Error updating record table: $e');
+//   }
+// }
 
-Future<Map<String, dynamic>> _fetchColonDetails(int colonId) async {
-  var url = '${API.baseUrl}/api/get-colon-details?colonId=$colonId';
-  var response = await http.get(Uri.parse(url));
+// Future<Map<String, dynamic>> _fetchColonDetails(int colonId) async {
+//   var url = '${API.baseUrl}/api/get-colon-details?colonId=$colonId';
+//   var response = await http.get(Uri.parse(url));
 
-  if (response.statusCode == 200) {
-    var jsonResponse = jsonDecode(response.body);
-    return jsonResponse;
-  } else {
-    throw Exception('Failed to load colon details');
-  }
-}
-//콜론폴더 이름 확인하기 
-Future<String> _fetchColonFolderName(int folderId) async {
-  var url = '${API.baseUrl}/api/get-Colonfolder-name?folderId=$folderId';
-  var response = await http.get(Uri.parse(url));
+//   if (response.statusCode == 200) {
+//     var jsonResponse = jsonDecode(response.body);
+//     return jsonResponse;
+//   } else {
+//     throw Exception('Failed to load colon details');
+//   }
+// }
 
-  if (response.statusCode == 200) {
-    var jsonResponse = jsonDecode(response.body);
-    return jsonResponse['folder_name'];
-  } else {
-    throw Exception('Failed to load folder name');
-  }
-}
+// //콜론폴더 이름 확인하기 
+// Future<String> _fetchColonFolderName(int folderId) async {
+//   var url = '${API.baseUrl}/api/get-Colonfolder-name?folderId=$folderId';
+//   var response = await http.get(Uri.parse(url));
 
-Future<void> updateLectureFileWithColonId(int? lectureFileId, int colonFileId) async {
-  var url = '${API.baseUrl}/api/update-lecture-file';
+//   if (response.statusCode == 200) {
+//     var jsonResponse = jsonDecode(response.body);
+//     return jsonResponse['folder_name'];
+//   } else {
+//     throw Exception('Failed to load folder name');
+//   }
+// }
 
-  var body = {
-    'lectureFileId': lectureFileId,
-    'colonFileId': colonFileId,
-  };
+// Future<void> updateLectureFileWithColonId(int? lectureFileId, int colonFileId) async {
+//   var url = '${API.baseUrl}/api/update-lecture-file';
 
-  try {
-    var response = await http.post(
-      Uri.parse(url),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(body),
-    );
+//   var body = {
+//     'lectureFileId': lectureFileId,
+//     'colonFileId': colonFileId,
+//   };
 
-    if (response.statusCode == 200) {
-      print('Lecture file updated successfully with colonFileId');
-    } else {
-      print('Failed to update lecture file: ${response.statusCode}');
-      print('Response body: ${response.body}');
-    }
-  } catch (e) {
-    print('Error during HTTP request: $e');
-  }
-}
+//   try {
+//     var response = await http.post(
+//       Uri.parse(url),
+//       headers: {'Content-Type': 'application/json'},
+//       body: jsonEncode(body),
+//     );
 
+//     if (response.statusCode == 200) {
+//       print('Lecture file updated successfully with colonFileId');
+//     } else {
+//       print('Failed to update lecture file: ${response.statusCode}');
+//       print('Response body: ${response.body}');
+//     }
+//   } catch (e) {
+//     print('Error during HTTP request: $e');
+//   }
+// }
 
-
-
-void _navigateToColonPage(BuildContext context, String folderName, String noteName, String lectureName, String createdAt, String fileUrl) {
-  try {
-    print('Navigating to ColonPage'); // 로그 추가
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => ColonPage(
-          folderName: "$folderName",
-          noteName: "$noteName (:)",
-          lectureName: lectureName,
-          createdAt: createdAt,
-          fileUrl: fileUrl,
-        ),
-      ),
-    );
-  } catch (e) {
-    print('Navigation error: $e');
-  }
-}
+// void _navigateToColonPage(BuildContext context, String folderName, String noteName, String lectureName, String createdAt) {
+//   try {
+//     print('Navigating to ColonPage'); // 로그 추가
+//     Navigator.of(context).push(
+//       MaterialPageRoute(
+//         builder: (context) => ColonPage(
+//           folderName: "$folderName",
+//           noteName: "$noteName (:)",
+//           lectureName: lectureName,
+//           createdAt: createdAt,
+//         ),
+//       ),
+//     );
+//   } catch (e) {
+//     print('Navigation error: $e');
+//   }
+// }
 
 
 // Learning - 강의 자료 학습중 팝업
