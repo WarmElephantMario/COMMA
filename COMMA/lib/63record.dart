@@ -21,7 +21,7 @@ enum RecordingState { initial, recording, recorded }
 
 class RecordPage extends StatefulWidget {
   final int? lecturefileId;
-  final String selectedFolderId;
+  final int? selectedFolderId;
   final String noteName;
   final String fileUrl;
   final String folderName;
@@ -64,6 +64,7 @@ class _RecordPageState extends State<RecordPage> {
   bool _isListening = false;
   String _recognizedText = '';
   double _confidence = 1.0;
+
 
   @override
   void initState() {
