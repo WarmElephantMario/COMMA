@@ -35,23 +35,25 @@ CREATE TABLE ColonFolders (
 );
 
 CREATE TABLE LectureFiles (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    folder_id INT,
-    file_name VARCHAR(255),
-    file_url VARCHAR(2048),
-    lecture_name VARCHAR(255),
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (folder_id) REFERENCES LectureFolders(id) ON DELETE CASCADE
+		id INT AUTO_INCREMENT PRIMARY KEY,
+    folder_name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    userKey INT,
+    type int,
+    existColon INT,
+    FOREIGN KEY (userKey) REFERENCES User_Table(userKey) ON DELETE CASCADE,
+    FOREIGN KEY (existColon) REFERENCES ColonFiles(id) ON DELETE CASCADE
 );
 
 CREATE TABLE ColonFiles (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id INT PRIMARY KEY AUTO_INCREMENT,
     folder_id INT,
     file_name VARCHAR(255),
-    file_url VARCHAR(2048),
+    file_url VARCHAR(255),
     lecture_name VARCHAR(255),
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (folder_id) REFERENCES ColonFolders(id) ON DELETE CASCADE
+    created_at DATETIME,
+    type int
 );
+
 
 ```
