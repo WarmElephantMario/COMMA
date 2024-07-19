@@ -27,7 +27,7 @@ class LectureStartPage extends StatefulWidget {
     this.responseUrl,
     required this.type,
     this.selectedFolder,
-    this.noteName
+    this.noteName,
   });
 
   @override
@@ -189,7 +189,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => RecordPage(
-                        selectedFolderId: widget.lectureFolderId!,
+                        lectureFolderId: widget.lectureFolderId!,
                         noteName: widget.noteName!,
                         fileUrl: widget.fileURL,
                         folderName: widget.selectedFolder!,
