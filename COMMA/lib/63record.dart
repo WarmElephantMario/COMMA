@@ -564,13 +564,14 @@ Future<Map<String, String>> callChatGPT4API(
   final Uri apiUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
 
   final String promptForPageScript = '''
-  당신은 이미지 분석 전문가입니다. 다음은 강의 자료의 페이지와 해당하는 스크립트입니다. 
-  각 페이지의 스크립트를 텍스트 파일로 분할해 주세요.
+  당신은 이미지 분석 전문가입니다. 당신에게 한 강의의 녹음본과, 해당 강의를 진행하는 데 사용된 강의 자료를 함께 드리겠습니다. 
+  주어진 강의 자료가 여러 페이지일 텐데, 해당 자료의 내용을 숙지하여 강의의 녹음본을 강의 자료의 페이지별로 분할해 주세요. 
+  상세 조건은 다음과 같습니다.
   조건:
-  1. 각 페이지별로 텍스트 파일을 생성해 주세요.
-  2. 텍스트 파일의 이름은 page_{페이지 번호}.txt 형태로 해주세요.
-  3. 스크립트를 가능한 한 정확하게 분할해 주세요.
-''';
+  1. 강의의 녹음본을 제가 드린 강의 자료의 페이지 개수만큼의 섹션으로 분할해 주세요.
+  2. 텍스트 파일의 이름은 page_{페이지 번호}.txt 형태로 해주세요. 번호는 0부터 시작합니다.
+  3. 강의 자료를 분할하는 것 외에 부가적인 글자 수정은 하지 말아주세요.
+  4. 당신의 답변은 오직 다음의 패턴을 따릅니다 : [page_0.txt] 스크립트 내용 [page_1.txt] 스크립트 내용 ... ''';
 
   try {
     // 메시지 구성
@@ -939,6 +940,7 @@ Future<Map<String, String>> callChatGPT4API(
                                     lectureScript,
                                     widget.lectureName
                                 );
+                                //////
 
                                 // Firebase에 페이지별 스크립트 저장 및 URL 수집
                                 for (var entry in pageScripts.entries) {
