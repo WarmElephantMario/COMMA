@@ -750,7 +750,8 @@ Future<void> updateLectureDetails(int lecturefileId, String fileUrl, String lect
         print("Starting file upload");
         // `lectureFolderId` 설정
        lectureFolderId = getFolderIdByName(_selectedFolder);
-       //print(lectureFolderId);
+       print('${lectureFolderId}');
+
         try {
           final userProvider = Provider.of<UserProvider>(context, listen: false);
           // API 호출
