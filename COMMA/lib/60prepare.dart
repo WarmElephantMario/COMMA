@@ -823,10 +823,13 @@ Future<void> updateLectureDetails(int lecturefileId, String fileUrl, String lect
               if (Navigator.canPop(context)) {
                 Navigator.of(context, rootNavigator: true).pop();
               }
+
+              
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => LectureStartPage(
+                    lectureFolderId: lectureFolderId,
                     lecturefileId: lecturefileId!, // Inserted ID 전달
                     lectureName: _selectedFileName!,
                     fileURL: _downloadURL!,
