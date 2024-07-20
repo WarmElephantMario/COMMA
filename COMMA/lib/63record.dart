@@ -64,7 +64,7 @@ class _RecordPageState extends State<RecordPage> {
   Map<int, String> pageTexts = {};
   bool _isColonCreated = false; // 추가: 콜론 생성 상태를 나타내는 프로퍼티
   int? _existColon; // 추가: existColon 값을 저장할 프로퍼티
-  final ValueNotifier<double> _progressNotifier = ValueNotifier<double>(0.0);
+  final ValueNotifier<double> progressNotifier = ValueNotifier<double>(0.0);
   List<Map<String, dynamic>> folderList = [];
 
   late stt.SpeechToText _speech;
@@ -564,70 +564,70 @@ Future<Map<String, String>> callChatGPT4API(
   final Uri apiUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
 
   final String promptForPageScript = '''
-  당신은 이미지 분석 전문가입니다. 다음은 강의 자료의 페이지와 해당하는 스크립트입니다. 
-  각 페이지의 스크립트를 텍스트 파일로 분할해 주세요.
+  당신은 이미지 분석 전문가입니다. 당신에게 한 강의의 녹음본과, 해당 강의를 진행하는 데 사용된 강의 자료를 함께 드리겠습니다. 
+  주어진 강의 자료가 여러 페이지일 텐데, 해당 자료의 내용을 숙지하여 강의의 녹음본을 강의 자료의 페이지별로 분할해 주세요. 
+  상세 조건은 다음과 같습니다.
   조건:
-  1. 각 페이지별로 텍스트 파일을 생성해 주세요.
-  2. 텍스트 파일의 이름은 page_{페이지 번호}.txt 형태로 해주세요.
-  3. 스크립트를 가능한 한 정확하게 분할해 주세요.
-''';
+  1. 강의의 녹음본을 제가 드린 강의 자료의 페이지 개수만큼의 섹션으로 분할해 주세요.
+  2. 텍스트 파일의 이름은 page_{페이지 번호}.txt 형태로 해주세요. 번호는 0부터 시작합니다.
+  3. 강의 자료를 분할하는 것 외에 부가적인 글자 수정은 하지 말아주세요. 스크립트의 글자 수정은 절대 금합니다. 페이지만 구분해주세요.
+  4. 당신의 답변은 오직 다음의 패턴을 따릅니다 : '페이지 (쪽수)\n이미지 URL: (주소)\n스크립트: (내용)\n'. 
+     이 형식 이외의 답변은 금지합니다.''';
 
   try {
-    // 메시지 구성
-    List<Map<String, String>> messages = [
-      {'role': 'system', 'content': promptForPageScript}
-    ];
+    var pageScripts = <String, String>{};
 
-    for (int i = 0; i < imageUrls.length; i++) {
-      messages.add({
-        'role': 'user',
-        'content': '페이지 ${i + 1}\n이미지 URL: ${imageUrls[i]}\n스크립트:\n$lectureScript'
-      });
-    }
+    for (int i = 0; i < imageUrls.length; ++i) {
+      var messages = [
+        {'role': 'system', 'content': promptForPageScript},
+        {
+          'role': 'user',
+          'content': '페이지 ${i}\n이미지 URL: ${imageUrls[i]}\n스크립트: $lectureScript'
+        }
+      ];
 
-    var response = await http.post(
-      apiUrl,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $apiKey',
-      },
-      body: jsonEncode({
-        'model': 'gpt-4',
-        'messages': messages,
-        'max_tokens': 500,
-      }),
-    );
+      var response = await http.post(
+        apiUrl,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $apiKey',
+        },
+        body: jsonEncode({
+          'model': 'gpt-4',
+          'messages': messages,
+          'max_tokens': 1000,
+        }),
+      );
 
-    if (response.statusCode == 200) {
-      var responseBody = utf8.decode(response.bodyBytes);
-      var decodedResponse = jsonDecode(responseBody);
-      var gptResponse = decodedResponse['choices'][0]['message']['content'];
+      if (response.statusCode == 200) {
+        var responseBody = utf8.decode(response.bodyBytes);
+        var decodedResponse = jsonDecode(responseBody);
+        var gptResponse = decodedResponse['choices'][0]['message']['content'];
 
-      print('GPT-4 response content:');
-      print(gptResponse);
+        print('GPT-4 response content for page $i:');
+        print(gptResponse);
 
-      // 응답을 페이지별 텍스트로 분할
-      var pageScripts = <String, String>{};
-      var matches =
-          RegExp(r'\[page_(\d+)\.txt\]\n(.+?)(?=\n\[|$)', dotAll: true)
-              .allMatches(gptResponse);
-      for (var match in matches) {
-        var pageIndex = match.group(1)!;
-        var scriptContent = match.group(2)!.trim();
-        pageScripts['page_$pageIndex.txt'] = scriptContent;
+        // 응답을 페이지별 텍스트로 분할
+        var matches = RegExp(r'페이지 (\d+)\n이미지 URL: .+?\n스크립트: (.+?)(?=\n페이지 \d|\$)', dotAll: true)
+            .allMatches(gptResponse);
+        for (var match in matches) {
+          var pageIndex = match.group(1)!;
+          var scriptContent = match.group(2)!.trim();
+          pageScripts['page_$pageIndex.txt'] = scriptContent;
 
-         // 추가된 로그: 각 페이지의 스크립트를 추출한 후 이를 출력
-        print('Extracted script for page $pageIndex:');
-        print(scriptContent);
+          //  각 페이지의 스크립트를 추출하여 Map 구조에 분리해서 저장
+          print('Extracted script for page $pageIndex:');
+          print(scriptContent);
+        }
+      } else {
+        var responseBody = utf8.decode(response.bodyBytes);
+        print('Error calling ChatGPT-4 API: ${response.statusCode}');
+        print('Response body: $responseBody');
       }
-      return pageScripts; // 페이지별 텍스트 파일 내용을 반환
-
-    } else {
-      var responseBody = utf8.decode(response.bodyBytes);
-      print('Error calling ChatGPT-4 API: ${response.statusCode}');
-      print('Response body: $responseBody');
-      return {};
     }
+
+    return pageScripts; // 페이지별 텍스트 파일 내용을 반환
+
   } catch (e) {
     print('Error: $e');
     return {};
@@ -903,7 +903,7 @@ Future<Map<String, String>> callChatGPT4API(
                                         context,
                                         colonDetails['file_name'],
                                         colonDetails['file_url'],
-                                        _progressNotifier);
+                                        progressNotifier);
 
                                     // (3) gpt 불러서 강의자료&자막 주고 찢어달라 하기 -> 파이어베이스 저장
 
@@ -911,9 +911,9 @@ Future<Map<String, String>> callChatGPT4API(
                                     int pageIndex = 0;
                                     bool loadingImages = true;
 
-                                    // Firebase Storage에서 강의 자료 사진 로드
+                                    // (3)-1 Firebase Storage에서 강의 자료 사진 로드
                                     while (loadingImages) {
-                                      print('uploads/$userKey/${widget.lectureFolderId}/${widget.lecturefileId}/pdf_handle/page_$pageIndex.jpg');
+                                      //print('uploads/$userKey/${widget.lectureFolderId}/${widget.lecturefileId}/pdf_handle/page_$pageIndex.jpg');
                                       try {
                                         String imageUrl = await FirebaseStorage.instance
                                           .ref('uploads/$userKey/${widget.lectureFolderId}/${widget.lecturefileId}/pdf_handle/page_$pageIndex.jpg')
@@ -926,24 +926,32 @@ Future<Map<String, String>> callChatGPT4API(
                                     }
                                     print('Loaded image URLs: $imageUrls');
 
-                                    // Record_table에서 강의 스크립트 .txt 파일 로드
+                                    // (3)-2 Record_table에서 강의 스크립트 .txt 파일 로드
                                     String scriptUrl =
                                         await fetchRecordUrl(colonFileId);
                                     String lectureScript = await http
                                         .get(Uri.parse(scriptUrl))
                                         .then((response) => response.body);
 
-                                  // 두 개 한꺼번에 주면서 gpt 호출 (찢어달라고 하기)
-                                  Map<String, String> pageScripts = await callChatGPT4API(
-                                    imageUrls,
-                                    lectureScript,
-                                    widget.lectureName
-                                );
+                                    // (3)-3 두 개 한꺼번에 주면서 gpt 호출 (찢어달라고 하기)
+                                    Map<String, String> pageScripts = await callChatGPT4API(
+                                      imageUrls,
+                                      lectureScript,
+                                      widget.lectureName
+                                    );
+                                    // 받은 pageScrips 구조 : 
+                                    /* "page_0.txt": "이것은 페이지 0의 스크립트 내용입니다.",
+                                        "page_1.txt": "이것은 페이지 1의 스크립트 내용입니다."
+                                    */
 
-                                // Firebase에 페이지별 스크립트 저장 및 URL 수집
-                                for (var entry in pageScripts.entries) {
+                                // (3)-4 Firebase에 Map의 각 항목별로 (페이지별로) 스크립트 저장 및 URL 수집
+                                for (var i = 0; i < pageScripts.entries.length; i++) {
+                                  var entry = pageScripts.entries.elementAt(i);
                                   String fileName = entry.key;
                                   String scriptContent = entry.value;
+
+                                  // 로그: 현재 처리 중인 파일 이름 출력
+                                  print('Processing file: $fileName');
 
                                   // Get temporary directory to store the file
                                   final directory = await getTemporaryDirectory();
@@ -953,15 +961,26 @@ Future<Map<String, String>> callChatGPT4API(
                                   final file = File(filePath);
                                   await file.writeAsString(scriptContent);
 
+                                  // 로그: 파일 작성 완료
+                                  print('File written: $filePath');
+
                                   // Define the storage path
                                   final userProvider = Provider.of<UserProvider>(context, listen: false);
                                   final storageRef = FirebaseStorage.instance.ref().child(
-                                      'response2/$userKey/${colonDetails['folder_id']}/${path.basename(filePath)}');
+                                      'response2/$userKey/${colonDetails['folder_id']}/${colonFileId}/${fileName}');
+
+                                  // 로그: Firebase Storage 경로 출력
+                                  print('Firebase storage path: ${storageRef.fullPath}');
+
                                   UploadTask uploadTask = storageRef.putFile(file);
 
+                                  //업로드된 파일의 저장 url을 가져옴
                                   TaskSnapshot taskSnapshot = await uploadTask;
                                   String responseUrl = await taskSnapshot.ref.getDownloadURL();
                                   print('GPT Response stored URL: $responseUrl');
+
+                                  // 진행률 업데이트
+                                  progressNotifier.value = (i + 1) / pageScripts.entries.length;
 
                                   // Optionally delete the temporary file
                                   await file.delete();
