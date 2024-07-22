@@ -690,9 +690,9 @@ Please follow these instructions:
 
 
   void _navigateToColonPage(BuildContext context, String folderName,
-      String noteName, String lectureName, String createdAt) {
+      String noteName, String lectureName, String createdAt,String fileUrl, int colonFileId) {
     try {
-      print('Navigating to ColonPage');
+      print('Navigating to ColonPage'); // 로그 추가
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => ColonPage(
@@ -700,6 +700,8 @@ Please follow these instructions:
             noteName: "$noteName (:)",
             lectureName: lectureName,
             createdAt: createdAt,
+            fileUrl: fileUrl,
+            colonFileId :colonFileId
           ),
         ),
       );
@@ -707,6 +709,142 @@ Please follow these instructions:
       print('Navigation error: $e');
     }
   }
+
+   Future<void> insertDividedScript(int colonfileId, int page, String url) async {
+  final apiUrl = '${API.baseUrl}/api/insertDividedScript';
+  final body = jsonEncode({
+    'colonfile_id': colonfileId,
+    'page': page,
+    'url': url,
+  });
+
+  final response = await http.post(
+    Uri.parse(apiUrl),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: body,
+  );
+
+  if (response.statusCode == 200) {
+    print('Divided script inserted successfully');
+  } else {
+    print('Failed to insert divided script: ${response.statusCode}');
+    print('Response body: ${response.body}');
+  }
+}
+
+ // 콜론 생성 다이얼로그 함수
+void showColonCreatedDialog(
+  BuildContext context,
+  String folderName,
+  String noteName,
+  String lectureName,
+  String fileUrl,
+  int? lectureFileId,
+  int colonFileId
+) {
+  final userProvider = Provider.of<UserProvider>(context, listen: false);
+  final userKey = userProvider.user?.userKey;
+
+  if (userKey != null) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: Column(
+            children: [
+              const Text(
+                '콜론이 생성되었습니다.',
+                style: TextStyle(
+                  color: Color(0xFF545454),
+                  fontSize: 14,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '폴더 이름: $folderName (:)', // 기본폴더 대신 folderName 사용
+                style: const TextStyle(
+                  color: Color(0xFF245B3A),
+                  fontSize: 14,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                '으로 이동하시겠습니까?',
+                style: TextStyle(
+                  color: Color(0xFF545454),
+                  fontSize: 14,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(dialogContext).pop();
+                    },
+                    child: const Text(
+                      '취소',
+                      style: TextStyle(
+                        color: Color(0xFFFFA17A),
+                        fontSize: 14,
+                        fontFamily: 'DM Sans',
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  TextButton(
+                    onPressed: () async {
+                      Navigator.of(dialogContext).pop();
+
+                        // `ColonPage`로 이동전 콜론 정보 가져오기
+                        var colonDetails = await _fetchColonDetails(colonFileId);
+                  
+                        //ColonFiles에 folder_id로 폴더 이름 가져오기
+                        var colonFolderName = await _fetchColonFolderName(colonDetails['folder_id']);
+
+                        // 다이얼로그가 닫힌 후에 네비게이션을 실행
+                        Future.delayed(Duration(milliseconds: 200), () {
+                          _navigateToColonPage(context, colonFolderName, colonDetails['file_name'], colonDetails['lecture_name'], colonDetails['created_at'],colonDetails['file_url'],colonFileId);
+                        });
+                    },
+                    child: const Text(
+                      '확인',
+                      style: TextStyle(
+                        color: Color(0xFF545454),
+                        fontSize: 14,
+                        fontFamily: 'DM Sans',
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  } else {
+    print('User Key is null, cannot create colon folder.');
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -1013,9 +1151,18 @@ Please follow these instructions:
                                       progressNotifier.value =
                                           (i + 1) / pageScripts.entries.length;
 
+                                      // URL을 데이터베이스에 삽입
+                                      int pageIndex = int.parse(fileName.replaceAll(RegExp(r'[^0-9]'), ''));
+                                      await insertDividedScript(colonFileId, pageIndex, responseUrl);
+
                                       await file.delete();
                                     }
 
+                                    // (5)-1 CreatingDialog pop 하기
+                                  
+                                      progressNotifier.value = 1.0; // 작업 완료 후 프로그레스 업데이트
+                                    // (5)-2 CreatedDialog 호출하기
+                                    //     이 안에서 생성된 콜론 화면으로 navigate
                                     showColonCreatedDialog(
                                       context,
                                       widget.folderName,
@@ -1023,7 +1170,9 @@ Please follow these instructions:
                                       widget.lectureName,
                                       widget.fileUrl,
                                       widget.lecturefileId!,
+                                      colonFileId
                                     );
+                                    
                                   } else {
                                     print('콜론 파일이랑 폴더 생성 실패한듯요 ...');
                                   }
