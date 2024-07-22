@@ -612,13 +612,13 @@ class _RecordPageState extends State<RecordPage> {
     }
   }
 
-  Future<Map<String, String>> callChatGPT4API(List<String> imageUrls,
-      String lectureScript, String lectureFileName) async {
-    const String apiKey = Env.apiKey;
-    final Uri apiUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
+Future<Map<String, String>> callChatGPT4API(List<String> imageUrls,
+    String lectureScript, String lectureFileName) async {
+  const String apiKey = Env.apiKey;
+  final Uri apiUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
 
-    final String promptForPageScript = '''
-You are an expert in analyzing lecture scripts. I will provide you with a full lecture script and a pages of lecture materials in the form of images. 
+  final String promptForPageScript = '''
+You are an expert in analyzing lecture scripts. I will provide you with a full lecture script and a series of lecture materials in the form of images. 
 Your task is to identify and extract the part of the lecture script that corresponds to each page of the lecture material.
 Please follow these instructions:
 1. Do not modify any text in the lecture script.
@@ -626,69 +626,68 @@ Please follow these instructions:
 3. The output should strictly follow this format: 'Page (page number)\nImage URL: (url)\nScript: (content)\n'.
 4. Start the page number from 0.
 5. Ensure that the response contains only the script corresponding to the specific page without generating new content or modifying the original script.
-   If delivered lecture script is written in Korean, your response also should be written in Korean.
+''';
 
-     ''';
+  try {
+    var pageScripts = <String, String>{};
 
-    try {
-      var pageScripts = <String, String>{};
-
-      for (int i = 0; i < imageUrls.length; ++i) {
-        var messages = [
-          {'role': 'system', 'content': promptForPageScript},
-          {
-            'role': 'user',
-            'content':
-                '페이지 ${i}\n이미지 URL: ${imageUrls[i]}\n스크립트: $lectureScript'
-          }
-        ];
-
-        var response = await http.post(
-          apiUrl,
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $apiKey',
-          },
-          body: jsonEncode({
-            'model': 'gpt-4',
-            'messages': messages,
-            'max_tokens': 1000,
-          }),
-        );
-
-        if (response.statusCode == 200) {
-          var responseBody = utf8.decode(response.bodyBytes);
-          var decodedResponse = jsonDecode(responseBody);
-          var gptResponse = decodedResponse['choices'][0]['message']['content'];
-
-          print('GPT-4 response content for page $i:');
-          print(gptResponse);
-
-          var matches = RegExp(
-                  r'페이지 (\d+)\n이미지 URL: .+?\n스크립트: (.+?)(?=\n페이지 \d|\$)',
-                  dotAll: true)
-              .allMatches(gptResponse);
-          for (var match in matches) {
-            var pageIndex = match.group(1)!;
-            var scriptContent = match.group(2)!.trim();
-            pageScripts['page_$pageIndex.txt'] = scriptContent;
-
-            print('Extracted script for page $pageIndex:');
-            print(scriptContent);
-          }
-        } else {
-          var responseBody = utf8.decode(response.bodyBytes);
-          print('Error calling ChatGPT-4 API: ${response.statusCode}');
-          print('Response body: $responseBody');
+    for (int i = 0; i < imageUrls.length; ++i) {
+      var messages = [
+        {'role': 'system', 'content': promptForPageScript},
+        {
+          'role': 'user',
+          'content':
+              'Page ${i}\nImage URL: ${imageUrls[i]}\nLecture Script: $lectureScript'
         }
-      }
+      ];
 
-      return pageScripts;
-    } catch (e) {
-      print('Error: $e');
-      return {};
+      var response = await http.post(
+        apiUrl,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $apiKey',
+        },
+        body: jsonEncode({
+          'model': 'gpt-4',
+          'messages': messages,
+          'max_tokens': 1000,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        var responseBody = utf8.decode(response.bodyBytes);
+        var decodedResponse = jsonDecode(responseBody);
+        var gptResponse = decodedResponse['choices'][0]['message']['content'];
+
+        print('GPT-4 response content for page $i:');
+        print(gptResponse);
+
+        var match = RegExp(
+                r'Page (\d+)\nImage URL: .+?\nScript: (.+)',
+                dotAll: true)
+            .firstMatch(gptResponse);
+        if (match != null) {
+          var pageIndex = match.group(1)!;
+          var scriptContent = match.group(2)!.trim();
+          pageScripts['page_$pageIndex.txt'] = scriptContent;
+
+          print('Extracted script for page $pageIndex:');
+          print(scriptContent);
+        }
+      } else {
+        var responseBody = utf8.decode(response.bodyBytes);
+        print('Error calling ChatGPT-4 API: ${response.statusCode}');
+        print('Response body: $responseBody');
+      }
     }
+
+    return pageScripts;
+  } catch (e) {
+    print('Error: $e');
+    return {};
   }
+}
+
 
   void _navigateToColonPage(BuildContext context, String folderName,
       String noteName, String lectureName, String createdAt) {
