@@ -321,7 +321,7 @@ class _ColonPageState extends State<ColonPage> {
 
 
 Future<String> _fetchPageText(int pageIndex) async {
-  int pageNumber = pageIndex + 1;
+  int pageNumber = pageIndex;
   if (pageScripts.containsKey(pageNumber)) {
     final url = pageScripts[pageNumber]!;
     print('Fetching text from URL: $url');  // URL 출력

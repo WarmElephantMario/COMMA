@@ -626,6 +626,7 @@ Please follow these instructions:
 3. The output should strictly follow this format: 'Page (page number)\nImage URL: (url)\nScript: (content)\n'.
 4. Start the page number from 0.
 5. Ensure that the response contains only the script corresponding to the specific page without generating new content or modifying the original script.
+6. When given a specific page (e.g., page_0.jpg), only generate the script for that specific page.
 ''';
 
   try {
@@ -637,7 +638,7 @@ Please follow these instructions:
         {
           'role': 'user',
           'content':
-              'Page ${i}\nImage URL: ${imageUrls[i]}\nLecture Script: $lectureScript'
+              'Page ${i}\nImage URL: ${imageUrls[i]}\nLecture Script: $lectureScript\nGenerate the script for this specific page only.'
         }
       ];
 
@@ -673,6 +674,12 @@ Please follow these instructions:
 
           print('Extracted script for page $pageIndex:');
           print(scriptContent);
+
+          // Extract the remaining lecture script
+          var scriptStartIndex = lectureScript.indexOf(scriptContent);
+          if (scriptStartIndex != -1) {
+            lectureScript = lectureScript.substring(scriptStartIndex + scriptContent.length).trim();
+          }
         }
       } else {
         var responseBody = utf8.decode(response.bodyBytes);
@@ -687,7 +694,6 @@ Please follow these instructions:
     return {};
   }
 }
-
 
   void _navigateToColonPage(BuildContext context, String folderName,
       String noteName, String lectureName, String createdAt,String fileUrl, int colonFileId) {
