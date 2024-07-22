@@ -242,7 +242,6 @@ void navigateToPage(BuildContext context, String folderName,
       lectureName: file['lecture_name'] ?? 'Unknown Lecture',
       createdAt: file['created_at'] ?? 'Unknown Date',
       fileUrl: file['file_url'] ?? 'Unknown fileUrl',
-      colonFileId: file['id'] ?? 'Unknown id',
     );
   }
 
