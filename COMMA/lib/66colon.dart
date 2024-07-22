@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pdfx/pdfx.dart'; // PDF 렌더링 패키지 추가
@@ -6,6 +7,8 @@ import '60prepare.dart';
 import 'components.dart';
 import 'api/api.dart';
 import 'dart:typed_data';
+import 'dart:io';
+import 'package:charset_converter/charset_converter.dart';
 
 class ColonPage extends StatefulWidget {
   final String folderName; // 폴더 이름 가져오기 사용
@@ -13,6 +16,7 @@ class ColonPage extends StatefulWidget {
   final String lectureName; // 강의 자료 이름 추가
   final dynamic createdAt; // 생성 날짜 및 시간 추가
   final String? fileUrl; // 강의자료 추가, 선택 사항으로 만듦
+  final int? colonFileId;
 
   const ColonPage({
     Key? key,
@@ -21,6 +25,7 @@ class ColonPage extends StatefulWidget {
     required this.lectureName,
     required this.createdAt,
     this.fileUrl,
+    this.colonFileId,
   }) : super(key: key);
 
   @override
@@ -32,23 +37,64 @@ class _ColonPageState extends State<ColonPage> {
   List<PdfPageImage> pages = [];
   Uint8List? imageData;
   int _selectedIndex = 2;
-  final Map<int, String> pageTexts = {
-    1: '첫 번째 페이지의 텍스트',
-    2: '두 번째 페이지의 텍스트',
-    3: '세 번째 페이지의 텍스트',
-    // 필요한 만큼 페이지 번호와 텍스트를 추가하세요.
-  };
+  Map<int, String> pageScripts = {};
+  late int colonFileId;
 
   @override
   void initState() {
     super.initState();
-    _loadFile();
+    if (widget.colonFileId != null) {
+      colonFileId = widget.colonFileId!;
+      _loadFile();
+      _loadPageScripts();
+    } else {
+      setState(() {
+        isLoading = false;
+      });
+      print('Error: colonFileId is null.');
+    }
   }
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  Future<Map<int, String>> fetchPageScripts(int colonFileId) async {
+  final apiUrl = '${API.baseUrl}/api/get-page-scripts?colonfile_id=$colonFileId';
+
+  final response = await http.get(Uri.parse(apiUrl));
+
+  if (response.statusCode == 200) {
+    // 응답 데이터 직접 확인
+    print('Response body: ${response.body}');
+    final List<dynamic> jsonResponse = jsonDecode(utf8.decode(response.bodyBytes));
+    Map<int, String> pageScripts = {};
+    for (var script in jsonResponse) {
+      int page = script['page'];
+      String url = script['url'];
+      pageScripts[page] = url;
+    }
+    return pageScripts;
+  } else {
+    throw Exception('Failed to load page scripts');
+  }
+}
+
+
+  Future<void> _loadPageScripts() async {
+    try {
+      pageScripts = await fetchPageScripts(colonFileId);
+      setState(() {
+        isLoading = false;
+      });
+    } catch (e) {
+      print('Failed to load page scripts: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   Future<void> _loadFile() async {
@@ -201,16 +247,27 @@ class _ColonPageState extends State<ColonPage> {
                             ),
                           );
                         } else {
-                          final pageIndex = (index ~/ 2) + 1;
+                          final pageIndex = (index ~/ 2);
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Text(
-                              pageTexts[pageIndex] ?? '페이지 $pageIndex의 텍스트가 없습니다.',
-                              style: const TextStyle(
-                                color: Color(0xFF414141),
-                                fontSize: 16,
-                                fontFamily: 'DM Sans',
-                              ),
+                            child: FutureBuilder<String>(
+                              future: _fetchPageText(pageIndex),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                  return CircularProgressIndicator();
+                                } else if (snapshot.hasError) {
+                                  return Text('Error: ${snapshot.error}');
+                                } else {
+                                  return Text(
+                                    snapshot.data ?? '페이지 $pageIndex의 텍스트가 없습니다.',
+                                    style: const TextStyle(
+                                      color: Color(0xFF414141),
+                                      fontSize: 16,
+                                      fontFamily: 'DM Sans',
+                                    ),
+                                  );
+                                }
+                              },
                             ),
                           );
                         }
@@ -229,13 +286,24 @@ class _ColonPageState extends State<ColonPage> {
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: Text(
-                            pageTexts[1] ?? '이미지의 텍스트가 없습니다.',
-                            style: const TextStyle(
-                              color: Color(0xFF414141),
-                              fontSize: 16,
-                              fontFamily: 'DM Sans',
-                            ),
+                          child: FutureBuilder<String>(
+                            future: _fetchPageText(0),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                return CircularProgressIndicator();
+                              } else if (snapshot.hasError) {
+                                return Text('Error: ${snapshot.error}');
+                              } else {
+                                return Text(
+                                  snapshot.data ?? '이미지의 텍스트가 없습니다.',
+                                  style: const TextStyle(
+                                    color: Color(0xFF414141),
+                                    fontSize: 16,
+                                    fontFamily: 'DM Sans',
+                                  ),
+                                );
+                              }
+                            },
                           ),
                         ),
                       ],
@@ -247,4 +315,45 @@ class _ColonPageState extends State<ColonPage> {
           buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
+
+
+
+Future<String> _fetchPageText(int pageIndex) async {
+  int pageNumber = pageIndex + 1;
+  if (pageScripts.containsKey(pageNumber)) {
+    final url = pageScripts[pageNumber]!;
+    print('Fetching text from URL: $url');  // URL 출력
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        try {
+          // UTF-8로 시도
+          final text = utf8.decode(response.bodyBytes);
+          print('Loaded text for page $pageNumber: $text');  // 로드된 텍스트 출력
+          return text;
+        } catch (e) {
+          print('Error decoding text as UTF-8 for page $pageNumber: $e');
+          try {
+            // EUC-KR로 수동으로 디코딩
+            final eucKrBytes = response.bodyBytes;
+            final text = eucKrBytes.map((e) => e & 0xFF).map((e) => e.toRadixString(16)).join(' ');
+            print('Loaded text with manual EUC-KR decoding for page $pageNumber: $text');
+            return text;
+          } catch (e) {
+            print('Error decoding text with manual EUC-KR decoding for page $pageNumber: $e');
+            return 'Error decoding page text';
+          }
+        }
+      } else {
+        print('Failed to load page text: ${response.statusCode}');
+        return 'Failed to load page text';
+      }
+    } catch (e) {
+      print('Error loading page text: $e');
+      return 'Error loading page text';
+    }
+  } else {
+    return '페이지 $pageNumber의 텍스트가 없습니다.';
+  }
+}
 }
