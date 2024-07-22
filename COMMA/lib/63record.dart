@@ -703,7 +703,7 @@ Please follow these instructions:
         MaterialPageRoute(
           builder: (context) => ColonPage(
             folderName: "$folderName",
-            noteName: "$noteName (:)",
+            noteName: "$noteName",
             lectureName: lectureName,
             createdAt: createdAt,
             fileUrl: fileUrl,
@@ -821,6 +821,11 @@ void showColonCreatedDialog(
 
                         // `ColonPage`로 이동전 콜론 정보 가져오기
                         var colonDetails = await _fetchColonDetails(colonFileId);
+
+                          // type = 0 대체텍스트이면 colonfileId를 Alt table에 추가하기
+                          if (widget.type == 0) {
+                            await _insertColonFileIdToAltTable(widget.lecturefileId!,colonFileId);
+                          }
                   
                         //ColonFiles에 folder_id로 폴더 이름 가져오기
                         var colonFolderName = await _fetchColonFolderName(colonDetails['folder_id']);
@@ -852,6 +857,29 @@ void showColonCreatedDialog(
   }
 }
 
+
+Future<void> _insertColonFileIdToAltTable(int lecturefileId, int colonFileId) async {
+  print('Alt_table에 colonfile_id 저장하겠습니다');
+
+  var altTableUrl = '${API.baseUrl}/api/update-alt-table';
+  var altTableBody = {
+    'lecturefileId': lecturefileId,
+    'colonFileId': colonFileId,
+  };
+
+  var altTableResponse = await http.post(
+    Uri.parse(altTableUrl),
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode(altTableBody),
+  );
+
+  if (altTableResponse.statusCode == 200) {
+    print('Alt_table에 colonfile_id 저장 완료');
+  } else {
+    print('Failed to add colonfile_id to alt table: ${altTableResponse.statusCode}');
+    print(altTableResponse.body);
+  }
+}
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
