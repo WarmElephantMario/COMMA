@@ -874,7 +874,6 @@ Future<Map<String, String>> callChatGPT4API(
                                 if (existColon == null) {
                                   // (1) 바로 콜론 폴더 및 파일 생성하기
                                   int colonFileId = await createColonFolder(
-                                      //..이상하게 타입 추가가 안됨
                                       "${widget.folderName} (:)",
                                       "${widget.noteName} (:)",
                                       widget.fileUrl,
