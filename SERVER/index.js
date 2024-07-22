@@ -960,6 +960,35 @@ app.post('/api/update-record-table', (req, res) => {
     });
 });
 
+// DividedScript_Table에 colonfile_id page, url 저장
+app.post('/api/insertDividedScript', (req, res) => {
+    const { colonfile_id, page, url } = req.body;
+    const sql = 'INSERT INTO DividedScript_Table (colonfile_id, page, url) VALUES (?, ?, ?)';
+    db.query(sql, [colonfile_id, page, url], (err, result) => {
+        if (err) {
+            console.error('Failed to insert divided script:', err);
+            res.status(500).send('Failed to insert divided script');
+        } else {
+            console.log('Divided script inserted successfully:', result);
+            res.send({ id: result.insertId, colonfile_id, page, url });
+        }
+    });
+});
+
+// DividedScript_Table에서 page , url(페이지 스크립트) 가져오기
+app.get('/api/get-page-scripts', (req, res) => {
+    const colonfile_id = req.query.colonfile_id;
+    const sql = 'SELECT page, url FROM DividedScript_Table WHERE colonfile_id = ?';
+
+    db.query(sql, [colonfile_id], (err, results) => {
+        if (err) {
+            console.error('페이지 스크립트 가져오기 실패:', err);
+            res.status(500).send('페이지 스크립트 가져오기 실패');
+        } else {
+            res.send(results);
+        }
+    });
+});
 
 
 
