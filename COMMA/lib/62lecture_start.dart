@@ -37,7 +37,6 @@ class LectureStartPage extends StatefulWidget {
 class _LectureStartPageState extends State<LectureStartPage> {
   int _selectedIndex = 2;
 
-
   @override
   void initState() {
     super.initState();
@@ -165,16 +164,16 @@ class _LectureStartPageState extends State<LectureStartPage> {
               child: ClickButton(
                 text: '강의실 입장하기',
                 onPressed: () {
-                // int selectedFolderId = getFolderIdByName(_selectedFolder);
-                    //  print("Navigating to RecordPage with:");
-                    //   print("lectureFolderId: ${widget.lectureFolderId}");
-                    //   print("lecturefileId: ${widget.lecturefileId}");
-                    //   print("lectureName: ${widget.lectureName}");
-                    //   print("fileURL: ${widget.fileURL}");
-                    //   print("responseUrl: ${widget.responseUrl ?? ''}");
-                    //   print("type: ${widget.type}");
-                    //   print("folderName: ${widget.selectedFolder}");
-                    //   print("noteName: ${widget.noteName}");
+                  // int selectedFolderId = getFolderIdByName(_selectedFolder);
+                  //  print("Navigating to RecordPage with:");
+                  //   print("lectureFolderId: ${widget.lectureFolderId}");
+                  //   print("lecturefileId: ${widget.lecturefileId}");
+                  //   print("lectureName: ${widget.lectureName}");
+                  //   print("fileURL: ${widget.fileURL}");
+                  //   print("responseUrl: ${widget.responseUrl ?? ''}");
+                  //   print("type: ${widget.type}");
+                  //   print("folderName: ${widget.selectedFolder}");
+                  //   print("noteName: ${widget.noteName}");
 
                   Navigator.push(
                     context,
@@ -186,7 +185,9 @@ class _LectureStartPageState extends State<LectureStartPage> {
                         folderName: widget.selectedFolder!,
                         recordingState: RecordingState.initial,
                         lectureName: widget.lectureName,
-                        responseUrl: widget.responseUrl != null ? widget.responseUrl : null,
+                        responseUrl: widget.responseUrl != null
+                            ? widget.responseUrl
+                            : null,
                         type: widget.type, //대체인지 실시간인지 전달해줌
                         lecturefileId: widget.lecturefileId,
                       ),
