@@ -891,7 +891,7 @@ app.get('/api/get-colon-details', (req, res) => {
     }
     const parsedColonId = parseInt(colonId, 10);
 
-    const query = 'SELECT folder_id, file_name, file_url, lecture_name, created_at FROM ColonFiles WHERE id = ?';
+    const query = 'SELECT folder_id, file_name, file_url, lecture_name, created_at, type FROM ColonFiles WHERE id = ?';
     console.log(`Executing query: ${query} with colonId: ${parsedColonId}`);
     
     db.query(query, [parsedColonId], (err, results) => {
@@ -989,6 +989,58 @@ app.get('/api/get-page-scripts', (req, res) => {
         }
     });
 });
+
+// 특정 lecturefile_id 행에 colonfile_id 업데이트하기
+app.post('/api/update-alt-table', (req, res) => {
+    const { lecturefileId, colonFileId } = req.body;
+  
+    console.log('Received data:', { lecturefileId, colonFileId }); // 로그 추가
+  
+    if (!lecturefileId || !colonFileId) {
+      console.log('Missing required fields'); // 로그 추가
+      return res.status(400).send({ error: 'Missing required fields' });
+    }
+  
+    const sql = 'UPDATE Alt_table SET colonfile_id = ? WHERE lecturefile_id = ?';
+    db.query(sql, [colonFileId, lecturefileId], (err, results) => {
+      if (err) {
+        console.error('Database query error:', err); // 로그 추가
+        res.status(500).send('Internal server error');
+      } else {
+        if (results.affectedRows > 0) {
+          console.log('Update successful'); // 로그 추가
+          res.status(200).send('Update successful');
+        } else {
+          console.log('Lecturefile not found'); // 로그 추가
+          res.status(404).send('Lecturefile not found');
+        }
+      }
+    });
+  });
+
+// Alt_table의 특정 colonfile_id 행에서 URL 가져오기
+app.get('/api/get-alt-url/:colonfile_id', (req, res) => {
+    const colonfile_id = req.params.colonfile_id;
+    console.log(`Received request for colonfile_id: ${colonfile_id}`); // 로그 추가
+    const sql = 'SELECT alternative_text_url FROM Alt_table WHERE colonfile_id = ?';
+  
+    db.query(sql, [colonfile_id], (err, results) => {
+      if (err) {
+        console.error('Failed to fetch alternative text URL:', err);
+        res.status(500).send('Failed to fetch alternative text URL');
+      } else {
+        console.log('Query results:', results); // 로그 추가
+        if (results.length > 0) {
+          console.log(`Found URL: ${results[0].alternative_text_url}`); // 로그 추가
+          res.json({ alternative_text_url: results[0].alternative_text_url });
+        } else {
+          console.log('No URL found for the given colonfile_id'); // 로그 추가
+          res.status(404).send('No URL found for the given colonfile_id');
+        }
+      }
+    });
+  });
+  
 
 
 
