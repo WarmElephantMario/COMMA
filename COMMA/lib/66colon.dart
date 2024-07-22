@@ -39,6 +39,8 @@ class _ColonPageState extends State<ColonPage> {
   int _selectedIndex = 2;
   Map<int, String> pageScripts = {};
   late int colonFileId;
+  // var colonDetails = await _fetchColonDetails(colonFileId);
+  // int type = colonDetails['type'];
 
   @override
   void initState() {
@@ -132,6 +134,17 @@ class _ColonPageState extends State<ColonPage> {
     return DateFormat('yyyy/MM/dd hh:mm a').format(dateTime);
   }
 
+    Future<Map<String, dynamic>> _fetchColonDetails(int colonFileId) async {
+    var url = '${API.baseUrl}/api/get-colon-details?colonId=$colonFileId';
+    var response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      var jsonResponse = jsonDecode(response.body);
+      return jsonResponse;
+    } else {
+      throw Exception('Failed to load colon details');
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -317,8 +330,6 @@ class _ColonPageState extends State<ColonPage> {
           buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
-
-
 
 Future<String> _fetchPageText(int pageIndex) async {
   int pageNumber = pageIndex + 1;
