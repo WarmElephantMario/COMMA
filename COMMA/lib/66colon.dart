@@ -161,7 +161,8 @@ class _ColonPageState extends State<ColonPage> {
                         ),
                         const SizedBox(height: 5), // 추가된 날짜와 시간을 위한 공간
                         Text(
-                          _formatDate(widget.createdAt), // 데이터베이스에서 가져온 생성 날짜 및 시간 사용
+                          _formatDate(
+                              widget.createdAt), // 데이터베이스에서 가져온 생성 날짜 및 시간 사용
                           style: const TextStyle(
                             color: Color(0xFF575757),
                             fontSize: 12,
@@ -194,7 +195,8 @@ class _ColonPageState extends State<ColonPage> {
                           final pageImage = pages[index ~/ 2];
                           return Container(
                             width: double.infinity,
-                            height: MediaQuery.of(context).size.height - 200, // 화면 높이에 맞춤
+                            height: MediaQuery.of(context).size.height -
+                                200, // 화면 높이에 맞춤
                             child: Image.memory(
                               pageImage.bytes,
                               fit: BoxFit.cover, // 이미지를 전체 화면에 맞춤
@@ -205,7 +207,8 @@ class _ColonPageState extends State<ColonPage> {
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
                             child: Text(
-                              pageTexts[pageIndex] ?? '페이지 $pageIndex의 텍스트가 없습니다.',
+                              pageTexts[pageIndex] ??
+                                  '페이지 $pageIndex의 텍스트가 없습니다.',
                               style: const TextStyle(
                                 color: Color(0xFF414141),
                                 fontSize: 16,
@@ -217,8 +220,8 @@ class _ColonPageState extends State<ColonPage> {
                       },
                     ),
                   if ((widget.lectureName.endsWith('.png') ||
-                      widget.lectureName.endsWith('.jpg') ||
-                      widget.lectureName.endsWith('.jpeg')) &&
+                          widget.lectureName.endsWith('.jpg') ||
+                          widget.lectureName.endsWith('.jpeg')) &&
                       imageData != null)
                     Column(
                       children: [
