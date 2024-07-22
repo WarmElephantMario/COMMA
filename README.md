@@ -1,8 +1,11 @@
 # 수정 및 변경 사항
 
-- folder_search 이미지 안 뜨는 것 해결
-- 학습 시작 페이지에서 '대체텍스트 생성', '실시간 자막 생성' 중 하나만 선택 가능하도록 수정
-- CustomRadioButton 추가
+- 자막 부분 deepgram STT API 사용으로 변경
+- deepgram flutter 관련 튜토리얼 : https://deepgram.com/learn/flutter-speech-to-text-tutorial
+- 따코마 구글 계정으로 가입함(카드 등록 X, 200 달러 무료 사용 중, 약 500시간 정도)
+- 이후 10달러부터 충전 가능
+- 0.0059달러/분
+
 
 
 **데이터베이스 테이블 구조**
