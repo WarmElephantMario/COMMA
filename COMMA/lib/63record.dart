@@ -28,7 +28,7 @@ import 'env/env.dart';
 enum RecordingState { initial, recording, recorded }
 
 const serverUrl =
-    'wss://api.deepgram.com/v1/listen?model=nova-2&encoding=linear16&sample_rate=16000&language=ko-KR';
+    'wss://api.deepgram.com/v1/listen?model=nova-2&encoding=linear16&sample_rate=16000&language=ko-KR&punctuate=true';
 const apiKey = 'e8f1fe0d8f088e4cf2e01a1f11dc190d60b37b2b';
 
 class RecordPage extends StatefulWidget {
@@ -41,19 +41,20 @@ class RecordPage extends StatefulWidget {
   final String lectureName;
   final String? responseUrl;
   final int type;
+  final List<String>? keywords;
 
-  const RecordPage({
-    super.key,
-    this.lecturefileId,
-    required this.lectureFolderId,
-    required this.noteName,
-    required this.fileUrl,
-    required this.folderName,
-    required this.recordingState,
-    required this.lectureName,
-    this.responseUrl,
-    required this.type,
-  });
+  const RecordPage(
+      {super.key,
+      this.lecturefileId,
+      required this.lectureFolderId,
+      required this.noteName,
+      required this.fileUrl,
+      required this.folderName,
+      required this.recordingState,
+      required this.lectureName,
+      this.responseUrl,
+      required this.type,
+      this.keywords});
 
   @override
   _RecordPageState createState() => _RecordPageState();
@@ -77,6 +78,8 @@ class _RecordPageState extends State<RecordPage> {
   bool _isListening = false;
   String _recognizedText = '';
   String _interimText = '';
+  int _currentLength = 0; // 자막 길이
+  String combineText = ''; // 문단 구분 위한 변수
 
   final RecorderStream _recorder = RecorderStream();
   late StreamSubscription _recorderStatus;
@@ -115,8 +118,23 @@ class _RecordPageState extends State<RecordPage> {
     await Permission.microphone.request();
   }
 
+  String buildServerUrlWithKeywords(String baseUrl, List<String> keywordList) {
+    final List<String> keywords = keywordList
+        .expand((keyword) => keyword.split(','))
+        .map((keyword) => keyword.trim())
+        .toList();
+    final keywordQuery =
+        keywords.map((keyword) => 'keywords=$keyword').join('&');
+    return '$baseUrl&$keywordQuery';
+  }
+
   Future<void> _initStream() async {
-    channel = IOWebSocketChannel.connect(Uri.parse(serverUrl),
+    // 키워드가 있을 경우 serverUrl에 키워드 추가
+    final String urlWithKeywords =
+        buildServerUrlWithKeywords(serverUrl, widget.keywords!);
+    print(urlWithKeywords);
+
+    channel = IOWebSocketChannel.connect(Uri.parse(urlWithKeywords),
         headers: {'Authorization': 'Token $apiKey'});
 
     channel.stream.listen((event) async {
@@ -143,32 +161,9 @@ class _RecordPageState extends State<RecordPage> {
     await _recorder.initialize();
   }
 
-  void _startRecord() async {
-    resetText();
-    await _initStream();
-    await _recorder.start();
-    setState(() {
-      _isListening = true;
-    });
-  }
-
-  void _stopRecord() async {
-    await _recorder.stop();
-    setState(() {
-      _isListening = false;
-    });
-  }
-
   void onLayoutDone(Duration timeStamp) async {
     await Permission.microphone.request();
     setState(() {});
-  }
-
-  void updateText(newText) {
-    setState(() {
-      _recognizedText += ' ' + newText;
-      _interimText = '';
-    });
   }
 
   void interimUpdateText(newText) {
@@ -177,10 +172,34 @@ class _RecordPageState extends State<RecordPage> {
     });
   }
 
-  void resetText() {
+  void updateText(String newText) {
     setState(() {
-      _recognizedText = '';
+      _interimText = '';
+      final processedText = processParagraphs(newText);
+      _recognizedText =
+          _recognizedText + ' ' + processedText; // 처리된 텍스트를 기존 텍스트에 추가
     });
+  }
+
+  String processParagraphs(String newText) {
+    const int maxLength = 200; // 단락을 나눌 텍스트의 최대 길이
+    StringBuffer buffer = StringBuffer();
+
+    combineText += newText;
+    _currentLength = combineText.length;
+    print(_currentLength);
+
+    for (int i = 0; i < newText.length; i++) {
+      buffer.write(newText[i]);
+      if (_currentLength >= maxLength &&
+          (newText[i] == '.' || newText[i] == '?' || newText[i] == '!')) {
+        buffer.write('\n\n'); // 단락을 나눌 때 개행 문자를 추가
+        _currentLength = 0; // 카운트 초기화
+        combineText = ''; // combineText 초기화
+      }
+    }
+    // buffer.write(' ');
+    return buffer.toString();
   }
 
   Future<void> _checkExistColon() async {
@@ -612,12 +631,12 @@ class _RecordPageState extends State<RecordPage> {
     }
   }
 
-Future<Map<String, String>> callChatGPT4API(List<String> imageUrls,
-    String lectureScript, String lectureFileName) async {
-  const String apiKey = Env.apiKey;
-  final Uri apiUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
+  Future<Map<String, String>> callChatGPT4API(List<String> imageUrls,
+      String lectureScript, String lectureFileName) async {
+    const String apiKey = Env.apiKey;
+    final Uri apiUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
 
-  final String promptForPageScript = '''
+    final String promptForPageScript = '''
 You are an expert in analyzing lecture scripts. I will provide you with a full lecture script and a series of lecture materials in the form of images. 
 Your task is to identify and extract the part of the lecture script that corresponds to each page of the lecture material.
 Please follow these instructions:
@@ -629,86 +648,92 @@ Please follow these instructions:
 6. When given a specific page (e.g., page_0.jpg), only generate the script for that specific page.
 ''';
 
-  try {
-    var pageScripts = <String, String>{};
+    try {
+      var pageScripts = <String, String>{};
 
-    for (int i = 0; i < imageUrls.length; ++i) {
-      var messages = [
-        {'role': 'system', 'content': promptForPageScript},
-        {
-          'role': 'user',
-          'content':
-              'Page ${i}\nImage URL: ${imageUrls[i]}\nLecture Script: $lectureScript\nGenerate the script for this specific page only.'
-        }
-      ];
-
-      var response = await http.post(
-        apiUrl,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $apiKey',
-        },
-        body: jsonEncode({
-          'model': 'gpt-4',
-          'messages': messages,
-          'max_tokens': 1000,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        var responseBody = utf8.decode(response.bodyBytes);
-        var decodedResponse = jsonDecode(responseBody);
-        var gptResponse = decodedResponse['choices'][0]['message']['content'];
-
-        print('GPT-4 response content for page $i:');
-        print(gptResponse);
-
-        var match = RegExp(
-                r'Page (\d+)\nImage URL: .+?\nScript: (.+)',
-                dotAll: true)
-            .firstMatch(gptResponse);
-        if (match != null) {
-          var pageIndex = match.group(1)!;
-          var scriptContent = match.group(2)!.trim();
-          pageScripts['page_$pageIndex.txt'] = scriptContent;
-
-          print('Extracted script for page $pageIndex:');
-          print(scriptContent);
-
-          // Extract the remaining lecture script
-          var scriptStartIndex = lectureScript.indexOf(scriptContent);
-          if (scriptStartIndex != -1) {
-            lectureScript = lectureScript.substring(scriptStartIndex + scriptContent.length).trim();
+      for (int i = 0; i < imageUrls.length; ++i) {
+        var messages = [
+          {'role': 'system', 'content': promptForPageScript},
+          {
+            'role': 'user',
+            'content':
+                'Page ${i}\nImage URL: ${imageUrls[i]}\nLecture Script: $lectureScript\nGenerate the script for this specific page only.'
           }
+        ];
+
+        var response = await http.post(
+          apiUrl,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $apiKey',
+          },
+          body: jsonEncode({
+            'model': 'gpt-4',
+            'messages': messages,
+            'max_tokens': 1000,
+          }),
+        );
+
+        if (response.statusCode == 200) {
+          var responseBody = utf8.decode(response.bodyBytes);
+          var decodedResponse = jsonDecode(responseBody);
+          var gptResponse = decodedResponse['choices'][0]['message']['content'];
+
+          print('GPT-4 response content for page $i:');
+          print(gptResponse);
+
+          var match =
+              RegExp(r'Page (\d+)\nImage URL: .+?\nScript: (.+)', dotAll: true)
+                  .firstMatch(gptResponse);
+          if (match != null) {
+            var pageIndex = match.group(1)!;
+            var scriptContent = match.group(2)!.trim();
+            pageScripts['page_$pageIndex.txt'] = scriptContent;
+
+            print('Extracted script for page $pageIndex:');
+            print(scriptContent);
+
+            // Extract the remaining lecture script
+            var scriptStartIndex = lectureScript.indexOf(scriptContent);
+            if (scriptStartIndex != -1) {
+              lectureScript = lectureScript
+                  .substring(scriptStartIndex + scriptContent.length)
+                  .trim();
+            }
+          }
+        } else {
+          var responseBody = utf8.decode(response.bodyBytes);
+          print('Error calling ChatGPT-4 API: ${response.statusCode}');
+          print('Response body: $responseBody');
         }
-      } else {
-        var responseBody = utf8.decode(response.bodyBytes);
-        print('Error calling ChatGPT-4 API: ${response.statusCode}');
-        print('Response body: $responseBody');
       }
+
+      return pageScripts;
+    } catch (e) {
+      print('Error: $e');
+      return {};
     }
-
-    return pageScripts;
-  } catch (e) {
-    print('Error: $e');
-    return {};
   }
-}
 
-  void _navigateToColonPage(BuildContext context, String folderName,
-      String noteName, String lectureName, String createdAt,String fileUrl, int colonFileId) {
+  void _navigateToColonPage(
+      BuildContext context,
+      String folderName,
+      String noteName,
+      String lectureName,
+      String createdAt,
+      String fileUrl,
+      int colonFileId) {
     try {
       print('Navigating to ColonPage'); // 로그 추가
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => ColonPage(
-            folderName: "$folderName",
-            noteName: "$noteName",
-            lectureName: lectureName,
-            createdAt: createdAt,
-            fileUrl: fileUrl,
-            colonFileId :colonFileId
-          ),
+              folderName: "$folderName",
+              noteName: "$noteName",
+              lectureName: lectureName,
+              createdAt: createdAt,
+              fileUrl: fileUrl,
+              colonFileId: colonFileId),
         ),
       );
     } catch (e) {
@@ -716,170 +741,182 @@ Please follow these instructions:
     }
   }
 
-   Future<void> insertDividedScript(int colonfileId, int page, String url) async {
-  final apiUrl = '${API.baseUrl}/api/insertDividedScript';
-  final body = jsonEncode({
-    'colonfile_id': colonfileId,
-    'page': page,
-    'url': url,
-  });
+  Future<void> insertDividedScript(
+      int colonfileId, int page, String url) async {
+    final apiUrl = '${API.baseUrl}/api/insertDividedScript';
+    final body = jsonEncode({
+      'colonfile_id': colonfileId,
+      'page': page,
+      'url': url,
+    });
 
-  final response = await http.post(
-    Uri.parse(apiUrl),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: body,
-  );
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: body,
+    );
 
-  if (response.statusCode == 200) {
-    print('Divided script inserted successfully');
-  } else {
-    print('Failed to insert divided script: ${response.statusCode}');
-    print('Response body: ${response.body}');
+    if (response.statusCode == 200) {
+      print('Divided script inserted successfully');
+    } else {
+      print('Failed to insert divided script: ${response.statusCode}');
+      print('Response body: ${response.body}');
+    }
   }
-}
 
- // 콜론 생성 다이얼로그 함수
-void showColonCreatedDialog(
-  BuildContext context,
-  String folderName,
-  String noteName,
-  String lectureName,
-  String fileUrl,
-  int? lectureFileId,
-  int colonFileId
-) {
-  final userProvider = Provider.of<UserProvider>(context, listen: false);
-  final userKey = userProvider.user?.userKey;
+  // 콜론 생성 다이얼로그 함수
+  void showColonCreatedDialog(
+      BuildContext context,
+      String folderName,
+      String noteName,
+      String lectureName,
+      String fileUrl,
+      int? lectureFileId,
+      int colonFileId) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userKey = userProvider.user?.userKey;
 
-  if (userKey != null) {
-    showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          title: Column(
-            children: [
-              const Text(
-                '콜론이 생성되었습니다.',
-                style: TextStyle(
-                  color: Color(0xFF545454),
-                  fontSize: 14,
-                  fontFamily: 'DM Sans',
-                  fontWeight: FontWeight.bold,
+    if (userKey != null) {
+      showDialog(
+        context: context,
+        builder: (BuildContext dialogContext) {
+          return AlertDialog(
+            backgroundColor: Colors.white,
+            title: Column(
+              children: [
+                const Text(
+                  '콜론이 생성되었습니다.',
+                  style: TextStyle(
+                    color: Color(0xFF545454),
+                    fontSize: 14,
+                    fontFamily: 'DM Sans',
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '폴더 이름: $folderName (:)', // 기본폴더 대신 folderName 사용
-                style: const TextStyle(
-                  color: Color(0xFF245B3A),
-                  fontSize: 14,
-                  fontFamily: 'DM Sans',
-                  fontWeight: FontWeight.bold,
+                const SizedBox(height: 4),
+                Text(
+                  '폴더 이름: $folderName (:)', // 기본폴더 대신 folderName 사용
+                  style: const TextStyle(
+                    color: Color(0xFF245B3A),
+                    fontSize: 14,
+                    fontFamily: 'DM Sans',
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                '으로 이동하시겠습니까?',
-                style: TextStyle(
-                  color: Color(0xFF545454),
-                  fontSize: 14,
-                  fontFamily: 'DM Sans',
-                  fontWeight: FontWeight.bold,
+                const SizedBox(height: 4),
+                const Text(
+                  '으로 이동하시겠습니까?',
+                  style: TextStyle(
+                    color: Color(0xFF545454),
+                    fontSize: 14,
+                    fontFamily: 'DM Sans',
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-          actions: <Widget>[
-            Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(dialogContext).pop();
-                    },
-                    child: const Text(
-                      '취소',
-                      style: TextStyle(
-                        color: Color(0xFFFFA17A),
-                        fontSize: 14,
-                        fontFamily: 'DM Sans',
-                        fontWeight: FontWeight.bold,
+              ],
+            ),
+            actions: <Widget>[
+              Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(dialogContext).pop();
+                      },
+                      child: const Text(
+                        '취소',
+                        style: TextStyle(
+                          color: Color(0xFFFFA17A),
+                          fontSize: 14,
+                          fontFamily: 'DM Sans',
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  TextButton(
-                    onPressed: () async {
-                      Navigator.of(dialogContext).pop();
+                    const SizedBox(width: 16),
+                    TextButton(
+                      onPressed: () async {
+                        Navigator.of(dialogContext).pop();
 
                         // `ColonPage`로 이동전 콜론 정보 가져오기
-                        var colonDetails = await _fetchColonDetails(colonFileId);
+                        var colonDetails =
+                            await _fetchColonDetails(colonFileId);
 
-                          // type = 0 대체텍스트이면 colonfileId를 Alt table에 추가하기
-                          if (widget.type == 0) {
-                            await _insertColonFileIdToAltTable(widget.lecturefileId!,colonFileId);
-                          }
-                  
+                        // type = 0 대체텍스트이면 colonfileId를 Alt table에 추가하기
+                        if (widget.type == 0) {
+                          await _insertColonFileIdToAltTable(
+                              widget.lecturefileId!, colonFileId);
+                        }
+
                         //ColonFiles에 folder_id로 폴더 이름 가져오기
-                        var colonFolderName = await _fetchColonFolderName(colonDetails['folder_id']);
+                        var colonFolderName = await _fetchColonFolderName(
+                            colonDetails['folder_id']);
 
                         // 다이얼로그가 닫힌 후에 네비게이션을 실행
                         Future.delayed(Duration(milliseconds: 200), () {
-                          _navigateToColonPage(context, colonFolderName, colonDetails['file_name'], colonDetails['lecture_name'], colonDetails['created_at'],colonDetails['file_url'],colonFileId);
+                          _navigateToColonPage(
+                              context,
+                              colonFolderName,
+                              colonDetails['file_name'],
+                              colonDetails['lecture_name'],
+                              colonDetails['created_at'],
+                              colonDetails['file_url'],
+                              colonFileId);
                         });
-                    },
-                    child: const Text(
-                      '확인',
-                      style: TextStyle(
-                        color: Color(0xFF545454),
-                        fontSize: 14,
-                        fontFamily: 'DM Sans',
-                        fontWeight: FontWeight.bold,
+                      },
+                      child: const Text(
+                        '확인',
+                        style: TextStyle(
+                          color: Color(0xFF545454),
+                          fontSize: 14,
+                          fontFamily: 'DM Sans',
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
-        );
-      },
+            ],
+          );
+        },
+      );
+    } else {
+      print('User Key is null, cannot create colon folder.');
+    }
+  }
+
+  Future<void> _insertColonFileIdToAltTable(
+      int lecturefileId, int colonFileId) async {
+    print('Alt_table에 colonfile_id 저장하겠습니다');
+
+    var altTableUrl = '${API.baseUrl}/api/update-alt-table';
+    var altTableBody = {
+      'lecturefileId': lecturefileId,
+      'colonFileId': colonFileId,
+    };
+
+    var altTableResponse = await http.post(
+      Uri.parse(altTableUrl),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(altTableBody),
     );
-  } else {
-    print('User Key is null, cannot create colon folder.');
+
+    if (altTableResponse.statusCode == 200) {
+      print('Alt_table에 colonfile_id 저장 완료');
+    } else {
+      print(
+          'Failed to add colonfile_id to alt table: ${altTableResponse.statusCode}');
+      print(altTableResponse.body);
+    }
   }
-}
 
-
-Future<void> _insertColonFileIdToAltTable(int lecturefileId, int colonFileId) async {
-  print('Alt_table에 colonfile_id 저장하겠습니다');
-
-  var altTableUrl = '${API.baseUrl}/api/update-alt-table';
-  var altTableBody = {
-    'lecturefileId': lecturefileId,
-    'colonFileId': colonFileId,
-  };
-
-  var altTableResponse = await http.post(
-    Uri.parse(altTableUrl),
-    headers: {'Content-Type': 'application/json'},
-    body: jsonEncode(altTableBody),
-  );
-
-  if (altTableResponse.statusCode == 200) {
-    print('Alt_table에 colonfile_id 저장 완료');
-  } else {
-    print('Failed to add colonfile_id to alt table: ${altTableResponse.statusCode}');
-    print(altTableResponse.body);
-  }
-}
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
@@ -1131,7 +1168,8 @@ Future<void> _insertColonFileIdToAltTable(int lecturefileId, int colonFileId) as
                                     print('Loaded image URLs: $imageUrls');
 
                                     //스크립트 가져오기
-                                    String scriptUrl = await fetchRecordUrl(colonFileId);
+                                    String scriptUrl =
+                                        await fetchRecordUrl(colonFileId);
                                     String lectureScript = await http
                                         .get(Uri.parse(scriptUrl))
                                         .then((response) => response.body);
@@ -1186,27 +1224,28 @@ Future<void> _insertColonFileIdToAltTable(int lecturefileId, int colonFileId) as
                                           (i + 1) / pageScripts.entries.length;
 
                                       // URL을 데이터베이스에 삽입
-                                      int pageIndex = int.parse(fileName.replaceAll(RegExp(r'[^0-9]'), ''));
-                                      await insertDividedScript(colonFileId, pageIndex, responseUrl);
+                                      int pageIndex = int.parse(fileName
+                                          .replaceAll(RegExp(r'[^0-9]'), ''));
+                                      await insertDividedScript(
+                                          colonFileId, pageIndex, responseUrl);
 
                                       await file.delete();
                                     }
 
                                     // (5)-1 CreatingDialog pop 하기
-                                  
-                                      progressNotifier.value = 1.0; // 작업 완료 후 프로그레스 업데이트
+
+                                    progressNotifier.value =
+                                        1.0; // 작업 완료 후 프로그레스 업데이트
                                     // (5)-2 CreatedDialog 호출하기
                                     //     이 안에서 생성된 콜론 화면으로 navigate
                                     showColonCreatedDialog(
-                                      context,
-                                      widget.folderName,
-                                      widget.noteName,
-                                      widget.lectureName,
-                                      widget.fileUrl,
-                                      widget.lecturefileId!,
-                                      colonFileId
-                                    );
-                                    
+                                        context,
+                                        widget.folderName,
+                                        widget.noteName,
+                                        widget.lectureName,
+                                        widget.fileUrl,
+                                        widget.lecturefileId!,
+                                        colonFileId);
                                   } else {
                                     print('콜론 파일이랑 폴더 생성 실패한듯요 ...');
                                   }
