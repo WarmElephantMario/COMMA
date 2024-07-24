@@ -787,15 +787,13 @@ Please follow these instructions:
     }
   }
 
-  Future<void> insertDividedScript(
-      int colonfileId, int page, String url) async {
-    final apiUrl = '${API.baseUrl}/api/insertDividedScript';
+  Future<void> upadateRecordPage(
+      int page, int record_id) async {
+    final apiUrl = '${API.baseUrl}/api/updateRecordPage';
     final body = jsonEncode({
-      'colonfile_id': colonfileId,
       'page': page,
-      'url': url,
+      'url': record_id,
     });
-
     final response = await http.post(
       Uri.parse(apiUrl),
       headers: {
@@ -803,7 +801,6 @@ Please follow these instructions:
       },
       body: body,
     );
-
     if (response.statusCode == 200) {
       print('Divided script inserted successfully');
     } else {
@@ -1266,11 +1263,13 @@ Please follow these instructions:
                                       progressNotifier.value =
                                           (i + 1) / pageScripts.entries.length;
 
-                                      // URL을 데이터베이스에 삽입
-                                      int pageIndex = int.parse(fileName
-                                          .replaceAll(RegExp(r'[^0-9]'), ''));
-                                      await insertDividedScript(
-                                          colonFileId, pageIndex, responseUrl);
+                                      // page 번호를 Record_table 데이터베이스에 삽입
+                                      // int pageIndex = int.parse(fileName
+                                      //     .replaceAll(RegExp(r'[^0-9]'), ''));
+                                      // await insertDividedScript(
+                                      //     colonFileId, pageIndex, responseUrl);
+
+                                      //해당되는 record_url 열에 id를 받아와 해당 열에 page 삽입하기
 
                                       await file.delete();
                                     }
