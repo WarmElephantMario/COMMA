@@ -406,6 +406,7 @@ class _RecordPageState extends State<RecordPage> {
     final userKey = userProvider.user?.userKey;
 
       print('Alt_table에 대체텍스트 url 저장하겠습니다');
+      print('Alt_table에 대체텍스트 url 저장하겠습니다');
 
       var altTableUrl = '${API.baseUrl}/api/alt-table';
       var altTableBody = {
@@ -665,15 +666,13 @@ class _RecordPageState extends State<RecordPage> {
     }
   }
 
-  Future<void> insertDividedScript(
-      int colonfileId, int page, String url) async {
-    final apiUrl = '${API.baseUrl}/api/insertDividedScript';
+  Future<void> upadateRecordPage(
+      int page, int record_id) async {
+    final apiUrl = '${API.baseUrl}/api/updateRecordPage';
     final body = jsonEncode({
-      'colonfile_id': colonfileId,
       'page': page,
-      'url': url,
+      'url': record_id,
     });
-
     final response = await http.post(
       Uri.parse(apiUrl),
       headers: {
@@ -681,7 +680,6 @@ class _RecordPageState extends State<RecordPage> {
       },
       body: body,
     );
-
     if (response.statusCode == 200) {
       print('Divided script inserted successfully');
     } else {
@@ -1281,11 +1279,13 @@ Future<Map<String, List<String>>> divideScriptsByPages(List<String> pageTexts, L
                                     //   progressNotifier.value =
                                     //       (i + 1) / pageScripts.entries.length;
 
-                                    //   // URL을 데이터베이스에 삽입
-                                    //   int pageIndex = int.parse(fileName
-                                    //       .replaceAll(RegExp(r'[^0-9]'), ''));
-                                    //   await insertDividedScript(
-                                    //       colonFileId, pageIndex, responseUrl);
+                                      // page 번호를 Record_table 데이터베이스에 삽입
+                                      // int pageIndex = int.parse(fileName
+                                      //     .replaceAll(RegExp(r'[^0-9]'), ''));
+                                      // await insertDividedScript(
+                                      //     colonFileId, pageIndex, responseUrl);
+
+                                      //해당되는 record_url 열에 id를 받아와 해당 열에 page 삽입하기
 
                                     //   await file.delete();
                                     // }
