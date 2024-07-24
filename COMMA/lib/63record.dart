@@ -666,27 +666,6 @@ class _RecordPageState extends State<RecordPage> {
     }
   }
 
-  Future<void> upadateRecordPage(
-      int page, int record_id) async {
-    final apiUrl = '${API.baseUrl}/api/updateRecordPage';
-    final body = jsonEncode({
-      'page': page,
-      'url': record_id,
-    });
-    final response = await http.post(
-      Uri.parse(apiUrl),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: body,
-    );
-    if (response.statusCode == 200) {
-      print('Divided script inserted successfully');
-    } else {
-      print('Failed to insert divided script: ${response.statusCode}');
-      print('Response body: ${response.body}');
-    }
-  }
 
   // 콜론 생성 다이얼로그 함수
   void showColonCreatedDialog(
