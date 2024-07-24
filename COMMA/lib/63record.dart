@@ -440,7 +440,7 @@ class _RecordPageState extends State<RecordPage> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userKey = userProvider.user?.userKey;
 
-    print('Alt_table에 대체텍스트 url 저장하겠습니다');
+      print('Alt_table에 대체텍스트 url 저장하겠습니다');
 
     var altTableUrl = '${API.baseUrl}/api/alt-table';
     var altTableBody = {
