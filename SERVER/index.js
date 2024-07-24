@@ -1041,6 +1041,23 @@ app.get('/api/get-alt-url/:colonfile_id', (req, res) => {
     });
   });
   
+  //쪼개 대체 삽입
+  app.post('/api/alt-table2', (req, res) => {
+    console.log('POST /api/alt-table2 called');
+    const { lecturefile_id, alternative_text_url, page } = req.body;
+
+    if (!lecturefile_id || !alternative_text_url || page === undefined) {
+        return res.status(400).json({ success: false, error: 'You must provide lecturefile_id, url, and page.' });
+    }
+
+    const sql = 'INSERT INTO Alt_table2 (lecturefile_id, alternative_text_url, page) VALUES (?, ?, ?)';
+    db.query(sql, [lecturefile_id, alternative_text_url, page], (err, result) => {
+        if (err) {
+            return res.status(500).json({ success: false, error: err.message });
+        }
+        res.json({ success: true, lecturefile_id, alternative_text_url, page });
+    });
+});
 
 
 app.listen(port, () => {
