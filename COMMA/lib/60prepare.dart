@@ -507,8 +507,10 @@ class _LearningPreparationState extends State<LearningPreparation> {
           var gptResponse = decodedResponse['choices'][0]['message']['content'];
           print('GPT-4 response content for image URL: $url');
           print(gptResponse);
+          //
           responses.add(
               '[${i + 1} 페이지 설명 시작]\n$gptResponse\n[${i + 1} 페이지 설명 끝] // \n');
+        //
         } else {
           var responseBody = utf8.decode(apiResponse.bodyBytes);
           print('Error calling ChatGPT-4 API: ${apiResponse.statusCode}');
