@@ -398,7 +398,6 @@ class _RecordPageState extends State<RecordPage> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userKey = userProvider.user?.userKey;
 
-    if (widget.type == 0) {
       print('Alt_table에 대체텍스트 url 저장하겠습니다');
 
       var altTableUrl = '${API.baseUrl}/api/alt-table';
@@ -423,7 +422,6 @@ class _RecordPageState extends State<RecordPage> {
         print('Failed to add alt table entry: ${altTableResponse.statusCode}');
         print(altTableResponse.body);
       }
-    }
   }
 
   Future<void> _fetchCreatedAt() async {
@@ -645,6 +643,7 @@ Please follow these instructions:
 3. The output should strictly follow this format: 'Page (page number)\nImage URL: (url)\nScript: (content)\n'.
 4. Start the page number from 0.
 5. Ensure that the response contains only the script corresponding to the specific page without generating new content or modifying the original script.
+6. When given a specific page (e.g., page_0.jpg), only generate the script for that specific page.e
 6. When given a specific page (e.g., page_0.jpg), only generate the script for that specific page.
 7. '다음 페이지로 넘어가겠다' 등의 명시적인 지시어가 나오면, 페이지를 구분해 주세요.
 8. 페이지를 구분하는 명시적인 대사가 없더라도, 강의 자료의 맥락상 해당 스크립트가 주어진 강의 사진의 상황과 일치하지 않는 것으로 판단되면 스크립트를 분할해 주세요.
@@ -849,13 +848,10 @@ Please follow these instructions:
                         // `ColonPage`로 이동전 콜론 정보 가져오기
                         var colonDetails =
                             await _fetchColonDetails(colonFileId);
-
-                        // type = 0 대체텍스트이면 colonfileId를 Alt table에 추가하기
-                        if (widget.type == 0) {
+                        
                           await _insertColonFileIdToAltTable(
                               widget.lecturefileId!, colonFileId);
-                        }
-
+                        
                         //ColonFiles에 folder_id로 폴더 이름 가져오기
                         var colonFolderName = await _fetchColonFolderName(
                             colonDetails['folder_id']);

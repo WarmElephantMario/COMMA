@@ -325,7 +325,8 @@ class _ColonPageState extends State<ColonPage> {
                                       200, // 화면 높이에 맞춤
                                   child: Image.memory(
                                     pageImage.bytes,
-                                    fit: BoxFit.cover, // 이미지를 전체 화면에 맞춤
+                                    // 수정 
+                                    //fit: BoxFit.cover, // 이미지를 전체 화면에 맞춤
                                   ),
                                 ),
                                 if (_blurredPages.contains(pageIndex + 1) &&
