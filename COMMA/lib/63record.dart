@@ -194,14 +194,14 @@ class _RecordPageState extends State<RecordPage> {
       if (_currentLength >= maxLength &&
           (newText[i] == '.' || newText[i] == '?' || newText[i] == '!')) {
         buffer.write('\n\n'); // 단락을 나눌 때 개행 문자를 추가
-
+        
         // Firebase에 저장
         String paragraph = combineText.replaceAll('\n\n', ' ').trim();
         saveTranscriptPart(paragraph);
 
         _currentLength = 0; // 카운트 초기화
         combineText = ''; // combineText 초기화
-        // 새로운 단락 시작
+                // 새로운 단락 시작
         // buffer.clear();
       }
     }
@@ -242,7 +242,7 @@ class _RecordPageState extends State<RecordPage> {
     } catch (e) {
       print('Error saving transcript: $e');
     }
-  }
+      }
 
   Future<void> _checkExistColon() async {
     var url =
@@ -293,7 +293,6 @@ class _RecordPageState extends State<RecordPage> {
   }
 
   Future<void> _loadPageTexts() async {
-    if (widget.lecturefileId != null) {
       try {
         final response = await http.get(Uri.parse(
             '${API.baseUrl}/api/get-alternative-text-url?lecturefileId=${widget.lecturefileId}'));
@@ -326,59 +325,25 @@ class _RecordPageState extends State<RecordPage> {
       } catch (e) {
         print('Error occurred: $e');
       }
-    } else {
-      try {
-        final response = await http.get(Uri.parse(
-            '${API.baseUrl}/api/get-alternative-text-url?lecturefileId=${widget.lecturefileId}'));
-
-        if (response.statusCode == 200) {
-          print('Response body: ${response.body}');
-
-          final fileData = jsonDecode(response.body);
-          final alternativeTextUrl = fileData['alternative_text_url'];
-
-          if (alternativeTextUrl != null) {
-            final textResponse = await http.get(Uri.parse(alternativeTextUrl));
-            if (textResponse.statusCode == 200) {
-              final textLines = utf8.decode(textResponse.bodyBytes).split('\n');
-              setState(() {
-                pageTexts = {
-                  for (int i = 0; i < textLines.length; i++) i + 1: textLines[i]
-                };
-              });
-            } else {
-              print('Failed to fetch text file: ${textResponse.statusCode}');
-            }
-          } else {
-            print('Alternative text URL is null');
-          }
-        } else {
-          print('Failed to fetch alternative text URL: ${response.statusCode}');
-          print('Response body: ${response.body}');
-        }
-      } catch (e) {
-        print('Error occurred: $e');
-      }
-    }
   }
 
-  Future<String> fetchRecordUrl(int colonFileId) async {
-    try {
-      final response = await http.get(Uri.parse(
-          '${API.baseUrl}/api/get-record-url?colonfileId=$colonFileId'));
+  // Future<String> fetchRecordUrl(int colonFileId) async {
+  //   try {
+  //     final response = await http.get(Uri.parse(
+  //         '${API.baseUrl}/api/get-record-url?colonfileId=$colonFileId'));
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        print('스크립트 잘 찾았어요 ${data['record_url']}');
-        return data['record_url'];
-      } else {
-        throw Exception('Failed to fetch record URL');
-      }
-    } catch (e) {
-      print('Error occurred: $e');
-      throw e;
-    }
-  }
+  //     if (response.statusCode == 200) {
+  //       final data = jsonDecode(response.body);
+  //       print('스크립트 잘 찾았어요 ${data['record_url']}');
+  //       return data['record_url'];
+  //     } else {
+  //       throw Exception('Failed to fetch record URL');
+  //     }
+  //   } catch (e) {
+  //     print('Error occurred: $e');
+  //     throw e;
+  //   }
+  // }
 
   void _toggleBlur(int page) {
     setState(() {
@@ -441,29 +406,30 @@ class _RecordPageState extends State<RecordPage> {
     final userKey = userProvider.user?.userKey;
 
       print('Alt_table에 대체텍스트 url 저장하겠습니다');
+      print('Alt_table에 대체텍스트 url 저장하겠습니다');
 
-    var altTableUrl = '${API.baseUrl}/api/alt-table';
-    var altTableBody = {
-      'lecturefile_id': widget.lecturefileId,
-      'colonfile_id': null,
-      'alternative_text_url': widget.responseUrl,
-    };
+      var altTableUrl = '${API.baseUrl}/api/alt-table';
+      var altTableBody = {
+        'lecturefile_id': widget.lecturefileId,
+        'colonfile_id': null,
+        'alternative_text_url': widget.responseUrl,
+      };
 
-    var altTableResponse = await http.post(
-      Uri.parse(altTableUrl),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(altTableBody),
-    );
+      var altTableResponse = await http.post(
+        Uri.parse(altTableUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(altTableBody),
+      );
 
-    if (altTableResponse.statusCode == 200) {
-      print('Alt_table에 대체텍스트 url 저장 완료');
-      print('대체텍스트 url 로드하겠습니다');
-      await _loadPageTexts();
-      print('대체텍스트 url 로드 완료');
-    } else {
-      print('Failed to add alt table entry: ${altTableResponse.statusCode}');
-      print(altTableResponse.body);
-    }
+      if (altTableResponse.statusCode == 200) {
+        print('Alt_table에 대체텍스트 url 저장 완료');
+        print('대체텍스트 url 로드하겠습니다');
+        await _loadPageTexts();
+        print('대체텍스트 url 로드 완료');
+      } else {
+        print('Failed to add alt table entry: ${altTableResponse.statusCode}');
+        print(altTableResponse.body);
+      }
   }
 
   Future<void> _fetchCreatedAt() async {
@@ -521,11 +487,11 @@ class _RecordPageState extends State<RecordPage> {
       _recordingState = RecordingState.recorded;
       _isListening = false;
       _recognizedText += ' ' + _interimText;
-
+      
       // 남은 텍스트를 최종적으로 저장
       processParagraphs(_interimText.trim(), isFinal: true);
 
-      _interimText = '';
+            _interimText = '';
     });
     await _fetchCreatedAt();
   }
@@ -674,93 +640,6 @@ class _RecordPageState extends State<RecordPage> {
     }
   }
 
-  Future<Map<String, String>> callChatGPT4API(List<String> imageUrls,
-      String lectureScript, String lectureFileName) async {
-    const String apiKey = Env.apiKey;
-    final Uri apiUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
-
-    final String promptForPageScript = '''
-You are an expert in analyzing lecture scripts. I will provide you with a full lecture script and a series of lecture materials in the form of images. 
-Your task is to identify and extract the part of the lecture script that corresponds to each page of the lecture material.
-Please follow these instructions:
-1. Do not modify any text in the lecture script.
-2. Divide the lecture script into sections corresponding to each page of the lecture material.
-3. The output should strictly follow this format: 'Page (page number)\nImage URL: (url)\nScript: (content)\n'.
-4. Start the page number from 0.
-5. Ensure that the response contains only the script corresponding to the specific page without generating new content or modifying the original script.
-6. When given a specific page (e.g., page_0.jpg), only generate the script for that specific page.e
-6. When given a specific page (e.g., page_0.jpg), only generate the script for that specific page.
-7. '다음 페이지로 넘어가겠다' 등의 명시적인 지시어가 나오면, 페이지를 구분해 주세요.
-8. 페이지를 구분하는 명시적인 대사가 없더라도, 강의 자료의 맥락상 해당 스크립트가 주어진 강의 사진의 상황과 일치하지 않는 것으로 판단되면 스크립트를 분할해 주세요.
-''';
-
-    try {
-      var pageScripts = <String, String>{};
-
-      for (int i = 0; i < imageUrls.length; ++i) {
-        var messages = [
-          {'role': 'system', 'content': promptForPageScript},
-          {
-            'role': 'user',
-            'content':
-                'Page ${i}\nImage URL: ${imageUrls[i]}\nLecture Script: $lectureScript\nGenerate the script for this specific page only.'
-          }
-        ];
-
-        var response = await http.post(
-          apiUrl,
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $apiKey',
-          },
-          body: jsonEncode({
-            'model': 'gpt-4',
-            'messages': messages,
-            'max_tokens': 1000,
-          }),
-        );
-
-        if (response.statusCode == 200) {
-          var responseBody = utf8.decode(response.bodyBytes);
-          var decodedResponse = jsonDecode(responseBody);
-          var gptResponse = decodedResponse['choices'][0]['message']['content'];
-
-          print('GPT-4 response content for page $i:');
-          print(gptResponse);
-
-          var match =
-              RegExp(r'Page (\d+)\nImage URL: .+?\nScript: (.+)', dotAll: true)
-                  .firstMatch(gptResponse);
-          if (match != null) {
-            var pageIndex = match.group(1)!;
-            var scriptContent = match.group(2)!.trim();
-            pageScripts['page_$pageIndex.txt'] = scriptContent;
-
-            print('Extracted script for page $pageIndex:');
-            print(scriptContent);
-
-            // Extract the remaining lecture script
-            var scriptStartIndex = lectureScript.indexOf(scriptContent);
-            if (scriptStartIndex != -1) {
-              lectureScript = lectureScript
-                  .substring(scriptStartIndex + scriptContent.length)
-                  .trim();
-            }
-          }
-        } else {
-          var responseBody = utf8.decode(response.bodyBytes);
-          print('Error calling ChatGPT-4 API: ${response.statusCode}');
-          print('Response body: $responseBody');
-        }
-      }
-
-      return pageScripts;
-    } catch (e) {
-      print('Error: $e');
-      return {};
-    }
-  }
-
   void _navigateToColonPage(
       BuildContext context,
       String folderName,
@@ -890,10 +769,10 @@ Please follow these instructions:
                         // `ColonPage`로 이동전 콜론 정보 가져오기
                         var colonDetails =
                             await _fetchColonDetails(colonFileId);
-
-                        await _insertColonFileIdToAltTable(
-                            widget.lecturefileId!, colonFileId);
-
+                        
+                          await _insertColonFileIdToAltTable(
+                              widget.lecturefileId!, colonFileId);
+                        
                         //ColonFiles에 folder_id로 폴더 이름 가져오기
                         var colonFolderName = await _fetchColonFolderName(
                             colonDetails['folder_id']);
@@ -956,6 +835,168 @@ Please follow these instructions:
       print(altTableResponse.body);
     }
   }
+
+  //분리된 강의 스크립트를 sql에서 찾아옴
+  Future<List<String>> fetchRecordUrls(int? lectureFileId) async {
+  final response = await http.get(Uri.parse('${API.baseUrl}/api/get-record-urls?lecturefileId=$lectureFileId'));
+
+  if (response.statusCode == 200) {
+    final jsonResponse = jsonDecode(response.body);
+    List<String> recordUrls = List<String>.from(jsonResponse['record_urls']);
+    return recordUrls;
+  } else {
+    throw Exception('Failed to load record URLs');
+  }
+}
+
+//분리된 대체텍스트를 sql에서 찾아옴
+Future<List<String>> fetchAlternativeTextUrls(int? lectureFileId) async {
+  final response = await http.get(Uri.parse('${API.baseUrl}/api/get-alternative-text-urls?lecturefileId=$lectureFileId'));
+
+  if (response.statusCode == 200) {
+    final jsonResponse = jsonDecode(response.body);
+    List<String> alternativeTextUrls = List<String>.from(jsonResponse['alternative_text_urls']);
+    return alternativeTextUrls;
+  } else {
+    throw Exception('Failed to load alternative text URLs');
+  }
+}
+
+// gpt의 답변을 토대로 각 스크립트 조각의 page 값을 sql에 업데이트
+Future<void> updateRecordPage(String recordUrl, int page) async {
+  final response = await http.post(
+    Uri.parse('${API.baseUrl}/api/update-record-page'),
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({'recordUrl': recordUrl, 'page': page}),
+  );
+
+  if (response.statusCode != 200) {
+    throw Exception('Failed to update record page');
+  }
+}
+
+
+  // GPT-4 API 호출 함수
+Future<bool> callChatGPT4API(String pageText1, String pageText2, String scriptText) async {
+  const String apiKey = Env.apiKey;
+  final Uri apiUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
+
+  Map<String, String> headers = {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer $apiKey'
+  };
+
+  String prompt = '''
+  You are an expert in analyzing lecture scripts. I will provide you with the text of two consecutive lecture material pages and a script segment. 
+  Your task is to determine whether the provided script segment belongs to the first or the second page of the lecture material.
+  Please follow these instructions:
+  1. Do not modify any text in the script segment.
+  2. Simply respond with "isNext" if the script belongs to the second page, or "isNotNext" if it belongs to the first page.
+  3. Ensure that the response contains only "isNext" or "isNotNext".
+  Page 1 Text: $pageText1
+  Page 2 Text: $pageText2
+  Script Text: $scriptText
+  Which page does this script belong to? 
+  ''';
+
+  String body = jsonEncode({
+    'model': 'gpt-4',
+    'messages': [
+      {'role': 'system', 'content': 'You are an expert in analyzing lecture scripts.'},
+      {'role': 'user', 'content': prompt}
+    ],
+    'max_tokens': 50
+  });
+
+  final response = await http.post(apiUrl, headers: headers, body: body);
+  if (response.statusCode == 200) {
+    var decodedResponse = jsonDecode(response.body);
+    var gptResponse = decodedResponse['choices'][0]['message']['content'].trim();
+
+    if (gptResponse == 'isNext') {
+      return true;
+    } else if (gptResponse == 'isNotNext') {
+      return false;
+    } else {
+      throw Exception('Unexpected GPT-4 response: $gptResponse');
+    }
+  } else {
+    throw Exception('Failed to call GPT-4 API: ${response.statusCode}');
+  }
+}
+
+// GPT-4 API 호출을 통해 스크립트를 페이지별로 분할하는 함수
+Future<Map<String, List<String>>> divideScriptsByPages(List<String> pageTexts, List<String> scriptTexts, List<String> scriptUrls) async {
+  Map<String, List<String>> result = {};
+  int currentPageIndex = 0;
+
+  // 대체 텍스트 .txt 파일은 두 개, 스크립트 .txt 파일은 한 개씩 전달
+  for (int scriptIndex = 0; scriptIndex < scriptTexts.length; scriptIndex++) {
+    String script = scriptTexts[scriptIndex];
+    String scriptUrl = scriptUrls[scriptIndex];
+    String pageText1 = pageTexts[currentPageIndex];
+    String pageText2 = currentPageIndex + 1 < pageTexts.length ? pageTexts[currentPageIndex + 1] : '';
+
+    bool isNextPage = await callChatGPT4API(pageText1, pageText2, script);
+    if (isNextPage) {
+      currentPageIndex++;
+    }
+    result.putIfAbsent("Page $currentPageIndex", () => []).add(script);
+
+    // gpt의 답변에 따라 Record_table의 page 값 수정
+    await updateRecordPage(scriptUrl, currentPageIndex);
+  }
+  return result;
+}
+
+ // 대체텍스트 .txt 리스트 & 스크립트 .txt 리스트 로드해서 함께 divide 함수로 보냄
+  Future<void> loadAndProcessLectureData(int? lecturefileId) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userKey = userProvider.user?.userKey;
+
+    // 대체텍스트 파일 불러오기
+    List<String> pageTexts = [];
+    print('대체텍스트 로드 기다립니다');
+    List<String> alternativeTextUrls = await fetchAlternativeTextUrls(lecturefileId);
+    print('대체텍스트 로드 다 됐습니다');
+
+    for (String url in alternativeTextUrls) {
+      try {
+        String pageText = await http.get(Uri.parse(url)).then((response) => response.body);
+        pageTexts.add(pageText);
+      } catch (e) {
+        print('Error loading alternative text: $e');
+      }
+    }
+    print('Loaded page texts: $pageTexts');
+
+    // 강의 스크립트 파일 불러오기
+    List<String> scriptTexts = [];
+    List<String> scriptUrls = await fetchRecordUrls(lecturefileId);
+
+    for (String url in scriptUrls) {
+      try {
+        String scriptText = await http.get(Uri.parse(url)).then((response) => response.body);
+        scriptTexts.add(scriptText);
+      } catch (e) {
+        print('Error loading script text: $e');
+      }
+    }
+    print('Loaded script texts: $scriptTexts');
+
+
+    // 각 페이지별 스크립트 분할 작업
+    Map<String, List<String>> pageScripts = await divideScriptsByPages(pageTexts, scriptTexts, scriptUrls);
+
+    // 결과 출력 (또는 필요한 처리) - TODO
+    pageScripts.forEach((page, scripts) {
+      print("Page $page:");
+      scripts.forEach((script) {
+        print(script);
+      });
+    });
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -1188,80 +1229,57 @@ Please follow these instructions:
                                         colonDetails['file_url'],
                                         progressNotifier);
 
-                                    List<String> imageUrls = [];
-                                    int pageIndex = 0;
-                                    bool loadingImages = true;
 
-                                    while (loadingImages) {
-                                      try {
-                                        String imageUrl = await FirebaseStorage
-                                            .instance
-                                            .ref(
-                                                'uploads/$userKey/${widget.lectureFolderId}/${widget.lecturefileId}/pdf_handle/page_$pageIndex.jpg')
-                                            .getDownloadURL();
-                                        imageUrls.add(imageUrl);
-                                        pageIndex++;
-                                      } catch (e) {
-                                        loadingImages = false;
-                                      }
-                                    }
-                                    print('Loaded image URLs: $imageUrls');
+                                    // 강의자료 대체텍스트, 스크립트 덩어리들 load
+                                    // gpt에게 대체텍스트 & 스크립트 보내서 스크립트를 페이지별로 분할 
+                                    // 분할한 값 따라 Record_table에 page 값 수정
+                                    await loadAndProcessLectureData(widget.lecturefileId);
 
-                                    //스크립트 가져오기
-                                    String scriptUrl =
-                                        await fetchRecordUrl(colonFileId);
-                                    String lectureScript = await http
-                                        .get(Uri.parse(scriptUrl))
-                                        .then((response) => response.body);
-                                    print(lectureScript);
 
-                                    Map<String, String> pageScripts =
-                                        await callChatGPT4API(imageUrls,
-                                            lectureScript, widget.lectureName);
+                                    //나눈 페이지를 하나씩 firebase에 업로드 (수정필요)
+                                    // for (var i = 0;
+                                    //     i < pageScripts.entries.length;
+                                    //     i++) {
+                                    //   var entry =
+                                    //       pageScripts.entries.elementAt(i);
+                                    //   String fileName = entry.key;
+                                    //   String scriptContent = entry.value;
 
-                                    for (var i = 0;
-                                        i < pageScripts.entries.length;
-                                        i++) {
-                                      var entry =
-                                          pageScripts.entries.elementAt(i);
-                                      String fileName = entry.key;
-                                      String scriptContent = entry.value;
+                                    //   print('Processing file: $fileName');
 
-                                      print('Processing file: $fileName');
+                                    //   final directory =
+                                    //       await getTemporaryDirectory();
+                                    //   final filePath =
+                                    //       path.join(directory.path, fileName);
 
-                                      final directory =
-                                          await getTemporaryDirectory();
-                                      final filePath =
-                                          path.join(directory.path, fileName);
+                                    //   final file = File(filePath);
+                                    //   await file.writeAsString(scriptContent);
 
-                                      final file = File(filePath);
-                                      await file.writeAsString(scriptContent);
+                                    //   print('File written: $filePath');
 
-                                      print('File written: $filePath');
+                                    //   final userProvider =
+                                    //       Provider.of<UserProvider>(context,
+                                    //           listen: false);
+                                    //   final storageRef =
+                                    //       FirebaseStorage.instance.ref().child(
+                                    //           'response2/$userKey/${colonDetails['folder_id']}/${colonFileId}/${fileName}');
 
-                                      final userProvider =
-                                          Provider.of<UserProvider>(context,
-                                              listen: false);
-                                      final storageRef =
-                                          FirebaseStorage.instance.ref().child(
-                                              'response2/$userKey/${colonDetails['folder_id']}/${colonFileId}/${fileName}');
+                                    //   print(
+                                    //       'Firebase storage path: ${storageRef.fullPath}');
 
-                                      print(
-                                          'Firebase storage path: ${storageRef.fullPath}');
+                                    //   UploadTask uploadTask =
+                                    //       storageRef.putFile(file);
 
-                                      UploadTask uploadTask =
-                                          storageRef.putFile(file);
+                                    //   TaskSnapshot taskSnapshot =
+                                    //       await uploadTask;
+                                    //   String responseUrl = await taskSnapshot
+                                    //       .ref
+                                    //       .getDownloadURL();
+                                    //   print(
+                                    //       'GPT Response stored URL: $responseUrl');
 
-                                      TaskSnapshot taskSnapshot =
-                                          await uploadTask;
-                                      String responseUrl = await taskSnapshot
-                                          .ref
-                                          .getDownloadURL();
-                                      print(
-                                          'GPT Response stored URL: $responseUrl');
-
-                                      progressNotifier.value =
-                                          (i + 1) / pageScripts.entries.length;
+                                    //   progressNotifier.value =
+                                    //       (i + 1) / pageScripts.entries.length;
 
                                       // page 번호를 Record_table 데이터베이스에 삽입
                                       // int pageIndex = int.parse(fileName
@@ -1271,8 +1289,8 @@ Please follow these instructions:
 
                                       //해당되는 record_url 열에 id를 받아와 해당 열에 page 삽입하기
 
-                                      await file.delete();
-                                    }
+                                    //   await file.delete();
+                                    // }
 
                                     // (5)-1 CreatingDialog pop 하기
 
