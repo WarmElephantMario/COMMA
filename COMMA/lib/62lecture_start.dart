@@ -165,17 +165,6 @@ class _LectureStartPageState extends State<LectureStartPage> {
               child: ClickButton(
                 text: '강의실 입장하기',
                 onPressed: () {
-                  // int selectedFolderId = getFolderIdByName(_selectedFolder);
-                  //  print("Navigating to RecordPage with:");
-                  //   print("lectureFolderId: ${widget.lectureFolderId}");
-                  //   print("lecturefileId: ${widget.lecturefileId}");
-                  //   print("lectureName: ${widget.lectureName}");
-                  //   print("fileURL: ${widget.fileURL}");
-                  //   print("responseUrl: ${widget.responseUrl ?? ''}");
-                  //   print("type: ${widget.type}");
-                  //   print("folderName: ${widget.selectedFolder}");
-                  //   print("noteName: ${widget.noteName}");
-
                   Navigator.push(
                     context,
                     MaterialPageRoute(
