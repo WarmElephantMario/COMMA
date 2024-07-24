@@ -459,13 +459,13 @@ class _LearningPreparationState extends State<LearningPreparation> {
     final String promptForAlternativeText = '''
     Please convert the content of the following lecture materials into text so that visually impaired individuals can recognize it using a screen reader. 
     Write all the text that is in the lecture materials as IT IS, with any additional description or modification. 
+    If there is a picture in the lecture material, please generate a alternative text which describes about the picture.
     Creating new words that are not in the materials is strictly prohibited. Only write the letters that are in the materials exactly as they are.
     In other words, if the lecture materials are written in English, write the text in English exactly as it appears. If the lecture materials are written in Korean, write the Korean text exactly as it appears. 
     Visually impaired individuals should be able to understand where and what letters or pictures are located in the lecture materials through this text.
-    Conditions:
-    1. If there are multiple pages in the lecture materials, create alternative text for each page, and place '//' between the alternative texts for each page. 
-    2. Write the text included in the lecture materials without any modifications. 
-    3. Write as clearly and concisely as possible.
+    Conditions: 
+    1. Write the text included in the lecture materials without any modifications. 
+    2. Write as clearly and concisely as possible.
     ''';
 
     try {
@@ -490,7 +490,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
         var data = {
           "model": "gpt-4o",
           "messages": messages,
-          "max_tokens": 1000
+          "max_tokens": 500
         };
 
         var apiResponse = await http.post(
@@ -509,7 +509,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
           print('GPT-4 response content for image URL: $url');
           print(gptResponse);
           responses.add(
-              '[${i + 1} 페이지 설명 시작]\n$gptResponse\n[${i + 1} 페이지 설명 끝] //\n');
+              '[${i + 1} 페이지 설명 시작]\n$gptResponse\n[${i + 1} 페이지 설명 끝] // \n');
         } else {
           var responseBody = utf8.decode(apiResponse.bodyBytes);
           print('Error calling ChatGPT-4 API: ${apiResponse.statusCode}');
