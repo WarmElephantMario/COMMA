@@ -960,16 +960,16 @@ app.post('/api/update-record-table', (req, res) => {
     });
 });
 
-// DividedScript_Table에 colonfile_id page, url 저장
-app.post('/api/insertDividedScript', (req, res) => {
-    const { colonfile_id, page, url } = req.body;
-    const sql = 'INSERT INTO DividedScript_Table (colonfile_id, page, url) VALUES (?, ?, ?)';
-    db.query(sql, [colonfile_id, page, url], (err, result) => {
+// Record_Table에 page 업데이트
+app.post('/api/updateRecordPage', (req, res) => {
+    const { page, id } = req.body;
+    const sql = 'UPDATE Alt_table SET page = ? WHERE id = ?';
+    db.query(sql, [page, id], (err, result) => {
         if (err) {
-            console.error('Failed to insert divided script:', err);
-            res.status(500).send('Failed to insert divided script');
+            console.error('Failed to update RecordPage:', err);
+            res.status(500).send('Failed to insert RecordPage');
         } else {
-            console.log('Divided script inserted successfully:', result);
+            console.log('page inserted successfully:', result);
             res.send({ id: result.insertId, colonfile_id, page, url });
         }
     });
@@ -1041,8 +1041,6 @@ app.get('/api/get-alt-url/:colonfile_id', (req, res) => {
     });
   });
   
-
-
 
 
 app.listen(port, () => {
