@@ -458,16 +458,16 @@ Future<String> callChatGPT4API(
   const String apiKey = Env.apiKey;
   final Uri apiUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
   final String promptForAlternativeText = '''
-    Please convert the content of the following lecture materials into text so that visually impaired individuals can recognize it using a screen reader. 
-    Write all the text that is in the lecture materials as IT IS, with any additional description or modification. 
-    Creating new words that are not in the materials is strictly prohibited. Only write the letters that are in the materials exactly as they are.
-    In other words, if the lecture materials are written in English, write the text in English exactly as it appears. If the lecture materials are written in Korean, write the Korean text exactly as it appears. 
-    Visually impaired individuals should be able to understand where and what letters or pictures are located in the lecture materials through this text.
-    Conditions:
-    1. If there are multiple pages in the lecture materials, create alternative text for each page, and place '//' between the alternative texts for each page. 
-    2. Write the text included in the lecture materials without any modifications. 
-    3. Write as clearly and concisely as possible.
-    ''';
+      당신은 시각장애인을 위한 대체텍스트를 작성하는 전문가입니다. 다음 강의 자료의 내용을 스크린 리더가 인식할 수 있도록 텍스트로 변환해 주세요. 
+      시각장애인이 이 텍스트를 통해 강의 자료의 어느 위치에 어떤 글자나 그림이 있는지 알 수 있어야 합니다.
+      조건:
+      1. 강의 자료의 페이지가 여러 장인 경우, 각 페이지별로 대체텍스트를 생성하되, 페이지별 대체텍스트의 사이에는 '//' 라는 구분자를 넣어주세요.
+         그리고 각 페이지의 대체텍스트의 시작과 끝에는 [nr 페이지 설명 시작], [n 페이지 설명 끝] 이라는 문구를 붙여주세요.
+      2. 강의 자료에 포함되어 있는 글은 수정 없이 텍스트로 그대로 옮겨 적어주세요. 다만, 해당 줄글이 강의 자료의 어느 위치에 쓰여 있는지에 대한 위치 설명은 추가되어야 합니다.
+      3. 가능한 한 명확하고 간결하게 작성해 주세요. 문단 구분은 [n 페이지 설명 시작], [n 페이지 설명 끝]을 구분할 때를 제외하고 최대한 넣지 말아주세요.
+      예시: [1페이지 설명 시작] 흰 바탕에 파란 테두리가 그려져있다. 오른쪽 위 모서리에는 이화생활도서고나 로고가 있다. 그 아래 가운데에는 글자색 파란색으로 "모두의 화장실"이라고 크게 적혀있다. 그 아래에는 글자색 검정색으로 "모두의 화장실이 뭐지?" 라고 적혀있다. [1페이지 설명 끝] //
+       [2페이지 설명 시작] 맨 뒤에는 "모두의 화장실이란?" 이라고 적혀있다. 그 아래에는 "모두의 화장실은 단순 성별 중립 화장실을 포괄하는 보다 넓은 개념입니다." 라고 쓰여있다. [2페이지 설명 끝]
+      ''';
 
   final String promptForKeywords = '''
     당신은 이미지 분석 전문가입니다. 다음 이미지 속에 있는 키워드를 최대한 많이 추출해 주세요. 조건은 다음과 같습니다:
@@ -493,7 +493,7 @@ Future<String> callChatGPT4API(
       ];
 
       var data = {
-        "model": "gpt-4-turbo",
+        "model": "gpt-4o",
         "messages": messages,
         "max_tokens": 1000
       };
