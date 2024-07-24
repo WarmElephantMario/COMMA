@@ -20,6 +20,7 @@ import 'dart:ui' as ui;
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import './api/api.dart';
+import 'package:image/image.dart' as img;
 
 bool isAlternativeTextEnabled = true;
 bool isRealTimeSttEnabled = false;
@@ -45,7 +46,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
   List<Map<String, dynamic>> folderList = [];
   List<Map<String, dynamic>> items = [];
   int _selectedIndex = 2;
-  int? lecturefileId; 
+  int? lecturefileId;
   int? lectureFolderId;
 
   @override
@@ -67,7 +68,8 @@ class _LearningPreparationState extends State<LearningPreparation> {
     if (userKey != null) {
       try {
         // currentFolderId를 쿼리 파라미터로 포함
-        final uri = Uri.parse('${API.baseUrl}/api/lecture-folders?userKey=$userKey');
+        final uri =
+            Uri.parse('${API.baseUrl}/api/lecture-folders?userKey=$userKey');
         final response = await http.get(uri);
 
         if (response.statusCode == 200) {
@@ -277,66 +279,68 @@ class _LearningPreparationState extends State<LearningPreparation> {
   }
 
   void showRenameDialog2(
-  BuildContext context,
-  String currentName,
-  Future<void> Function(String) renameItem,
-  void Function(VoidCallback) setState,
-  String title,
-  String fieldName,
-) {
-  final TextEditingController textController = TextEditingController();
-  textController.text = currentName;
+    BuildContext context,
+    String currentName,
+    Future<void> Function(String) renameItem,
+    void Function(VoidCallback) setState,
+    String title,
+    String fieldName,
+  ) {
+    final TextEditingController textController = TextEditingController();
+    textController.text = currentName;
 
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        backgroundColor: Colors.white,
-        title: Text(
-          title,
-          style: const TextStyle(
-            color: Color(0xFF545454),
-            fontSize: 14,
-            fontFamily: 'DM Sans',
-            fontWeight: FontWeight.bold,
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: Text(
+            title,
+            style: const TextStyle(
+              color: Color(0xFF545454),
+              fontSize: 14,
+              fontFamily: 'DM Sans',
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-        content: TextField(
-          controller: textController,
-          decoration: InputDecoration(
-            hintText: "새로운 노트",
-            hintStyle: TextStyle(color: Colors.grey),
-          ),
-          style: TextStyle(color: Color(0xFF545454)),  // 입력할 때 글자 색상 지정
-          onTap: () {
-            if (textController.text == currentName) {
-              textController.clear();
-            }
-          },
-        ),
-        actions: <Widget>[
-          TextButton(
-            child: const Text('취소', style: TextStyle(color: Color(0xFFFFA17A))),
-            onPressed: () {
-              Navigator.of(context).pop();
+          content: TextField(
+            controller: textController,
+            decoration: InputDecoration(
+              hintText: "새로운 노트",
+              hintStyle: TextStyle(color: Colors.grey),
+            ),
+            style: TextStyle(color: Color(0xFF545454)), // 입력할 때 글자 색상 지정
+            onTap: () {
+              if (textController.text == currentName) {
+                textController.clear();
+              }
             },
           ),
-          TextButton(
-            child: const Text('저장', style: TextStyle(color: Color(0xFF545454))),
-            onPressed: () async {
-              String newName = textController.text;
-              await renameItem(newName);
-              setState(() {
-                _noteName = newName;
-              });
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      );
-    },
-  );
-}
+          actions: <Widget>[
+            TextButton(
+              child:
+                  const Text('취소', style: TextStyle(color: Color(0xFFFFA17A))),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child:
+                  const Text('저장', style: TextStyle(color: Color(0xFF545454))),
+              onPressed: () async {
+                String newName = textController.text;
+                await renameItem(newName);
+                setState(() {
+                  _noteName = newName;
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   Future<void> _pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
@@ -378,9 +382,8 @@ class _LearningPreparationState extends State<LearningPreparation> {
 
         // Upload file with metadata
         final userProvider = Provider.of<UserProvider>(context, listen: false);
-        Reference storageRef = FirebaseStorage.instance
-            .ref()
-            .child('uploads/${userProvider.user!.userKey}/${getFolderIdByName(_selectedFolder)}/$lecturefileId/show_handle/${fileName}_${id}');
+        Reference storageRef = FirebaseStorage.instance.ref().child(
+            'uploads/${userProvider.user!.userKey}/${getFolderIdByName(_selectedFolder)}/$lecturefileId/show_handle/${fileName}_${id}');
         UploadTask uploadTask = storageRef.putData(fileBytes, metadata);
 
         TaskSnapshot taskSnapshot = await uploadTask;
@@ -431,14 +434,14 @@ class _LearningPreparationState extends State<LearningPreparation> {
   }
 
   Future<List<String>> uploadImagesToFirebase(
-    List<Uint8List> images, int userKey) async {
+      List<Uint8List> images, int userKey) async {
     List<String> downloadUrls = [];
 
     for (int i = 0; i < images.length; i++) {
       _progressNotifier.value = (i + 1) / images.length; // 진행률 업데이트
 
-      final storageRef =
-          FirebaseStorage.instance.ref().child('uploads/$userKey/${getFolderIdByName(_selectedFolder)}/$lecturefileId/pdf_handle/page_$i.jpg');
+      final storageRef = FirebaseStorage.instance.ref().child(
+          'uploads/$userKey/${getFolderIdByName(_selectedFolder)}/$lecturefileId/pdf_handle/page_$i.jpg');
       final uploadTask = storageRef.putData(
           images[i], SettableMetadata(contentType: 'image/jpeg'));
       final taskSnapshot = await uploadTask;
@@ -449,15 +452,11 @@ class _LearningPreparationState extends State<LearningPreparation> {
     return downloadUrls;
   }
 
-Future<String> callChatGPT4API(
-    List<String> imageUrls,
-    bool isAlternativeTextEnabled,
-    bool isRealTimeSttEnabled,
-    int userKey,
-    String lectureFileName) async {
-  const String apiKey = Env.apiKey;
-  final Uri apiUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
-  final String promptForAlternativeText = '''
+  Future<String> callChatGPT4APIForAlternativeText(
+      List<String> imageUrls, int userKey, String lectureFileName) async {
+    const String apiKey = Env.apiKey;
+    final Uri apiUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
+    final String promptForAlternativeText = '''
     Please convert the content of the following lecture materials into text so that visually impaired individuals can recognize it using a screen reader. 
     Write all the text that is in the lecture materials as IT IS, with any additional description or modification. 
     Creating new words that are not in the materials is strictly prohibited. Only write the letters that are in the materials exactly as they are.
@@ -469,64 +468,61 @@ Future<String> callChatGPT4API(
     3. Write as clearly and concisely as possible.
     ''';
 
-  final String promptForKeywords = '''
-    당신은 이미지 분석 전문가입니다. 다음 이미지 속에 있는 키워드를 최대한 많이 추출해 주세요. 조건은 다음과 같습니다:
-    1. 중복되지 않는 키워드를 나열해 주세요.
-    2. 키워드는 줄바꿈 없이 나열해 주세요.
-    3. 가능한 한 많은 키워드를 포함해 주세요.
-    ''';
+    try {
+      List<String> responses = [];
 
-  try {
-    List<String> responses = [];
+      for (int i = 0; i < imageUrls.length; i++) {
+        var url = imageUrls[i];
+        var messages = [
+          {'role': 'system', 'content': promptForAlternativeText},
+          {
+            'role': 'user',
+            'content': [
+              {'type': 'text', 'text': promptForAlternativeText},
+              {
+                'type': 'image_url',
+                'image_url': {'url': url}
+              }
+            ]
+          }
+        ];
 
-    for (int i = 0; i < imageUrls.length; i++) {
-      var url = imageUrls[i];
-      var messages = [
-        {'role': 'system', 'content': isAlternativeTextEnabled ? promptForAlternativeText : promptForKeywords},
-        {
-          'role': 'user',
-          'content': [
-            {'type': 'text', 'text': isAlternativeTextEnabled ? promptForAlternativeText : promptForKeywords},
-            {'type': 'image_url', 'image_url': {'url': url}}
-          ]
+        var data = {
+          "model": "gpt-4o",
+          "messages": messages,
+          "max_tokens": 1000
+        };
+
+        var apiResponse = await http.post(
+          apiUrl,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $apiKey',
+          },
+          body: jsonEncode(data),
+        );
+
+        if (apiResponse.statusCode == 200) {
+          var responseBody = utf8.decode(apiResponse.bodyBytes);
+          var decodedResponse = jsonDecode(responseBody);
+          var gptResponse = decodedResponse['choices'][0]['message']['content'];
+          print('GPT-4 response content for image URL: $url');
+          print(gptResponse);
+          responses.add(
+              '[${i + 1} 페이지 설명 시작]\n$gptResponse\n[${i + 1} 페이지 설명 끝] //\n');
+        } else {
+          var responseBody = utf8.decode(apiResponse.bodyBytes);
+          print('Error calling ChatGPT-4 API: ${apiResponse.statusCode}');
+          print('Response body: $responseBody');
+          responses.add('Error: ${apiResponse.statusCode}');
         }
-      ];
-
-      var data = {
-        "model": "gpt-4-turbo",
-        "messages": messages,
-        "max_tokens": 1000
-      };
-
-      var apiResponse = await http.post(
-        apiUrl,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $apiKey',
-        },
-        body: jsonEncode(data),
-      );
-
-      if (apiResponse.statusCode == 200) {
-        var responseBody = utf8.decode(apiResponse.bodyBytes);
-        var decodedResponse = jsonDecode(responseBody);
-        var gptResponse = decodedResponse['choices'][0]['message']['content'];
-        print('GPT-4 response content for image URL: $url');
-        print(gptResponse);
-        responses.add('[${i + 1} 페이지 설명 시작]\n$gptResponse\n[${i + 1} 페이지 설명 끝] //\n');
-      } else {
-        var responseBody = utf8.decode(apiResponse.bodyBytes);
-        print('Error calling ChatGPT-4 API: ${apiResponse.statusCode}');
-        print('Response body: $responseBody');
-        responses.add('Error: ${apiResponse.statusCode}');
       }
-    }
 
-    String finalResponse = responses.join();
+      String finalResponse = responses.join();
 
-    if (isAlternativeTextEnabled) {
       final directory = await getTemporaryDirectory();
-      final filePath = path.join(directory.path, '${DateTime.now().millisecondsSinceEpoch}.txt');
+      final filePath = path.join(
+          directory.path, '${DateTime.now().millisecondsSinceEpoch}.txt');
 
       final file = File(filePath);
       await file.writeAsString(finalResponse);
@@ -542,15 +538,88 @@ Future<String> callChatGPT4API(
 
       await file.delete();
       return responseUrl;
+    } catch (e) {
+      print('Error: $e');
+      return 'Error: $e';
     }
-
-    return finalResponse;
-  } catch (e) {
-    print('Error: $e');
-    return 'Error: $e';
   }
-}
 
+  Future<List<String>> callChatGPT4APIForKeywords(
+      List<String> imageUrls) async {
+    const String apiKey = Env.apiKey;
+    final Uri apiUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
+    final String promptForKeywords = '''
+  You are an image analysis expert. Please extract the keywords in the following image. The conditions are as follows:
+  1. Please list the non-overlapping keywords.
+  2. Please extract only the key keywords in the class.
+  3. Please list each keyword separated by a comma.
+  4. The maximum number of keywords is 5.
+  5. Please print out all keywords in Korean.
+  ''';
+
+    try {
+      List<String> allKeywords = [];
+
+      for (int i = 0; i < imageUrls.length; i++) {
+        var url = imageUrls[i];
+        var messages = [
+          {'role': 'system', 'content': promptForKeywords},
+          {
+            'role': 'user',
+            'content': [
+              {'type': 'text', 'text': promptForKeywords},
+              {
+                'type': 'image_url',
+                'image_url': {'url': url}
+              }
+            ]
+          }
+        ];
+
+        var data = {
+          "model": "gpt-4o",
+          "messages": messages,
+          "max_tokens": 1000
+        };
+
+        var apiResponse = await http.post(
+          apiUrl,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $apiKey',
+          },
+          body: jsonEncode(data),
+        );
+
+        if (apiResponse.statusCode == 200) {
+          var responseBody = utf8.decode(apiResponse.bodyBytes);
+          var decodedResponse = jsonDecode(responseBody);
+          var gptResponse = decodedResponse['choices'][0]['message']['content'];
+          print('GPT-4 response content for image URL: $url');
+          print(gptResponse);
+
+          // Extract keywords from GPT response
+          var keywords = gptResponse.split('&');
+          allKeywords.addAll(keywords);
+        } else {
+          var responseBody = utf8.decode(apiResponse.bodyBytes);
+          print('Error calling ChatGPT-4 API: ${apiResponse.statusCode}');
+          print('Response body: $responseBody');
+        }
+      }
+
+      // Remove duplicates and limit to 50 keywords
+      var uniqueKeywords = allKeywords.toSet().toList();
+      if (uniqueKeywords.length > 50) {
+        uniqueKeywords = uniqueKeywords.sublist(0, 50);
+      }
+
+      return uniqueKeywords;
+    } catch (e) {
+      print('Error: $e');
+      return [];
+    }
+  }
 
   Future<List<String>> handlePdfUpload(Uint8List pdfBytes, int userKey) async {
     try {
@@ -583,49 +652,50 @@ Future<String> callChatGPT4API(
     }
   }
 
-//데베에 폴더id,파일이름을 삽입하는 함수 
-  Future<int> saveLectureFile({required int folderId, required String noteName}) async {
+//데베에 폴더id,파일이름을 삽입하는 함수
+  Future<int> saveLectureFile(
+      {required int folderId, required String noteName}) async {
     final response = await http.post(
-        Uri.parse('${API.baseUrl}/api/lecture-files'),
-        headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, dynamic>{
-            'folder_id': folderId,
-            'file_name': noteName,
-        }),
+      Uri.parse('${API.baseUrl}/api/lecture-files'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, dynamic>{
+        'folder_id': folderId,
+        'file_name': noteName,
+      }),
     );
 
     if (response.statusCode == 200) {
-        final responseBody = jsonDecode(response.body);
-        return responseBody['id'];
+      final responseBody = jsonDecode(response.body);
+      return responseBody['id'];
     } else {
-        throw Exception('Failed to save lecture file');
+      throw Exception('Failed to save lecture file');
     }
-}
-
-// 데베 업데이트 file URL,lecture name,type 
-Future<void> updateLectureDetails(int lecturefileId, String fileUrl, String lectureName, int type) async {
-  final response = await http.post(
-    Uri.parse('${API.baseUrl}/api/update-lecture-details'),
-    headers: <String, String>{
-      'Content-Type': 'application/json; charset=UTF-8',
-    },
-    body: jsonEncode(<String, dynamic>{
-      'lecturefileId': lecturefileId,
-      'file_url': fileUrl,
-      'lecture_name': lectureName,
-      'type': type,
-    }),
-  );
-
-  if (response.statusCode == 200) {
-    print('Lecture details updated successfully');
-  } else {
-    throw Exception('Failed to update lecture details');
   }
-}
 
+// 데베 업데이트 file URL,lecture name,type
+  Future<void> updateLectureDetails(
+      int lecturefileId, String fileUrl, String lectureName, int type) async {
+    final response = await http.post(
+      Uri.parse('${API.baseUrl}/api/update-lecture-details'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, dynamic>{
+        'lecturefileId': lecturefileId,
+        'file_url': fileUrl,
+        'lecture_name': lectureName,
+        'type': type,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      print('Lecture details updated successfully');
+    } else {
+      throw Exception('Failed to update lecture details');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -746,120 +816,151 @@ Future<void> updateLectureDetails(int lecturefileId, String fileUrl, String lect
           ),
           const SizedBox(height: 20),
           Center(
-  child: ClickButton(
-    text: _isMaterialEmbedded ? '강의 자료 학습 시작하기' : '강의 자료를 임베드하세요',
-    onPressed: () async {
-      if (!_isMaterialEmbedded) {
-        print("Starting file upload");
-        // `lectureFolderId` 설정
-       lectureFolderId = getFolderIdByName(_selectedFolder);
-       print('${lectureFolderId}');
+            child: ClickButton(
+              text: _isMaterialEmbedded ? '강의 자료 학습 시작하기' : '강의 자료를 임베드하세요',
+              onPressed: () async {
+                if (!_isMaterialEmbedded) {
+                  print("Starting file upload");
+                  // `lectureFolderId` 설정
+                  lectureFolderId = getFolderIdByName(_selectedFolder);
+                  print('${lectureFolderId}');
 
-        try {
-          final userProvider = Provider.of<UserProvider>(context, listen: false);
-          // API 호출
-          lecturefileId = await saveLectureFile(
-          folderId: lectureFolderId!,
-          noteName: _noteName, //노트이름
-          );
-          print("Lecture file saved with ID: $lecturefileId");
-          await _pickFile(); // 파일 선택 후 업로드
+                  try {
+                    final userProvider =
+                        Provider.of<UserProvider>(context, listen: false);
+                    // API 호출
+                    lecturefileId = await saveLectureFile(
+                      folderId: lectureFolderId!,
+                      noteName: _noteName, //노트이름
+                    );
+                    print("Lecture file saved with ID: $lecturefileId");
+                    await _pickFile(); // 파일 선택 후 업로드
 
-          setState(() {
-            _isMaterialEmbedded = true;
-          });
-        } catch (e) {
-          print('Error: $e');
-        }
-      } else {
-        print("Starting learning with file: $_selectedFileName");
-        print("대체텍스트 선택 여부: $isAlternativeTextEnabled");
-        print("실시간자막 선택 여부: $isRealTimeSttEnabled");
-        if (_selectedFileName != null && _downloadURL != null && _isMaterialEmbedded) {
-          showLearningDialog(context, _selectedFileName!, _downloadURL!, _progressNotifier);
-          try {
-            final userProvider = Provider.of<UserProvider>(context, listen: false);
-            int type = isAlternativeTextEnabled ? 0 : 1; // 대체면 0, 실시간이면 1
-            //데베에 fileUrl, lecturename, type
-            print(lecturefileId!);
-            print(type);
-            await updateLectureDetails(lecturefileId!, _downloadURL!, _selectedFileName!, type);
-            if (_isPDF && _fileBytes != null) {
-              handlePdfUpload(_fileBytes!, userProvider.user!.userKey).then((imageUrls) async {
-                final responseUrl = await callChatGPT4API(
-                  imageUrls,
-                  isAlternativeTextEnabled,
-                  isRealTimeSttEnabled,
-                  userProvider.user!.userKey,
-                  _selectedFileName!
-                );
-                print("GPT-4 Response: $responseUrl");
-                if (Navigator.canPop(context)) {
-                  Navigator.of(context, rootNavigator: true).pop();
+                    setState(() {
+                      _isMaterialEmbedded = true;
+                    });
+                  } catch (e) {
+                    print('Error: $e');
+                  }
+                } else {
+                  print("Starting learning with file: $_selectedFileName");
+                  print("대체텍스트 선택 여부: $isAlternativeTextEnabled");
+                  print("실시간자막 선택 여부: $isRealTimeSttEnabled");
+                  if (_selectedFileName != null &&
+                      _downloadURL != null &&
+                      _isMaterialEmbedded) {
+                    showLearningDialog(context, _selectedFileName!,
+                        _downloadURL!, _progressNotifier);
+                    try {
+                      final userProvider =
+                          Provider.of<UserProvider>(context, listen: false);
+                      int type =
+                          isAlternativeTextEnabled ? 0 : 1; // 대체면 0, 실시간이면 1
+                      //데베에 fileUrl, lecturename, type
+                      print(lecturefileId!);
+                      print(type);
+                      await updateLectureDetails(lecturefileId!, _downloadURL!,
+                          _selectedFileName!, type);
+
+                      if (_isPDF && _fileBytes != null) {
+                        handlePdfUpload(_fileBytes!, userProvider.user!.userKey)
+                            .then((imageUrls) async {
+                          String? responseUrl;
+                          List<String>? keywords;
+
+                          if (isAlternativeTextEnabled) {
+                            responseUrl =
+                                await callChatGPT4APIForAlternativeText(
+                                    imageUrls,
+                                    userProvider.user!.userKey,
+                                    _selectedFileName!);
+                          } else {
+                            keywords =
+                                await callChatGPT4APIForKeywords(imageUrls);
+                          }
+
+                          print("GPT-4 Response: $responseUrl");
+                          print("GPT-4 keywords: $keywords");
+                          if (Navigator.canPop(context)) {
+                            Navigator.of(context, rootNavigator: true).pop();
+                          }
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => LectureStartPage(
+                                lectureFolderId: lectureFolderId!,
+                                lecturefileId: lecturefileId!, // Inserted ID 전달
+                                lectureName: _selectedFileName!,
+                                fileURL: _downloadURL!,
+                                responseUrl:
+                                    responseUrl ?? '', // null일 경우 빈 문자열 전달
+                                type: type, // 대체인지 실시간인지 전달해줌
+                                selectedFolder: _selectedFolder,
+                                noteName: _noteName,
+                                keywords: isAlternativeTextEnabled
+                                    ? []
+                                    : keywords, // 키워드 전달 (대체 텍스트가 아닐 때만)
+                              ),
+                            ),
+                          );
+                        });
+                      } else {
+                        String? responseUrl;
+                        List<String>? keywords;
+
+                        if (isAlternativeTextEnabled) {
+                          responseUrl = await callChatGPT4APIForAlternativeText(
+                              [_downloadURL!],
+                              userProvider.user!.userKey,
+                              _selectedFileName!);
+                        } else {
+                          keywords =
+                              await callChatGPT4APIForKeywords([_downloadURL!]);
+                        }
+
+                        print("GPT-4 Response: $responseUrl");
+                        if (Navigator.canPop(context)) {
+                          Navigator.of(context, rootNavigator: true).pop();
+                        }
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => LectureStartPage(
+                              lectureFolderId: lectureFolderId,
+                              lecturefileId: lecturefileId!, // Inserted ID 전달
+                              lectureName: _selectedFileName!,
+                              fileURL: _downloadURL!,
+                              responseUrl:
+                                  responseUrl, // 실시간 자막일 때는 그냥 response 전달하고 안쓰면됨
+                              type: type,
+                              selectedFolder: _selectedFolder,
+                              noteName: _noteName,
+                              keywords: isAlternativeTextEnabled
+                                  ? []
+                                  : keywords, // 키워드 전달 (대체 텍스트가 아닐 때만)
+                            ),
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      if (Navigator.canPop(context)) {
+                        Navigator.of(context, rootNavigator: true).pop();
+                      }
+                      print('Error: $e');
+                    }
+                  } else {
+                    print(
+                        'Error: File name, URL, or embedded material is missing.');
+                  }
                 }
-                
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => LectureStartPage(
-                      lectureFolderId : lectureFolderId!,
-                      lecturefileId: lecturefileId!, // Inserted ID 전달
-                      lectureName: _selectedFileName!,
-                      fileURL: _downloadURL!,
-                      responseUrl: responseUrl ?? '', // null일 경우 빈 문자열 전달
-                      type: type, // 대체인지 실시간인지 전달해줌
-                      selectedFolder: _selectedFolder,
-                      noteName: _noteName,
-                    ),
-                  ),
-                );
-              });
-            } else {
-              final response = await callChatGPT4API(
-                [_downloadURL!],
-                isAlternativeTextEnabled,
-                isRealTimeSttEnabled,
-                userProvider.user!.userKey,
-                _selectedFileName!
-              );
-              print("GPT-4 Response: $response");
-              if (Navigator.canPop(context)) {
-                Navigator.of(context, rootNavigator: true).pop();
-              }
-
-              
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => LectureStartPage(
-                    lectureFolderId: lectureFolderId,
-                    lecturefileId: lecturefileId!, // Inserted ID 전달
-                    lectureName: _selectedFileName!,
-                    fileURL: _downloadURL!,
-                    responseUrl: response,// 실시간 자막일 때는 그냥 response 전달하고 안쓰면됨
-                    type: type,
-                    selectedFolder: _selectedFolder,
-                    noteName: _noteName,
-                  ),
-                ),
-              );
-            }
-          } catch (e) {
-            if (Navigator.canPop(context)) {
-              Navigator.of(context, rootNavigator: true).pop();
-            }
-            print('Error: $e');
-          }
-        } else {
-          print('Error: File name, URL, or embedded material is missing.');
-        }
-      }
-    },
-    width: MediaQuery.of(context).size.width * 0.7,
-    height: 50.0,
-    iconPath: _isIconVisible ? 'assets/Vector.png' : null,
-  ),
-),
+              },
+              width: MediaQuery.of(context).size.width * 0.7,
+              height: 50.0,
+              iconPath: _isIconVisible ? 'assets/Vector.png' : null,
+            ),
+          ),
           if (_isMaterialEmbedded)
             Column(
               children: [

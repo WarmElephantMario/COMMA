@@ -1,13 +1,17 @@
 # 수정 및 변경 사항
 
 - 자막 부분 deepgram STT API 사용으로 변경
+- 자막 200자 이상되면 구두점에서 줄바꿈
+- prepare에서 키워드 뽑아내기 → lecturestart → record 페이지로 키워드 전달 (this.keywords 추가)
+- deepgram 쿼리로 키워드 전달
+<br>
 - deepgram flutter 관련 튜토리얼 : https://deepgram.com/learn/flutter-speech-to-text-tutorial
 - 따코마 구글 계정으로 가입함(카드 등록 X, 200 달러 무료 사용 중, 약 500시간 정도)
 - 이후 10달러부터 충전 가능
 - 0.0059달러/분
 
 
-
+<br>
 **데이터베이스 테이블 구조**
 ***수정 필요***<br>
 
