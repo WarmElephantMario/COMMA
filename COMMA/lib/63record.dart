@@ -956,7 +956,9 @@ Future<Map<String, List<String>>> divideScriptsByPages(List<String> pageTexts, L
 
     // 대체텍스트 파일 불러오기
     List<String> pageTexts = [];
+    print('대체텍스트 로드 기다립니다');
     List<String> alternativeTextUrls = await fetchAlternativeTextUrls(lecturefileId);
+    print('대체텍스트 로드 다 됐습니다');
 
     for (String url in alternativeTextUrls) {
       try {
