@@ -452,93 +452,119 @@ class _LearningPreparationState extends State<LearningPreparation> {
     return downloadUrls;
   }
 
-  Future<String> callChatGPT4APIForAlternativeText(
-      List<String> imageUrls, int userKey, String lectureFileName) async {
-    const String apiKey = Env.apiKey;
-    final Uri apiUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
-    final String promptForAlternativeText = '''
-    Please convert the content of the following lecture materials into text so that visually impaired individuals can recognize it using a screen reader. 
-    Write all the text that is in the lecture materials as IT IS, with any additional description or modification. 
-    If there is a picture in the lecture material, please generate a alternative text which describes about the picture.
-    Creating new words that are not in the materials is strictly prohibited. Only write the letters that are in the materials exactly as they are.
-    In other words, if the lecture materials are written in English, write the text in English exactly as it appears. If the lecture materials are written in Korean, write the Korean text exactly as it appears. 
-    Visually impaired individuals should be able to understand where and what letters or pictures are located in the lecture materials through this text.
-    Conditions: 
-    1. Write the text included in the lecture materials without any modifications. 
-    2. Write as clearly and concisely as possible.
-    ''';
+Future<String> callChatGPT4APIForAlternativeText(
+    List<String> imageUrls, int userKey, String lectureFileName) async {
+  const String apiKey = Env.apiKey;
+  final Uri apiUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
+  final String promptForAlternativeText = '''
+  Please convert the content of the following lecture materials into text so that visually impaired individuals can recognize it using a screen reader. 
+  Write all the text that is in the lecture materials as IT IS, with any additional description or modification. 
+  If there is a picture in the lecture material, please generate a alternative text which describes about the picture.
+  Creating new words that are not in the materials is strictly prohibited. Only write the letters that are in the materials exactly as they are.
+  In other words, if the lecture materials are written in English, write the text in English exactly as it appears. If the lecture materials are written in Korean, write the Korean text exactly as it appears. 
+  Visually impaired individuals should be able to understand where and what letters or pictures are located in the lecture materials through this text.
+  Conditions: 
+  1. Write the text included in the lecture materials without any modifications. 
+  2. Write as clearly and concisely as possible.
+  ''';
 
-    try {
-      List<String> responses = [];
+  try {
+    List<String> allResponses = [];
 
-      for (int i = 0; i < imageUrls.length; i++) {
-        var url = imageUrls[i];
-        var messages = [
-          {'role': 'system', 'content': promptForAlternativeText},
-          {
-            'role': 'user',
-            'content': [
-              {'type': 'text', 'text': promptForAlternativeText},
-              {
-                'type': 'image_url',
-                'image_url': {'url': url}
-              }
-            ]
-          }
-        ];
-
-        var data = {"model": "gpt-4o", "messages": messages, "max_tokens": 500};
-
-        var apiResponse = await http.post(
-          apiUrl,
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $apiKey',
-          },
-          body: jsonEncode(data),
-        );
-
-        if (apiResponse.statusCode == 200) {
-          var responseBody = utf8.decode(apiResponse.bodyBytes);
-          var decodedResponse = jsonDecode(responseBody);
-          var gptResponse = decodedResponse['choices'][0]['message']['content'];
-          print('GPT-4 response content for image URL: $url');
-          print(gptResponse);
-          responses.add(
-              '[${i + 1} 페이지 설명 시작]\n$gptResponse\n[${i + 1} 페이지 설명 끝] // \n');
-        } else {
-          var responseBody = utf8.decode(apiResponse.bodyBytes);
-          print('Error calling ChatGPT-4 API: ${apiResponse.statusCode}');
-          print('Response body: $responseBody');
-          responses.add('Error: ${apiResponse.statusCode}');
+    for (int i = 0; i < imageUrls.length; i++) {
+      var url = imageUrls[i];
+      var messages = [
+        {'role': 'system', 'content': promptForAlternativeText},
+        {
+          'role': 'user',
+          'content': [
+            {'type': 'text', 'text': promptForAlternativeText},
+            {
+              'type': 'image_url',
+              'image_url': {'url': url}
+            }
+          ]
         }
+      ];
+
+      var data = {"model": "gpt-4o", "messages": messages, "max_tokens": 500};
+
+      var apiResponse = await http.post(
+        apiUrl,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $apiKey',
+        },
+        body: jsonEncode(data),
+      );
+
+      if (apiResponse.statusCode == 200) {
+        var responseBody = utf8.decode(apiResponse.bodyBytes);
+        var decodedResponse = jsonDecode(responseBody);
+        var gptResponse = decodedResponse['choices'][0]['message']['content'];
+        print('GPT-4 response content for image URL: $url');
+        print(gptResponse);
+        String pageResponse = '[${i + 1} 페이지 설명 시작]\n$gptResponse\n[${i + 1} 페이지 설명 끝] // \n';
+        allResponses.add(pageResponse);
+
+        // Create a temporary text file for each page
+        final directory = await getTemporaryDirectory();
+        final filePath = path.join(directory.path, 'page_$i.txt');
+
+        final file = File(filePath);
+        await file.writeAsString(pageResponse);
+
+        // Upload the file to Firebase
+        final storageRef = FirebaseStorage.instance.ref().child(
+          //쪼개 대체 
+            'div_alttxt/$userKey/${getFolderIdByName(_selectedFolder)}/$lecturefileId/page_$i.txt');
+        UploadTask uploadTask = storageRef.putFile(file);
+
+        TaskSnapshot taskSnapshot = await uploadTask;
+        String responseUrl = await taskSnapshot.ref.getDownloadURL();
+        print('GPT Response stored URL: $responseUrl');
+
+        // Insert into database
+        await insertIntoAltTable(lecturefileId!, responseUrl, i);
+
+        // Delete the temporary file
+        await file.delete();
+      } else {
+        var responseBody = utf8.decode(apiResponse.bodyBytes);
+        print('Error calling ChatGPT-4 API: ${apiResponse.statusCode}');
+        print('Response body: $responseBody');
       }
-
-      String finalResponse = responses.join();
-
-      final directory = await getTemporaryDirectory();
-      final filePath = path.join(
-          directory.path, '${DateTime.now().millisecondsSinceEpoch}.txt');
-
-      final file = File(filePath);
-      await file.writeAsString(finalResponse);
-
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final storageRef = FirebaseStorage.instance.ref().child(
-          'response/${userProvider.user!.userKey}/${getFolderIdByName(_selectedFolder)}/${path.basename(filePath)}');
-      UploadTask uploadTask = storageRef.putFile(file);
-
-      TaskSnapshot taskSnapshot = await uploadTask;
-      String responseUrl = await taskSnapshot.ref.getDownloadURL();
-      print('GPT Response stored URL: $responseUrl');
-
-      await file.delete();
-      return responseUrl;
-    } catch (e) {
-      print('Error: $e');
-      return 'Error: $e';
     }
+
+    String finalResponse = allResponses.join();
+
+    final directory = await getTemporaryDirectory();
+    final filePath = path.join(
+        directory.path, '${DateTime.now().millisecondsSinceEpoch}.txt');
+
+    final file = File(filePath);
+    await file.writeAsString(finalResponse);
+
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    // 통 대체
+    final storageRef = FirebaseStorage.instance.ref().child(
+        'response/${userProvider.user!.userKey}/${getFolderIdByName(_selectedFolder)}/$lecturefileId/${path.basename(filePath)}');
+    UploadTask uploadTask = storageRef.putFile(file);
+
+    TaskSnapshot taskSnapshot = await uploadTask;
+    String responseUrl = await taskSnapshot.ref.getDownloadURL();
+    print('GPT Response stored URL: $responseUrl');
+
+    await file.delete();
+    return responseUrl;
+  } catch (e) {
+    print('Error: $e');
+    return 'Error: $e';
   }
+}
+
+
 
   Future<List<String>> callChatGPT4APIForKeywords(
       List<String> imageUrls) async {
@@ -692,6 +718,27 @@ class _LearningPreparationState extends State<LearningPreparation> {
       throw Exception('Failed to update lecture details');
     }
   }
+
+  //쪼개 대체 데베 삽입
+  Future<void> insertIntoAltTable(int lecturefileId, String url, int page) async {
+  final response = await http.post(
+    Uri.parse('${API.baseUrl}/api/alt-table2'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(<String, dynamic>{
+      'lecturefile_id': lecturefileId,
+      'alternative_text_url': url,
+      'page': page,
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    print('Successfully inserted into Alt_table2');
+  } else {
+    print('Failed to insert into Alt_table2');
+  }
+}
 
   @override
   Widget build(BuildContext context) {
