@@ -998,25 +998,11 @@ app.post('/api/update-record-table', (req, res) => {
     });
 });
 
-// Record_Table에 page 업데이트
-app.post('/api/updateRecordPage', (req, res) => {
-    const { page, id } = req.body;
-    const sql = 'UPDATE Alt_table SET page = ? WHERE id = ?';
-    db.query(sql, [page, id], (err, result) => {
-        if (err) {
-            console.error('Failed to update RecordPage:', err);
-            res.status(500).send('Failed to insert RecordPage');
-        } else {
-            console.log('page inserted successfully:', result);
-            res.send({ id: result.insertId, colonfile_id, page, url });
-        }
-    });
-});
 
-// DividedScript_Table에서 page , url(페이지 스크립트) 가져오기
+// Record_Table에서 page, record_url(페이지 스크립트) 가져오기
 app.get('/api/get-page-scripts', (req, res) => {
     const colonfile_id = req.query.colonfile_id;
-    const sql = 'SELECT page, url FROM DividedScript_Table WHERE colonfile_id = ?';
+    const sql = 'SELECT page, record_url FROM Record_table WHERE colonfile_id = ?';
 
     db.query(sql, [colonfile_id], (err, results) => {
         if (err) {
