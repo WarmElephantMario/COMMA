@@ -486,11 +486,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
           }
         ];
 
-        var data = {
-          "model": "gpt-4o",
-          "messages": messages,
-          "max_tokens": 500
-        };
+        var data = {"model": "gpt-4o", "messages": messages, "max_tokens": 500};
 
         var apiResponse = await http.post(
           apiUrl,
@@ -847,28 +843,35 @@ class _LearningPreparationState extends State<LearningPreparation> {
                   print("Starting learning with file: $_selectedFileName");
                   print("대체텍스트 선택 여부: $isAlternativeTextEnabled");
                   print("실시간자막 선택 여부: $isRealTimeSttEnabled");
-                  if (_selectedFileName != null && _downloadURL != null && _isMaterialEmbedded) {
-                    showLearningDialog(context, _selectedFileName!, _downloadURL!, _progressNotifier);
+                  if (_selectedFileName != null &&
+                      _downloadURL != null &&
+                      _isMaterialEmbedded) {
+                    showLearningDialog(context, _selectedFileName!,
+                        _downloadURL!, _progressNotifier);
                     try {
-                      final userProvider = Provider.of<UserProvider>(context, listen: false);
-                      int type = isAlternativeTextEnabled ? 0 : 1; // 대체면 0, 실시간이면 1
+                      final userProvider =
+                          Provider.of<UserProvider>(context, listen: false);
+                      int type =
+                          isAlternativeTextEnabled ? 0 : 1; // 대체면 0, 실시간이면 1
                       //데베에 fileUrl, lecturename, type
                       print(lecturefileId!);
                       print(type);
-                      await updateLectureDetails(lecturefileId!, _downloadURL!, _selectedFileName!, type);
+                      await updateLectureDetails(lecturefileId!, _downloadURL!,
+                          _selectedFileName!, type);
 
                       if (_isPDF && _fileBytes != null) {
-                        handlePdfUpload(_fileBytes!, userProvider.user!.userKey).then((imageUrls) async {
+                        handlePdfUpload(_fileBytes!, userProvider.user!.userKey)
+                            .then((imageUrls) async {
                           String? responseUrl;
                           List<String>? keywords;
 
                           // 대체텍스트와 키워드를 모두 생성
                           responseUrl = await callChatGPT4APIForAlternativeText(
-                            imageUrls,
-                            userProvider.user!.userKey,
-                            _selectedFileName!
-                          );
-                          keywords = await callChatGPT4APIForKeywords(imageUrls);
+                              imageUrls,
+                              userProvider.user!.userKey,
+                              _selectedFileName!);
+                          keywords =
+                              await callChatGPT4APIForKeywords(imageUrls);
 
                           print("GPT-4 Response: $responseUrl");
                           print("GPT-4 keywords: $keywords");
@@ -883,7 +886,8 @@ class _LearningPreparationState extends State<LearningPreparation> {
                                 lecturefileId: lecturefileId!, // Inserted ID 전달
                                 lectureName: _selectedFileName!,
                                 fileURL: _downloadURL!,
-                                responseUrl: responseUrl ?? '', // null일 경우 빈 문자열 전달
+                                responseUrl:
+                                    responseUrl ?? '', // null일 경우 빈 문자열 전달
                                 type: type, // 대체인지 실시간인지 전달해줌
                                 selectedFolder: _selectedFolder,
                                 noteName: _noteName,
@@ -892,7 +896,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
                             ),
                           );
                         });
-                      } 
+                      }
                     } catch (e) {
                       if (Navigator.canPop(context)) {
                         Navigator.of(context, rootNavigator: true).pop();
@@ -900,7 +904,8 @@ class _LearningPreparationState extends State<LearningPreparation> {
                       print('Error: $e');
                     }
                   } else {
-                    print('Error: File name, URL, or embedded material is missing.');
+                    print(
+                        'Error: File name, URL, or embedded material is missing.');
                   }
                 }
               },
