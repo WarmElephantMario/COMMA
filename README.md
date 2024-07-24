@@ -63,7 +63,19 @@ CREATE TABLE ColonFiles (
     type int
 );
 
+//통 스크립트
 CREATE TABLE Alt_table (
+  `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `lecturefile_id` INT,
+  `colonfile_id` INT,
+  `alternative_text_url` VARCHAR(2048),
+  `page` INT,
+  CONSTRAINT `fk_lecturefile` FOREIGN KEY (`lecturefile_id`) REFERENCES `LectureFiles` (`id`),
+  CONSTRAINT `fk_colonfile` FOREIGN KEY (`colonfile_id`) REFERENCES `ColonFiles` (`id`)
+);
+
+//쪼개 스크립트
+CREATE TABLE Alt_table2 (
   `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `lecturefile_id` INT,
   `colonfile_id` INT,
