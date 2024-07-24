@@ -452,21 +452,20 @@ class _LearningPreparationState extends State<LearningPreparation> {
     return downloadUrls;
   }
 
-Future<String> callChatGPT4APIForAlternativeText(
-    List<String> imageUrls, int userKey, String lectureFileName) async {
-  const String apiKey = Env.apiKey;
-  final Uri apiUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
-  final String promptForAlternativeText = '''
-  Please convert the content of the following lecture materials into text so that visually impaired individuals can recognize it using a screen reader. 
-  Write all the text that is in the lecture materials as IT IS, with any additional description or modification. 
-  If there is a picture in the lecture material, please generate a alternative text which describes about the picture.
-  Creating new words that are not in the materials is strictly prohibited. Only write the letters that are in the materials exactly as they are.
-  In other words, if the lecture materials are written in English, write the text in English exactly as it appears. If the lecture materials are written in Korean, write the Korean text exactly as it appears. 
-  Visually impaired individuals should be able to understand where and what letters or pictures are located in the lecture materials through this text.
-  Conditions: 
-  1. Write the text included in the lecture materials without any modifications. 
-  2. Write as clearly and concisely as possible.
-  ''';
+  Future<String> callChatGPT4APIForAlternativeText(
+      List<String> imageUrls, int userKey, String lectureFileName) async {
+    const String apiKey = Env.apiKey;
+    final Uri apiUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
+    final String promptForAlternativeText = '''
+    Please convert the content of the following lecture materials into text so that visually impaired individuals can recognize it using a screen reader. 
+    Write all the text that is in the lecture materials as IT IS, with any additional description or modification.
+    If there is a picture in the lecture material, please generate a alternative text which describes about the picture.
+    Visually impaired individuals should be able to understand where and what letters or pictures are located in the lecture materials through this text.
+    Please write all descriptions in Korean.
+    Conditions: 
+    1. Write the text included in the lecture materials without any modifications. 
+    2. Write as clearly and concisely as possible.
+    ''';
 
   try {
     List<String> allResponses = [];
