@@ -80,6 +80,7 @@ class _RecordPageState extends State<RecordPage> {
   String _interimText = '';
   int _currentLength = 0; // 자막 길이
   String combineText = ''; // 문단 구분 위한 변수
+  int _recordCount = 0; // 자막 개수
 
   final RecorderStream _recorder = RecorderStream();
   late StreamSubscription _recorderStatus;
@@ -181,25 +182,66 @@ class _RecordPageState extends State<RecordPage> {
     });
   }
 
-  String processParagraphs(String newText) {
+  String processParagraphs(String newText, {bool? isFinal}) {
     const int maxLength = 200; // 단락을 나눌 텍스트의 최대 길이
     StringBuffer buffer = StringBuffer();
 
     combineText += newText;
     _currentLength = combineText.length;
-    print(_currentLength);
 
     for (int i = 0; i < newText.length; i++) {
       buffer.write(newText[i]);
       if (_currentLength >= maxLength &&
           (newText[i] == '.' || newText[i] == '?' || newText[i] == '!')) {
         buffer.write('\n\n'); // 단락을 나눌 때 개행 문자를 추가
+
+        // Firebase에 저장
+        String paragraph = combineText.replaceAll('\n\n', ' ').trim();
+        saveTranscriptPart(paragraph);
+
         _currentLength = 0; // 카운트 초기화
         combineText = ''; // combineText 초기화
+        // 새로운 단락 시작
+        // buffer.clear();
       }
     }
-    // buffer.write(' ');
+
+    // 마지막 남은 텍스트 저장
+    if (isFinal != null && isFinal == true && combineText.trim().isNotEmpty) {
+      String finalParagraph = combineText.replaceAll('\n\n', ' ').trim();
+      saveTranscriptPart(finalParagraph);
+      combineText = ''; // 저장 후 초기화
+      _currentLength = 0; // 초기화
+    }
+
     return buffer.toString();
+  }
+
+  Future<void> saveTranscriptPart(String text) async {
+    try {
+      Uint8List fileBytes = Uint8List.fromList(utf8.encode(text));
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final userKey = userProvider.user?.userKey;
+
+      if (userKey != null) {
+        final storageRef = FirebaseStorage.instance.ref().child(
+            'record/$userKey/${widget.lectureFolderId}/${widget.lecturefileId}/record-$_recordCount.txt');
+        _recordCount++; // 파일 번호 증가
+
+        UploadTask uploadTask = storageRef.putData(fileBytes,
+            SettableMetadata(contentType: 'text/plain; charset=utf-8'));
+
+        TaskSnapshot taskSnapshot = await uploadTask;
+        String downloadURL = await taskSnapshot.ref.getDownloadURL();
+        print('Transcript part uploaded: $downloadURL');
+
+        await _insertRecordData(widget.lecturefileId, null, downloadURL);
+      } else {
+        print('User ID is null, cannot save transcript.');
+      }
+    } catch (e) {
+      print('Error saving transcript: $e');
+    }
   }
 
   Future<void> _checkExistColon() async {
@@ -363,30 +405,30 @@ class _RecordPageState extends State<RecordPage> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userKey = userProvider.user?.userKey;
 
-      print('Alt_table에 대체텍스트 url 저장하겠습니다');
+    print('Alt_table에 대체텍스트 url 저장하겠습니다');
 
-      var altTableUrl = '${API.baseUrl}/api/alt-table';
-      var altTableBody = {
-        'lecturefile_id': widget.lecturefileId,
-        'colonfile_id': null,
-        'alternative_text_url': widget.responseUrl,
-      };
+    var altTableUrl = '${API.baseUrl}/api/alt-table';
+    var altTableBody = {
+      'lecturefile_id': widget.lecturefileId,
+      'colonfile_id': null,
+      'alternative_text_url': widget.responseUrl,
+    };
 
-      var altTableResponse = await http.post(
-        Uri.parse(altTableUrl),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(altTableBody),
-      );
+    var altTableResponse = await http.post(
+      Uri.parse(altTableUrl),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(altTableBody),
+    );
 
-      if (altTableResponse.statusCode == 200) {
-        print('Alt_table에 대체텍스트 url 저장 완료');
-        print('대체텍스트 url 로드하겠습니다');
-        await _loadPageTexts();
-        print('대체텍스트 url 로드 완료');
-      } else {
-        print('Failed to add alt table entry: ${altTableResponse.statusCode}');
-        print(altTableResponse.body);
-      }
+    if (altTableResponse.statusCode == 200) {
+      print('Alt_table에 대체텍스트 url 저장 완료');
+      print('대체텍스트 url 로드하겠습니다');
+      await _loadPageTexts();
+      print('대체텍스트 url 로드 완료');
+    } else {
+      print('Failed to add alt table entry: ${altTableResponse.statusCode}');
+      print(altTableResponse.body);
+    }
   }
 
   Future<void> _fetchCreatedAt() async {
@@ -444,37 +486,40 @@ class _RecordPageState extends State<RecordPage> {
       _recordingState = RecordingState.recorded;
       _isListening = false;
       _recognizedText += ' ' + _interimText;
+
+      // 남은 텍스트를 최종적으로 저장
+      processParagraphs(_interimText.trim(), isFinal: true);
+
       _interimText = '';
     });
-    _saveTranscript();
     await _fetchCreatedAt();
   }
 
-  Future<void> _saveTranscript() async {
-    try {
-      Uint8List fileBytes = Uint8List.fromList(utf8.encode(_recognizedText));
+  // Future<void> _saveTranscript() async {
+  //   try {
+  //     Uint8List fileBytes = Uint8List.fromList(utf8.encode(_recognizedText));
 
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final userKey = userProvider.user?.userKey;
-      if (userKey != null) {
-        final storageRef = FirebaseStorage.instance.ref().child(
-            'record/$userKey/${widget.lectureFolderId}/${widget.lecturefileId}/자막.txt');
+  //     final userProvider = Provider.of<UserProvider>(context, listen: false);
+  //     final userKey = userProvider.user?.userKey;
+  //     if (userKey != null) {
+  //       final storageRef = FirebaseStorage.instance.ref().child(
+  //           'record/$userKey/${widget.lectureFolderId}/${widget.lecturefileId}/자막.txt');
 
-        UploadTask uploadTask = storageRef.putData(fileBytes,
-            SettableMetadata(contentType: 'text/plain; charset=utf-8'));
+  //       UploadTask uploadTask = storageRef.putData(fileBytes,
+  //           SettableMetadata(contentType: 'text/plain; charset=utf-8'));
 
-        TaskSnapshot taskSnapshot = await uploadTask;
-        String downloadURL = await taskSnapshot.ref.getDownloadURL();
-        print('Transcript uploaded: $downloadURL');
+  //       TaskSnapshot taskSnapshot = await uploadTask;
+  //       String downloadURL = await taskSnapshot.ref.getDownloadURL();
+  //       print('Transcript uploaded: $downloadURL');
 
-        await _insertRecordData(widget.lecturefileId, null, downloadURL);
-      } else {
-        print('User ID is null, cannot save transcript.');
-      }
-    } catch (e) {
-      print('Error saving transcript: $e');
-    }
-  }
+  //       await _insertRecordData(widget.lecturefileId, null, downloadURL);
+  //     } else {
+  //       print('User ID is null, cannot save transcript.');
+  //     }
+  //   } catch (e) {
+  //     print('Error saving transcript: $e');
+  //   }
+  // }
 
   Future<void> _insertRecordData(
       int? lecturefileId, int? colonfileId, String downloadURL) async {
@@ -726,10 +771,10 @@ class _RecordPageState extends State<RecordPage> {
                         // `ColonPage`로 이동전 콜론 정보 가져오기
                         var colonDetails =
                             await _fetchColonDetails(colonFileId);
-                        
-                          await _insertColonFileIdToAltTable(
-                              widget.lecturefileId!, colonFileId);
-                        
+
+                        await _insertColonFileIdToAltTable(
+                            widget.lecturefileId!, colonFileId);
+
                         //ColonFiles에 folder_id로 폴더 이름 가져오기
                         var colonFolderName = await _fetchColonFolderName(
                             colonDetails['folder_id']);
