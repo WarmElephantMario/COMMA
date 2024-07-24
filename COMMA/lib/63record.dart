@@ -910,21 +910,42 @@ Future<Map<String, List<String>>> divideScriptsByPages(List<String> pageTexts, L
   int currentPageIndex = 0;
 
   // 대체 텍스트 .txt 파일은 두 개, 스크립트 .txt 파일은 한 개씩 전달
-  for (int scriptIndex = 0; scriptIndex < scriptTexts.length; scriptIndex++) {
-    String script = scriptTexts[scriptIndex];
-    String scriptUrl = scriptUrls[scriptIndex];
-    String pageText1 = pageTexts[currentPageIndex];
-    String pageText2 = currentPageIndex + 1 < pageTexts.length ? pageTexts[currentPageIndex + 1] : '';
+for (int scriptIndex = 0; scriptIndex < scriptTexts.length; scriptIndex++) {
+  String script = scriptTexts[scriptIndex];
+  String scriptUrl = scriptUrls[scriptIndex];
 
+  // 페이지 인덱스가 마지막 페이지를 넘어가지 않도록 수정
+  String pageText1 = currentPageIndex < pageTexts.length ? pageTexts[currentPageIndex] : '';
+  String pageText2 = currentPageIndex + 1 < pageTexts.length ? pageTexts[currentPageIndex + 1] : '';
+
+  if (pageText1.isEmpty) {
+    // currentPageIndex가 유효한지 확인
+    print('Error: pageText1 is empty. Invalid currentPageIndex: $currentPageIndex');
+    break; // or continue, depending on how you want to handle this
+  }
+
+  // 마지막 페이지에 도달한 경우 더 이상 페이지 인덱스를 증가시키지 않음
+  if (currentPageIndex < pageTexts.length - 1) {
     bool isNextPage = await callChatGPT4API(pageText1, pageText2, script);
     if (isNextPage) {
       currentPageIndex++;
     }
-    result.putIfAbsent("Page $currentPageIndex", () => []).add(script);
+  } else {
+    // 마지막 페이지에 대한 처리
+    pageText1 = pageTexts[pageTexts.length - 1];
+    pageText2 = '';
+  }
 
+  result.putIfAbsent("Page $currentPageIndex", () => []).add(script);
+
+  if (scriptUrl.isNotEmpty) {
     // gpt의 답변에 따라 Record_table의 page 값 수정
     await updateRecordPage(scriptUrl, currentPageIndex);
+  } else {
+    print('Error: scriptUrl is empty for scriptIndex: $scriptIndex');
   }
+}
+
   return result;
 }
 
