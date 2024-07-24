@@ -44,7 +44,7 @@ class _ColonPageState extends State<ColonPage> {
   int type = -1; // colonDetails에서 type을 가져와 저장할 변수
   //Texts가 붙으면 대체텍스트
   //Scripts가 붙으면 자막
-  
+
   @override
   void initState() {
     super.initState();
@@ -357,7 +357,7 @@ class _ColonPageState extends State<ColonPage> {
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
                             child: FutureBuilder<List<String>>(
-                              future: _fetchPageTexts(pageIndex + 1),
+                              future: _fetchPageTexts(pageIndex),
                               builder: (context, snapshot) {
                                 if (snapshot.connectionState ==
                                     ConnectionState.waiting) {
