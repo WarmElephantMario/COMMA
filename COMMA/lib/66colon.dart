@@ -37,11 +37,13 @@ class _ColonPageState extends State<ColonPage> {
   List<PdfPageImage> pages = [];
   Uint8List? imageData;
   int _selectedIndex = 2;
-  Map<int, String> pageScripts = {};
+  Map<int, List<String>> pageScripts = {}; // 페이지별 텍스트를 저장할 Map
   Map<int, String> pageTexts = {}; // 페이지별 대체 텍스트를 저장할 Map
   final Set<int> _blurredPages = {}; // 블러 처리된 페이지를 추적하는 Set
   late int colonFileId;
   int type = -1; // colonDetails에서 type을 가져와 저장할 변수
+  //Texts가 붙으면 대체텍스트
+  //Scripts가 붙으면 자막
 
   @override
   void initState() {
@@ -96,22 +98,21 @@ class _ColonPageState extends State<ColonPage> {
     }
   }
 
-  Future<Map<int, String>> fetchPageScripts(int colonFileId) async {
-    final apiUrl =
-        '${API.baseUrl}/api/get-page-scripts?colonfile_id=$colonFileId';
+  Future<Map<int, List<String>>> fetchPageScripts(int colonFileId) async {
+    final apiUrl = '${API.baseUrl}/api/get-page-scripts?colonfile_id=$colonFileId';
 
     final response = await http.get(Uri.parse(apiUrl));
 
     if (response.statusCode == 200) {
-      // 응답 데이터 직접 확인
-      print('Response body: ${response.body}');
-      final List<dynamic> jsonResponse =
-          jsonDecode(utf8.decode(response.bodyBytes));
-      Map<int, String> pageScripts = {};
+      final List<dynamic> jsonResponse = jsonDecode(utf8.decode(response.bodyBytes));
+      Map<int, List<String>> pageScripts = {};
       for (var script in jsonResponse) {
         int page = script['page'];
-        String url = script['url'];
-        pageScripts[page] = url;
+        String url = script['record_url'];
+        if (!pageScripts.containsKey(page)) {
+          pageScripts[page] = [];
+        }
+        pageScripts[page]?.add(url);
       }
       return pageScripts;
     } else {
@@ -355,8 +356,8 @@ class _ColonPageState extends State<ColonPage> {
                           final pageIndex = index ~/ 2;
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: FutureBuilder<String>(
-                              future: _fetchPageText(pageIndex),
+                            child: FutureBuilder<List<String>>(
+                              future: _fetchPageTexts(pageIndex),
                               builder: (context, snapshot) {
                                 if (snapshot.connectionState ==
                                     ConnectionState.waiting) {
@@ -364,14 +365,22 @@ class _ColonPageState extends State<ColonPage> {
                                 } else if (snapshot.hasError) {
                                   return Text('Error: ${snapshot.error}');
                                 } else {
-                                  return Text(
-                                    snapshot.data ??
-                                        '페이지 ${pageIndex + 1}의 텍스트가 없습니다.',
-                                    style: const TextStyle(
-                                      color: Color(0xFF414141),
-                                      fontSize: 16,
-                                      fontFamily: 'DM Sans',
-                                    ),
+                                  final pageTexts = snapshot.data ?? [];
+                                  return Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: pageTexts.map((text) {
+                                      return Padding(
+                                        padding: const EdgeInsets.only(bottom: 8.0),
+                                        child: Text(
+                                          text,
+                                          style: const TextStyle(
+                                            color: Color(0xFF414141),
+                                            fontSize: 16,
+                                            fontFamily: 'DM Sans',
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
                                   );
                                 }
                               },
@@ -412,46 +421,51 @@ class _ColonPageState extends State<ColonPage> {
     );
   }
 
-  Future<String> _fetchPageText(int pageIndex) async {
+//대체 텍스트
+  Future<List<String>> _fetchPageTexts(int pageIndex) async {
     if (pageScripts.containsKey(pageIndex)) {
-      final url = pageScripts[pageIndex]!;
-      print('Fetching text from URL: $url'); // URL 출력
-      try {
-        final response = await http.get(Uri.parse(url));
-        if (response.statusCode == 200) {
-          try {
-            // UTF-8로 시도
-            final text = utf8.decode(response.bodyBytes);
-            print('Loaded text for page $pageIndex: $text'); // 로드된 텍스트 출력
-            return text;
-          } catch (e) {
-            print('Error decoding text as UTF-8 for page $pageIndex: $e');
+      final urls = pageScripts[pageIndex]!;
+      List<String> texts = [];
+      for (var url in urls) {
+        print('Fetching text from URL: $url'); // URL 출력
+        try {
+          final response = await http.get(Uri.parse(url));
+          if (response.statusCode == 200) {
             try {
-              // EUC-KR로 수동으로 디코딩
-              final eucKrBytes = response.bodyBytes;
-              final text = eucKrBytes
-                  .map((e) => e & 0xFF)
-                  .map((e) => e.toRadixString(16))
-                  .join(' ');
-              print(
-                  'Loaded text with manual EUC-KR decoding for page $pageIndex: $text');
-              return text;
+              // UTF-8로 시도
+              final text = utf8.decode(response.bodyBytes);
+              print('Loaded text for page $pageIndex: $text'); // 로드된 텍스트 출력
+              texts.add(text);
             } catch (e) {
-              print(
-                  'Error decoding text with manual EUC-KR decoding for page $pageIndex: $e');
-              return 'Error decoding page text';
+              print('Error decoding text as UTF-8 for page $pageIndex: $e');
+              try {
+                // EUC-KR로 수동으로 디코딩
+                final eucKrBytes = response.bodyBytes;
+                final text = eucKrBytes
+                    .map((e) => e & 0xFF)
+                    .map((e) => e.toRadixString(16))
+                    .join(' ');
+                print(
+                    'Loaded text with manual EUC-KR decoding for page $pageIndex: $text');
+                texts.add(text);
+              } catch (e) {
+                print(
+                    'Error decoding text with manual EUC-KR decoding for page $pageIndex: $e');
+                texts.add('Error decoding page text');
+              }
             }
+          } else {
+            print('Failed to load page text: ${response.statusCode}');
+            texts.add('Failed to load page text');
           }
-        } else {
-          print('Failed to load page text: ${response.statusCode}');
-          return 'Failed to load page text';
+        } catch (e) {
+          print('Error loading page text: $e');
+          texts.add('Error loading page text');
         }
-      } catch (e) {
-        print('Error loading page text: $e');
-        return 'Error loading page text';
       }
+      return texts;
     } else {
-      return '페이지 ${pageIndex + 1}의 텍스트가 없습니다.';
+      return ['페이지 ${pageIndex + 1}의 텍스트가 없습니다.'];
     }
   }
 }
