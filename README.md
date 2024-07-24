@@ -63,11 +63,14 @@ CREATE TABLE ColonFiles (
     type int
 );
 
-CREATE TABLE DividedScript_Table (
-    colonfile_id INT PRIMARY KEY,
-    page INT,
-    url varchar(2048),
-    FOREIGN KEY (colonfile_id) REFERENCES ColonFiles(id) ON DELETE CASCADE
+CREATE TABLE Alt_table (
+  `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `lecturefile_id` INT,
+  `colonfile_id` INT,
+  `alternative_text_url` VARCHAR(2048),
+  `page` INT,
+  CONSTRAINT `fk_lecturefile` FOREIGN KEY (`lecturefile_id`) REFERENCES `LectureFiles` (`id`),
+  CONSTRAINT `fk_colonfile` FOREIGN KEY (`colonfile_id`) REFERENCES `ColonFiles` (`id`)
 );
 
 
