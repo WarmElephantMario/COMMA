@@ -646,6 +646,8 @@ Please follow these instructions:
 4. Start the page number from 0.
 5. Ensure that the response contains only the script corresponding to the specific page without generating new content or modifying the original script.
 6. When given a specific page (e.g., page_0.jpg), only generate the script for that specific page.
+7. '다음 페이지로 넘어가겠다' 등의 명시적인 지시어가 나오면, 페이지를 구분해 주세요.
+8. 페이지를 구분하는 명시적인 대사가 없더라도, 강의 자료의 맥락상 해당 스크립트가 주어진 강의 사진의 상황과 일치하지 않는 것으로 판단되면 스크립트를 분할해 주세요.
 ''';
 
     try {
