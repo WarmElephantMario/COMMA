@@ -17,18 +17,19 @@ class LectureStartPage extends StatefulWidget {
   final int type;
   final String? selectedFolder;
   final String? noteName;
+  final List<String>? keywords;
 
-  const LectureStartPage({
-    super.key,
-    this.lectureFolderId,
-    this.lecturefileId,
-    required this.lectureName,
-    required this.fileURL,
-    this.responseUrl,
-    required this.type,
-    this.selectedFolder,
-    this.noteName,
-  });
+  const LectureStartPage(
+      {super.key,
+      this.lectureFolderId,
+      this.lecturefileId,
+      required this.lectureName,
+      required this.fileURL,
+      this.responseUrl,
+      required this.type,
+      this.selectedFolder,
+      this.noteName,
+      this.keywords});
 
   @override
   _LectureStartPageState createState() => _LectureStartPageState();
@@ -190,6 +191,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
                             : null,
                         type: widget.type, //대체인지 실시간인지 전달해줌
                         lecturefileId: widget.lecturefileId,
+                        keywords: widget.keywords,
                       ),
                     ),
                   );

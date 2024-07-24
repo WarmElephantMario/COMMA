@@ -300,10 +300,10 @@ void showConfirmationDialog(
 
 // Creating - 콜론 파일 생성중 팝업
 void showColonCreatingDialog(
-  BuildContext context, 
-  String fileName, //생성된 콜론 파일 이름
-  String fileURL,  //강의자료 url
-  ValueNotifier<double> progressNotifier) {
+    BuildContext context,
+    String fileName, //생성된 콜론 파일 이름
+    String fileURL, //강의자료 url
+    ValueNotifier<double> progressNotifier) {
   showDialog(
     context: context,
     barrierDismissible: false,
@@ -412,14 +412,8 @@ void showColonCreatingDialog(
 // }
 
 // 콜론 생성 다이얼로그 함수
-void showColonCreatedDialog(
-  BuildContext context,
-  String folderName,
-  String noteName,
-  String lectureName,
-  String fileUrl,
-  int? lectureFileId
-) {
+void showColonCreatedDialog(BuildContext context, String folderName,
+    String noteName, String lectureName, String fileUrl, int? lectureFileId) {
   final userProvider = Provider.of<UserProvider>(context, listen: false);
   final userKey = userProvider.user?.userKey;
 
@@ -580,7 +574,7 @@ void showColonCreatedDialog(
 //   }
 // }
 
-// //콜론폴더 이름 확인하기 
+// //콜론폴더 이름 확인하기
 // Future<String> _fetchColonFolderName(int folderId) async {
 //   var url = '${API.baseUrl}/api/get-Colonfolder-name?folderId=$folderId';
 //   var response = await http.get(Uri.parse(url));
@@ -636,7 +630,6 @@ void showColonCreatedDialog(
 //     print('Navigation error: $e');
 //   }
 // }
-
 
 // Learning - 강의 자료 학습중 팝업
 void showLearningDialog(BuildContext context, String fileName, String fileURL,
@@ -1145,7 +1138,7 @@ Future<void> showAddFolderDialog(
             hintStyle: TextStyle(color: Color.fromRGBO(110, 110, 110, 1.0)),
           ),
           style: const TextStyle(
-            color: Color(0xFF545454), 
+            color: Color(0xFF545454),
           ),
         ),
         actions: <Widget>[
@@ -1313,6 +1306,7 @@ class _CustomRadioButtonState extends State<CustomRadioButton> {
     );
   }
 }
+
 class CustomRadioButton2 extends StatelessWidget {
   final String label;
   final bool isSelected;
@@ -1367,7 +1361,6 @@ class CustomRadioButton2 extends StatelessWidget {
     );
   }
 }
-
 
 // Checkbox2 위젯
 // class Checkbox2 extends StatefulWidget {
@@ -1664,7 +1657,9 @@ class ClickButton extends StatelessWidget {
           width: width,
           height: height,
           decoration: ShapeDecoration(
-            color: isDisabled ? Colors.grey : (backgroundColor ?? const Color.fromRGBO(54, 174, 146, 1.0)),
+            color: isDisabled
+                ? Colors.grey
+                : (backgroundColor ?? const Color.fromRGBO(54, 174, 146, 1.0)),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
@@ -1705,7 +1700,6 @@ class ClickButton extends StatelessWidget {
     );
   }
 }
-
 
 // 폴더 리스트
 class FolderListItem extends StatelessWidget {
