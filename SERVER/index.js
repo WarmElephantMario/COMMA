@@ -854,29 +854,67 @@ app.get('/api/get-alternative-text-url', (req, res) => {
     });
 });
 
-// record_url을 가져오기
-app.get('/api/get-record-url', (req, res) => {
-    const { colonfileId } = req.query;
-    console.log(`Received colonfileId: ${colonfileId}`);
+// 분리된 대체텍스트 URL을 가져오기
+app.get('/api/get-alternative-text-urls', (req, res) => {
+    const { lecturefileId } = req.query;
+    console.log(`Received lecturefileId: ${lecturefileId}`);
 
     const sql = `
-        SELECT record_url
-        FROM Record_table
-        WHERE colonfile_id = ?
+        SELECT alternative_text_url
+        FROM Alt_table2
+        WHERE lecturefile_id = ?
     `;
 
-    db.query(sql, [colonfileId], (err, results) => {
+    db.query(sql, [lecturefileId], (err, results) => {
         if (err) {
             return res.status(500).json({ success: false, error: err.message });
         }
 
-        console.log(`Query results: ${JSON.stringify(results)}`);
+        const alternativeTextUrls = results.map(record => record.alternative_text_url);
+        res.status(200).json({ alternative_text_urls: alternativeTextUrls });
+    });
+});
 
-        if (results.length > 0) {
-            res.status(200).json({ record_url: results[0].record_url });
-        } else {
-            res.status(404).json({ success: false, message: 'No matching record found' });
+
+// 분리된 강의 스크립트 URL을 가져오기
+app.get('/api/get-record-urls', (req, res) => {
+    const { lecturefileId } = req.query;
+    console.log(`Received lecturefileId: ${lecturefileId}`);
+
+    const sql = `
+        SELECT record_url
+        FROM Record_table
+        WHERE lecturefile_id = ?
+    `;
+
+    db.query(sql, [lecturefileId], (err, results) => {
+        if (err) {
+            return res.status(500).json({ success: false, error: err.message });
         }
+
+        const recordUrls = results.map(record => record.record_url);
+        res.status(200).json({ record_urls: recordUrls });
+    });
+});
+
+// 분리된 강의 스크립트의 page 값 업데이트해주기
+app.post('/api/update-record-page', (req, res) => {
+    const { recordUrl, page } = req.body;
+    console.log(`Updating record URL: ${recordUrl} with page: ${page}`);
+
+    const sql = `
+        UPDATE Record_table
+        SET page = ?
+        WHERE record_url = ?
+    `;
+
+    db.query(sql, [page, recordUrl], (err, results) => {
+        if (err) {
+            return res.status(500).json({ success: false, error: err.message });
+        }
+
+        console.log(`Updated record URL: ${recordUrl} with page: ${page}`);
+        res.status(200).json({ success: true, message: 'Record updated successfully' });
     });
 });
 
