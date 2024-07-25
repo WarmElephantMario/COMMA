@@ -931,8 +931,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
                                 lecturefileId: lecturefileId!, // Inserted ID 전달
                                 lectureName: _selectedFileName!,
                                 fileURL: _downloadURL!,
-                                responseUrl:
-                                    responseUrl ?? '', // null일 경우 빈 문자열 전달
+                                responseUrl: responseUrl ?? '', // null일 경우 빈 문자열 전달
                                 type: type, // 대체인지 실시간인지 전달해줌
                                 selectedFolder: _selectedFolder,
                                 noteName: _noteName,
