@@ -30,14 +30,17 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       backgroundColor: Color(0xFF36AE92),
       body: Center(
-        child: Container(
-          width: size.width * 0.3, // Adjust this value to change logo size
-          height: size.width * 0.3, // Maintain aspect ratio
-          decoration: const BoxDecoration(
-            color: Color(0xFF36AE92),
-            image: DecorationImage(
-              image: AssetImage('assets/logo_white.png'),
-              fit: BoxFit.contain,
+        child: Semantics(
+          label: '앱 로고 COMMA',
+          child: Container(
+            width: size.width * 0.3, // Adjust this value to change logo size
+            height: size.width * 0.3, // Maintain aspect ratio
+            decoration: const BoxDecoration(
+              color: Color(0xFF36AE92),
+              image: DecorationImage(
+                image: AssetImage('assets/logo_white.png'),
+                fit: BoxFit.contain,
+              ),
             ),
           ),
         ),
