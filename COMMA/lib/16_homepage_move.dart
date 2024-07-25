@@ -212,6 +212,7 @@ void navigateToPage(BuildContext context, String folderName,
   Widget page;
   if (fileType == 'lecture') { //강의 파일인 경우
     if (file['type'] == 0) { //강의 파일 + 대체텍스트인 경우 
+
       page = RecordPage(
         lecturefileId: file['id'] ?? 'Unknown id',
         lectureFolderId: file['folder_id'] ?? 'Unknown Folder Id',
