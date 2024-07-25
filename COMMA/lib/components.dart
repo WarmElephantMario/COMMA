@@ -1347,13 +1347,16 @@ class CustomRadioButton2 extends StatelessWidget {
                 : null,
           ),
           const SizedBox(width: 8),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 16,
-              fontFamily: 'DM Sans',
-              color: Color.fromARGB(255, 70, 70, 70),
-              fontWeight: FontWeight.w500,
+          Flexible(
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 16,
+                fontFamily: 'DM Sans',
+                color: Color.fromARGB(255, 70, 70, 70),
+                fontWeight: FontWeight.w500,
+              ),
+              overflow: TextOverflow.ellipsis, // 텍스트 오버플로우 처리
             ),
           ),
         ],
@@ -1361,6 +1364,7 @@ class CustomRadioButton2 extends StatelessWidget {
     );
   }
 }
+
 
 // Checkbox2 위젯
 // class Checkbox2 extends StatefulWidget {
@@ -1460,17 +1464,20 @@ class LectureExample extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Row(
                   children: [
-                    Text(
-                      lectureName,
-                      style: const TextStyle(
-                        color: Color(0xFF1F1F39),
-                        fontSize: 14,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w700,
-                        height: 1.2,
+                    Expanded(
+                      child: Text(
+                        lectureName,
+                        style: const TextStyle(
+                          color: Color(0xFF1F1F39),
+                          fontSize: 14,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w700,
+                          height: 1.2,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const Spacer(),
+                    const SizedBox(width: 10),
                     Text(
                       date,
                       style: const TextStyle(
@@ -1506,6 +1513,7 @@ class LectureExample extends StatelessWidget {
     );
   }
 }
+
 
 //RenameDeletePopup 이름바꾸기
 class RenameDeletePopup extends StatelessWidget {
@@ -1752,6 +1760,7 @@ class FolderListItem extends StatelessWidget {
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
+              overflow: TextOverflow.ellipsis, // 텍스트 오버플로우 처리
             ),
           ),
           Row(

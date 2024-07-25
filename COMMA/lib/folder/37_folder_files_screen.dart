@@ -160,7 +160,6 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
             createdAt: file['created_at'] ?? 'Unknown Date',
             fileUrl: file['file_url'] ?? 'Unknown fileUrl',
             colonFileId: file['id'] ?? 'Unknown id',
-
           );
 
     Navigator.push(context, MaterialPageRoute(builder: (context) => page));
@@ -278,26 +277,28 @@ class FileListItem extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(
-              file['file_name'] ?? 'Unknown',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                formatDateTimeToKorean(file['created_at'] ?? ''),
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF6C7A89),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  file['file_name'] ?? 'Unknown',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                  overflow: TextOverflow.ellipsis, // 텍스트 오버플로우 처리
                 ),
-              ),
-            ],
+                const SizedBox(height: 5),
+                Text(
+                  formatDateTimeToKorean(file['created_at'] ?? ''),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF6C7A89),
+                  ),
+                ),
+              ],
+            ),
           ),
           RenameDeletePopup(
             onRename: onRename,
