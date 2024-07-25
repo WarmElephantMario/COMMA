@@ -1243,7 +1243,7 @@ for (int scriptIndex = 0; scriptIndex < scriptTexts.length; scriptIndex++) {
                                     // gpt에게 대체텍스트 & 스크립트 보내서 스크립트를 페이지별로 분할 
                                     // 분할한 값 따라 Record_table에 page 값 수정
                                     await loadAndProcessLectureData(widget.lecturefileId);
-
+                                    Navigator.of(context, rootNavigator: true).pop();
 
                                     //나눈 페이지를 하나씩 firebase에 업로드 (수정필요)
                                     // for (var i = 0;
@@ -1303,8 +1303,7 @@ for (int scriptIndex = 0; scriptIndex < scriptTexts.length; scriptIndex++) {
 
                                     // (5)-1 CreatingDialog pop 하기
 
-                                    progressNotifier.value =
-                                        1.0; // 작업 완료 후 프로그레스 업데이트
+                                    
                                     // (5)-2 CreatedDialog 호출하기
                                     //     이 안에서 생성된 콜론 화면으로 navigate
                                     showColonCreatedDialog(

@@ -823,11 +823,10 @@ class _LearningPreparationState extends State<LearningPreparation> {
                         child: Text(
                           '폴더 분류 > $_selectedFolder',
                           style: const TextStyle(
-                            color: Color(0xFF575757),
-                            fontSize: 12,
+                            fontSize: 16,
                             fontFamily: 'DM Sans',
+                            color: Color.fromARGB(255, 70, 70, 70),
                             fontWeight: FontWeight.w500,
-                            height: 1.2,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -856,11 +855,10 @@ class _LearningPreparationState extends State<LearningPreparation> {
                         child: Text(
                           _noteName,
                           style: const TextStyle(
-                            color: Color(0xFF575757),
-                            fontSize: 12,
+                            fontSize: 16,
                             fontFamily: 'DM Sans',
+                            color: Color.fromARGB(255, 70, 70, 70),
                             fontWeight: FontWeight.w500,
-                            height: 1.2,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
