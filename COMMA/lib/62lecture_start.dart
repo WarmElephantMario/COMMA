@@ -175,7 +175,9 @@ class _LectureStartPageState extends State<LectureStartPage> {
                         folderName: widget.selectedFolder!,
                         recordingState: RecordingState.initial,
                         lectureName: widget.lectureName,
-                        responseUrl: widget.responseUrl != null ? widget.responseUrl : null,
+                        responseUrl: widget.responseUrl != null
+                            ? widget.responseUrl
+                            : null,
                         type: widget.type, //대체인지 실시간인지 전달해줌
                         lecturefileId: widget.lecturefileId,
                         keywords: widget.keywords,

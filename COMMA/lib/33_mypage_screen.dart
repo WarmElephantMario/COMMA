@@ -21,11 +21,27 @@ class MyPageScreen extends StatefulWidget {
 
 class _MyPageScreenState extends State<MyPageScreen> {
   int _selectedIndex = 3;
+  final FocusNode _appBarFocusNode = FocusNode();
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _appBarFocusNode.requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    _appBarFocusNode.dispose();
+    super.dispose();
   }
 
   Widget _buildCard(BuildContext context, String title, VoidCallback onTap) {
@@ -84,16 +100,19 @@ class _MyPageScreenState extends State<MyPageScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-          backgroundColor: Colors.white,
-          title: const Text(
+        backgroundColor: Colors.white,
+        title: Focus(
+          focusNode: _appBarFocusNode,
+          child: const Text(
             '마이페이지',
             style: TextStyle(
                 color: Color.fromARGB(255, 48, 48, 48),
                 fontFamily: 'DM Sans',
                 fontWeight: FontWeight.w700),
           ),
-          iconTheme:
-              const IconThemeData(color: Color.fromARGB(255, 48, 48, 48))),
+        ),
+        iconTheme: const IconThemeData(color: Color.fromARGB(255, 48, 48, 48)),
+      ),
       body: ListView(
         children: <Widget>[
           const SizedBox(height: 15),

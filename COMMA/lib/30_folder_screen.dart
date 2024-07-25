@@ -23,6 +23,8 @@ class _FolderScreenState extends State<FolderScreen> {
 
   int _selectedIndex = 1; // 학습 시작 탭이 기본 선택되도록 설정
 
+  final FocusNode _focusNode = FocusNode();
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -33,6 +35,16 @@ class _FolderScreenState extends State<FolderScreen> {
   void initState() {
     super.initState();
     fetchFolders();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNode.requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
   }
 
   Future<void> fetchFolders() async {

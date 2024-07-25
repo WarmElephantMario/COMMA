@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import '3_onboarding-2.dart';
 import '4_onboarding-3.dart';
 import '5_Signup.dart';
@@ -11,6 +12,7 @@ class FigmaToCodeApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       theme: ThemeData.dark().copyWith(
         scaffoldBackgroundColor: const Color.fromRGBO(54, 174, 146, 1.0),
       ),
@@ -25,14 +27,19 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
-
   final PageController _pageController = PageController(initialPage: 0);
   int _currentPage = 0;
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void dispose() {
     _pageController.dispose();
+    _focusNode.dispose();
     super.dispose();
+  }
+
+  void _setFocusToTop() {
+    _focusNode.requestFocus();
   }
 
   @override
@@ -48,12 +55,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             onPageChanged: (int page) {
               setState(() {
                 _currentPage = page;
+                _setFocusToTop();
               });
             },
             children: [
               Onboarding1(),
-              Onboarding2(),
-              Onboarding3(),
+              Onboarding2(focusNode: _focusNode),
+              Onboarding3(focusNode: _focusNode),
             ],
           ),
           Positioned(
@@ -66,100 +74,120 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     for (int i = 0; i < 3; i++) // 페이지 개수에 따라 수정
-                      Indicator(active: i == _currentPage), // 현재 페이지 인덱스에 따라 활성화 여부 결정
+                      Indicator(
+                          active:
+                              i == _currentPage), // 현재 페이지 인덱스에 따라 활성화 여부 결정
                   ],
                 ),
                 SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _currentPage > 0 ? Color.fromRGBO(54, 174, 146, 1.0) : Colors.grey, // 비활성화된 버튼 배경색
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                    Semantics(
+                      sortKey: const OrdinalSortKey(1),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _currentPage > 0
+                              ? Color.fromRGBO(54, 174, 146, 1.0)
+                              : Colors.grey, // 비활성화된 버튼 배경색
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          fixedSize: Size(
+                              size.width * 0.44, size.height * 0.065), // 크기 설정
                         ),
-                        fixedSize: Size(size.width * 0.44, size.height * 0.065), // 크기 설정
-                      ),
-                      onPressed: _currentPage > 0
-                          ? () {
-                        _pageController.previousPage(
-                          duration: Duration(milliseconds: 300),
-                          curve: Curves.ease,
-                        );
-                      }
-                          : null, // 0페이지일 때 onPressed에 null 할당하여 비활성화
-                      child: Text(
-                        '이전',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: _currentPage > 0 ? Colors.white : Colors.grey, // 텍스트 색상도 조정
-                          fontSize: 14,
-                          fontFamily: 'DM Sans',
-                          fontWeight: FontWeight.w700,
+                        onPressed: _currentPage > 0
+                            ? () {
+                                _pageController.previousPage(
+                                  duration: Duration(milliseconds: 300),
+                                  curve: Curves.ease,
+                                );
+                              }
+                            : null, // 0페이지일 때 onPressed에 null 할당하여 비활성화
+                        child: Text(
+                          '이전',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: _currentPage > 0
+                                ? Colors.white
+                                : Colors.grey, // 텍스트 색상도 조정
+                            fontSize: 14,
+                            fontFamily: 'DM Sans',
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
                     ),
-
-                    SizedBox( width: 10, ),
-
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _currentPage < 2 ? Color.fromRGBO(54, 174, 146, 1.0) : Colors.grey, // 비활성화된 버튼 배경색
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                    const SizedBox(width: 10),
+                    Semantics(
+                      sortKey: const OrdinalSortKey(2),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _currentPage < 2
+                              ? Color.fromRGBO(54, 174, 146, 1.0)
+                              : Colors.grey, // 비활성화된 버튼 배경색
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          fixedSize: Size(
+                              size.width * 0.44, size.height * 0.065), // 크기 설정
                         ),
-                        fixedSize: Size(size.width * 0.44, size.height * 0.065), // 크기 설정
-                      ),
-                      onPressed: _currentPage < 2 // 마지막 페이지에서는 비활성화
-                          ? () {
-                        _pageController.nextPage(
-                          duration: Duration(milliseconds: 300),
-                          curve: Curves.ease,
-                        );
-                      }
-                          : null,
-                      child: Text(
-                        '다음',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: _currentPage < 2 ? Colors.white : Colors.grey, // 텍스트 색상도 조정
-                          fontSize: 14,
-                          fontFamily: 'DM Sans',
-                          fontWeight: FontWeight.w700,
+                        onPressed: _currentPage < 2 // 마지막 페이지에서는 비활성화
+                            ? () {
+                                _pageController.nextPage(
+                                  duration: Duration(milliseconds: 300),
+                                  curve: Curves.ease,
+                                );
+                              }
+                            : null,
+                        child: Text(
+                          '다음',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: _currentPage < 2
+                                ? Colors.white
+                                : Colors.grey, // 텍스트 색상도 조정
+                            fontSize: 14,
+                            fontFamily: 'DM Sans',
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
                     ),
                   ],
                 ),
-
-                SizedBox(height: 5,),
-
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromRGBO(54, 174, 146, 1.0), // Background color
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                const SizedBox(height: 5),
+                Semantics(
+                  sortKey: const OrdinalSortKey(3),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          Color.fromRGBO(54, 174, 146, 1.0), // Background color
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      fixedSize: Size(
+                          size.width * 0.9, size.height * 0.065), // Button size
                     ),
-                    fixedSize: Size(size.width * 0.9, size.height * 0.065), // Button size
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => FigmaToCodeApp5()),
-                    );
-                  },
-                  child: Text(
-                    '바로 시작하기',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontFamily: 'DM Sans',
-                      fontWeight: FontWeight.w700,
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => FigmaToCodeApp5()),
+                      );
+                    },
+                    child: const Text(
+                      '바로 시작하기',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontFamily: 'DM Sans',
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -183,7 +211,7 @@ class Onboarding1 extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(height: size.height * 0.20), // 위쪽 여백 추가
-          Text(
+          const Text(
             '더 정확한 자막을 실시간으로 제공해요.',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -194,7 +222,7 @@ class Onboarding1 extends StatelessWidget {
             ),
           ),
           SizedBox(height: size.height * 0.02),
-          Text(
+          const Text(
             'COMMA는 강의 자료를 학습하여\n실시간 수업 중에 더 정확한 자막을 생성해요.',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -205,17 +233,19 @@ class Onboarding1 extends StatelessWidget {
             ),
           ),
           SizedBox(height: size.height * 0.08),
-          Container(
-            width: size.width,
-            height: size.height * 0.3,
-            child: Image.asset('assets/onboarding_1.png'),
+          Semantics(
+            label: '학습하는 모습',
+            child: SizedBox(
+              width: size.width,
+              height: size.height * 0.3,
+              child: Image.asset('assets/onboarding_1.png'),
+            ),
           ),
         ],
       ),
     );
   }
 }
-
 
 class Indicator extends StatelessWidget {
   final bool active;
@@ -234,4 +264,3 @@ class Indicator extends StatelessWidget {
     );
   }
 }
-
