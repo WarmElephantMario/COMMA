@@ -131,8 +131,9 @@ class _RecordPageState extends State<RecordPage> {
 
   Future<void> _initStream() async {
     // 키워드가 있을 경우 serverUrl에 키워드 추가
+    final List<String> keywords = widget.keywords ?? [];
     final String urlWithKeywords =
-        buildServerUrlWithKeywords(serverUrl, widget.keywords!);
+        buildServerUrlWithKeywords(serverUrl, keywords);
     print(urlWithKeywords);
 
     channel = IOWebSocketChannel.connect(Uri.parse(urlWithKeywords),
@@ -268,7 +269,7 @@ class _RecordPageState extends State<RecordPage> {
     }
   }
 
-  Future<Map<String, dynamic>> _fetchColonDetails(int colonId) async {
+  Future<Map<String, dynamic>> _fetchColonDetails(int? colonId) async {
     var url = '${API.baseUrl}/api/get-colon-details?colonId=$colonId';
     var response = await http.get(Uri.parse(url));
 
@@ -381,9 +382,12 @@ class _RecordPageState extends State<RecordPage> {
     if (response.statusCode == 200) {
       setState(() {
         _fileBytes = response.bodyBytes;
-        _pdfController = PdfController(
-          document: PdfDocument.openData(_fileBytes!),
-        );
+        if (_fileBytes != null) {
+          _pdfController = PdfController(
+            document: PdfDocument.openData(_fileBytes!),
+          );
+          _isPDF = true; // PDF가 성공적으로 로드되었음을 표시
+        }
       });
     } else {
       print('Failed to load PDF file: ${response.statusCode}');
@@ -412,7 +416,7 @@ class _RecordPageState extends State<RecordPage> {
       var altTableBody = {
         'lecturefile_id': widget.lecturefileId,
         'colonfile_id': null,
-        'alternative_text_url': widget.responseUrl,
+        'alternative_text_url': widget.responseUrl ?? '',
       };
 
       var altTableResponse = await http.post(
@@ -750,7 +754,7 @@ class _RecordPageState extends State<RecordPage> {
                             await _fetchColonDetails(colonFileId);
                         
                           await _insertColonFileIdToAltTable(
-                              widget.lecturefileId!, colonFileId);
+                              widget.lecturefileId ?? -1, colonFileId);
                         
                         //ColonFiles에 folder_id로 폴더 이름 가져오기
                         var colonFolderName = await _fetchColonFolderName(
@@ -1175,10 +1179,12 @@ for (int scriptIndex = 0; scriptIndex < scriptTexts.length; scriptIndex++) {
                           text: _isColonCreated ? '콜론(:) 이동' : '콜론 생성(:)',
                           backgroundColor: _isColonCreated ? Colors.grey : null,
                           onPressed: () async {
-                            if (_isColonCreated) {
-                              print(_existColon);
+                            if (_isColonCreated) { //이미 콜론 있는 경우
+                              print('existcolon 값: ${_existColon}');
+
+                            if(_existColon != null) {
                               var colonDetails =
-                                  await _fetchColonDetails(_existColon!);
+                                  await _fetchColonDetails(_existColon);
                               var colonFolderName = await _fetchColonFolderName(
                                   colonDetails['folder_id']);
                               Navigator.push(
@@ -1193,6 +1199,9 @@ for (int scriptIndex = 0; scriptIndex < scriptTexts.length; scriptIndex++) {
                                   ),
                                 ),
                               );
+                            }
+
+
                             } else {
                               print('콜론 생성 버튼 클릭됨');
                               var url =
@@ -1304,7 +1313,7 @@ for (int scriptIndex = 0; scriptIndex < scriptTexts.length; scriptIndex++) {
                                         widget.noteName,
                                         widget.lectureName,
                                         widget.fileUrl,
-                                        widget.lecturefileId!,
+                                        widget.lecturefileId ?? -1,
                                         colonFileId);
                                   } else {
                                     print('콜론 파일이랑 폴더 생성 실패한듯요 ...');
@@ -1335,7 +1344,7 @@ for (int scriptIndex = 0; scriptIndex < scriptTexts.length; scriptIndex++) {
                   },
                   child: Stack(
                     children: [
-                      if (_isPDF)
+                      if (_isPDF && _pdfController != null)
                         SizedBox(
                           height: 600,
                           child: PdfView(
