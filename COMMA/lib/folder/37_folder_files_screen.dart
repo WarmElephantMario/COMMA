@@ -300,10 +300,15 @@ class FileListItem extends StatelessWidget {
               ],
             ),
           ),
-          RenameDeletePopup(
-            onRename: onRename,
-            onDelete: onDelete,
-          ),
+         GestureDetector(
+          child: ImageIcon(
+                  AssetImage('assets/folder_menu.png'),
+                  color: Color.fromRGBO(255, 161, 122, 1),
+                  ),
+                    onTap: () {
+                      showCustomMenu2(context, onRename, onDelete);
+                    },
+                  ),
         ],
       ),
     );
