@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'components.dart';
 import 'package:provider/provider.dart';
 import 'model/user_provider.dart';
@@ -24,11 +25,24 @@ class _MainPageState extends State<MainPage> {
   List<Map<String, dynamic>> folders = [];
   int _selectedIndex = 0;
 
+  final FocusNode _focusNode = FocusNode(); // FocusNode 추가
+
   @override
   void initState() {
     super.initState();
     fetchLectureFiles();
     fetchColonFiles();
+
+    // 화면이 빌드된 후 초점을 설정
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNode.requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
   }
 
   Future<void> fetchLectureFiles() async {
@@ -186,7 +200,7 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-// 강의 파일 클릭 이벤트에서 폴더 이름 조회
+  // 강의 파일 클릭 이벤트에서 폴더 이름 조회
   void fetchFolderAndNavigate(BuildContext context, int folderId,
       String fileType, Map<String, dynamic> file) async {
     try {
@@ -206,50 +220,54 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-// 강의 파일 또는 콜론 파일 페이지로 네비게이션
-void navigateToPage(BuildContext context, String folderName,
-    Map<String, dynamic> file, String fileType) {
-  Widget page;
-  if (fileType == 'lecture') { //강의 파일인 경우
-    if (file['type'] == 0) { //강의 파일 + 대체텍스트인 경우 
+  // 강의 파일 또는 콜론 파일 페이지로 네비게이션
+  void navigateToPage(BuildContext context, String folderName,
+      Map<String, dynamic> file, String fileType) {
+    Widget page;
+    if (fileType == 'lecture') {
+      //강의 파일인 경우
+      if (file['type'] == 0) {
+        //강의 파일 + 대체텍스트인 경우
 
-      page = RecordPage(
-        lecturefileId: file['id'] ?? 'Unknown id',
-        lectureFolderId: file['folder_id'] ?? 'Unknown Folder Id',
+        page = RecordPage(
+          lecturefileId: file['id'] ?? 'Unknown id',
+          lectureFolderId: file['folder_id'] ?? 'Unknown Folder Id',
+          noteName: file['file_name'] ?? 'Unknown Note',
+          fileUrl: file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
+          folderName: folderName ?? 'Unknown Folder Name',
+          recordingState: RecordingState.recorded,
+          lectureName: file['lecture_name'] ?? 'Unknown Lecture',
+          responseUrl: file['alternative_text_url'] ??
+              'https://defaulturl.com/defaultfile.txt', // 대체텍스트 url 전달
+          type: file['type'] ?? 'Unknown Type',
+        );
+      } else {
+        //강의 파일 + 실시간 자막인 경우
+        page = RecordPage(
+          lecturefileId: file['id'] ?? 'Unknown id',
+          lectureFolderId: file['folder_id'] ?? 'Unknown Folder Id',
+          noteName: file['file_name'] ?? 'Unknown Note',
+          fileUrl: file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
+          folderName: folderName ?? 'Unknown Folder Name',
+          recordingState: RecordingState.recorded,
+          lectureName: file['lecture_name'] ?? 'Unknown Lecture',
+          type: file['type'] ?? 'Unknown Type',
+        );
+      }
+    } else {
+      //콜론 파일인 경우
+      page = ColonPage(
+        folderName: folderName,
         noteName: file['file_name'] ?? 'Unknown Note',
-        fileUrl: file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
-        folderName: folderName ?? 'Unknown Folder Name',
-        recordingState: RecordingState.recorded,
         lectureName: file['lecture_name'] ?? 'Unknown Lecture',
-        responseUrl: file['alternative_text_url'] ?? 'https://defaulturl.com/defaultfile.txt', // 대체텍스트 url 전달
-        type: file['type'] ?? 'Unknown Type',
-      );
-    } else { //강의 파일 + 실시간 자막인 경우
-      page = RecordPage(
-        lecturefileId: file['id'] ?? 'Unknown id',
-        lectureFolderId: file['folder_id'] ?? 'Unknown Folder Id',
-        noteName: file['file_name'] ?? 'Unknown Note',
-        fileUrl: file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
-        folderName: folderName ?? 'Unknown Folder Name',
-        recordingState: RecordingState.recorded,
-        lectureName: file['lecture_name'] ?? 'Unknown Lecture',
-        type: file['type'] ?? 'Unknown Type',
+        createdAt: file['created_at'] ?? 'Unknown Date',
+        fileUrl: file['file_url'] ?? 'Unknown fileUrl',
+        colonFileId: file['id'] ?? 'Unknown id',
       );
     }
-  } else { //콜론 파일인 경우
-    page = ColonPage(
-      folderName: folderName,
-      noteName: file['file_name'] ?? 'Unknown Note',
-      lectureName: file['lecture_name'] ?? 'Unknown Lecture',
-      createdAt: file['created_at'] ?? 'Unknown Date',
-      fileUrl: file['file_url'] ?? 'Unknown fileUrl',
-      colonFileId:file['id'] ?? 'Unknown id',
-    );
+
+    Navigator.push(context, MaterialPageRoute(builder: (context) => page));
   }
-
-  Navigator.push(context, MaterialPageRoute(builder: (context) => page));
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -259,23 +277,28 @@ void navigateToPage(BuildContext context, String folderName,
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         iconTheme: const IconThemeData(
           color: Color(0xFF36AE92),
         ),
+        leading: null,
         actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.search_rounded,
+          Semantics(
+            label: '검색 아이콘',
+            child: IconButton(
+              icon: const Icon(
+                Icons.search_rounded,
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MainToSearchPage(),
+                  ),
+                );
+              },
             ),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const MainToSearchPage(),
-                ),
-              );
-            },
           ),
         ],
       ),
@@ -285,37 +308,46 @@ void navigateToPage(BuildContext context, String folderName,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text.rich(
-                TextSpan(
+              Focus(
+                // FocusNode를 사용하여 초점을 받을 수 있도록 설정
+                focusNode: _focusNode,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const TextSpan(
-                      text: '안녕하세요, ',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 24,
-                        fontFamily: 'DM Sans',
-                        fontWeight: FontWeight.w500,
-                        height: 1.5,
-                      ),
-                    ),
-                    TextSpan(
-                      text: userProvider.user?.user_nickname ?? 'Guest',
-                      style: const TextStyle(
-                        color: Color(0xFF36AE92), // 원하는 색상으로 설정
-                        fontSize: 24,
-                        fontFamily: 'DM Sans',
-                        fontWeight: FontWeight.w700,
-                        height: 1.5,
-                      ),
-                    ),
-                    const TextSpan(
-                      text: ' 님',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 24,
-                        fontFamily: 'DM Sans',
-                        fontWeight: FontWeight.w500,
-                        height: 1.5,
+                    Text.rich(
+                      TextSpan(
+                        children: [
+                          const TextSpan(
+                            text: '안녕하세요, ',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 24,
+                              fontFamily: 'DM Sans',
+                              fontWeight: FontWeight.w500,
+                              height: 1.5,
+                            ),
+                          ),
+                          TextSpan(
+                            text: userProvider.user?.user_nickname ?? 'Guest',
+                            style: const TextStyle(
+                              color: Color(0xFF36AE92), // 원하는 색상으로 설정
+                              fontSize: 24,
+                              fontFamily: 'DM Sans',
+                              fontWeight: FontWeight.w700,
+                              height: 1.5,
+                            ),
+                          ),
+                          const TextSpan(
+                            text: ' 님',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 24,
+                              fontFamily: 'DM Sans',
+                              fontWeight: FontWeight.w500,
+                              height: 1.5,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -385,47 +417,50 @@ void navigateToPage(BuildContext context, String folderName,
                       )
                     ]
                   : lectureFiles.take(3).map((file) {
-                      return GestureDetector(
-                        onTap: () {
-                          print(
-                              'Lecture ${file['file_name'] ?? "N/A"} is clicked');
-                          print('File details: $file');
-                          fetchFolderAndNavigate(
-                              context, file['folder_id'], 'lecture', file);
-                        },
-                        child: LectureExample(
-                          lectureName: file['file_name'] ?? 'Unknown',
-                          date: formatDate(file['created_at'] ?? 'Unknown'),
-                          onRename: () => showRenameDialog(
-                            context,
-                            lectureFiles.indexOf(file),
-                            lectureFiles,
-                            (id, name) => renameItem(id, name, 'lecture'),
-                            setState,
-                            '이름 바꾸기',
-                            'file_name',
-                          ),
-                          onDelete: () async {
-                            await deleteItem(file['id'], 'lecture');
-                            setState(() {
-                              lectureFiles.remove(file);
-                            });
+                      return Semantics(
+                        sortKey: OrdinalSortKey(2),
+                        child: GestureDetector(
+                          onTap: () {
+                            print(
+                                'Lecture ${file['file_name'] ?? "N/A"} is clicked');
+                            print('File details: $file');
+                            fetchFolderAndNavigate(
+                                context, file['folder_id'], 'lecture', file);
                           },
-                          onMove: () async {
-                            await fetchOtherFolders(
-                                'lecture', file['folder_id']);
-                            showQuickMenu(
+                          child: LectureExample(
+                            lectureName: file['file_name'] ?? 'Unknown',
+                            date: formatDate(file['created_at'] ?? 'Unknown'),
+                            onRename: () => showRenameDialog(
                               context,
-                              file['id'],
-                              'lecture',
-                              file['folder_id'],
-                              moveItem,
-                              () => fetchOtherFolders(
-                                  'lecture', file['folder_id']),
-                              folders,
+                              lectureFiles.indexOf(file),
+                              lectureFiles,
+                              (id, name) => renameItem(id, name, 'lecture'),
                               setState,
-                            );
-                          },
+                              '이름 바꾸기',
+                              'file_name',
+                            ),
+                            onDelete: () async {
+                              await deleteItem(file['id'], 'lecture');
+                              setState(() {
+                                lectureFiles.remove(file);
+                              });
+                            },
+                            onMove: () async {
+                              await fetchOtherFolders(
+                                  'lecture', file['folder_id']);
+                              showQuickMenu(
+                                context,
+                                file['id'],
+                                'lecture',
+                                file['folder_id'],
+                                moveItem,
+                                () => fetchOtherFolders(
+                                    'lecture', file['folder_id']),
+                                folders,
+                                setState,
+                              );
+                            },
+                          ),
                         ),
                       );
                     }).toList()),
@@ -493,47 +528,51 @@ void navigateToPage(BuildContext context, String folderName,
                       )
                     ]
                   : colonFiles.take(3).map((file) {
-                      return GestureDetector(
-                        onTap: () {
-                          print(
-                              'Colon ${file['file_name'] ?? "N/A"} is clicked');
-                          print('Colon file clicked: ${file['file_name']}');
-                          print('File details: $file');
-                          fetchFolderAndNavigate(
-                              context, file['folder_id'], 'colon', file);
-                        },
-                        child: LectureExample(
-                          lectureName: file['file_name'] ?? 'Unknown',
-                          date: formatDate(file['created_at'] ?? 'Unknown'),
-                          onRename: () => showRenameDialog(
-                            context,
-                            colonFiles.indexOf(file),
-                            colonFiles,
-                            (id, name) => renameItem(id, name, 'colon'),
-                            setState,
-                            '이름 바꾸기',
-                            'file_name',
-                          ),
-                          onDelete: () async {
-                            await deleteItem(file['id'], 'colon');
-                            setState(() {
-                              colonFiles.remove(file);
-                            });
+                      return Semantics(
+                        sortKey: OrdinalSortKey(3),
+                        child: GestureDetector(
+                          onTap: () {
+                            print(
+                                'Colon ${file['file_name'] ?? "N/A"} is clicked');
+                            print('Colon file clicked: ${file['file_name']}');
+                            print('File details: $file');
+                            fetchFolderAndNavigate(
+                                context, file['folder_id'], 'colon', file);
                           },
-                          onMove: () async {
-                            await fetchOtherFolders('colon', file['folder_id']);
-                            showQuickMenu(
+                          child: LectureExample(
+                            lectureName: file['file_name'] ?? 'Unknown',
+                            date: formatDate(file['created_at'] ?? 'Unknown'),
+                            onRename: () => showRenameDialog(
                               context,
-                              file['id'],
-                              'colon',
-                              file['folder_id'],
-                              moveItem,
-                              () =>
-                                  fetchOtherFolders('colon', file['folder_id']),
-                              folders,
+                              colonFiles.indexOf(file),
+                              colonFiles,
+                              (id, name) => renameItem(id, name, 'colon'),
                               setState,
-                            );
-                          },
+                              '이름 바꾸기',
+                              'file_name',
+                            ),
+                            onDelete: () async {
+                              await deleteItem(file['id'], 'colon');
+                              setState(() {
+                                colonFiles.remove(file);
+                              });
+                            },
+                            onMove: () async {
+                              await fetchOtherFolders(
+                                  'colon', file['folder_id']);
+                              showQuickMenu(
+                                context,
+                                file['id'],
+                                'colon',
+                                file['folder_id'],
+                                moveItem,
+                                () => fetchOtherFolders(
+                                    'colon', file['folder_id']),
+                                folders,
+                                setState,
+                              );
+                            },
+                          ),
                         ),
                       );
                     }).toList()),

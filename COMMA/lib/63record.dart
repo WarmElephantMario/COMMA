@@ -195,14 +195,14 @@ class _RecordPageState extends State<RecordPage> {
       if (_currentLength >= maxLength &&
           (newText[i] == '.' || newText[i] == '?' || newText[i] == '!')) {
         buffer.write('\n\n'); // 단락을 나눌 때 개행 문자를 추가
-        
+
         // Firebase에 저장
         String paragraph = combineText.replaceAll('\n\n', ' ').trim();
         saveTranscriptPart(paragraph);
 
         _currentLength = 0; // 카운트 초기화
         combineText = ''; // combineText 초기화
-                // 새로운 단락 시작
+        // 새로운 단락 시작
         // buffer.clear();
       }
     }
@@ -243,7 +243,7 @@ class _RecordPageState extends State<RecordPage> {
     } catch (e) {
       print('Error saving transcript: $e');
     }
-      }
+  }
 
   Future<void> _checkExistColon() async {
     var url =
@@ -294,38 +294,38 @@ class _RecordPageState extends State<RecordPage> {
   }
 
   Future<void> _loadPageTexts() async {
-      try {
-        final response = await http.get(Uri.parse(
-            '${API.baseUrl}/api/get-alternative-text-url?lecturefileId=${widget.lecturefileId}'));
+    try {
+      final response = await http.get(Uri.parse(
+          '${API.baseUrl}/api/get-alternative-text-url?lecturefileId=${widget.lecturefileId}'));
 
-        if (response.statusCode == 200) {
-          print('Response body: ${response.body}');
+      if (response.statusCode == 200) {
+        print('Response body: ${response.body}');
 
-          final fileData = jsonDecode(response.body);
-          final alternativeTextUrl = fileData['alternative_text_url'];
+        final fileData = jsonDecode(response.body);
+        final alternativeTextUrl = fileData['alternative_text_url'];
 
-          if (alternativeTextUrl != null) {
-            final textResponse = await http.get(Uri.parse(alternativeTextUrl));
-            if (textResponse.statusCode == 200) {
-              final textLines = utf8.decode(textResponse.bodyBytes).split('//');
-              setState(() {
-                pageTexts = {
-                  for (int i = 0; i < textLines.length; i++) i + 1: textLines[i]
-                };
-              });
-            } else {
-              print('Failed to fetch text file: ${textResponse.statusCode}');
-            }
+        if (alternativeTextUrl != null) {
+          final textResponse = await http.get(Uri.parse(alternativeTextUrl));
+          if (textResponse.statusCode == 200) {
+            final textLines = utf8.decode(textResponse.bodyBytes).split('//');
+            setState(() {
+              pageTexts = {
+                for (int i = 0; i < textLines.length; i++) i + 1: textLines[i]
+              };
+            });
           } else {
-            print('Alternative text URL is null');
+            print('Failed to fetch text file: ${textResponse.statusCode}');
           }
         } else {
-          print('Failed to fetch alternative text URL: ${response.statusCode}');
-          print('Response body: ${response.body}');
+          print('Alternative text URL is null');
         }
-      } catch (e) {
-        print('Error occurred: $e');
+      } else {
+        print('Failed to fetch alternative text URL: ${response.statusCode}');
+        print('Response body: ${response.body}');
       }
+    } catch (e) {
+      print('Error occurred: $e');
+    }
   }
 
   // Future<String> fetchRecordUrl(int colonFileId) async {
@@ -409,31 +409,31 @@ class _RecordPageState extends State<RecordPage> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userKey = userProvider.user?.userKey;
 
-      print('Alt_table에 대체텍스트 url 저장하겠습니다');
-      print('Alt_table에 대체텍스트 url 저장하겠습니다');
+    print('Alt_table에 대체텍스트 url 저장하겠습니다');
+    print('Alt_table에 대체텍스트 url 저장하겠습니다');
 
-      var altTableUrl = '${API.baseUrl}/api/alt-table';
-      var altTableBody = {
-        'lecturefile_id': widget.lecturefileId,
-        'colonfile_id': null,
-        'alternative_text_url': widget.responseUrl ?? '',
-      };
+    var altTableUrl = '${API.baseUrl}/api/alt-table';
+    var altTableBody = {
+      'lecturefile_id': widget.lecturefileId,
+      'colonfile_id': null,
+      'alternative_text_url': widget.responseUrl ?? '',
+    };
 
-      var altTableResponse = await http.post(
-        Uri.parse(altTableUrl),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(altTableBody),
-      );
+    var altTableResponse = await http.post(
+      Uri.parse(altTableUrl),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(altTableBody),
+    );
 
-      if (altTableResponse.statusCode == 200) {
-        print('Alt_table에 대체텍스트 url 저장 완료');
-        print('대체텍스트 url 로드하겠습니다');
-        await _loadPageTexts();
-        print('대체텍스트 url 로드 완료');
-      } else {
-        print('Failed to add alt table entry: ${altTableResponse.statusCode}');
-        print(altTableResponse.body);
-      }
+    if (altTableResponse.statusCode == 200) {
+      print('Alt_table에 대체텍스트 url 저장 완료');
+      print('대체텍스트 url 로드하겠습니다');
+      await _loadPageTexts();
+      print('대체텍스트 url 로드 완료');
+    } else {
+      print('Failed to add alt table entry: ${altTableResponse.statusCode}');
+      print(altTableResponse.body);
+    }
   }
 
   Future<void> _fetchCreatedAt() async {
@@ -491,11 +491,11 @@ class _RecordPageState extends State<RecordPage> {
       _recordingState = RecordingState.recorded;
       _isListening = false;
       _recognizedText += ' ' + _interimText;
-      
+
       // 남은 텍스트를 최종적으로 저장
       processParagraphs(_interimText.trim(), isFinal: true);
 
-            _interimText = '';
+      _interimText = '';
     });
     await _fetchCreatedAt();
   }
@@ -670,7 +670,6 @@ class _RecordPageState extends State<RecordPage> {
     }
   }
 
-
   // 콜론 생성 다이얼로그 함수
   void showColonCreatedDialog(
       BuildContext context,
@@ -752,10 +751,10 @@ class _RecordPageState extends State<RecordPage> {
                         // `ColonPage`로 이동전 콜론 정보 가져오기
                         var colonDetails =
                             await _fetchColonDetails(colonFileId);
-                        
-                          await _insertColonFileIdToAltTable(
-                              widget.lecturefileId ?? -1, colonFileId);
-                        
+
+                        await _insertColonFileIdToAltTable(
+                            widget.lecturefileId ?? -1, colonFileId);
+
                         //ColonFiles에 folder_id로 폴더 이름 가져오기
                         var colonFolderName = await _fetchColonFolderName(
                             colonDetails['folder_id']);
@@ -821,55 +820,58 @@ class _RecordPageState extends State<RecordPage> {
 
   //분리된 강의 스크립트를 sql에서 찾아옴
   Future<List<String>> fetchRecordUrls(int? lectureFileId) async {
-  final response = await http.get(Uri.parse('${API.baseUrl}/api/get-record-urls?lecturefileId=$lectureFileId'));
+    final response = await http.get(Uri.parse(
+        '${API.baseUrl}/api/get-record-urls?lecturefileId=$lectureFileId'));
 
-  if (response.statusCode == 200) {
-    final jsonResponse = jsonDecode(response.body);
-    List<String> recordUrls = List<String>.from(jsonResponse['record_urls']);
-    return recordUrls;
-  } else {
-    throw Exception('Failed to load record URLs');
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+      List<String> recordUrls = List<String>.from(jsonResponse['record_urls']);
+      return recordUrls;
+    } else {
+      throw Exception('Failed to load record URLs');
+    }
   }
-}
 
 //분리된 대체텍스트를 sql에서 찾아옴
-Future<List<String>> fetchAlternativeTextUrls(int? lectureFileId) async {
-  final response = await http.get(Uri.parse('${API.baseUrl}/api/get-alternative-text-urls?lecturefileId=$lectureFileId'));
+  Future<List<String>> fetchAlternativeTextUrls(int? lectureFileId) async {
+    final response = await http.get(Uri.parse(
+        '${API.baseUrl}/api/get-alternative-text-urls?lecturefileId=$lectureFileId'));
 
-  if (response.statusCode == 200) {
-    final jsonResponse = jsonDecode(response.body);
-    List<String> alternativeTextUrls = List<String>.from(jsonResponse['alternative_text_urls']);
-    return alternativeTextUrls;
-  } else {
-    throw Exception('Failed to load alternative text URLs');
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+      List<String> alternativeTextUrls =
+          List<String>.from(jsonResponse['alternative_text_urls']);
+      return alternativeTextUrls;
+    } else {
+      throw Exception('Failed to load alternative text URLs');
+    }
   }
-}
 
 // gpt의 답변을 토대로 각 스크립트 조각의 page 값을 sql에 업데이트
-Future<void> updateRecordPage(String recordUrl, int page) async {
-  final response = await http.post(
-    Uri.parse('${API.baseUrl}/api/update-record-page'),
-    headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({'recordUrl': recordUrl, 'page': page}),
-  );
+  Future<void> updateRecordPage(String recordUrl, int page) async {
+    final response = await http.post(
+      Uri.parse('${API.baseUrl}/api/update-record-page'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'recordUrl': recordUrl, 'page': page}),
+    );
 
-  if (response.statusCode != 200) {
-    throw Exception('Failed to update record page');
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update record page');
+    }
   }
-}
-
 
   // GPT-4 API 호출 함수
-Future<bool> callChatGPT4API(String pageText1, String pageText2, String scriptText) async {
-  const String apiKey = Env.apiKey;
-  final Uri apiUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
+  Future<bool> callChatGPT4API(
+      String pageText1, String pageText2, String scriptText) async {
+    const String apiKey = Env.apiKey;
+    final Uri apiUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
 
-  Map<String, String> headers = {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer $apiKey'
-  };
+    Map<String, String> headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $apiKey'
+    };
 
-  String prompt = '''
+    String prompt = '''
   You are an expert in analyzing lecture scripts. I will provide you with the text of two consecutive lecture material pages and a script segment. 
   Your task is to determine whether the provided script segment belongs to the first or the second page of the lecture material.
   Please follow these instructions:
@@ -882,78 +884,88 @@ Future<bool> callChatGPT4API(String pageText1, String pageText2, String scriptTe
   Which page does this script belong to? 
   ''';
 
-  String body = jsonEncode({
-    'model': 'gpt-4',
-    'messages': [
-      {'role': 'system', 'content': 'You are an expert in analyzing lecture scripts.'},
-      {'role': 'user', 'content': prompt}
-    ],
-    'max_tokens': 50
-  });
+    String body = jsonEncode({
+      'model': 'gpt-4',
+      'messages': [
+        {
+          'role': 'system',
+          'content': 'You are an expert in analyzing lecture scripts.'
+        },
+        {'role': 'user', 'content': prompt}
+      ],
+      'max_tokens': 50
+    });
 
-  final response = await http.post(apiUrl, headers: headers, body: body);
-  if (response.statusCode == 200) {
-    var decodedResponse = jsonDecode(response.body);
-    var gptResponse = decodedResponse['choices'][0]['message']['content'].trim();
+    final response = await http.post(apiUrl, headers: headers, body: body);
+    if (response.statusCode == 200) {
+      var decodedResponse = jsonDecode(response.body);
+      var gptResponse =
+          decodedResponse['choices'][0]['message']['content'].trim();
 
-    if (gptResponse == 'isNext') {
-      return true;
-    } else if (gptResponse == 'isNotNext') {
-      return false;
+      if (gptResponse == 'isNext') {
+        return true;
+      } else if (gptResponse == 'isNotNext') {
+        return false;
+      } else {
+        throw Exception('Unexpected GPT-4 response: $gptResponse');
+      }
     } else {
-      throw Exception('Unexpected GPT-4 response: $gptResponse');
+      throw Exception('Failed to call GPT-4 API: ${response.statusCode}');
     }
-  } else {
-    throw Exception('Failed to call GPT-4 API: ${response.statusCode}');
   }
-}
 
 // GPT-4 API 호출을 통해 스크립트를 페이지별로 분할하는 함수
-Future<Map<String, List<String>>> divideScriptsByPages(List<String> pageTexts, List<String> scriptTexts, List<String> scriptUrls) async {
-  Map<String, List<String>> result = {};
-  int currentPageIndex = 0;
+  Future<Map<String, List<String>>> divideScriptsByPages(List<String> pageTexts,
+      List<String> scriptTexts, List<String> scriptUrls) async {
+    Map<String, List<String>> result = {};
+    int currentPageIndex = 0;
 
-  // 대체 텍스트 .txt 파일은 두 개, 스크립트 .txt 파일은 한 개씩 전달
-for (int scriptIndex = 0; scriptIndex < scriptTexts.length; scriptIndex++) {
-  String script = scriptTexts[scriptIndex];
-  String scriptUrl = scriptUrls[scriptIndex];
+    // 대체 텍스트 .txt 파일은 두 개, 스크립트 .txt 파일은 한 개씩 전달
+    for (int scriptIndex = 0; scriptIndex < scriptTexts.length; scriptIndex++) {
+      String script = scriptTexts[scriptIndex];
+      String scriptUrl = scriptUrls[scriptIndex];
 
-  // 페이지 인덱스가 마지막 페이지를 넘어가지 않도록 수정
-  String pageText1 = currentPageIndex < pageTexts.length ? pageTexts[currentPageIndex] : '';
-  String pageText2 = currentPageIndex + 1 < pageTexts.length ? pageTexts[currentPageIndex + 1] : '';
+      // 페이지 인덱스가 마지막 페이지를 넘어가지 않도록 수정
+      String pageText1 = currentPageIndex < pageTexts.length
+          ? pageTexts[currentPageIndex]
+          : '';
+      String pageText2 = currentPageIndex + 1 < pageTexts.length
+          ? pageTexts[currentPageIndex + 1]
+          : '';
 
-  if (pageText1.isEmpty) {
-    // currentPageIndex가 유효한지 확인
-    print('Error: pageText1 is empty. Invalid currentPageIndex: $currentPageIndex');
-    break; // or continue, depending on how you want to handle this
-  }
+      if (pageText1.isEmpty) {
+        // currentPageIndex가 유효한지 확인
+        print(
+            'Error: pageText1 is empty. Invalid currentPageIndex: $currentPageIndex');
+        break; // or continue, depending on how you want to handle this
+      }
 
-  // 마지막 페이지에 도달한 경우 더 이상 페이지 인덱스를 증가시키지 않음
-  if (currentPageIndex < pageTexts.length - 1) {
-    bool isNextPage = await callChatGPT4API(pageText1, pageText2, script);
-    if (isNextPage) {
-      currentPageIndex++;
+      // 마지막 페이지에 도달한 경우 더 이상 페이지 인덱스를 증가시키지 않음
+      if (currentPageIndex < pageTexts.length - 1) {
+        bool isNextPage = await callChatGPT4API(pageText1, pageText2, script);
+        if (isNextPage) {
+          currentPageIndex++;
+        }
+      } else {
+        // 마지막 페이지에 대한 처리
+        pageText1 = pageTexts[pageTexts.length - 1];
+        pageText2 = '';
+      }
+
+      result.putIfAbsent("Page $currentPageIndex", () => []).add(script);
+
+      if (scriptUrl.isNotEmpty) {
+        // gpt의 답변에 따라 Record_table의 page 값 수정
+        await updateRecordPage(scriptUrl, currentPageIndex);
+      } else {
+        print('Error: scriptUrl is empty for scriptIndex: $scriptIndex');
+      }
     }
-  } else {
-    // 마지막 페이지에 대한 처리
-    pageText1 = pageTexts[pageTexts.length - 1];
-    pageText2 = '';
+
+    return result;
   }
 
-  result.putIfAbsent("Page $currentPageIndex", () => []).add(script);
-
-  if (scriptUrl.isNotEmpty) {
-    // gpt의 답변에 따라 Record_table의 page 값 수정
-    await updateRecordPage(scriptUrl, currentPageIndex);
-  } else {
-    print('Error: scriptUrl is empty for scriptIndex: $scriptIndex');
-  }
-}
-
-  return result;
-}
-
- // 대체텍스트 .txt 리스트 & 스크립트 .txt 리스트 로드해서 함께 divide 함수로 보냄
+  // 대체텍스트 .txt 리스트 & 스크립트 .txt 리스트 로드해서 함께 divide 함수로 보냄
   Future<void> loadAndProcessLectureData(int? lecturefileId) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userKey = userProvider.user?.userKey;
@@ -961,12 +973,14 @@ for (int scriptIndex = 0; scriptIndex < scriptTexts.length; scriptIndex++) {
     // 대체텍스트 파일 불러오기
     List<String> pageTexts = [];
     print('대체텍스트 로드 기다립니다');
-    List<String> alternativeTextUrls = await fetchAlternativeTextUrls(lecturefileId);
+    List<String> alternativeTextUrls =
+        await fetchAlternativeTextUrls(lecturefileId);
     print('대체텍스트 로드 다 됐습니다');
 
     for (String url in alternativeTextUrls) {
       try {
-        String pageText = await http.get(Uri.parse(url)).then((response) => response.body);
+        String pageText =
+            await http.get(Uri.parse(url)).then((response) => response.body);
         pageTexts.add(pageText);
       } catch (e) {
         print('Error loading alternative text: $e');
@@ -980,7 +994,8 @@ for (int scriptIndex = 0; scriptIndex < scriptTexts.length; scriptIndex++) {
 
     for (String url in scriptUrls) {
       try {
-        String scriptText = await http.get(Uri.parse(url)).then((response) => response.body);
+        String scriptText =
+            await http.get(Uri.parse(url)).then((response) => response.body);
         scriptTexts.add(scriptText);
       } catch (e) {
         print('Error loading script text: $e');
@@ -988,9 +1003,9 @@ for (int scriptIndex = 0; scriptIndex < scriptTexts.length; scriptIndex++) {
     }
     print('Loaded script texts: $scriptTexts');
 
-
     // 각 페이지별 스크립트 분할 작업
-    Map<String, List<String>> pageScripts = await divideScriptsByPages(pageTexts, scriptTexts, scriptUrls);
+    Map<String, List<String>> pageScripts =
+        await divideScriptsByPages(pageTexts, scriptTexts, scriptUrls);
 
     // 결과 출력 (또는 필요한 처리) - TODO
     pageScripts.forEach((page, scripts) {
@@ -999,8 +1014,7 @@ for (int scriptIndex = 0; scriptIndex < scriptTexts.length; scriptIndex++) {
         print(script);
       });
     });
-}
-
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1179,29 +1193,29 @@ for (int scriptIndex = 0; scriptIndex < scriptTexts.length; scriptIndex++) {
                           text: _isColonCreated ? '콜론(:) 이동' : '콜론 생성(:)',
                           backgroundColor: _isColonCreated ? Colors.grey : null,
                           onPressed: () async {
-                            if (_isColonCreated) { //이미 콜론 있는 경우
+                            if (_isColonCreated) {
+                              //이미 콜론 있는 경우
                               print('existcolon 값: ${_existColon}');
 
-                            if(_existColon != null) {
-                              var colonDetails =
-                                  await _fetchColonDetails(_existColon);
-                              var colonFolderName = await _fetchColonFolderName(
-                                  colonDetails['folder_id']);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ColonPage(
-                                    folderName: colonFolderName,
-                                    noteName: colonDetails['file_name'],
-                                    lectureName: colonDetails['lecture_name'],
-                                    createdAt: colonDetails['created_at'],
-                                    fileUrl: colonDetails['file_url'],
+                              if (_existColon != null) {
+                                var colonDetails =
+                                    await _fetchColonDetails(_existColon);
+                                var colonFolderName =
+                                    await _fetchColonFolderName(
+                                        colonDetails['folder_id']);
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ColonPage(
+                                      folderName: colonFolderName,
+                                      noteName: colonDetails['file_name'],
+                                      lectureName: colonDetails['lecture_name'],
+                                      createdAt: colonDetails['created_at'],
+                                      fileUrl: colonDetails['file_url'],
+                                    ),
                                   ),
-                                ),
-                              );
-                            }
-
-
+                                );
+                              }
                             } else {
                               print('콜론 생성 버튼 클릭됨');
                               var url =
@@ -1238,12 +1252,12 @@ for (int scriptIndex = 0; scriptIndex < scriptTexts.length; scriptIndex++) {
                                         colonDetails['file_url'],
                                         progressNotifier);
 
-
                                     // 강의자료 대체텍스트, 스크립트 덩어리들 load
-                                    // gpt에게 대체텍스트 & 스크립트 보내서 스크립트를 페이지별로 분할 
+                                    // gpt에게 대체텍스트 & 스크립트 보내서 스크립트를 페이지별로 분할
                                     // 분할한 값 따라 Record_table에 page 값 수정
-                                    await loadAndProcessLectureData(widget.lecturefileId);
-                                    
+                                    await loadAndProcessLectureData(
+                                        widget.lecturefileId);
+
                                     //나눈 페이지를 하나씩 firebase에 업로드 (수정필요)
                                     // for (var i = 0;
                                     //     i < pageScripts.entries.length;
@@ -1289,21 +1303,21 @@ for (int scriptIndex = 0; scriptIndex < scriptTexts.length; scriptIndex++) {
                                     //   progressNotifier.value =
                                     //       (i + 1) / pageScripts.entries.length;
 
-                                      // page 번호를 Record_table 데이터베이스에 삽입
-                                      // int pageIndex = int.parse(fileName
-                                      //     .replaceAll(RegExp(r'[^0-9]'), ''));
-                                      // await insertDividedScript(
-                                      //     colonFileId, pageIndex, responseUrl);
+                                    // page 번호를 Record_table 데이터베이스에 삽입
+                                    // int pageIndex = int.parse(fileName
+                                    //     .replaceAll(RegExp(r'[^0-9]'), ''));
+                                    // await insertDividedScript(
+                                    //     colonFileId, pageIndex, responseUrl);
 
-                                      //해당되는 record_url 열에 id를 받아와 해당 열에 page 삽입하기
+                                    //해당되는 record_url 열에 id를 받아와 해당 열에 page 삽입하기
 
                                     //   await file.delete();
                                     // }
 
                                     // (5)-1 CreatingDialog pop 하기
-                                    Navigator.of(context, rootNavigator: true).pop();
+                                    Navigator.of(context, rootNavigator: true)
+                                        .pop();
 
-                                    
                                     // (5)-2 CreatedDialog 호출하기
                                     //     이 안에서 생성된 콜론 화면으로 navigate
                                     showColonCreatedDialog(
