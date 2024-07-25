@@ -920,7 +920,7 @@ Future<void> showCustomMenu2(
 
   await showMenu<String>(
     context: context,
-    position: RelativeRect.fromLTRB(left, top, left + button.size.width, top),
+    position: RelativeRect.fromLTRB(left+ button.size.width, top, left , top),
     items: [
       const PopupMenuItem<String>(
         value: 'rename',
@@ -1497,9 +1497,10 @@ class LectureExample extends StatelessWidget {
                 return Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: GestureDetector(
-                    child: const Icon(
-                      Icons.more_vert,
-                    ),
+                    child: ImageIcon(
+                            AssetImage('assets/folder_menu.png'),
+                            color: Color.fromRGBO(255, 161, 122, 1),
+                          ),
                     onTap: () {
                       showCustomMenu(context, onRename, onDelete, onMove);
                     },
@@ -1776,10 +1777,15 @@ class FolderListItem extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              RenameDeletePopup(
-                onRename: onRename,
-                onDelete: onDelete,
-              ),
+             GestureDetector(
+                    child: ImageIcon(
+                            AssetImage('assets/folder_menu.png'),
+                            color: Color.fromRGBO(255, 161, 122, 1),
+                          ),
+                    onTap: () {
+                      showCustomMenu2(context, onRename, onDelete);
+                    },
+                  ),
             ],
           ),
         ],
