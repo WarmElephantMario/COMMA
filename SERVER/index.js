@@ -30,11 +30,10 @@ db.getConnection((err, connection) => {
 });
 
 // 사용자 ID 기반으로 강의 폴더 목록 가져오기
-app.get('/api/lecture-folders', (req, res) => {
-    const userKey = req.query.userKey;
-    const currentFolderId = req.query.currentFolderId;
+app.get('/api/lecture-folders/:userKey', (req, res) => {
+    const userKey = req.params.userKey;
     const sql = 'SELECT id, folder_name FROM LectureFolders WHERE userKey = ?';
-    db.query(sql, [userKey, currentFolderId], (err, result) => {
+    db.query(sql, [userKey], (err, result) => {
         if (err) throw err;
         res.send(result);
     });
