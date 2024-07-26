@@ -15,7 +15,7 @@ package="com.comma.myapp">
 
     <application
         
-        android:label="flutter_plugin"
+        android:label="COMMA"
 
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
