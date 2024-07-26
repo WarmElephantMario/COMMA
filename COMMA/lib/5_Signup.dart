@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_plugin/api/api.dart';
 import 'package:flutter_plugin/model/user.dart';
 import '6_verification.dart';
@@ -16,6 +16,7 @@ class FigmaToCodeApp5 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       theme: ThemeData.dark().copyWith(
         scaffoldBackgroundColor: const Color.fromARGB(255, 18, 32, 47),
       ),
@@ -146,11 +147,10 @@ class _SignUpPageState extends State<SignUpPage> {
           Fluttertoast.showToast(msg: "This Email Address is already in use.");
           return false;
         } else {
-
           print('validation success');
 
           //saveInfo();
-          
+
           // 이메일 인증번호 전송 API 호출
           var emailResponse = await http.post(
             Uri.parse('${API.baseUrl}/api/send_verification_code'),
@@ -161,7 +161,7 @@ class _SignUpPageState extends State<SignUpPage> {
           );
 
           print(emailResponse.statusCode);
-          if (emailResponse.statusCode == 200) {        
+          if (emailResponse.statusCode == 200) {
             // 인증번호 전송 완료 화면으로 이동
             // Navigator.push(
             //   context,
@@ -178,7 +178,6 @@ class _SignUpPageState extends State<SignUpPage> {
           }
         }
       }
-
     } catch (e) {
       print(e.toString());
       Fluttertoast.showToast(msg: e.toString());
@@ -254,177 +253,192 @@ class _SignUpPageState extends State<SignUpPage> {
           Column(
             children: [
               SizedBox(height: size.height * 0.17), // 높이를 화면 높이의 17%로 설정
-              const Text(
-                '계정 생성하기',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 20,
-                  fontFamily: 'DM Sans',
-                  fontWeight: FontWeight.w700,
+              Semantics(
+                sortKey: OrdinalSortKey(1.0),
+                child: const Text(
+                  '계정 생성하기',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 20,
+                    fontFamily: 'DM Sans',
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
               SizedBox(height: size.height * 0.02),
-              const Text(
-                '계정 생성을 위해 필요한 정보를\n정확히 입력해 주세요.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Color(0xFF245B3A),
-                  fontSize: 14,
-                  fontFamily: 'DM Sans',
-                  fontWeight: FontWeight.w500,
+              Semantics(
+                sortKey: OrdinalSortKey(2.0),
+                child: const Text(
+                  '계정 생성을 위해 필요한 정보를\n정확히 입력해 주세요.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Color(0xFF245B3A),
+                    fontSize: 14,
+                    fontFamily: 'DM Sans',
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
               SizedBox(height: size.height * 0.050),
-
-              Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    InputButton(
-                      label: 'Your ID',
-                      keyboardType: TextInputType.name,
-                      controller: idController,
-                    ),
-                    SizedBox(height: size.height * 0.035),
-                    InputButton(
-                      label: 'Password',
-                      obscureText: true,
-                      controller: passwordController,
-                    ),
-                    SizedBox(height: size.height * 0.035),
-                    InputButton(
-                      label: 'Email address',
-                      keyboardType: TextInputType.emailAddress,
-                      controller: emailController,
-                    ),
-                  ],
-                ),
-              ),
-
-              SizedBox(height: size.height * 0.060),
-
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: size.width * 0.05),
-                child: Container(
-                  width: size.width * 0.9,
-                  height: size.height * 0.065,
-                  decoration: ShapeDecoration(
-                    color: const Color.fromRGBO(54, 174, 146, 1.0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+              Semantics(
+                sortKey: OrdinalSortKey(3.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
                     children: [
-                      GestureDetector(
-                        onTap: () async {
-                          if (_formKey.currentState!.validate()) {
-                            bool isEmailValid = await checkUserEmail();
-                            if (isEmailValid) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => Verification_screen(
-                                    userEmail: emailController.text.trim(),
-                                    userId: idController.text.trim(),
-                                    userPassword: passwordController.text.trim(),
-                                )),
-                              );
-                            } else {
-                              print("인증 실패함");
-                            }
-                          }
-                        },
-                        child: const Text(
-                          '인증코드 전송하기',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontFamily: 'DM Sans',
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
+                      InputButton(
+                        label: '아이디',
+                        keyboardType: TextInputType.name,
+                        controller: idController,
                       ),
-                      const SizedBox(width: 8),
-                      const Icon(
-                        Icons.arrow_forward,
-                        color: Colors.white,
-                        size: 18,
+                      SizedBox(height: size.height * 0.035),
+                      InputButton(
+                        label: '비밀번호',
+                        obscureText: true,
+                        controller: passwordController,
+                      ),
+                      SizedBox(height: size.height * 0.035),
+                      InputButton(
+                        label: '이메일',
+                        keyboardType: TextInputType.emailAddress,
+                        controller: emailController,
                       ),
                     ],
                   ),
                 ),
               ),
-
+              SizedBox(height: size.height * 0.060),
+              Semantics(
+                sortKey: OrdinalSortKey(4.0),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: size.width * 0.05),
+                  child: Container(
+                    width: size.width * 0.9,
+                    height: size.height * 0.065,
+                    decoration: ShapeDecoration(
+                      color: const Color.fromRGBO(54, 174, 146, 1.0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: GestureDetector(
+                      onTap: () async {
+                        if (_formKey.currentState!.validate()) {
+                          bool isEmailValid = await checkUserEmail();
+                          if (isEmailValid) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Verification_screen(
+                                        userEmail: emailController.text.trim(),
+                                        userId: idController.text.trim(),
+                                        userPassword:
+                                            passwordController.text.trim(),
+                                      )),
+                            );
+                          } else {
+                            print("인증 실패함");
+                          }
+                        }
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            '인증코드 전송하기',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontFamily: 'DM Sans',
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Icon(
+                            Icons.arrow_forward,
+                            color: Colors.white,
+                            size: 18,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
               const SizedBox(
                 height: 120,
               ),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    '이미 계정이 있으신가요?',
-                    style: TextStyle(
-                      color: Color(0xFF36AE92),
-                      fontSize: 14,
-                      fontFamily: 'DM Sans',
-                      fontWeight: FontWeight.w500,
-                      height: 0.11,
-                    ),
-                  ),
-                  const SizedBox(width: 20),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const SigninPage()),
-                      );
-                    },
-                    child: const Text(
-                      '로그인',
+              Semantics(
+                sortKey: OrdinalSortKey(5.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      '이미 계정이 있으신가요?',
                       style: TextStyle(
-                        color: Colors.black,
+                        color: Color(0xFF36AE92),
                         fontSize: 14,
-                        fontWeight: FontWeight.bold,
+                        fontFamily: 'DM Sans',
+                        fontWeight: FontWeight.w500,
+                        height: 0.11,
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 20),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const SigninPage()),
+                        );
+                      },
+                      child: const Text(
+                        '로그인',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 15),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    '비밀번호를 잊으셨나요?',
-                    style: TextStyle(
-                      color: Color(0xFF36AE92),
-                      fontSize: 14,
-                      fontFamily: 'DM Sans',
-                      fontWeight: FontWeight.w500,
-                      height: 0.11,
-                    ),
-                  ),
-                  const SizedBox(width: 20),
-                  GestureDetector(
-                    onTap: () {
-                      // 비밀번호 찾기 화면 추가로 구현해야 함
-                      print('비밀번호 찾기 버튼이 클릭되었습니다.');
-                    },
-                    child: const Text(
-                      '비밀번호 찾기',
+              Semantics(
+                sortKey: OrdinalSortKey(6.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      '비밀번호를 잊으셨나요?',
                       style: TextStyle(
-                        color: Colors.black,
+                        color: Color(0xFF36AE92),
                         fontSize: 14,
-                        fontWeight: FontWeight.bold,
+                        fontFamily: 'DM Sans',
+                        fontWeight: FontWeight.w500,
+                        height: 0.11,
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 20),
+                    GestureDetector(
+                      onTap: () {
+                        // 비밀번호 찾기 화면 추가로 구현해야 함
+                        print('비밀번호 찾기 버튼이 클릭되었습니다.');
+                      },
+                      child: const Text(
+                        '비밀번호 찾기',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
