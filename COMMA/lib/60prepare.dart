@@ -30,8 +30,6 @@ class LearningPreparation extends StatefulWidget {
 
   @override
   _LearningPreparationState createState() => _LearningPreparationState();
-
-  
 }
 
 class ProgressNotifier extends ValueNotifier<double> {
@@ -39,7 +37,6 @@ class ProgressNotifier extends ValueNotifier<double> {
 
   String message;
 }
-
 
 class _LearningPreparationState extends State<LearningPreparation> {
   String? _selectedFileName;
@@ -504,7 +501,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
 
     try {
       List<String> allResponses = [];
-       _progressNotifier.value = 0.0;
+      _progressNotifier.value = 0.0;
       _progressNotifier.message = '강의 자료를 학습 중입니다';
 
       for (int i = 0; i < imageUrls.length; i++) {
@@ -603,39 +600,39 @@ class _LearningPreparationState extends State<LearningPreparation> {
   }
 
   Future<void> processFileWithGpt(List<String> imageUrls, int type) async {
-  String? responseUrl;
-  List<String>? keywords;
-  final userProvider = Provider.of<UserProvider>(context, listen: false);
+    String? responseUrl;
+    List<String>? keywords;
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
 
-  // 대체텍스트와 키워드를 모두 생성
-  responseUrl = await callChatGPT4APIForAlternativeText(
-      imageUrls, userProvider.user!.userKey, _selectedFileName!);
-  keywords = await callChatGPT4APIForKeywords(imageUrls);
+    // 대체텍스트와 키워드를 모두 생성
+    responseUrl = await callChatGPT4APIForAlternativeText(
+        imageUrls, userProvider.user!.userKey, _selectedFileName!);
+    keywords = await callChatGPT4APIForKeywords(imageUrls);
 
-  print("GPT-4 Response: $responseUrl");
-  print("GPT-4 keywords: $keywords");
+    print("GPT-4 Response: $responseUrl");
+    print("GPT-4 keywords: $keywords");
 
-  if (Navigator.canPop(context)) {
-    Navigator.of(context, rootNavigator: true).pop();
-  }
+    if (Navigator.canPop(context)) {
+      Navigator.of(context, rootNavigator: true).pop();
+    }
 
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => LectureStartPage(
-        lectureFolderId: lectureFolderId!,
-        lecturefileId: lecturefileId!, // Inserted ID 전달
-        lectureName: _selectedFileName!,
-        fileURL: _downloadURL!,
-        responseUrl: responseUrl ?? '', // null일 경우 빈 문자열 전달
-        type: type, // 대체인지 실시간인지 전달해줌
-        selectedFolder: _selectedFolder,
-        noteName: _noteName,
-        keywords: keywords ?? [], // 키워드 전달
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LectureStartPage(
+          lectureFolderId: lectureFolderId!,
+          lecturefileId: lecturefileId!, // Inserted ID 전달
+          lectureName: _selectedFileName!,
+          fileURL: _downloadURL!,
+          responseUrl: responseUrl ?? '', // null일 경우 빈 문자열 전달
+          type: type, // 대체인지 실시간인지 전달해줌
+          selectedFolder: _selectedFolder,
+          noteName: _noteName,
+          keywords: keywords ?? [], // 키워드 전달
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Future<List<String>> callChatGPT4APIForKeywords(
       List<String> imageUrls) async {
@@ -840,11 +837,10 @@ class _LearningPreparationState extends State<LearningPreparation> {
           const Text(
             '학습 유형을 선택해주세요.',
             style: TextStyle(
-              color: Color(0xFF575757),
-              fontSize: 16,
-              fontFamily: 'DM Sans',
-              fontWeight: FontWeight.bold
-            ),
+                color: Color(0xFF575757),
+                fontSize: 16,
+                fontFamily: 'DM Sans',
+                fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 15),
           CustomRadioButton(
@@ -866,11 +862,10 @@ class _LearningPreparationState extends State<LearningPreparation> {
           const Text(
             '강의폴더와 파일 이름을 설정해주세요.',
             style: TextStyle(
-              color: Color(0xFF575757),
-              fontSize: 16,
-              fontFamily: 'DM Sans',
-              fontWeight: FontWeight.bold
-            ),
+                color: Color(0xFF575757),
+                fontSize: 16,
+                fontFamily: 'DM Sans',
+                fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 15),
           Center(
@@ -986,23 +981,24 @@ class _LearningPreparationState extends State<LearningPreparation> {
                   if (_selectedFileName != null &&
                       _downloadURL != null &&
                       _isMaterialEmbedded) {
-
                     showLearningDialog(context, _selectedFileName!,
                         _downloadURL!, _progressNotifier);
 
                     try {
                       final userProvider =
                           Provider.of<UserProvider>(context, listen: false);
-                      int type = isAlternativeTextEnabled ? 0 : 1; // 대체면 0, 실시간이면 1
+                      int type =
+                          isAlternativeTextEnabled ? 0 : 1; // 대체면 0, 실시간이면 1
                       //데베에 fileUrl, lecturename, type
                       print(lecturefileId!);
                       print(type);
-                      await updateLectureDetails(lecturefileId!, _downloadURL!, _selectedFileName!, type);
+                      await updateLectureDetails(lecturefileId!, _downloadURL!,
+                          _selectedFileName!, type);
 
                       if (_fileBytes != null) {
-
                         if (_isPDF) {
-                          handlePdfUpload(_fileBytes!, userProvider.user!.userKey)
+                          handlePdfUpload(
+                                  _fileBytes!, userProvider.user!.userKey)
                               .then((imageUrls) async {
                             await processFileWithGpt(imageUrls, type);
                           });
@@ -1011,7 +1007,6 @@ class _LearningPreparationState extends State<LearningPreparation> {
                           List<String> fileUrls = [_downloadURL!];
                           await processFileWithGpt(fileUrls, type);
                         }
-
                       }
                     } catch (e) {
                       if (Navigator.canPop(context)) {
