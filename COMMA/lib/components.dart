@@ -250,90 +250,93 @@ void showConfirmationDialog(
   showDialog(
     context: context,
     builder: (BuildContext context) {
-      return AlertDialog(
-        backgroundColor: Colors.white,
-        title: Semantics(
-          sortKey: OrdinalSortKey(1.0),
-          child: Focus(
-            focusNode: titleFocusNode,
-            child: Text(
-              title,
-              style: const TextStyle(
-                color: Color(0xFF545454),
-                fontSize: 14,
-                fontFamily: 'DM Sans',
-                fontWeight: FontWeight.bold,
+      return Semantics(
+        label: '녹음을 종료하시겠습니까?',
+        child: AlertDialog(
+          backgroundColor: Colors.white,
+          title: Semantics(
+            sortKey: OrdinalSortKey(1.0),
+            child: Focus(
+              focusNode: titleFocusNode,
+              child: Text(
+                title,
+                style: const TextStyle(
+                  color: Color(0xFF545454),
+                  fontSize: 14,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
             ),
           ),
-        ),
-        content: Semantics(
-          sortKey: OrdinalSortKey(2.0),
-          child: Focus(
-            focusNode: contentFocusNode,
-            child: Text(
-              content,
-              style: const TextStyle(
-                color: Color(0xFF245B3A),
-                fontSize: 11,
-                fontFamily: 'DM Sans',
-                fontWeight: FontWeight.w200,
+          content: Semantics(
+            sortKey: OrdinalSortKey(2.0),
+            child: Focus(
+              focusNode: contentFocusNode,
+              child: Text(
+                content,
+                style: const TextStyle(
+                  color: Color(0xFF245B3A),
+                  fontSize: 11,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.w200,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
             ),
           ),
-        ),
-        actions: <Widget>[
-          Center(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Semantics(
-                  sortKey: OrdinalSortKey(3.0),
-                  child: Focus(
-                    focusNode: cancelFocusNode,
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text(
-                        '취소',
-                        style: TextStyle(
-                          color: Color(0xFFFFA17A),
-                          fontSize: 14,
-                          fontFamily: 'DM Sans',
-                          fontWeight: FontWeight.bold,
+          actions: <Widget>[
+            Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Semantics(
+                    sortKey: OrdinalSortKey(3.0),
+                    child: Focus(
+                      focusNode: cancelFocusNode,
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text(
+                          '취소',
+                          style: TextStyle(
+                            color: Color(0xFFFFA17A),
+                            fontSize: 14,
+                            fontFamily: 'DM Sans',
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                Semantics(
-                  sortKey: OrdinalSortKey(4.0),
-                  child: Focus(
-                    focusNode: confirmFocusNode,
-                    child: TextButton(
-                      onPressed: () {
-                        onConfirm();
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text(
-                        '확인',
-                        style: TextStyle(
-                          color: Color(0xFF545454),
-                          fontSize: 14,
-                          fontFamily: 'DM Sans',
-                          fontWeight: FontWeight.bold,
+                  Semantics(
+                    sortKey: OrdinalSortKey(4.0),
+                    child: Focus(
+                      focusNode: confirmFocusNode,
+                      child: TextButton(
+                        onPressed: () {
+                          onConfirm();
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text(
+                          '확인',
+                          style: TextStyle(
+                            color: Color(0xFF545454),
+                            fontSize: 14,
+                            fontFamily: 'DM Sans',
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       );
     },
   );
@@ -582,11 +585,10 @@ void showColonCreatedDialog(BuildContext context, String folderName,
   }
 }
 
-
-
 // Learning - 강의 자료 학습중 팝업
 void showLearningDialog(BuildContext context, String fileName, String fileURL,
-    ProgressNotifier progressNotifier) { // 변경된 부분: ProgressNotifier로 타입 변경
+    ProgressNotifier progressNotifier) {
+  // 변경된 부분: ProgressNotifier로 타입 변경
   showDialog(
     context: context,
     barrierDismissible: false,
@@ -635,7 +637,8 @@ void showLearningDialog(BuildContext context, String fileName, String fileURL,
                     ),
                     const SizedBox(height: 16),
                     const CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF36AE92)),
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(Color(0xFF36AE92)),
                       strokeWidth: 4.0,
                     ),
                     const SizedBox(height: 16),
@@ -658,7 +661,6 @@ void showLearningDialog(BuildContext context, String fileName, String fileURL,
     },
   );
 }
-
 
 //alarm
 //delete alarm
