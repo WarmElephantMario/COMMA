@@ -496,8 +496,10 @@ class _LearningPreparationState extends State<LearningPreparation> {
     2. Write as clearly and concisely as possible.
     3. When creating alternative text for images, do not indicate the position of the image. Instead, describe the image from top to bottom.
     4. Determine the type of visual content (table, diagram, graph, or other) and specify the format as [표], [그림], [그래프], etc., followed by the descriptive text.
-    5. For each slide, format the text as follows: Title: "이 페이지의 주제는 ~~~입니다."
-    6. Write all text in the slides as continuous prose without special characters that are hard to read aloud.
+      After the description, mark the end with "[표 끝]","[그림 끝]", "[그래프 끝]".
+    5. For each slide, format the text as follows: "이 페이지의 주제는 ~~~입니다."
+    6. Write all text in the slides as continuous prose without special characters that are hard to read aloud. This includes excluding emoticons, emojis, and other symbols that are difficult to read aloud.
+    7. Write numbers in words to ensure smooth reading. For example, "12번" should be written as "열두번" and "23번째" as "스물세 번째".
     ''';
 
     try {
