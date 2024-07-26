@@ -30,7 +30,16 @@ class LearningPreparation extends StatefulWidget {
 
   @override
   _LearningPreparationState createState() => _LearningPreparationState();
+
+  
 }
+
+class ProgressNotifier extends ValueNotifier<double> {
+  ProgressNotifier(double value, this.message) : super(value);
+
+  String message;
+}
+
 
 class _LearningPreparationState extends State<LearningPreparation> {
   String? _selectedFileName;
@@ -40,7 +49,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
   Uint8List? _fileBytes;
   bool _isPDF = false;
   late pdfx.PdfController _pdfController;
-  final ValueNotifier<double> _progressNotifier = ValueNotifier<double>(0.0);
+  final _progressNotifier = ProgressNotifier(0.0, '');
   String _selectedFolder = '폴더';
   String _noteName = '새로운 노트';
   List<Map<String, dynamic>> folderList = [];
@@ -458,6 +467,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
 
     for (int i = 0; i < images.length; i++) {
       _progressNotifier.value = (i + 1) / images.length; // 진행률 업데이트
+      _progressNotifier.message = '강의 자료를 서버에 업로드 중입니다';
 
       final storageRef = FirebaseStorage.instance.ref().child(
           'uploads/$userKey/${getFolderIdByName(_selectedFolder)}/$lecturefileId/pdf_handle/page_$i.jpg');
@@ -492,9 +502,12 @@ class _LearningPreparationState extends State<LearningPreparation> {
 
     try {
       List<String> allResponses = [];
+       _progressNotifier.value = 0.0;
+      _progressNotifier.message = '강의 자료를 학습 중입니다';
 
       for (int i = 0; i < imageUrls.length; i++) {
         var url = imageUrls[i];
+        _progressNotifier.value = (i + 1) / imageUrls.length;
         var messages = [
           {'role': 'system', 'content': promptForAlternativeText},
           {
@@ -793,9 +806,10 @@ class _LearningPreparationState extends State<LearningPreparation> {
               color: Color(0xFF575757),
               fontSize: 16,
               fontFamily: 'DM Sans',
+              fontWeight: FontWeight.bold
             ),
           ),
-          const SizedBox(height: 30),
+          const SizedBox(height: 15),
           CustomRadioButton(
             label: '대체텍스트 생성',
             value: true,
@@ -813,14 +827,15 @@ class _LearningPreparationState extends State<LearningPreparation> {
           ),
           const SizedBox(height: 50),
           const Text(
-            '강의폴더와 파일 이름을 설정해주세요 .',
+            '강의폴더와 파일 이름을 설정해주세요.',
             style: TextStyle(
               color: Color(0xFF575757),
               fontSize: 16,
               fontFamily: 'DM Sans',
+              fontWeight: FontWeight.bold
             ),
           ),
-          const SizedBox(height: 30),
+          const SizedBox(height: 15),
           Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -848,10 +863,10 @@ class _LearningPreparationState extends State<LearningPreparation> {
                           child: Text(
                             '폴더 분류 > $_selectedFolder',
                             style: const TextStyle(
-                              fontSize: 16,
+                              fontSize: 15.5,
                               fontFamily: 'DM Sans',
                               color: Color.fromARGB(255, 70, 70, 70),
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w200,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -883,10 +898,10 @@ class _LearningPreparationState extends State<LearningPreparation> {
                           child: Text(
                             _noteName,
                             style: const TextStyle(
-                              fontSize: 16,
+                              fontSize: 15.5,
                               fontFamily: 'DM Sans',
                               color: Color.fromARGB(255, 70, 70, 70),
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w200,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -930,11 +945,14 @@ class _LearningPreparationState extends State<LearningPreparation> {
                   print("Starting learning with file: $_selectedFileName");
                   print("대체텍스트 선택 여부: $isAlternativeTextEnabled");
                   print("실시간자막 선택 여부: $isRealTimeSttEnabled");
+
                   if (_selectedFileName != null &&
                       _downloadURL != null &&
                       _isMaterialEmbedded) {
+
                     showLearningDialog(context, _selectedFileName!,
                         _downloadURL!, _progressNotifier);
+
                     try {
                       final userProvider =
                           Provider.of<UserProvider>(context, listen: false);
