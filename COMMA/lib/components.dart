@@ -1344,7 +1344,7 @@ class _CustomRadioButtonState extends State<CustomRadioButton> {
               fontSize: 16,
               fontFamily: 'DM Sans',
               color: Color.fromARGB(255, 70, 70, 70),
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w200,
             ),
           ),
         ],
