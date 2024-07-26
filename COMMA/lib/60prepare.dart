@@ -30,7 +30,16 @@ class LearningPreparation extends StatefulWidget {
 
   @override
   _LearningPreparationState createState() => _LearningPreparationState();
+
+  
 }
+
+class ProgressNotifier extends ValueNotifier<double> {
+  ProgressNotifier(double value, this.message) : super(value);
+
+  String message;
+}
+
 
 class _LearningPreparationState extends State<LearningPreparation> {
   String? _selectedFileName;
@@ -40,7 +49,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
   Uint8List? _fileBytes;
   bool _isPDF = false;
   late pdfx.PdfController _pdfController;
-  final ValueNotifier<double> _progressNotifier = ValueNotifier<double>(0.0);
+  final _progressNotifier = ProgressNotifier(0.0, '');
   String _selectedFolder = '폴더';
   String _noteName = '새로운 노트';
   List<Map<String, dynamic>> folderList = [];
@@ -458,6 +467,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
 
     for (int i = 0; i < images.length; i++) {
       _progressNotifier.value = (i + 1) / images.length; // 진행률 업데이트
+      _progressNotifier.message = '강의 자료를 서버에 업로드 중입니다';
 
       final storageRef = FirebaseStorage.instance.ref().child(
           'uploads/$userKey/${getFolderIdByName(_selectedFolder)}/$lecturefileId/pdf_handle/page_$i.jpg');
@@ -492,9 +502,12 @@ class _LearningPreparationState extends State<LearningPreparation> {
 
     try {
       List<String> allResponses = [];
+       _progressNotifier.value = 0.0;
+      _progressNotifier.message = '강의 자료를 학습 중입니다';
 
       for (int i = 0; i < imageUrls.length; i++) {
         var url = imageUrls[i];
+        _progressNotifier.value = (i + 1) / imageUrls.length;
         var messages = [
           {'role': 'system', 'content': promptForAlternativeText},
           {
@@ -939,7 +952,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
 
                     showLearningDialog(context, _selectedFileName!,
                         _downloadURL!, _progressNotifier);
-                        
+
                     try {
                       final userProvider =
                           Provider.of<UserProvider>(context, listen: false);
