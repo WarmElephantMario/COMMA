@@ -600,6 +600,41 @@ class _LearningPreparationState extends State<LearningPreparation> {
     }
   }
 
+  Future<void> processFileWithGpt(List<String> imageUrls, int type) async {
+  String? responseUrl;
+  List<String>? keywords;
+  final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+  // 대체텍스트와 키워드를 모두 생성
+  responseUrl = await callChatGPT4APIForAlternativeText(
+      imageUrls, userProvider.user!.userKey, _selectedFileName!);
+  keywords = await callChatGPT4APIForKeywords(imageUrls);
+
+  print("GPT-4 Response: $responseUrl");
+  print("GPT-4 keywords: $keywords");
+
+  if (Navigator.canPop(context)) {
+    Navigator.of(context, rootNavigator: true).pop();
+  }
+
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => LectureStartPage(
+        lectureFolderId: lectureFolderId!,
+        lecturefileId: lecturefileId!, // Inserted ID 전달
+        lectureName: _selectedFileName!,
+        fileURL: _downloadURL!,
+        responseUrl: responseUrl ?? '', // null일 경우 빈 문자열 전달
+        type: type, // 대체인지 실시간인지 전달해줌
+        selectedFolder: _selectedFolder,
+        noteName: _noteName,
+        keywords: keywords ?? [], // 키워드 전달
+      ),
+    ),
+  );
+}
+
   Future<List<String>> callChatGPT4APIForKeywords(
       List<String> imageUrls) async {
     const String apiKey = Env.apiKey;
@@ -956,51 +991,25 @@ class _LearningPreparationState extends State<LearningPreparation> {
                     try {
                       final userProvider =
                           Provider.of<UserProvider>(context, listen: false);
-                      int type =
-                          isAlternativeTextEnabled ? 0 : 1; // 대체면 0, 실시간이면 1
+                      int type = isAlternativeTextEnabled ? 0 : 1; // 대체면 0, 실시간이면 1
                       //데베에 fileUrl, lecturename, type
                       print(lecturefileId!);
                       print(type);
-                      await updateLectureDetails(lecturefileId!, _downloadURL!,
-                          _selectedFileName!, type);
+                      await updateLectureDetails(lecturefileId!, _downloadURL!, _selectedFileName!, type);
 
-                      if (_isPDF && _fileBytes != null) {
-                        handlePdfUpload(_fileBytes!, userProvider.user!.userKey)
-                            .then((imageUrls) async {
-                          String? responseUrl;
-                          List<String>? keywords;
+                      if (_fileBytes != null) {
 
-                          // 대체텍스트와 키워드를 모두 생성
-                          responseUrl = await callChatGPT4APIForAlternativeText(
-                              imageUrls,
-                              userProvider.user!.userKey,
-                              _selectedFileName!);
-                          keywords =
-                              await callChatGPT4APIForKeywords(imageUrls);
+                        if (_isPDF) {
+                          handlePdfUpload(_fileBytes!, userProvider.user!.userKey)
+                              .then((imageUrls) async {
+                            await processFileWithGpt(imageUrls, type);
+                          });
+                        } else {
+                          // PDF가 아닌 경우 직접 파일 URL을 사용하여 GPT-4 API 호출
+                          List<String> fileUrls = [_downloadURL!];
+                          await processFileWithGpt(fileUrls, type);
+                        }
 
-                          print("GPT-4 Response: $responseUrl");
-                          print("GPT-4 keywords: $keywords");
-                          if (Navigator.canPop(context)) {
-                            Navigator.of(context, rootNavigator: true).pop();
-                          }
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => LectureStartPage(
-                                lectureFolderId: lectureFolderId!,
-                                lecturefileId: lecturefileId!, // Inserted ID 전달
-                                lectureName: _selectedFileName!,
-                                fileURL: _downloadURL!,
-                                responseUrl:
-                                    responseUrl ?? '', // null일 경우 빈 문자열 전달
-                                type: type, // 대체인지 실시간인지 전달해줌
-                                selectedFolder: _selectedFolder,
-                                noteName: _noteName,
-                                keywords: keywords ?? [], // 키워드 전달
-                              ),
-                            ),
-                          );
-                        });
                       }
                     } catch (e) {
                       if (Navigator.canPop(context)) {
