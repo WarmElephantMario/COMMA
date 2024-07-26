@@ -789,9 +789,10 @@ class _LearningPreparationState extends State<LearningPreparation> {
               color: Color(0xFF575757),
               fontSize: 16,
               fontFamily: 'DM Sans',
+              fontWeight: FontWeight.bold
             ),
           ),
-          const SizedBox(height: 30),
+          const SizedBox(height: 15),
           CustomRadioButton(
             label: '대체텍스트 생성',
             value: true,
@@ -809,14 +810,15 @@ class _LearningPreparationState extends State<LearningPreparation> {
           ),
           const SizedBox(height: 50),
           const Text(
-            '강의폴더와 파일 이름을 설정해주세요 .',
+            '강의폴더와 파일 이름을 설정해주세요.',
             style: TextStyle(
               color: Color(0xFF575757),
               fontSize: 16,
               fontFamily: 'DM Sans',
+              fontWeight: FontWeight.bold
             ),
           ),
-          const SizedBox(height: 30),
+          const SizedBox(height: 15),
           Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -844,10 +846,10 @@ class _LearningPreparationState extends State<LearningPreparation> {
                           child: Text(
                             '폴더 분류 > $_selectedFolder',
                             style: const TextStyle(
-                              fontSize: 16,
+                              fontSize: 15.5,
                               fontFamily: 'DM Sans',
                               color: Color.fromARGB(255, 70, 70, 70),
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w200,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -879,10 +881,10 @@ class _LearningPreparationState extends State<LearningPreparation> {
                           child: Text(
                             _noteName,
                             style: const TextStyle(
-                              fontSize: 16,
+                              fontSize: 15.5,
                               fontFamily: 'DM Sans',
                               color: Color.fromARGB(255, 70, 70, 70),
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w200,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -926,11 +928,14 @@ class _LearningPreparationState extends State<LearningPreparation> {
                   print("Starting learning with file: $_selectedFileName");
                   print("대체텍스트 선택 여부: $isAlternativeTextEnabled");
                   print("실시간자막 선택 여부: $isRealTimeSttEnabled");
+
                   if (_selectedFileName != null &&
                       _downloadURL != null &&
                       _isMaterialEmbedded) {
+
                     showLearningDialog(context, _selectedFileName!,
                         _downloadURL!, _progressNotifier);
+                        
                     try {
                       final userProvider =
                           Provider.of<UserProvider>(context, listen: false);
