@@ -500,6 +500,8 @@ class _LearningPreparationState extends State<LearningPreparation> {
     5. For each slide, format the text as follows: "이 페이지의 주제는 ~~~입니다."
     6. Write all text in the slides as continuous prose without special characters that are hard to read aloud. This includes excluding emoticons, emojis, and other symbols that are difficult to read aloud.
     7. Write numbers in words to ensure smooth reading. For example, "12번" should be written as "열두번" and "23번째" as "스물세 번째".
+    8. For mathematical formulas and symbols, write them out in text form so that they can be read aloud properly by a screen reader. This includes symbols like sigma, square root, alpha, beta, etc.
+    9.If mathematical symbols appear, convert them into text form based on your judgment, ensuring that the symbols are not written as they are but transformed into readable text.
     ''';
 
     try {
@@ -811,6 +813,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
       print('Failed to insert into Alt_table2');
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
