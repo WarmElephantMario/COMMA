@@ -50,23 +50,15 @@ BottomNavigationBar buildBottomNavigationBar(
     backgroundColor: Colors.white,
     type: BottomNavigationBarType.fixed,
     onTap: handleItemTap,
-    items: const [
-      BottomNavigationBarItem(
-        icon: ImageIcon(AssetImage('assets/navigation_bar/home.png')),
-        label: 'HOME',
-      ),
-      BottomNavigationBarItem(
-        icon: ImageIcon(AssetImage('assets/navigation_bar/folder.png')),
-        label: '폴더',
-      ),
-      BottomNavigationBarItem(
-        icon: ImageIcon(AssetImage('assets/navigation_bar/learningstart.png')),
-        label: '학습 시작',
-      ),
-      BottomNavigationBarItem(
-        icon: ImageIcon(AssetImage('assets/navigation_bar/mypage.png')),
-        label: '마이페이지',
-      ),
+    items: [
+      buildBottomNavigationBarItem(
+          context, currentIndex, 0, 'assets/navigation_bar/home.png', 'HOME'),
+      buildBottomNavigationBarItem(context, currentIndex, 1,
+          'assets/navigation_bar/folder.png', '폴더'),
+      buildBottomNavigationBarItem(context, currentIndex, 2,
+          'assets/navigation_bar/learningstart.png', '학습 시작'),
+      buildBottomNavigationBarItem(context, currentIndex, 3,
+          'assets/navigation_bar/mypage.png', '마이페이지'),
     ],
     selectedItemColor: Colors.teal,
     unselectedItemColor: Colors.black,
@@ -86,6 +78,50 @@ BottomNavigationBar buildBottomNavigationBar(
     ),
   );
 }
+
+BottomNavigationBarItem buildBottomNavigationBarItem(
+    BuildContext context,
+    int currentIndex,
+    int index,
+    String iconPath,
+    String label) {
+  final bool isSelected = currentIndex == index;
+
+  return BottomNavigationBarItem(
+    icon: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ImageIcon(
+          AssetImage(iconPath),
+          color: isSelected ? Colors.teal : Colors.black,
+        ),
+        const SizedBox(height: 4), // 아이콘과 라벨 사이의 간격 조정
+        Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.teal : Colors.black,
+            fontSize: 9,
+            fontFamily: 'DM Sans',
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        if (isSelected)
+          Container(
+            margin: const EdgeInsets.only(top: 2),
+            height: 2,
+            width: 40, // 바의 길이를 조정
+            color: Colors.teal,
+          ),
+      ],
+    ),
+    label: '',
+  );
+}
+
+
+
+
+
 
 Future<List<Map<String, String>>> fetchFolders() async {
   final response =
