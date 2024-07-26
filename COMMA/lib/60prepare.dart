@@ -484,6 +484,10 @@ class _LearningPreparationState extends State<LearningPreparation> {
     Conditions: 
     1. Write the text included in the lecture materials without any modifications. 
     2. Write as clearly and concisely as possible.
+    3. When creating alternative text for images, do not indicate the position of the image. Instead, describe the image from top to bottom.
+    4. Determine the type of visual content (table, diagram, graph, or other) and specify the format as [표], [그림], [그래프], etc., followed by the descriptive text.
+    5. For each slide, format the text as follows: Title: "이 페이지의 주제는 ~~~입니다."
+    6. Write all text in the slides as continuous prose without special characters that are hard to read aloud.
     ''';
 
     try {
