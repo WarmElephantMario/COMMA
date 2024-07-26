@@ -18,7 +18,7 @@ package="com.comma.myapp">
         android:label="COMMA"
 
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/app_comma">
         
         <activity
             android:name=".MainActivity"
