@@ -49,10 +49,22 @@ class _LearningPreparationState extends State<LearningPreparation> {
   int? lecturefileId;
   int? lectureFolderId;
 
+  final FocusNode _focusNode = FocusNode(); // 추가된 부분
+
   @override
   void initState() {
     super.initState();
     fetchFolderList();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNode.requestFocus(); // 페이지 빌드 후 초점을 설정하는 부분
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose(); // 추가된 부분
+    super.dispose();
   }
 
   void _onItemTapped(int index) {
@@ -153,136 +165,137 @@ class _LearningPreparationState extends State<LearningPreparation> {
   }
 
   void showQuickMenu(
-    BuildContext context,
-    Future<void> Function() fetchOtherFolders,
-    List<Map<String, dynamic>> folders,
-    Function(String) selectFolder) async {
-  print('Attempting to fetch other folders.');
-  await fetchOtherFolders();
-  print('Updating folders with selection state.');
+      BuildContext context,
+      Future<void> Function() fetchOtherFolders,
+      List<Map<String, dynamic>> folders,
+      Function(String) selectFolder) async {
+    print('Attempting to fetch other folders.');
+    await fetchOtherFolders();
+    print('Updating folders with selection state.');
 
-  // updatedFolders는 fetchOtherFolders 호출 후 업데이트된 folderList를 사용합니다.
-  var updatedFolders = folderList.map((folder) {
-    bool isSelected = folder['folder_name'] == _selectedFolder;
-    return {
-      ...folder,
-      'selected': isSelected,
-    };
-  }).toList();
+    // updatedFolders는 fetchOtherFolders 호출 후 업데이트된 folderList를 사용합니다.
+    var updatedFolders = folderList.map((folder) {
+      bool isSelected = folder['folder_name'] == _selectedFolder;
+      return {
+        ...folder,
+        'selected': isSelected,
+      };
+    }).toList();
 
-  print('Updated folders: $updatedFolders');
+    print('Updated folders: $updatedFolders');
 
-  showModalBottomSheet(
-    context: context,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(20),
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(20),
+        ),
       ),
-    ),
-    backgroundColor: Colors.white,
-    builder: (BuildContext context) {
-      return StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text(
-                        '취소',
+      backgroundColor: Colors.white,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Text(
+                          '취소',
+                          style: TextStyle(
+                            color: Color.fromRGBO(84, 84, 84, 1),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      const Text(
+                        '다음으로 이동',
                         style: TextStyle(
-                          color: Color.fromRGBO(84, 84, 84, 1),
+                          color: Colors.black,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ),
-                    const Text(
-                      '다음으로 이동',
+                      TextButton(
+                        onPressed: () async {
+                          final selectedFolder = updatedFolders.firstWhere(
+                              (folder) => folder['selected'] == true,
+                              orElse: () => {});
+                          if (selectedFolder.isNotEmpty) {
+                            selectFolder(selectedFolder['folder_name']);
+                          }
+                          Navigator.pop(context);
+                        },
+                        child: const Text(
+                          '이동',
+                          style: TextStyle(
+                            color: Color.fromRGBO(255, 161, 122, 1),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  const Center(
+                    child: Text(
+                      '다른 폴더로 이동할 수 있어요.',
                       style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF575757),
+                        fontSize: 13,
+                        fontFamily: 'Raleway',
+                        fontWeight: FontWeight.w500,
+                        height: 1.5,
                       ),
-                    ),
-                    TextButton(
-                      onPressed: () async {
-                        final selectedFolder = updatedFolders.firstWhere(
-                            (folder) => folder['selected'] == true,
-                            orElse: () => {});
-                        if (selectedFolder.isNotEmpty) {
-                          selectFolder(selectedFolder['folder_name']);
-                        }
-                        Navigator.pop(context);
-                      },
-                      child: const Text(
-                        '이동',
-                        style: TextStyle(
-                          color: Color.fromRGBO(255, 161, 122, 1),
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 2),
-                const Center(
-                  child: Text(
-                    '다른 폴더로 이동할 수 있어요.',
-                    style: TextStyle(
-                      color: Color(0xFF575757),
-                      fontSize: 13,
-                      fontFamily: 'Raleway',
-                      fontWeight: FontWeight.w500,
-                      height: 1.5,
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: updatedFolders.map((folder) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 5),
-                      child: Wrap(
-                        children: [
-                          Expanded(
-                            child: CustomRadioButton2(
-                              label: folder['folder_name'],
-                              isSelected: folder['selected'] ?? false,
-                              onChanged: (bool isSelected) {
-                                setState(() {
-                                  for (var f in updatedFolders) {
-                                    f['selected'] = false;
-                                  }
-                                  folder['selected'] = isSelected;
-                                });
-                                print('Folder selected: ${folder['folder_name']}');
-                              },
+                  const SizedBox(height: 16),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: updatedFolders.map((folder) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 5),
+                        child: Wrap(
+                          children: [
+                            Expanded(
+                              child: CustomRadioButton2(
+                                label: folder['folder_name'],
+                                isSelected: folder['selected'] ?? false,
+                                onChanged: (bool isSelected) {
+                                  setState(() {
+                                    for (var f in updatedFolders) {
+                                      f['selected'] = false;
+                                    }
+                                    folder['selected'] = isSelected;
+                                  });
+                                  print(
+                                      'Folder selected: ${folder['folder_name']}');
+                                },
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ],
-            ),
-          );
-        },
-      );
-    },
-  );
-}
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 
   void showRenameDialog2(
     BuildContext context,
@@ -473,103 +486,102 @@ class _LearningPreparationState extends State<LearningPreparation> {
     2. Write as clearly and concisely as possible.
     ''';
 
-  try {
-    List<String> allResponses = [];
+    try {
+      List<String> allResponses = [];
 
-    for (int i = 0; i < imageUrls.length; i++) {
-      var url = imageUrls[i];
-      var messages = [
-        {'role': 'system', 'content': promptForAlternativeText},
-        {
-          'role': 'user',
-          'content': [
-            {'type': 'text', 'text': promptForAlternativeText},
-            {
-              'type': 'image_url',
-              'image_url': {'url': url}
-            }
-          ]
+      for (int i = 0; i < imageUrls.length; i++) {
+        var url = imageUrls[i];
+        var messages = [
+          {'role': 'system', 'content': promptForAlternativeText},
+          {
+            'role': 'user',
+            'content': [
+              {'type': 'text', 'text': promptForAlternativeText},
+              {
+                'type': 'image_url',
+                'image_url': {'url': url}
+              }
+            ]
+          }
+        ];
+
+        var data = {"model": "gpt-4o", "messages": messages, "max_tokens": 500};
+
+        var apiResponse = await http.post(
+          apiUrl,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $apiKey',
+          },
+          body: jsonEncode(data),
+        );
+
+        if (apiResponse.statusCode == 200) {
+          var responseBody = utf8.decode(apiResponse.bodyBytes);
+          var decodedResponse = jsonDecode(responseBody);
+          var gptResponse = decodedResponse['choices'][0]['message']['content'];
+          print('GPT-4 response content for image URL: $url');
+          print(gptResponse);
+          String pageResponse =
+              '[${i + 1} 페이지 설명 시작]\n$gptResponse\n[${i + 1} 페이지 설명 끝] // \n';
+          allResponses.add(pageResponse);
+
+          // Create a temporary text file for each page
+          final directory = await getTemporaryDirectory();
+          final filePath = path.join(directory.path, 'page_$i.txt');
+
+          final file = File(filePath);
+          await file.writeAsString(pageResponse);
+
+          // Upload the file to Firebase
+          final storageRef = FirebaseStorage.instance.ref().child(
+              //쪼개 대체
+              'div_alttxt/$userKey/${getFolderIdByName(_selectedFolder)}/$lecturefileId/page_$i.txt');
+          UploadTask uploadTask = storageRef.putFile(file);
+
+          TaskSnapshot taskSnapshot = await uploadTask;
+          String responseUrl = await taskSnapshot.ref.getDownloadURL();
+          print('GPT Response stored URL: $responseUrl');
+
+          // Insert into database
+          await insertIntoAltTable(lecturefileId!, responseUrl, i);
+
+          // Delete the temporary file
+          await file.delete();
+        } else {
+          var responseBody = utf8.decode(apiResponse.bodyBytes);
+          print('Error calling ChatGPT-4 API: ${apiResponse.statusCode}');
+          print('Response body: $responseBody');
         }
-      ];
-
-      var data = {"model": "gpt-4o", "messages": messages, "max_tokens": 500};
-
-      var apiResponse = await http.post(
-        apiUrl,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $apiKey',
-        },
-        body: jsonEncode(data),
-      );
-
-      if (apiResponse.statusCode == 200) {
-        var responseBody = utf8.decode(apiResponse.bodyBytes);
-        var decodedResponse = jsonDecode(responseBody);
-        var gptResponse = decodedResponse['choices'][0]['message']['content'];
-        print('GPT-4 response content for image URL: $url');
-        print(gptResponse);
-        String pageResponse = '[${i + 1} 페이지 설명 시작]\n$gptResponse\n[${i + 1} 페이지 설명 끝] // \n';
-        allResponses.add(pageResponse);
-
-        // Create a temporary text file for each page
-        final directory = await getTemporaryDirectory();
-        final filePath = path.join(directory.path, 'page_$i.txt');
-
-        final file = File(filePath);
-        await file.writeAsString(pageResponse);
-
-        // Upload the file to Firebase
-        final storageRef = FirebaseStorage.instance.ref().child(
-          //쪼개 대체 
-            'div_alttxt/$userKey/${getFolderIdByName(_selectedFolder)}/$lecturefileId/page_$i.txt');
-        UploadTask uploadTask = storageRef.putFile(file);
-
-        TaskSnapshot taskSnapshot = await uploadTask;
-        String responseUrl = await taskSnapshot.ref.getDownloadURL();
-        print('GPT Response stored URL: $responseUrl');
-
-        // Insert into database
-        await insertIntoAltTable(lecturefileId!, responseUrl, i);
-
-        // Delete the temporary file
-        await file.delete();
-      } else {
-        var responseBody = utf8.decode(apiResponse.bodyBytes);
-        print('Error calling ChatGPT-4 API: ${apiResponse.statusCode}');
-        print('Response body: $responseBody');
       }
+
+      String finalResponse = allResponses.join();
+
+      final directory = await getTemporaryDirectory();
+      final filePath = path.join(
+          directory.path, '${DateTime.now().millisecondsSinceEpoch}.txt');
+
+      final file = File(filePath);
+      await file.writeAsString(finalResponse);
+
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+      // 통 대체
+      final storageRef = FirebaseStorage.instance.ref().child(
+          'response/${userProvider.user!.userKey}/${getFolderIdByName(_selectedFolder)}/$lecturefileId/${path.basename(filePath)}');
+      UploadTask uploadTask = storageRef.putFile(file);
+
+      TaskSnapshot taskSnapshot = await uploadTask;
+      String responseUrl = await taskSnapshot.ref.getDownloadURL();
+      print('GPT Response stored URL: $responseUrl');
+
+      await file.delete();
+      return responseUrl;
+    } catch (e) {
+      print('Error: $e');
+      return 'Error: $e';
     }
-
-    String finalResponse = allResponses.join();
-
-    final directory = await getTemporaryDirectory();
-    final filePath = path.join(
-        directory.path, '${DateTime.now().millisecondsSinceEpoch}.txt');
-
-    final file = File(filePath);
-    await file.writeAsString(finalResponse);
-
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-
-    // 통 대체
-    final storageRef = FirebaseStorage.instance.ref().child(
-        'response/${userProvider.user!.userKey}/${getFolderIdByName(_selectedFolder)}/$lecturefileId/${path.basename(filePath)}');
-    UploadTask uploadTask = storageRef.putFile(file);
-
-    TaskSnapshot taskSnapshot = await uploadTask;
-    String responseUrl = await taskSnapshot.ref.getDownloadURL();
-    print('GPT Response stored URL: $responseUrl');
-
-    await file.delete();
-    return responseUrl;
-  } catch (e) {
-    print('Error: $e');
-    return 'Error: $e';
   }
-}
-
-
 
   Future<List<String>> callChatGPT4APIForKeywords(
       List<String> imageUrls) async {
@@ -725,25 +737,26 @@ class _LearningPreparationState extends State<LearningPreparation> {
   }
 
   //쪼개 대체 데베 삽입
-  Future<void> insertIntoAltTable(int lecturefileId, String url, int page) async {
-  final response = await http.post(
-    Uri.parse('${API.baseUrl}/api/alt-table2'),
-    headers: <String, String>{
-      'Content-Type': 'application/json; charset=UTF-8',
-    },
-    body: jsonEncode(<String, dynamic>{
-      'lecturefile_id': lecturefileId,
-      'alternative_text_url': url,
-      'page': page,
-    }),
-  );
+  Future<void> insertIntoAltTable(
+      int lecturefileId, String url, int page) async {
+    final response = await http.post(
+      Uri.parse('${API.baseUrl}/api/alt-table2'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, dynamic>{
+        'lecturefile_id': lecturefileId,
+        'alternative_text_url': url,
+        'page': page,
+      }),
+    );
 
-  if (response.statusCode == 200) {
-    print('Successfully inserted into Alt_table2');
-  } else {
-    print('Failed to insert into Alt_table2');
+    if (response.statusCode == 200) {
+      print('Successfully inserted into Alt_table2');
+    } else {
+      print('Failed to insert into Alt_table2');
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -754,13 +767,19 @@ class _LearningPreparationState extends State<LearningPreparation> {
         padding: const EdgeInsets.all(16.0),
         children: [
           const SizedBox(height: 15),
-          const Text(
-            '오늘의 학습 준비하기',
-            style: TextStyle(
-              color: Color(0xFF414141),
-              fontSize: 24,
-              fontFamily: 'DM Sans',
-              fontWeight: FontWeight.bold,
+          Focus(
+            focusNode: _focusNode, // 추가된 부분
+            child: Semantics(
+              focusable: true,
+              child: const Text(
+                '오늘의 학습 준비하기',
+                style: TextStyle(
+                  color: Color(0xFF414141),
+                  fontSize: 24,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 30),
@@ -802,68 +821,74 @@ class _LearningPreparationState extends State<LearningPreparation> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                GestureDetector(
-                  onTap: () {
-                    int currentFolderId =
-                        folderList.isNotEmpty ? folderList.first['id'] : 0;
-                    // showQuickMenu 호출
-                    showQuickMenu(
-                      context,
-                      () => fetchOtherFolders('lecture', currentFolderId),
-                      folderList,
-                      _selectFolder,
-                    );
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset('assets/folder_search.png'),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          '폴더 분류 > $_selectedFolder',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontFamily: 'DM Sans',
-                            color: Color.fromARGB(255, 70, 70, 70),
-                            fontWeight: FontWeight.w500,
+                Semantics(
+                  label: '저장할 폴더를 선택하세요',
+                  child: GestureDetector(
+                    onTap: () {
+                      int currentFolderId =
+                          folderList.isNotEmpty ? folderList.first['id'] : 0;
+                      // showQuickMenu 호출
+                      showQuickMenu(
+                        context,
+                        () => fetchOtherFolders('lecture', currentFolderId),
+                        folderList,
+                        _selectFolder,
+                      );
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset('assets/folder_search.png'),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            '폴더 분류 > $_selectedFolder',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontFamily: 'DM Sans',
+                              color: Color.fromARGB(255, 70, 70, 70),
+                              fontWeight: FontWeight.w500,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
-                GestureDetector(
-                  onTap: () {
-                    showRenameDialog2(
-                        context,
-                        _noteName,
-                        renameItem,
-                        setState,
-                        "파일 이름 바꾸기", // 다이얼로그 제목
-                        "file_name" // 변경할 항목 타입
-                        );
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset('assets/text.png'),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
+                Semantics(
+                  label: '파일 이름을 설정하세요',
+                  child: GestureDetector(
+                    onTap: () {
+                      showRenameDialog2(
+                          context,
                           _noteName,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontFamily: 'DM Sans',
-                            color: Color.fromARGB(255, 70, 70, 70),
-                            fontWeight: FontWeight.w500,
+                          renameItem,
+                          setState,
+                          "파일 이름 바꾸기", // 다이얼로그 제목
+                          "file_name" // 변경할 항목 타입
+                          );
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset('assets/text.png'),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _noteName,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontFamily: 'DM Sans',
+                              color: Color.fromARGB(255, 70, 70, 70),
+                              fontWeight: FontWeight.w500,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -944,7 +969,8 @@ class _LearningPreparationState extends State<LearningPreparation> {
                                 lecturefileId: lecturefileId!, // Inserted ID 전달
                                 lectureName: _selectedFileName!,
                                 fileURL: _downloadURL!,
-                                responseUrl: responseUrl ?? '', // null일 경우 빈 문자열 전달
+                                responseUrl:
+                                    responseUrl ?? '', // null일 경우 빈 문자열 전달
                                 type: type, // 대체인지 실시간인지 전달해줌
                                 selectedFolder: _selectedFolder,
                                 noteName: _noteName,

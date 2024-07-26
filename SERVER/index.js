@@ -547,7 +547,7 @@ app.post('/api/lecture-files', (req, res) => {
     const sql = 'INSERT INTO LectureFiles (folder_id, file_name, file_url, lecture_name, type) VALUES (?, ?, ?, ?, ?)';
     db.query(sql, [folder_id, file_name, file_url, lecture_name, type], (err, result) => {
         if (err) {
-            print(res.body);
+            // print(res.body);
             return res.status(500).json({ success: false, error: err.message });
         }
         res.json({ success: true, id: result.insertId, folder_id, file_name, file_url, lecture_name, type });

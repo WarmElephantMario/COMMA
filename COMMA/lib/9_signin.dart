@@ -57,7 +57,7 @@ class _SigninPageState extends State<SigninPage> {
         print(resLogin);
 
         if (resLogin['success'] == true) {
-          Fluttertoast.showToast(msg: 'login successfully');
+          Fluttertoast.showToast(msg: '로그인 성공');
           User userInfo = User.fromJson(resLogin['userData']);
           // print(userInfo);
 
@@ -138,13 +138,13 @@ class _SigninPageState extends State<SigninPage> {
                     child: Column(
                       children: [
                         InputButton(
-                          label: 'Your ID',
+                          label: '아이디',
                           keyboardType: TextInputType.emailAddress,
                           controller: idController,
                         ),
                         SizedBox(height: size.height * 0.025),
                         InputButton(
-                          label: 'Password',
+                          label: '비밀번호',
                           obscureText: true,
                           controller: passwordController,
                         ),

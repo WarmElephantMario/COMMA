@@ -99,12 +99,14 @@ class _ColonPageState extends State<ColonPage> {
   }
 
   Future<Map<int, List<String>>> fetchPageScripts(int colonFileId) async {
-    final apiUrl = '${API.baseUrl}/api/get-page-scripts?colonfile_id=$colonFileId';
+    final apiUrl =
+        '${API.baseUrl}/api/get-page-scripts?colonfile_id=$colonFileId';
 
     final response = await http.get(Uri.parse(apiUrl));
 
     if (response.statusCode == 200) {
-      final List<dynamic> jsonResponse = jsonDecode(utf8.decode(response.bodyBytes));
+      final List<dynamic> jsonResponse =
+          jsonDecode(utf8.decode(response.bodyBytes));
       Map<int, List<String>> pageScripts = {};
       for (var script in jsonResponse) {
         int page = script['page'];
@@ -326,7 +328,7 @@ class _ColonPageState extends State<ColonPage> {
                                       200, // 화면 높이에 맞춤
                                   child: Image.memory(
                                     pageImage.bytes,
-                                    // 수정 
+                                    // 수정
                                     //fit: BoxFit.cover, // 이미지를 전체 화면에 맞춤
                                   ),
                                 ),
@@ -367,10 +369,12 @@ class _ColonPageState extends State<ColonPage> {
                                 } else {
                                   final pageTexts = snapshot.data ?? [];
                                   return Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: pageTexts.map((text) {
                                       return Padding(
-                                        padding: const EdgeInsets.only(bottom: 8.0),
+                                        padding:
+                                            const EdgeInsets.only(bottom: 8.0),
                                         child: Text(
                                           text,
                                           style: const TextStyle(

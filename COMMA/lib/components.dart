@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_plugin/16_homepage_move.dart';
 import '66colon.dart';
 import '62lecture_start.dart';
@@ -13,10 +14,10 @@ import 'package:provider/provider.dart';
 import 'api/api.dart';
 import 'package:intl/intl.dart';
 
+import 'package:flutter/material.dart';
+
 BottomNavigationBar buildBottomNavigationBar(
     BuildContext context, int currentIndex, Function(int) onItemTapped) {
-  // final userProvider = Provider.of<UserProvider>(context);
-
   final List<Widget> widgetOptions = <Widget>[
     const MainPage(),
     const FolderScreen(),
@@ -24,19 +25,30 @@ BottomNavigationBar buildBottomNavigationBar(
     const MyPageScreen(),
   ];
 
+  final List<FocusNode> focusNodes =
+      List.generate(widgetOptions.length, (_) => FocusNode());
+
   void handleItemTap(int index) {
     onItemTapped(index);
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => widgetOptions[index]),
+      MaterialPageRoute(builder: (context) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          focusNodes[index].requestFocus();
+        });
+        return Focus(
+          focusNode: focusNodes[index],
+          child: widgetOptions[index],
+        );
+      }),
     );
   }
 
   return BottomNavigationBar(
     currentIndex: currentIndex,
-    showUnselectedLabels: true, // 모든 텍스트 라벨을 항상 표시하도록 설정
+    showUnselectedLabels: true,
     backgroundColor: Colors.white,
-    type: BottomNavigationBarType.fixed, // 추가된 부분
+    type: BottomNavigationBarType.fixed,
     onTap: handleItemTap,
     items: const [
       BottomNavigationBarItem(
@@ -62,14 +74,14 @@ BottomNavigationBar buildBottomNavigationBar(
     unselectedIconTheme: const IconThemeData(color: Colors.black),
     selectedLabelStyle: const TextStyle(
       color: Colors.teal,
-      fontSize: 9, // 글씨 크기 설정
-      fontFamily: 'DM Sans', // 글씨체 설정
+      fontSize: 9,
+      fontFamily: 'DM Sans',
       fontWeight: FontWeight.bold,
-    ), // 글씨 두께 설정),
+    ),
     unselectedLabelStyle: const TextStyle(
       color: Colors.black,
-      fontSize: 9, // 글씨 크기 설정
-      fontFamily: 'DM Sans', // 글씨체 설정
+      fontSize: 9,
+      fontFamily: 'DM Sans',
       fontWeight: FontWeight.bold,
     ),
   );
@@ -230,62 +242,91 @@ void showConfirmationDialog(
   String content,
   VoidCallback onConfirm,
 ) {
+  final FocusNode titleFocusNode = FocusNode();
+  final FocusNode contentFocusNode = FocusNode();
+  final FocusNode cancelFocusNode = FocusNode();
+  final FocusNode confirmFocusNode = FocusNode();
+
   showDialog(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
         backgroundColor: Colors.white,
-        title: Text(
-          title,
-          style: const TextStyle(
-            color: Color(0xFF545454),
-            fontSize: 14,
-            fontFamily: 'DM Sans',
-            fontWeight: FontWeight.bold,
+        title: Semantics(
+          sortKey: OrdinalSortKey(1.0),
+          child: Focus(
+            focusNode: titleFocusNode,
+            child: Text(
+              title,
+              style: const TextStyle(
+                color: Color(0xFF545454),
+                fontSize: 14,
+                fontFamily: 'DM Sans',
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ),
-          textAlign: TextAlign.center,
         ),
-        content: Text(
-          content,
-          style: const TextStyle(
-            color: Color(0xFF245B3A),
-            fontSize: 11,
-            fontFamily: 'DM Sans',
-            fontWeight: FontWeight.w200,
+        content: Semantics(
+          sortKey: OrdinalSortKey(2.0),
+          child: Focus(
+            focusNode: contentFocusNode,
+            child: Text(
+              content,
+              style: const TextStyle(
+                color: Color(0xFF245B3A),
+                fontSize: 11,
+                fontFamily: 'DM Sans',
+                fontWeight: FontWeight.w200,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ),
-          textAlign: TextAlign.center,
         ),
         actions: <Widget>[
           Center(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text(
-                    '취소',
-                    style: TextStyle(
-                      color: Color(0xFFFFA17A),
-                      fontSize: 14,
-                      fontFamily: 'DM Sans',
-                      fontWeight: FontWeight.bold,
+                Semantics(
+                  sortKey: OrdinalSortKey(3.0),
+                  child: Focus(
+                    focusNode: cancelFocusNode,
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text(
+                        '취소',
+                        style: TextStyle(
+                          color: Color(0xFFFFA17A),
+                          fontSize: 14,
+                          fontFamily: 'DM Sans',
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ),
-                TextButton(
-                  onPressed: () {
-                    onConfirm();
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text(
-                    '확인',
-                    style: TextStyle(
-                      color: Color(0xFF545454),
-                      fontSize: 14,
-                      fontFamily: 'DM Sans',
-                      fontWeight: FontWeight.bold,
+                Semantics(
+                  sortKey: OrdinalSortKey(4.0),
+                  child: Focus(
+                    focusNode: confirmFocusNode,
+                    child: TextButton(
+                      onPressed: () {
+                        onConfirm();
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text(
+                        '확인',
+                        style: TextStyle(
+                          color: Color(0xFF545454),
+                          fontSize: 14,
+                          fontFamily: 'DM Sans',
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -296,6 +337,11 @@ void showConfirmationDialog(
       );
     },
   );
+
+  // 다음 프레임에서 포커스를 타이틀에 설정합니다.
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    FocusScope.of(context).requestFocus(titleFocusNode);
+  });
 }
 
 // Creating - 콜론 파일 생성중 팝업
@@ -920,7 +966,7 @@ Future<void> showCustomMenu2(
 
   await showMenu<String>(
     context: context,
-    position: RelativeRect.fromLTRB(left+ button.size.width, top, left , top),
+    position: RelativeRect.fromLTRB(left + button.size.width, top, left, top),
     items: [
       const PopupMenuItem<String>(
         value: 'rename',
@@ -1365,7 +1411,6 @@ class CustomRadioButton2 extends StatelessWidget {
   }
 }
 
-
 // Checkbox2 위젯
 // class Checkbox2 extends StatefulWidget {
 //   final String label;
@@ -1497,10 +1542,13 @@ class LectureExample extends StatelessWidget {
                 return Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: GestureDetector(
-                    child: ImageIcon(
-                            AssetImage('assets/folder_menu.png'),
-                            color: Color.fromRGBO(255, 161, 122, 1),
-                          ),
+                    child: Semantics(
+                      label: '파일 메뉴 버튼',
+                      child: ImageIcon(
+                        AssetImage('assets/folder_menu.png'),
+                        color: Color.fromRGBO(255, 161, 122, 1),
+                      ),
+                    ),
                     onTap: () {
                       showCustomMenu(context, onRename, onDelete, onMove);
                     },
@@ -1514,7 +1562,6 @@ class LectureExample extends StatelessWidget {
     );
   }
 }
-
 
 //RenameDeletePopup 이름바꾸기
 class RenameDeletePopup extends StatelessWidget {
@@ -1777,15 +1824,18 @@ class FolderListItem extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-             GestureDetector(
-                    child: ImageIcon(
-                            AssetImage('assets/folder_menu.png'),
-                            color: Color.fromRGBO(255, 161, 122, 1),
-                          ),
-                    onTap: () {
-                      showCustomMenu2(context, onRename, onDelete);
-                    },
+              GestureDetector(
+                child: Semantics(
+                  label: '폴더 메뉴 버튼',
+                  child: ImageIcon(
+                    AssetImage('assets/folder_menu.png'),
+                    color: Color.fromRGBO(255, 161, 122, 1),
                   ),
+                ),
+                onTap: () {
+                  showCustomMenu2(context, onRename, onDelete);
+                },
+              ),
             ],
           ),
         ],
