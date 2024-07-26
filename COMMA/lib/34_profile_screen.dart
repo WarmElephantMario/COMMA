@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart'; // semantics 패키지 추가
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'dart:io';
@@ -17,8 +18,12 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  
   int _selectedIndex = 3;
+  final FocusNode _focusNode = FocusNode();
+  final FocusNode _profileFocusNode = FocusNode();
+  final FocusNode _nicknameFocusNode = FocusNode();
+  final FocusNode _idFocusNode = FocusNode();
+  final FocusNode _emailFocusNode = FocusNode();
 
   void _onItemTapped(int index) {
     setState(() {
@@ -40,45 +45,93 @@ class _ProfileScreenState extends State<ProfileScreen> {
     nickname = userProvider.user?.user_nickname ?? "-";
     email = userProvider.user?.user_email ?? "-";
     id = userProvider.user?.user_id ?? "-";
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNode.requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    _profileFocusNode.dispose();
+    _nicknameFocusNode.dispose();
+    _idFocusNode.dispose();
+    _emailFocusNode.dispose();
+    super.dispose();
   }
 
   void _showEditNameDialog() {
-    final TextEditingController nicknameController = TextEditingController(text: nickname);
+    final TextEditingController nicknameController =
+        TextEditingController(text: nickname);
+
+    final FocusNode titleFocusNode = FocusNode();
+    final FocusNode contentFocusNode = FocusNode();
+    final FocusNode cancelFocusNode = FocusNode();
+    final FocusNode saveFocusNode = FocusNode();
 
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('닉네임 바꾸기'),
-          content: TextField(
-            controller: nicknameController,
-            decoration: const InputDecoration(hintText: '새 닉네임을 입력하세요'),
+          title: Semantics(
+            sortKey: OrdinalSortKey(1.0),
+            child: Focus(
+              focusNode: titleFocusNode,
+              child: const Text('닉네임 바꾸기'),
+            ),
+          ),
+          content: Semantics(
+            sortKey: OrdinalSortKey(2.0),
+            child: Focus(
+              focusNode: contentFocusNode,
+              child: TextField(
+                controller: nicknameController,
+                decoration: const InputDecoration(hintText: '새 닉네임을 입력하세요'),
+              ),
+            ),
           ),
           actions: <Widget>[
-            TextButton(
-              child: const Text('취소', style: TextStyle(color: Colors.red)),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+            Semantics(
+              sortKey: OrdinalSortKey(3.0),
+              child: Focus(
+                focusNode: cancelFocusNode,
+                child: TextButton(
+                  child: const Text('취소', style: TextStyle(color: Colors.red)),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ),
             ),
-            TextButton(
-              child: const Text('저장'),
-              onPressed: () async{
-                String newNickname = nicknameController.text;
-                await _updateNickname(newNickname);
-                setState(() {
-                  nickname = newNickname;
-                });
-                Navigator.of(context).pop();
-              },
+            Semantics(
+              sortKey: OrdinalSortKey(4.0),
+              child: Focus(
+                focusNode: saveFocusNode,
+                child: TextButton(
+                  child: const Text('저장'),
+                  onPressed: () async {
+                    String newNickname = nicknameController.text;
+                    await _updateNickname(newNickname);
+                    setState(() {
+                      nickname = newNickname;
+                    });
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ),
             ),
           ],
         );
       },
     );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(context).requestFocus(titleFocusNode);
+    });
   }
 
-Future<void> _updateNickname(String newNickname) async {
+  Future<void> _updateNickname(String newNickname) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userKey = userProvider.user?.userKey ?? 0;
 
@@ -94,9 +147,9 @@ Future<void> _updateNickname(String newNickname) async {
     );
 
     print('Request body: ${jsonEncode({
-        'userKey': userKey,
-        'user_nickname': newNickname,
-      })}');
+          'userKey': userKey,
+          'user_nickname': newNickname,
+        })}');
     print('Response status: ${response.statusCode}');
     print('Response body: ${response.body}');
 
@@ -111,8 +164,7 @@ Future<void> _updateNickname(String newNickname) async {
     } else {
       Fluttertoast.showToast(msg: '서버 오류: 닉네임 업데이트 실패');
     }
-}
-
+  }
 
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
@@ -123,35 +175,44 @@ Future<void> _updateNickname(String newNickname) async {
     }
   }
 
-  Widget _buildProfileItem(String label, String value, VoidCallback? onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16.0),
-        padding: const EdgeInsets.all(12.0),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12.0),
-          boxShadow: const [
-            BoxShadow(
-                color: Colors.black12, blurRadius: 6.0, offset: Offset(0, 2)),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              label,
-              style: const TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black54),
+  Widget _buildProfileItem(String label, String value, VoidCallback? onTap,
+      {required OrdinalSortKey order, required FocusNode focusNode}) {
+    return Semantics(
+      sortKey: order,
+      child: Focus(
+        focusNode: focusNode,
+        child: GestureDetector(
+          onTap: onTap,
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 16.0),
+            padding: const EdgeInsets.all(12.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12.0),
+              boxShadow: const [
+                BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 6.0,
+                    offset: Offset(0, 2)),
+              ],
             ),
-            Text(
-              value,
-              style: const TextStyle(fontSize: 16.0, color: Colors.black),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween, // 수정된 부분
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black54),
+                ),
+                Text(
+                  value,
+                  style: const TextStyle(fontSize: 16.0, color: Colors.black),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -159,7 +220,6 @@ Future<void> _updateNickname(String newNickname) async {
 
   @override
   Widget build(BuildContext context) {
-
     final userProvider = Provider.of<UserProvider>(context);
 
     nickname = userProvider.user?.user_nickname ?? "-";
@@ -168,13 +228,14 @@ Future<void> _updateNickname(String newNickname) async {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: const Text('프로필 정보',
+        title: const Text(
+          '프로필 정보',
           style: TextStyle(
               color: Color.fromARGB(255, 48, 48, 48),
               fontFamily: 'DM Sans',
               fontWeight: FontWeight.w600),
         ),
-        iconTheme: IconThemeData(color: Color.fromARGB(255, 48, 48, 48))
+        iconTheme: const IconThemeData(color: Color.fromARGB(255, 48, 48, 48)),
       ),
       backgroundColor: Colors.white,
       body: LayoutBuilder(
@@ -182,48 +243,61 @@ Future<void> _updateNickname(String newNickname) async {
           return SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  Stack(
-                    children: [
-                      CircleAvatar(
-                        radius: 50,
-                        backgroundImage: _image != null
-                            ? FileImage(_image!)
-                            : const AssetImage('assets/profile.jpg')
-                                as ImageProvider,
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: GestureDetector(
-                          onTap: _pickImage,
-                          child: Container(
-                            width: 30,
-                            height: 30,
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
+              child: FocusTraversalGroup(
+                policy: OrderedTraversalPolicy(),
+                child: Column(
+                  children: [
+                    Semantics(
+                      sortKey: OrdinalSortKey(1.0),
+                      child: Focus(
+                        focusNode: _profileFocusNode,
+                        child: Stack(
+                          children: [
+                            CircleAvatar(
+                              radius: 50,
+                              backgroundImage: _image != null
+                                  ? FileImage(_image!)
+                                  : const AssetImage('assets/profile.jpg')
+                                      as ImageProvider,
                             ),
-                            child: const Icon(Icons.camera_alt,
-                                color: Colors.black),
-                          ),
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: GestureDetector(
+                                onTap: _pickImage,
+                                child: Container(
+                                  width: 30,
+                                  height: 30,
+                                  decoration: const BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(Icons.camera_alt,
+                                      color: Colors.black),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  _buildProfileItem('닉네임', nickname, _showEditNameDialog),
-                  _buildProfileItem('아이디', id, null),
-                  _buildProfileItem('이메일', email, null),
-                  // _buildProfileItem('전화번호', phoneNumber, null),
-                ],
+                    ),
+                    const SizedBox(height: 20),
+                    _buildProfileItem('닉네임', nickname, _showEditNameDialog,
+                        order: OrdinalSortKey(2.0),
+                        focusNode: _nicknameFocusNode),
+                    _buildProfileItem('아이디', id, null,
+                        order: OrdinalSortKey(3.0), focusNode: _idFocusNode),
+                    _buildProfileItem('이메일', email, null,
+                        order: OrdinalSortKey(4.0), focusNode: _emailFocusNode),
+                  ],
+                ),
               ),
             ),
           );
         },
       ),
-      bottomNavigationBar: buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
+      bottomNavigationBar:
+          buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }
