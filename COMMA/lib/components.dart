@@ -582,104 +582,11 @@ void showColonCreatedDialog(BuildContext context, String folderName,
   }
 }
 
-// // Record_Table 업데이트 함수
-// Future<void> _updateRecordTableWithColonId(int? lecturefileId, int colonfileId) async {
-//   final updateUrl = '${API.baseUrl}/api/update-record-table';
-//   final updateBody = {
-//     'lecturefile_id': lecturefileId,
-//     'colonfile_id': colonfileId,
-//   };
 
-//   try {
-//     final updateResponse = await http.post(
-//       Uri.parse(updateUrl),
-//       headers: {'Content-Type': 'application/json'},
-//       body: jsonEncode(updateBody),
-//     );
-
-//     if (updateResponse.statusCode == 200) {
-//       print('Record table updated successfully with colon file ID');
-//     } else {
-//       print('Failed to update record table: ${updateResponse.statusCode}');
-//       print(updateResponse.body);
-//     }
-//   } catch (e) {
-//     print('Error updating record table: $e');
-//   }
-// }
-
-// Future<Map<String, dynamic>> _fetchColonDetails(int colonId) async {
-//   var url = '${API.baseUrl}/api/get-colon-details?colonId=$colonId';
-//   var response = await http.get(Uri.parse(url));
-
-//   if (response.statusCode == 200) {
-//     var jsonResponse = jsonDecode(response.body);
-//     return jsonResponse;
-//   } else {
-//     throw Exception('Failed to load colon details');
-//   }
-// }
-
-// //콜론폴더 이름 확인하기
-// Future<String> _fetchColonFolderName(int folderId) async {
-//   var url = '${API.baseUrl}/api/get-Colonfolder-name?folderId=$folderId';
-//   var response = await http.get(Uri.parse(url));
-
-//   if (response.statusCode == 200) {
-//     var jsonResponse = jsonDecode(response.body);
-//     return jsonResponse['folder_name'];
-//   } else {
-//     throw Exception('Failed to load folder name');
-//   }
-// }
-
-// Future<void> updateLectureFileWithColonId(int? lectureFileId, int colonFileId) async {
-//   var url = '${API.baseUrl}/api/update-lecture-file';
-
-//   var body = {
-//     'lectureFileId': lectureFileId,
-//     'colonFileId': colonFileId,
-//   };
-
-//   try {
-//     var response = await http.post(
-//       Uri.parse(url),
-//       headers: {'Content-Type': 'application/json'},
-//       body: jsonEncode(body),
-//     );
-
-//     if (response.statusCode == 200) {
-//       print('Lecture file updated successfully with colonFileId');
-//     } else {
-//       print('Failed to update lecture file: ${response.statusCode}');
-//       print('Response body: ${response.body}');
-//     }
-//   } catch (e) {
-//     print('Error during HTTP request: $e');
-//   }
-// }
-
-// void _navigateToColonPage(BuildContext context, String folderName, String noteName, String lectureName, String createdAt) {
-//   try {
-//     print('Navigating to ColonPage'); // 로그 추가
-//     Navigator.of(context).push(
-//       MaterialPageRoute(
-//         builder: (context) => ColonPage(
-//           folderName: "$folderName",
-//           noteName: "$noteName (:)",
-//           lectureName: lectureName,
-//           createdAt: createdAt,
-//         ),
-//       ),
-//     );
-//   } catch (e) {
-//     print('Navigation error: $e');
-//   }
-// }
 
 // Learning - 강의 자료 학습중 팝업
 void showLearningDialog(BuildContext context, String fileName, String fileURL,
-    ValueNotifier<double> progressNotifier) {
+    ProgressNotifier progressNotifier) { // 변경된 부분: ProgressNotifier로 타입 변경
   showDialog(
     context: context,
     barrierDismissible: false,
@@ -712,32 +619,36 @@ void showLearningDialog(BuildContext context, String fileName, String fileURL,
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              '강의 자료 학습중입니다',
-              style: TextStyle(
-                color: Color(0xFF414141),
-                fontSize: 16,
-                fontFamily: 'DM Sans',
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF36AE92)),
-              strokeWidth: 4.0,
-            ),
-            const SizedBox(height: 16),
             ValueListenableBuilder<double>(
               valueListenable: progressNotifier,
               builder: (context, value, child) {
-                return Text(
-                  '${(value * 100).toStringAsFixed(0)}%', // 진행률을 퍼센트로 표시
-                  style: const TextStyle(
-                    color: Color(0xFF414141),
-                    fontSize: 16,
-                    fontFamily: 'DM Sans',
-                    fontWeight: FontWeight.bold,
-                  ),
+                return Column(
+                  children: [
+                    Text(
+                      progressNotifier.message, // 메시지 표시
+                      style: const TextStyle(
+                        color: Color(0xFF414141),
+                        fontSize: 16,
+                        fontFamily: 'DM Sans',
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF36AE92)),
+                      strokeWidth: 4.0,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      '${(value * 100).toStringAsFixed(0)}%', // 진행률을 퍼센트로 표시
+                      style: const TextStyle(
+                        color: Color(0xFF414141),
+                        fontSize: 16,
+                        fontFamily: 'DM Sans',
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 );
               },
             ),
@@ -747,6 +658,7 @@ void showLearningDialog(BuildContext context, String fileName, String fileURL,
     },
   );
 }
+
 
 //alarm
 //delete alarm
@@ -1344,7 +1256,7 @@ class _CustomRadioButtonState extends State<CustomRadioButton> {
               fontSize: 16,
               fontFamily: 'DM Sans',
               color: Color.fromARGB(255, 70, 70, 70),
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w200,
             ),
           ),
         ],
