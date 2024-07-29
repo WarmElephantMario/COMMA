@@ -517,11 +517,11 @@ app.get('/api/getOtherFolders/:fileType/:currentFolderId', (req, res) => {
 app.get('/api/searchFiles', (req, res) => {
     const query = req.query.query;
     const sql = `
-        SELECT * FROM LectureFiles WHERE file_name LIKE ? 
-        UNION
-        SELECT * FROM ColonFiles WHERE file_name LIKE ? 
-        ORDER BY created_at DESC
-    `;
+    SELECT id, folder_id, file_name, file_url, lecture_name, created_at, 'lecture' AS file_type FROM LectureFiles WHERE file_name LIKE ? 
+    UNION
+    SELECT id, folder_id, file_name, file_url, lecture_name, created_at, 'colon' AS file_type FROM ColonFiles WHERE file_name LIKE ? 
+    ORDER BY created_at DESC
+`;
     const searchQuery = `%${query}%`;
     db.query(sql, [searchQuery, searchQuery], (err, results) => {
         if (err) {
