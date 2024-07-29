@@ -912,7 +912,8 @@ class _RecordPageState extends State<RecordPage> {
   Please follow these instructions:
   1. Do not modify any text in the script segment.
   2. Simply respond with "isNext" if the script belongs to the second page, or "isNotNext" if it belongs to the first page.
-  3. Ensure that the response contains only "isNext" or "isNotNext".
+  3. Ensure that the response contains only "isNext" or "isNotNext". Your response must be either "isNext" or "isNotNext" only, and no other responses are allowed.
+  4. If you are uncertain or it is difficult to determine, you must respond with "isNotNext".
   Page 1 Text: $pageText1
   Page 2 Text: $pageText2
   Script Text: $scriptText
