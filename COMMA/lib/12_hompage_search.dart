@@ -35,6 +35,8 @@ class _MainToSearchPageState extends State<MainToSearchPage> {
             List<Map<String, dynamic>>.from(jsonDecode(response.body)['files']);
       });
     } else {
+      print('Failed to search files: ${response.statusCode}');
+      print('Response body: ${response.body}');
       throw Exception('Failed to search files');
     }
   }
