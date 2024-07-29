@@ -920,7 +920,7 @@ class _RecordPageState extends State<RecordPage> {
   ''';
 
     String body = jsonEncode({
-      'model': 'gpt-4',
+      'model': 'gpt-4o',
       'messages': [
         {
           'role': 'system',
@@ -938,8 +938,10 @@ class _RecordPageState extends State<RecordPage> {
           decodedResponse['choices'][0]['message']['content'].trim();
 
       if (gptResponse == 'isNext') {
+        print('isNext');
         return true;
       } else if (gptResponse == 'isNotNext') {
+        print('isNotNext');
         return false;
       } else {
         throw Exception('Unexpected GPT-4 response: $gptResponse');
@@ -996,6 +998,8 @@ class _RecordPageState extends State<RecordPage> {
         print('Error: scriptUrl is empty for scriptIndex: $scriptIndex');
       }
     }
+      // 5초 대기
+    await Future.delayed(Duration(seconds: 5));
 
     return result;
   }
@@ -1015,7 +1019,7 @@ class _RecordPageState extends State<RecordPage> {
     for (String url in alternativeTextUrls) {
       try {
         String pageText =
-            await http.get(Uri.parse(url)).then((response) => response.body);
+            await http.get(Uri.parse(url)).then((response) => utf8.decode(response.bodyBytes));
         pageTexts.add(pageText);
       } catch (e) {
         print('Error loading alternative text: $e');
