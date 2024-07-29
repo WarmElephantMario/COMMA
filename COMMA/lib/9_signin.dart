@@ -9,6 +9,8 @@ import 'components.dart';
 import 'package:http/http.dart' as http;
 import 'package:fluttertoast/fluttertoast.dart';
 import './api/api.dart';
+import 'package:flutter/semantics.dart';
+
 
 class SigninPage extends StatefulWidget {
   const SigninPage({super.key});
@@ -164,8 +166,7 @@ class _SigninPageState extends State<SigninPage> {
                   ),
                   SizedBox(height: size.height * 0.060),
                   Padding(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: size.width * 0.05),
+                    padding: EdgeInsets.symmetric(horizontal: size.width * 0.05),
                     child: GestureDetector(
                       onTap: () async {
                         if (_formKey.currentState!.validate()) {
@@ -188,22 +189,53 @@ class _SigninPageState extends State<SigninPage> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '로그인',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontFamily: 'DM Sans',
-                                fontWeight: FontWeight.w700,
-                              ),
+                        child: const Center(
+                          child: Text(
+                            '로그인',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontFamily: 'DM Sans',
+                              fontWeight: FontWeight.w700,
                             ),
-                          ],
+                          ),
                         ),
                       ),
+                    ),
+                  ),
+                  SizedBox(height: size.height * 0.020),
+                  Semantics(
+                    sortKey: OrdinalSortKey(6.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          '비밀번호를 잊으셨나요?',
+                          style: TextStyle(
+                            color: Color(0xFF36AE92),
+                            fontSize: 14,
+                            fontFamily: 'DM Sans',
+                            fontWeight: FontWeight.w500,
+                            height: 1.5,
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                        GestureDetector(
+                          onTap: () {
+                            // 비밀번호 찾기 화면 추가로 구현해야 함
+                            print('비밀번호 찾기 버튼이 클릭되었습니다.');
+                          },
+                          child: const Text(
+                            '비밀번호 찾기',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
