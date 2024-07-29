@@ -368,7 +368,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
               ),
               const SizedBox(
-                height: 120,
+                height: 70,
               ),
               Semantics(
                 sortKey: OrdinalSortKey(5.0),
@@ -396,40 +396,6 @@ class _SignUpPageState extends State<SignUpPage> {
                       },
                       child: const Text(
                         '로그인',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 15),
-              Semantics(
-                sortKey: OrdinalSortKey(6.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      '비밀번호를 잊으셨나요?',
-                      style: TextStyle(
-                        color: Color(0xFF36AE92),
-                        fontSize: 14,
-                        fontFamily: 'DM Sans',
-                        fontWeight: FontWeight.w500,
-                        height: 0.11,
-                      ),
-                    ),
-                    const SizedBox(width: 20),
-                    GestureDetector(
-                      onTap: () {
-                        // 비밀번호 찾기 화면 추가로 구현해야 함
-                        print('비밀번호 찾기 버튼이 클릭되었습니다.');
-                      },
-                      child: const Text(
-                        '비밀번호 찾기',
                         style: TextStyle(
                           color: Colors.black,
                           fontSize: 14,
