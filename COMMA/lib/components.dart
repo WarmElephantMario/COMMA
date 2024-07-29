@@ -131,136 +131,143 @@ Future<List<Map<String, String>>> fetchFolders() async {
   }
 }
 
-//showQuickMenu 함수
-void showQuickMenu(
-    BuildContext context,
-    int fileId,
-    String fileType,
-    int currentFolderId,
-    Future<void> Function(int, int, String) moveItem,
-    Future<void> Function() fetchOtherFolders,
-    List<Map<String, dynamic>> folders,
-    Function(VoidCallback) updateState) async {
-  // folders 상태 초기화 및 폴더 목록 가져오기
-  updateState(() {
-    folders.clear();
-  });
 
-  await fetchOtherFolders();
 
-  // 폴더 목록에 selected 속성 추가
-  updateState(() {
-    folders = folders.map((folder) {
-      return {
-        ...folder,
-        'selected': false,
-      };
-    }).toList();
-  });
+// //showQuickMenu 함수
+// void showQuickMenu(
+//     BuildContext context,
+//     int fileId,
+//     String fileType,
+//     int currentFolderId,
+//     Future<void> Function(int, int, String) moveItem,
+//     Future<void> Function() fetchOtherFolders,
+//     List<Map<String, dynamic>> folders,
+//       Function(VoidCallback) updateState,
+// ) async {
+//   // 폴더 상태 초기화 및 폴더 목록 가져오기
+//   updateState(() {
+//     folders.clear();
+//   });
 
-  showModalBottomSheet(
-    context: context,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(20),
-      ),
-    ),
-    backgroundColor: Colors.white,
-    builder: (BuildContext context) {
-      return StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text(
-                        '취소',
-                        style: TextStyle(
-                          color: Color.fromRGBO(84, 84, 84, 1),
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    const Text(
-                      '다음으로 이동',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () async {
-                        final selectedFolder = folders.firstWhere(
-                            (folder) => folder['selected'] == true,
-                            orElse: () => {});
-                        final selectedFolderId = selectedFolder['id'];
-                        await moveItem(fileId, selectedFolderId, fileType);
-                        Navigator.pop(context);
-                      },
-                      child: const Text(
-                        '이동',
-                        style: TextStyle(
-                          color: Color.fromRGBO(255, 161, 122, 1),
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 2),
-                const Center(
-                  child: Text(
-                    '현재 위치 외 다른 폴더로 이동할 수 있어요.',
-                    style: TextStyle(
-                      color: Color(0xFF575757),
-                      fontSize: 13,
-                      fontFamily: 'Raleway',
-                      fontWeight: FontWeight.w500,
-                      height: 1.5,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: folders.map((folder) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 5),
-                      child: CustomCheckbox(
-                        label: folder['folder_name'],
-                        isSelected: folder['selected'] ?? false,
-                        onChanged: (bool isSelected) {
-                          setState(() {
-                            for (var f in folders) {
-                              f['selected'] = false;
-                            }
-                            folder['selected'] = isSelected;
-                          });
-                        },
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ],
-            ),
-          );
-        },
-      );
-    },
-  );
-}
+//   await fetchOtherFolders();
+
+//   // 폴더 목록에 selected 속성 추가
+//   updateState(() {
+//     folders = folders.map((folder) {
+//       return {
+//         ...folder,
+//         'selected': false,
+//       };
+//     }).toList();
+//   });
+  
+//     // 폴더 목록 로그 출력
+//     print('Folders after fetch: $folders');
+  
+
+//   showModalBottomSheet(
+//     context: context,
+//     shape: const RoundedRectangleBorder(
+//       borderRadius: BorderRadius.vertical(
+//         top: Radius.circular(20),
+//       ),
+//     ),
+//     backgroundColor: Colors.white,
+//     builder: (BuildContext context) {
+//       return StatefulBuilder(
+//         builder: (BuildContext context, StateSetter setState) {
+//           return Padding(
+//             padding: const EdgeInsets.all(16.0),
+//             child: Column(
+//               mainAxisSize: MainAxisSize.min,
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 Row(
+//                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                   children: [
+//                     TextButton(
+//                       onPressed: () {
+//                         Navigator.pop(context);
+//                       },
+//                       child: const Text(
+//                         '취소',
+//                         style: TextStyle(
+//                           color: Color.fromRGBO(84, 84, 84, 1),
+//                           fontSize: 16,
+//                           fontWeight: FontWeight.bold,
+//                         ),
+//                       ),
+//                     ),
+//                     const Text(
+//                       '다음으로 이동',
+//                       style: TextStyle(
+//                         color: Colors.black,
+//                         fontSize: 16,
+//                         fontWeight: FontWeight.bold,
+//                       ),
+//                     ),
+//                     TextButton(
+//                       onPressed: () async {
+//                         final selectedFolder = folders.firstWhere(
+//                             (folder) => folder['selected'] == true,
+//                             orElse: () => {});
+//                         final selectedFolderId = selectedFolder['id'];
+//                         await moveItem(fileId, selectedFolderId, fileType);
+//                         Navigator.pop(context);
+//                       },
+//                       child: const Text(
+//                         '이동',
+//                         style: TextStyle(
+//                           color: Color.fromRGBO(255, 161, 122, 1),
+//                           fontSize: 16,
+//                           fontWeight: FontWeight.bold,
+//                         ),
+//                       ),
+//                     ),
+//                   ],
+//                 ),
+//                 const SizedBox(height: 2),
+//                 const Center(
+//                   child: Text(
+//                     '현재 위치 외 다른 폴더로 이동할 수 있어요.',
+//                     style: TextStyle(
+//                       color: Color(0xFF575757),
+//                       fontSize: 13,
+//                       fontFamily: 'Raleway',
+//                       fontWeight: FontWeight.w500,
+//                       height: 1.5,
+//                     ),
+//                   ),
+//                 ),
+//                 const SizedBox(height: 16),
+//                 Column(
+//                   mainAxisAlignment: MainAxisAlignment.start,
+//                   children: folders.map((folder) {
+//                     return Padding(
+//                       padding: const EdgeInsets.symmetric(vertical: 5),
+//                       child: CustomCheckbox(
+//                         label: folder['folder_name'],
+//                         isSelected: folder['selected'] ?? false,
+//                         onChanged: (bool isSelected) {
+//                           setState(() {
+//                             for (var f in folders) {
+//                               f['selected'] = false;
+//                             }
+//                             folder['selected'] = isSelected;
+//                           });
+//                         },
+//                       ),
+//                     );
+//                   }).toList(),
+//                 ),
+//               ],
+//             ),
+//           );
+//         },
+//       );
+//     },
+//   );
+// }
 
 // CONFIRM ALEART 1,2
 void showConfirmationDialog(
@@ -1007,6 +1014,7 @@ Future<void> showRenameDialog(
     context: context,
     builder: (context) {
       return AlertDialog(
+        backgroundColor: Colors.white,
         title: Text(
           title,
           style: const TextStyle(
@@ -1294,6 +1302,7 @@ class _CustomRadioButtonState extends State<CustomRadioButton> {
   }
 }
 
+
 class CustomRadioButton2 extends StatelessWidget {
   final String label;
   final bool isSelected;
@@ -1351,6 +1360,66 @@ class CustomRadioButton2 extends StatelessWidget {
     );
   }
 }
+
+class CustomRadioButton3 extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final ValueChanged<bool> onChanged;
+
+  const CustomRadioButton3({
+    super.key,
+    required this.label,
+    required this.isSelected,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        onChanged(!isSelected);
+      },
+      child: Row(
+        children: [
+          Container(
+            width: 18,
+            height: 18,
+            decoration: BoxDecoration(
+              color: isSelected ? Colors.teal : Colors.transparent,
+              border: Border.all(
+                color: const Color.fromARGB(255, 80, 80, 80),
+                width: 1.6,
+              ),
+              borderRadius: BorderRadius.circular(9),
+            ),
+            child: isSelected
+                ? const Icon(
+                    Icons.check,
+                    size: 14,
+                    color: Colors.white,
+                  )
+                : null,
+          ),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 16,
+                fontFamily: 'DM Sans',
+                color: Color.fromARGB(255, 70, 70, 70),
+                fontWeight: FontWeight.w500,
+              ),
+              overflow: TextOverflow.ellipsis, // 텍스트 오버플로우 처리
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
 
 // Checkbox2 위젯
 // class Checkbox2 extends StatefulWidget {
