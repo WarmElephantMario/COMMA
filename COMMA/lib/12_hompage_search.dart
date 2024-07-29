@@ -35,6 +35,8 @@ class _MainToSearchPageState extends State<MainToSearchPage> {
             List<Map<String, dynamic>>.from(jsonDecode(response.body)['files']);
       });
     } else {
+      print('Failed to search files: ${response.statusCode}');
+      print('Response body: ${response.body}');
       throw Exception('Failed to search files');
     }
   }
@@ -93,6 +95,8 @@ class _MainToSearchPageState extends State<MainToSearchPage> {
             noteName: file['file_name'] ?? 'Unknown Note',
             lectureName: file['lecture_name'] ?? 'Unknown Lecture',
             createdAt: file['created_at'] ?? 'Unknown Date',
+            fileUrl: file['file_url'],
+            colonFileId: file['id'], // 이 부분 수정
           );
 
     Navigator.push(context, MaterialPageRoute(builder: (context) => page));

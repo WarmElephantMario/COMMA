@@ -53,8 +53,8 @@ BottomNavigationBar buildBottomNavigationBar(
     items: [
       buildBottomNavigationBarItem(
           context, currentIndex, 0, 'assets/navigation_bar/home.png', 'HOME'),
-      buildBottomNavigationBarItem(context, currentIndex, 1,
-          'assets/navigation_bar/folder.png', '폴더'),
+      buildBottomNavigationBarItem(
+          context, currentIndex, 1, 'assets/navigation_bar/folder.png', '폴더'),
       buildBottomNavigationBarItem(context, currentIndex, 2,
           'assets/navigation_bar/learningstart.png', '학습 시작'),
       buildBottomNavigationBarItem(context, currentIndex, 3,
@@ -79,12 +79,8 @@ BottomNavigationBar buildBottomNavigationBar(
   );
 }
 
-BottomNavigationBarItem buildBottomNavigationBarItem(
-    BuildContext context,
-    int currentIndex,
-    int index,
-    String iconPath,
-    String label) {
+BottomNavigationBarItem buildBottomNavigationBarItem(BuildContext context,
+    int currentIndex, int index, String iconPath, String label) {
   final bool isSelected = currentIndex == index;
 
   return BottomNavigationBarItem(
@@ -118,11 +114,6 @@ BottomNavigationBarItem buildBottomNavigationBarItem(
   );
 }
 
-
-
-
-
-
 Future<List<Map<String, String>>> fetchFolders() async {
   final response =
       await http.get(Uri.parse('http://localhost:3000/api/lecture-folders'));
@@ -139,8 +130,6 @@ Future<List<Map<String, String>>> fetchFolders() async {
     throw Exception('Failed to load folders');
   }
 }
-
-
 
 // //showQuickMenu 함수
 // void showQuickMenu(
@@ -169,10 +158,9 @@ Future<List<Map<String, String>>> fetchFolders() async {
 //       };
 //     }).toList();
 //   });
-  
+
 //     // 폴더 목록 로그 출력
 //     print('Folders after fetch: $folders');
-  
 
 //   showModalBottomSheet(
 //     context: context,
@@ -1311,7 +1299,6 @@ class _CustomRadioButtonState extends State<CustomRadioButton> {
   }
 }
 
-
 class CustomRadioButton2 extends StatelessWidget {
   final String label;
   final bool isSelected;
@@ -1427,8 +1414,6 @@ class CustomRadioButton3 extends StatelessWidget {
     );
   }
 }
-
-
 
 // Checkbox2 위젯
 // class Checkbox2 extends StatefulWidget {
