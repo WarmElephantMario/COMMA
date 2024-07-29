@@ -53,8 +53,8 @@ BottomNavigationBar buildBottomNavigationBar(
     items: [
       buildBottomNavigationBarItem(
           context, currentIndex, 0, 'assets/navigation_bar/home.png', 'HOME'),
-      buildBottomNavigationBarItem(context, currentIndex, 1,
-          'assets/navigation_bar/folder.png', '폴더'),
+      buildBottomNavigationBarItem(
+          context, currentIndex, 1, 'assets/navigation_bar/folder.png', '폴더'),
       buildBottomNavigationBarItem(context, currentIndex, 2,
           'assets/navigation_bar/learningstart.png', '학습 시작'),
       buildBottomNavigationBarItem(context, currentIndex, 3,
@@ -79,12 +79,8 @@ BottomNavigationBar buildBottomNavigationBar(
   );
 }
 
-BottomNavigationBarItem buildBottomNavigationBarItem(
-    BuildContext context,
-    int currentIndex,
-    int index,
-    String iconPath,
-    String label) {
+BottomNavigationBarItem buildBottomNavigationBarItem(BuildContext context,
+    int currentIndex, int index, String iconPath, String label) {
   final bool isSelected = currentIndex == index;
 
   return BottomNavigationBarItem(
@@ -117,11 +113,6 @@ BottomNavigationBarItem buildBottomNavigationBarItem(
     label: '',
   );
 }
-
-
-
-
-
 
 Future<List<Map<String, String>>> fetchFolders() async {
   final response =

@@ -7,6 +7,7 @@ import '60prepare.dart';
 import 'components.dart';
 import 'api/api.dart';
 import 'dart:typed_data';
+import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
 import 'package:charset_converter/charset_converter.dart';
 
@@ -183,16 +184,15 @@ class _ColonPageState extends State<ColonPage> {
     }
   }
 
- void _toggleBlur(int page) {
-  setState(() {
-    if (_blurredPages.contains(page)) {
-      _blurredPages.remove(page);
-    } else {
-      _blurredPages.add(page);
-    }
-  });
-}
-
+  void _toggleBlur(int page) {
+    setState(() {
+      if (_blurredPages.contains(page)) {
+        _blurredPages.remove(page);
+      } else {
+        _blurredPages.add(page);
+      }
+    });
+  }
 
   // Alt_table의 특정 colonfile_id 행에서 URL 가져오기
   Future<String> _fetchAltTableUrl(int colonFileId) async {
@@ -374,15 +374,18 @@ class _ColonPageState extends State<ColonPage> {
                                         CrossAxisAlignment.start,
                                     children: pageTexts.map((text) {
                                       return Padding(
-                                        padding:
-                                            const EdgeInsets.only(bottom: 8.0),
+                                        padding: const EdgeInsets.fromLTRB(
+                                            20, 10, 20, 10),
                                         child: Text(
                                           text,
-                                          style: const TextStyle(
-                                            color: Color(0xFF414141),
-                                            fontSize: 16,
-                                            fontFamily: 'DM Sans',
-                                          ),
+                                          style: TextStyle(
+                                              color: Color(0xFF414141),
+                                              fontSize: 17,
+                                              fontWeight: FontWeight.w500,
+                                              height: 1.8,
+                                              fontFamily:
+                                                  GoogleFonts.ibmPlexSansKr()
+                                                      .fontFamily),
                                         ),
                                       );
                                     }).toList(),
@@ -395,76 +398,79 @@ class _ColonPageState extends State<ColonPage> {
                       },
                     ),
                   if ((widget.lectureName.endsWith('.png') ||
-                    widget.lectureName.endsWith('.jpg') ||
-                    widget.lectureName.endsWith('.jpeg')) &&
-                    imageData != null)
-                  Column(
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          if (type == 0) {
-                            _toggleBlur(1);
-                          }
-                        },
-                        child: Stack(
-                          children: [
-                            Image.memory(
-                              imageData!,
-                              fit: BoxFit.cover, // 이미지를 전체 화면에 맞춤
-                              width: double.infinity,
-                            ),
-                            if (_blurredPages.contains(1) && type == 0)
-                              Container(
+                          widget.lectureName.endsWith('.jpg') ||
+                          widget.lectureName.endsWith('.jpeg')) &&
+                      imageData != null)
+                    Column(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            if (type == 0) {
+                              _toggleBlur(1);
+                            }
+                          },
+                          child: Stack(
+                            children: [
+                              Image.memory(
+                                imageData!,
+                                fit: BoxFit.cover, // 이미지를 전체 화면에 맞춤
                                 width: double.infinity,
-                                height: MediaQuery.of(context).size.height - 200, // 화면 높이에 맞춤
-                                color: Colors.black.withOpacity(0.5),
-                                child: Center(
-                                  child: Text(
-                                    pageTexts[1] ?? '이미지의 텍스트가 없습니다.',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontFamily: 'DM Sans',
-                                    ),
-                                  ),
-                                ),
                               ),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: FutureBuilder<List<String>>(
-                          future: _fetchPageTexts(0), // 이미지 파일은 1 페이지로 간주
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
-                              return CircularProgressIndicator();
-                            } else if (snapshot.hasError) {
-                              return Text('Error: ${snapshot.error}');
-                            } else {
-                              final pageTexts = snapshot.data ?? [];
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: pageTexts.map((text) {
-                                  return Padding(
-                                    padding: const EdgeInsets.only(bottom: 8.0),
+                              if (_blurredPages.contains(1) && type == 0)
+                                Container(
+                                  width: double.infinity,
+                                  height: MediaQuery.of(context).size.height -
+                                      200, // 화면 높이에 맞춤
+                                  color: Colors.black.withOpacity(0.5),
+                                  child: Center(
                                     child: Text(
-                                      text,
+                                      pageTexts[1] ?? '이미지의 텍스트가 없습니다.',
                                       style: const TextStyle(
-                                        color: Color(0xFF414141),
+                                        color: Colors.white,
                                         fontSize: 16,
                                         fontFamily: 'DM Sans',
                                       ),
                                     ),
-                                  );
-                                }).toList(),
-                              );
-                            }
-                          },
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: FutureBuilder<List<String>>(
+                            future: _fetchPageTexts(0), // 이미지 파일은 1 페이지로 간주
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return CircularProgressIndicator();
+                              } else if (snapshot.hasError) {
+                                return Text('Error: ${snapshot.error}');
+                              } else {
+                                final pageTexts = snapshot.data ?? [];
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: pageTexts.map((text) {
+                                    return Padding(
+                                      padding:
+                                          const EdgeInsets.only(bottom: 8.0),
+                                      child: Text(
+                                        text,
+                                        style: const TextStyle(
+                                          color: Color(0xFF414141),
+                                          fontSize: 16,
+                                          fontFamily: 'DM Sans',
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
+                                );
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
                 ],
               ),
             ),

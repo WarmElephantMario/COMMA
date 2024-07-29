@@ -2,6 +2,7 @@ import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_plugin/60prepare.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
@@ -93,15 +94,17 @@ class _RecordPageState extends State<RecordPage> {
     _recordingState = widget.recordingState;
     if (_recordingState == RecordingState.recorded) {
       _fetchCreatedAt();
+      _checkExistColon();
+      _loadRecordedTexts(); // 녹음된 자막 로드
     }
     if (_recordingState == RecordingState.initial) {
       _insertInitialData();
     }
-    if (_recordingState == RecordingState.recorded) {
-      _checkExistColon();
-    }
     _checkFileType();
-    _loadPageTexts();
+    if (widget.type == 0) {
+      // 대체 텍스트인 경우에만 호출
+      _loadPageTexts();
+    }
     WidgetsBinding.instance?.addPostFrameCallback((_) {
       _requestPermissions();
     });
@@ -197,7 +200,7 @@ class _RecordPageState extends State<RecordPage> {
         buffer.write('\n\n'); // 단락을 나눌 때 개행 문자를 추가
 
         // Firebase에 저장
-        String paragraph = combineText.replaceAll('\n\n', ' ').trim();
+        String paragraph = combineText.replaceAll('\n\n', ' ');
         saveTranscriptPart(paragraph);
 
         _currentLength = 0; // 카운트 초기화
@@ -209,7 +212,7 @@ class _RecordPageState extends State<RecordPage> {
 
     // 마지막 남은 텍스트 저장
     if (isFinal != null && isFinal == true && combineText.trim().isNotEmpty) {
-      String finalParagraph = combineText.replaceAll('\n\n', ' ').trim();
+      String finalParagraph = combineText.replaceAll('\n\n', ' ');
       saveTranscriptPart(finalParagraph);
       combineText = ''; // 저장 후 초기화
       _currentLength = 0; // 초기화
@@ -290,6 +293,38 @@ class _RecordPageState extends State<RecordPage> {
       return jsonResponse['folder_name'];
     } else {
       throw Exception('Failed to load folder name');
+    }
+  }
+
+  Future<void> _loadRecordedTexts() async {
+    try {
+      final response = await http.get(Uri.parse(
+          '${API.baseUrl}/api/get-record-urls?lecturefileId=${widget.lecturefileId}'));
+
+      if (response.statusCode == 200) {
+        print('Response body: ${response.body}');
+
+        final fileData = jsonDecode(response.body);
+        final recordedTextUrls = fileData['record_urls'];
+
+        for (String url in recordedTextUrls) {
+          final textResponse = await http.get(Uri.parse(url));
+          if (textResponse.statusCode == 200) {
+            setState(() {
+              _recognizedText +=
+                  utf8.decode(textResponse.bodyBytes).replaceAll('\n\n', ' ') +
+                      "\n\n"; // 문단 구분 추가
+            });
+          } else {
+            print('Failed to fetch text file: ${textResponse.statusCode}');
+          }
+        }
+      } else {
+        print('Failed to fetch recorded text URLs: ${response.statusCode}');
+        print('Response body: ${response.body}');
+      }
+    } catch (e) {
+      print('Error occurred: $e');
     }
   }
 
@@ -1026,7 +1061,7 @@ class _RecordPageState extends State<RecordPage> {
       appBar: AppBar(toolbarHeight: 0),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -1357,7 +1392,7 @@ class _RecordPageState extends State<RecordPage> {
                   },
                   child: Stack(
                     children: [
-                      if (_isPDF && _pdfController != null)
+                      if (_isPDF && _pdfController != null && widget.type != 1)
                         SizedBox(
                           height: 600,
                           child: PdfView(
@@ -1399,10 +1434,12 @@ class _RecordPageState extends State<RecordPage> {
                     const SizedBox(height: 10),
                     Text(
                       _recognizedText + ' ' + _interimText,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.black,
-                        fontSize: 18,
-                        fontFamily: 'DM Sans',
+                        fontSize: 17,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: GoogleFonts.ibmPlexSansKr().fontFamily,
+                        height: 1.8,
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -1414,10 +1451,12 @@ class _RecordPageState extends State<RecordPage> {
                     const SizedBox(height: 10),
                     Text(
                       _recognizedText,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.black,
-                        fontSize: 18,
-                        fontFamily: 'DM Sans',
+                        fontSize: 17,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: GoogleFonts.ibmPlexSansKr().fontFamily,
+                        height: 1.8,
                       ),
                     ),
                     const SizedBox(height: 20),
