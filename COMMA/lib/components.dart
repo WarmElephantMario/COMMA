@@ -131,8 +131,6 @@ Future<List<Map<String, String>>> fetchFolders() async {
   }
 }
 
-
-
 // //showQuickMenu 함수
 // void showQuickMenu(
 //     BuildContext context,
@@ -160,10 +158,9 @@ Future<List<Map<String, String>>> fetchFolders() async {
 //       };
 //     }).toList();
 //   });
-  
+
 //     // 폴더 목록 로그 출력
 //     print('Folders after fetch: $folders');
-  
 
 //   showModalBottomSheet(
 //     context: context,
@@ -1302,7 +1299,6 @@ class _CustomRadioButtonState extends State<CustomRadioButton> {
   }
 }
 
-
 class CustomRadioButton2 extends StatelessWidget {
   final String label;
   final bool isSelected;
@@ -1418,8 +1414,6 @@ class CustomRadioButton3 extends StatelessWidget {
     );
   }
 }
-
-
 
 // Checkbox2 위젯
 // class Checkbox2 extends StatefulWidget {
