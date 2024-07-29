@@ -29,12 +29,25 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorObservers: [MyNavigatorObserver()],
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: const SplashScreen(),
     );
+  }
+}
+
+class MyNavigatorObserver extends NavigatorObserver {
+  @override
+  void didPop(Route route, Route? previousRoute) {
+    super.didPop(route, previousRoute);
+    if (previousRoute == null) {
+      // 여기에 로그아웃이나 다른 동작을 정의
+      print('뒤로가기로 앱 종료 또는 초기화');
+      // 로그아웃 로직을 추가하거나 다른 동작을 수행합니다.
+    }
   }
 }
 

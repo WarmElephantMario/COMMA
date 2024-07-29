@@ -171,149 +171,150 @@ class _LearningPreparationState extends State<LearningPreparation> {
   }
 
   void showQuickMenu2(
-  BuildContext context,
-  Future<void> Function() fetchOtherFolders,
-  List<Map<String, dynamic>> folders,
-  Function(String) selectFolder,
-) async {
-  print('Attempting to fetch other folders.');
-  try {
-    await fetchOtherFolders();
-    print('Fetched other folders successfully.');
-  } catch (e) {
-    print('Error fetching other folders: $e');
-  }
+    BuildContext context,
+    Future<void> Function() fetchOtherFolders,
+    List<Map<String, dynamic>> folders,
+    Function(String) selectFolder,
+  ) async {
+    print('Attempting to fetch other folders.');
+    try {
+      await fetchOtherFolders();
+      print('Fetched other folders successfully.');
+    } catch (e) {
+      print('Error fetching other folders: $e');
+    }
 
-  // updatedFolders는 fetchOtherFolders 호출 후 업데이트된 folderList를 사용합니다.
-  var updatedFolders = folderList.map((folder) {
-    bool isSelected = folder['folder_name'] == _selectedFolder;
-    return {
-      ...folder,
-      'selected': isSelected,
-    };
-  }).toList();
+    // updatedFolders는 fetchOtherFolders 호출 후 업데이트된 folderList를 사용합니다.
+    var updatedFolders = folderList.map((folder) {
+      bool isSelected = folder['folder_name'] == _selectedFolder;
+      return {
+        ...folder,
+        'selected': isSelected,
+      };
+    }).toList();
 
-  print('Updated folders: $updatedFolders');
+    print('Updated folders: $updatedFolders');
 
-  showModalBottomSheet(
-    context: context,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(20),
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(20),
+        ),
       ),
-    ),
-    backgroundColor: Colors.white,
-    isScrollControlled: true, // 전체 화면에서 모달을 사용할 수 있게 함
-    builder: (BuildContext context) {
-      return StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-              left: 16,
-              right: 16,
-              top: 16,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text(
-                        '취소',
+      backgroundColor: Colors.white,
+      isScrollControlled: true, // 전체 화면에서 모달을 사용할 수 있게 함
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+                left: 16,
+                right: 16,
+                top: 16,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Text(
+                          '취소',
+                          style: TextStyle(
+                            color: Color.fromRGBO(84, 84, 84, 1),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      const Text(
+                        '다음으로 이동',
                         style: TextStyle(
-                          color: Color.fromRGBO(84, 84, 84, 1),
+                          color: Colors.black,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ),
-                    const Text(
-                      '다음으로 이동',
+                      TextButton(
+                        onPressed: () async {
+                          final selectedFolder = updatedFolders.firstWhere(
+                              (folder) => folder['selected'] == true,
+                              orElse: () => {});
+                          if (selectedFolder.isNotEmpty) {
+                            print(
+                                'Selected folder: ${selectedFolder['folder_name']}');
+                            selectFolder(selectedFolder['folder_name']);
+                          } else {
+                            print('No folder selected.');
+                          }
+                          Navigator.pop(context);
+                        },
+                        child: const Text(
+                          '이동',
+                          style: TextStyle(
+                            color: Color.fromRGBO(255, 161, 122, 1),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  const Center(
+                    child: Text(
+                      '다른 폴더로 이동할 수 있어요.',
                       style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF575757),
+                        fontSize: 13,
+                        fontFamily: 'Raleway',
+                        fontWeight: FontWeight.w500,
+                        height: 1.5,
                       ),
                     ),
-                    TextButton(
-                      onPressed: () async {
-                        final selectedFolder = updatedFolders.firstWhere(
-                            (folder) => folder['selected'] == true,
-                            orElse: () => {});
-                        if (selectedFolder.isNotEmpty) {
-                          print('Selected folder: ${selectedFolder['folder_name']}');
-                          selectFolder(selectedFolder['folder_name']);
-                        } else {
-                          print('No folder selected.');
-                        }
-                        Navigator.pop(context);
+                  ),
+                  const SizedBox(height: 16),
+                  Flexible(
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: updatedFolders.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        final folder = updatedFolders[index];
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 5),
+                          child: CustomRadioButton2(
+                            label: folder['folder_name'],
+                            isSelected: folder['selected'] ?? false,
+                            onChanged: (bool isSelected) {
+                              setState(() {
+                                for (var f in updatedFolders) {
+                                  f['selected'] = false;
+                                }
+                                folder['selected'] = isSelected;
+                              });
+                              print(
+                                  'Folder selected: ${folder['folder_name']}');
+                            },
+                          ),
+                        );
                       },
-                      child: const Text(
-                        '이동',
-                        style: TextStyle(
-                          color: Color.fromRGBO(255, 161, 122, 1),
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 2),
-                const Center(
-                  child: Text(
-                    '다른 폴더로 이동할 수 있어요.',
-                    style: TextStyle(
-                      color: Color(0xFF575757),
-                      fontSize: 13,
-                      fontFamily: 'Raleway',
-                      fontWeight: FontWeight.w500,
-                      height: 1.5,
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                Flexible(
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: updatedFolders.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      final folder = updatedFolders[index];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 5),
-                        child: CustomRadioButton2(
-                          label: folder['folder_name'],
-                          isSelected: folder['selected'] ?? false,
-                          onChanged: (bool isSelected) {
-                            setState(() {
-                              for (var f in updatedFolders) {
-                                f['selected'] = false;
-                              }
-                              folder['selected'] = isSelected;
-                            });
-                            print('Folder selected: ${folder['folder_name']}');
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      );
-    },
-  );
-}
-
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 
   void showRenameDialog2(
     BuildContext context,
@@ -651,13 +652,14 @@ class _LearningPreparationState extends State<LearningPreparation> {
   Future<List<String>> callChatGPT4APIForKeywords(
       List<String> imageUrls) async {
     const String apiKey = Env.apiKey;
+    final int maxKeywordPerPage = (100 / imageUrls.length).ceil();
     final Uri apiUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
     final String promptForKeywords = '''
   You are an image analysis expert. Please extract the keywords in the following image. The conditions are as follows:
   1. Please list the non-overlapping keywords.
   2. Please extract only the key keywords in the class.
   3. Please list each keyword separated by a comma.
-  4. The maximum number of keywords is 5.
+  4. The maximum number of keywords is $maxKeywordPerPage.
   5. Please print out all keywords in Korean.
   ''';
 
@@ -714,8 +716,8 @@ class _LearningPreparationState extends State<LearningPreparation> {
 
       // Remove duplicates and limit to 50 keywords
       var uniqueKeywords = allKeywords.toSet().toList();
-      if (uniqueKeywords.length > 50) {
-        uniqueKeywords = uniqueKeywords.sublist(0, 50);
+      if (uniqueKeywords.length > 100) {
+        uniqueKeywords = uniqueKeywords.sublist(0, 100);
       }
 
       return uniqueKeywords;
@@ -822,7 +824,6 @@ class _LearningPreparationState extends State<LearningPreparation> {
       print('Failed to insert into Alt_table2');
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
