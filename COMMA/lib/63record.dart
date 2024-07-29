@@ -998,7 +998,7 @@ class _RecordPageState extends State<RecordPage> {
         print('Error: scriptUrl is empty for scriptIndex: $scriptIndex');
       }
     }
-      // 5초 대기
+    // 5초 대기
     await Future.delayed(Duration(seconds: 5));
 
     return result;
@@ -1018,8 +1018,9 @@ class _RecordPageState extends State<RecordPage> {
 
     for (String url in alternativeTextUrls) {
       try {
-        String pageText =
-            await http.get(Uri.parse(url)).then((response) => utf8.decode(response.bodyBytes));
+        String pageText = await http
+            .get(Uri.parse(url))
+            .then((response) => utf8.decode(response.bodyBytes));
         pageTexts.add(pageText);
       } catch (e) {
         print('Error loading alternative text: $e');
