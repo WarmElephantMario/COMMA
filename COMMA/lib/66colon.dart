@@ -209,7 +209,9 @@ class _ColonPageState extends State<ColonPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return PopScope(
+    canPop: false ,
+    child:  Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         toolbarHeight: 0,
@@ -476,6 +478,7 @@ class _ColonPageState extends State<ColonPage> {
             ),
       bottomNavigationBar:
           buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
+    ),
     );
   }
 
