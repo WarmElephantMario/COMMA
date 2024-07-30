@@ -87,15 +87,25 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Path Provider Example'),
+    return WillPopScope(
+      onWillPop: () async {
+        if (Navigator.of(context).canPop()) {
+          return true;
+        } else {
+          // 앱을 종료하지 않고 로그인 상태를 유지합니다.
+          return false;
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Path Provider Example'),
+        ),
+        body: Center(
+          child: Text('Temporary Directory: $_tempDirPath'),
+        ),
+        bottomNavigationBar:
+            buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
       ),
-      body: Center(
-        child: Text('Temporary Directory: $_tempDirPath'),
-      ),
-      bottomNavigationBar:
-          buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
     );
   }
 }
