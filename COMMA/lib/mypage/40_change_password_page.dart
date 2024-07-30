@@ -20,7 +20,11 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+    onWillPop: () async {
+      return false; // 뒤로 가기 버튼을 눌렀을 때 아무 반응도 하지 않도록 설정
+    },
+    child:  Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -66,6 +70,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       ),
       bottomNavigationBar:
           buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
+    ),
     );
   }
 }

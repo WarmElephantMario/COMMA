@@ -11,6 +11,8 @@ import '66colon.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import '12_hompage_search.dart';
+// import 'popscope.dart';
+
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -448,8 +450,9 @@ void fetchFolderAndNavigate(BuildContext context, int folderId, String fileType,
   Widget build(BuildContext context) {
     // final size = MediaQuery.of(context).size;
     final userProvider = Provider.of<UserProvider>(context);
-
-    return Scaffold(
+    return PopScope(
+    canPop: false,
+    child:  Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -736,23 +739,22 @@ void fetchFolderAndNavigate(BuildContext context, int folderId, String fileType,
                               });
                             },
                             onMove: () async {
-  await fetchOtherFolders('colon', file['folder_id']);
-  showQuickMenu(
-    context,
-    file['id'],
-    'colon',
-    file['folder_id'],
-    moveItem,
-    () => fetchOtherFolders('colon', file['folder_id']),
-    folderList,
-    (selectedFolder) {
-      setState(() {
-        file['folder_id'] = selectedFolder;
-      });
-    },
-  );
-},
-
+                              await fetchOtherFolders('colon', file['folder_id']);
+                              showQuickMenu(
+                                context,
+                                file['id'],
+                                'colon',
+                                file['folder_id'],
+                                moveItem,
+                                () => fetchOtherFolders('colon', file['folder_id']),
+                                folderList,
+                                (selectedFolder) {
+                                  setState(() {
+                                    file['folder_id'] = selectedFolder;
+                                  });
+                                },
+                              );
+                            },
                           ),
                         ),
                       );
@@ -764,6 +766,7 @@ void fetchFolderAndNavigate(BuildContext context, int folderId, String fileType,
       ),
       bottomNavigationBar:
           buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
+    ),
     );
   }
 }
