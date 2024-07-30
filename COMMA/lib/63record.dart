@@ -25,6 +25,8 @@ import 'model/user_provider.dart';
 import '62lecture_start.dart';
 import '66colon.dart';
 import 'env/env.dart';
+import 'folder/37_folder_files_screen.dart';
+
 
 enum RecordingState { initial, recording, recorded }
 
@@ -1061,8 +1063,11 @@ class _RecordPageState extends State<RecordPage> {
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userKey = userProvider.user?.userKey;
-
-    return Scaffold(
+    return WillPopScope(
+    onWillPop: () async {
+      return false; // 뒤로 가기 버튼을 눌렀을 때 아무 반응도 하지 않도록 설정
+    },
+    child:  Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(toolbarHeight: 0),
       body: SingleChildScrollView(
@@ -1089,14 +1094,10 @@ class _RecordPageState extends State<RecordPage> {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => LectureStartPage(
-                              lecturefileId: widget.lecturefileId,
-                              lectureName: widget.lectureName,
-                              fileURL: widget.fileUrl,
-                              responseUrl: widget.responseUrl ?? '',
-                              type: widget.type,
-                              selectedFolder: widget.folderName,
-                              noteName: widget.noteName,
+                            builder: (context) => FolderFilesScreen(
+                              folderName: widget.folderName,
+                              folderId: widget.lectureFolderId!,
+                              folderType: 'lecture',  // 예시 폴더 유형
                             ),
                           ),
                         );
@@ -1474,6 +1475,7 @@ class _RecordPageState extends State<RecordPage> {
       ),
       bottomNavigationBar:
           buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
+    ),
     );
   }
 }

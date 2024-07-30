@@ -45,8 +45,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-
-    return Scaffold(
+    return WillPopScope(
+    onWillPop: () async {
+      return false; // 뒤로 가기 버튼을 눌렀을 때 아무 반응도 하지 않도록 설정
+    },
+    child:  Scaffold(
       body: Stack(
         children: [
           PageView(
@@ -193,6 +196,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ),
         ],
       ),
+    ),
     );
   }
 }
