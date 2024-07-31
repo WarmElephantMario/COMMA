@@ -11,6 +11,8 @@ import '66colon.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import '12_hompage_search.dart';
+// import 'popscope.dart';
+
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -446,8 +448,9 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     // final size = MediaQuery.of(context).size;
     final userProvider = Provider.of<UserProvider>(context);
-
-    return Scaffold(
+    return PopScope(
+    canPop: false,
+    child:  Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -735,16 +738,14 @@ class _MainPageState extends State<MainPage> {
                               });
                             },
                             onMove: () async {
-                              await fetchOtherFolders(
-                                  'colon', file['folder_id']);
+                              await fetchOtherFolders('colon', file['folder_id']);
                               showQuickMenu(
                                 context,
                                 file['id'],
                                 'colon',
                                 file['folder_id'],
                                 moveItem,
-                                () => fetchOtherFolders(
-                                    'colon', file['folder_id']),
+                                () => fetchOtherFolders('colon', file['folder_id']),
                                 folderList,
                                 (selectedFolder) {
                                   setState(() {
@@ -764,6 +765,7 @@ class _MainPageState extends State<MainPage> {
       ),
       bottomNavigationBar:
           buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
+    ),
     );
   }
 }
