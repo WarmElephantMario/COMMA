@@ -171,7 +171,7 @@ class Information extends StatelessWidget {
         children: [
           Column(
             children: [
-              SizedBox(height: size.height * 0.10),
+              SizedBox(height: size.height * 0.17),
               const Text(
                 '인증코드',
                 textAlign: TextAlign.center,
