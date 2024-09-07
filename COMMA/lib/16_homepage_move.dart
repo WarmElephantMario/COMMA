@@ -114,138 +114,140 @@ class _MainPageState extends State<MainPage> {
   }
 
   void showQuickMenu(
-    BuildContext context,
-    int fileId,
-    String fileType,
-    int currentFolderId,
-    Future<void> Function(int, int, String) moveItem,
-    Future<void> Function() fetchOtherFolders,
-    List<Map<String, dynamic>> folders,
-    Function(int) selectFolder,
-  ) async {
-    print('Attempting to fetch other folders.');
-    try {
-      await fetchOtherFolders();
-      print('Fetched other folders successfully.');
-    } catch (e) {
-      print('Error fetching other folders: $e');
-    }
+  BuildContext context,
+  int fileId,
+  String fileType,
+  int currentFolderId,
+  Future<void> Function(int, int, String) moveItem,
+  Future<void> Function() fetchOtherFolders,
+  List<Map<String, dynamic>> folders,
+  Function(int) selectFolder,
+) async {
+  print('Attempting to fetch other folders.');
+  try {
+    await fetchOtherFolders();
+    print('Fetched other folders successfully.');
+  } catch (e) {
+    print('Error fetching other folders: $e');
+  }
 
-    var updatedFolders = folders.map((folder) {
-      bool isSelected = folder['id'] == currentFolderId;
-      return {
-        ...folder,
-        'selected': isSelected,
-      };
-    }).toList();
+  var updatedFolders = folders.map((folder) {
+    bool isSelected = folder['id'] == currentFolderId;
+    return {
+      ...folder,
+      'selected': isSelected,
+    };
+  }).toList();
 
-    print('Updated folders: $updatedFolders');
+  print('Updated folders: $updatedFolders');
 
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(20),
-        ),
+  showModalBottomSheet(
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(20),
       ),
-      backgroundColor: Colors.white,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: const Text(
-                          '취소',
-                          style: TextStyle(
-                            color: Color.fromRGBO(84, 84, 84, 1),
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      const Text(
-                        '다음으로 이동',
+    ),
+    backgroundColor: Colors.white,
+    builder: (BuildContext context) {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text(
+                        '취소',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: Color.fromRGBO(84, 84, 84, 1),
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      TextButton(
-                        onPressed: () async {
-                          final selectedFolder = updatedFolders.firstWhere(
-                            (folder) => folder['selected'] == true,
-                            orElse: () => {'id': null},
-                          );
-                          final selectedFolderId = selectedFolder['id'];
-                          await moveItem(fileId, selectedFolderId, fileType);
-                          Navigator.pop(context);
-                        },
-                        child: const Text(
-                          '이동',
-                          style: TextStyle(
-                            color: Color.fromRGBO(255, 161, 122, 1),
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
+                    ),
+                    const Text(
+                      '다음으로 이동',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        final selectedFolder = updatedFolders.firstWhere(
+                          (folder) => folder['selected'] == true,
+                          orElse: () => {'id': null},
+                        );
+                        final selectedFolderId = selectedFolder['id'];
+                        await moveItem(fileId, selectedFolderId, fileType);
+                        Navigator.pop(context);
+                      },
+                      child: const Text(
+                        '이동',
+                        style: TextStyle(
+                          color: Color.fromRGBO(255, 161, 122, 1),
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 2),
-                  const Center(
-                    child: Text(
-                      '현재 위치 외 다른 폴더로 이동할 수 있어요.',
-                      style: TextStyle(
-                        color: Color(0xFF575757),
-                        fontSize: 13,
-                        fontFamily: 'Raleway',
-                        fontWeight: FontWeight.w500,
-                        height: 1.5,
-                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                const Center(
+                  child: Text(
+                    '현재 위치 외 다른 폴더로 이동할 수 있어요.',
+                    style: TextStyle(
+                      color: Color(0xFF575757),
+                      fontSize: 13,
+                      fontFamily: 'Raleway',
+                      fontWeight: FontWeight.w500,
+                      height: 1.5,
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  Expanded(
-                    child: ListView(
-                      children: updatedFolders.map((folder) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 5),
-                          child: CustomRadioButton3(
-                            label: folder['folder_name'],
-                            isSelected: folder['selected'],
-                            onChanged: (bool value) {
-                              setState(() {
-                                for (var f in updatedFolders) {
-                                  f['selected'] = false;
-                                }
-                                folder['selected'] = value;
-                              });
-                            },
-                          ),
-                        );
-                      }).toList(),
-                    ),
+                ),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: ListView(
+                    children: updatedFolders.map((folder) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 5),
+                        child: CustomRadioButton3(
+                          label: folder['folder_name'],
+                          isSelected: folder['selected'],
+                          onChanged: (bool value) {
+                            setState(() {
+                              for (var f in updatedFolders) {
+                                f['selected'] = false;
+                              }
+                              folder['selected'] = value;
+                            });
+                          },
+                        ),
+                      );
+                    }).toList(),
                   ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    },
+  );
+}
+
+
 
   void _onItemTapped(int index) {
     setState(() {
@@ -323,126 +325,126 @@ class _MainPageState extends State<MainPage> {
   }
 
   Future<void> moveItem(int fileId, int newFolderId, String fileType) async {
-    try {
-      final response = await http.put(
-        Uri.parse('${API.baseUrl}/api/$fileType-files/move/$fileId'),
-        body: jsonEncode({'folder_id': newFolderId}),
-        headers: {'Content-Type': 'application/json'},
-      );
+  try {
+    final response = await http.put(
+      Uri.parse('${API.baseUrl}/api/$fileType-files/move/$fileId'),
+      body: jsonEncode({'folder_id': newFolderId}),
+      headers: {'Content-Type': 'application/json'},
+    );
 
-      if (response.statusCode == 200) {
-        setState(() {
-          if (fileType == 'lecture') {
-            lectureFiles = lectureFiles.map((file) {
-              if (file['id'] == fileId) {
-                return {...file, 'folder_id': newFolderId};
-              }
-              return file;
-            }).toList();
-          } else {
-            colonFiles = colonFiles.map((file) {
-              if (file['id'] == fileId) {
-                return {...file, 'folder_id': newFolderId};
-              }
-              return file;
-            }).toList();
-          }
-        });
-      } else {
-        throw Exception('Failed to move file');
-      }
-    } catch (error) {
-      print('Error moving file: $error');
-      rethrow;
+    if (response.statusCode == 200) {
+      setState(() {
+        if (fileType == 'lecture') {
+          lectureFiles = lectureFiles.map((file) {
+            if (file['id'] == fileId) {
+              return {...file, 'folder_id': newFolderId};
+            }
+            return file;
+          }).toList();
+        } else {
+          colonFiles = colonFiles.map((file) {
+            if (file['id'] == fileId) {
+              return {...file, 'folder_id': newFolderId};
+            }
+            return file;
+          }).toList();
+        }
+      });
+    } else {
+      throw Exception('Failed to move file');
     }
+  } catch (error) {
+    print('Error moving file: $error');
+    rethrow;
   }
+}
+
 
   // 강의 파일 클릭 이벤트에서 폴더 이름 조회
-  void fetchFolderAndNavigate(BuildContext context, int folderId,
-      String fileType, Map<String, dynamic> file) async {
-    try {
-      final response = await http.get(
-          Uri.parse('${API.baseUrl}/api/getFolderName/$fileType/$folderId'));
-      if (response.statusCode == 200) {
-        var data = jsonDecode(response.body);
-        String folderName = data['folder_name']?.toString() ?? 'Unknown Folder';
-        navigateToPage(context, folderName, file, fileType);
-      } else {
-        print('Failed to load folder name: ${response.statusCode}');
-        navigateToPage(context, 'Unknown Folder', file, fileType);
-      }
-    } catch (e) {
-      print('Error fetching folder name: $e');
-      // 오류 발생 시 navigateToPage를 다시 호출하지 않음
+void fetchFolderAndNavigate(BuildContext context, int folderId, String fileType, Map<String, dynamic> file) async {
+  try {
+    final response = await http.get(Uri.parse('${API.baseUrl}/api/getFolderName/$fileType/$folderId'));
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+      String folderName = data['folder_name']?.toString() ?? 'Unknown Folder';
+      navigateToPage(context, folderName, file, fileType);
+    } else {
+      print('Failed to load folder name: ${response.statusCode}');
+      navigateToPage(context, 'Unknown Folder', file, fileType);
     }
+  } catch (e) {
+    print('Error fetching folder name: $e');
+    // 오류 발생 시 navigateToPage를 다시 호출하지 않음
   }
+}
+
+
+
 
   // 강의 파일 또는 콜론 파일 페이지로 네비게이션
-  void navigateToPage(BuildContext context, String folderName,
-      Map<String, dynamic> file, String fileType) {
-    try {
-      Widget page;
+  void navigateToPage(BuildContext context, String folderName, Map<String, dynamic> file, String fileType) {
+  try {
+    Widget page;
 
-      int lectureFolderId;
-      int colonFileId;
+    int lectureFolderId;
+    int colonFileId;
 
-      // folder_id가 문자열일 경우 int로 변환
-
+    // folder_id가 문자열일 경우 int로 변환
+    
       lectureFolderId = file['folder_id'];
 
-      // id가 문자열일 경우 int로 변환
-
+    // id가 문자열일 경우 int로 변환
+   
       colonFileId = file['id'];
+  
+    //print('Navigating to page with folderName: $folderName, lectureFolderId: $lectureFolderId, colonFileId: $colonFileId');
 
-      //print('Navigating to page with folderName: $folderName, lectureFolderId: $lectureFolderId, colonFileId: $colonFileId');
-
-      if (fileType == 'lecture') {
-        if (file['type'] == 0) {
-          // 강의 파일 + 대체텍스트인 경우
-          page = RecordPage(
-            lecturefileId: file['id'] ?? 'Unknown id',
-            lectureFolderId: lectureFolderId,
-            noteName: file['file_name'] ?? 'Unknown Note',
-            fileUrl:
-                file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
-            folderName: folderName,
-            recordingState: RecordingState.recorded,
-            lectureName: file['lecture_name'] ?? 'Unknown Lecture',
-            responseUrl: file['alternative_text_url'] ??
-                'https://defaulturl.com/defaultfile.txt',
-            type: file['type'] ?? 'Unknown Type',
-          );
-        } else {
-          // 강의 파일 + 실시간 자막인 경우
-          page = RecordPage(
-            lecturefileId: file['id'] ?? 'Unknown id',
-            lectureFolderId: lectureFolderId,
-            noteName: file['file_name'] ?? 'Unknown Note',
-            fileUrl:
-                file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
-            folderName: folderName,
-            recordingState: RecordingState.recorded,
-            lectureName: file['lecture_name'] ?? 'Unknown Lecture',
-            type: file['type'] ?? 'Unknown Type',
-          );
-        }
-      } else {
-        // 콜론 파일인 경우
-        page = ColonPage(
-          folderName: folderName,
+    if (fileType == 'lecture') {
+      if (file['type'] == 0) {
+        // 강의 파일 + 대체텍스트인 경우
+        page = RecordPage(
+          lecturefileId: file['id'] ?? 'Unknown id',
+          lectureFolderId: lectureFolderId,
           noteName: file['file_name'] ?? 'Unknown Note',
+          fileUrl: file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
+          folderName: folderName,
+          recordingState: RecordingState.recorded,
           lectureName: file['lecture_name'] ?? 'Unknown Lecture',
-          createdAt: file['created_at'] ?? 'Unknown Date',
-          fileUrl: file['file_url'] ?? 'Unknown fileUrl',
-          colonFileId: colonFileId,
+          responseUrl: file['alternative_text_url'] ?? 'https://defaulturl.com/defaultfile.txt',
+          type: file['type'] ?? 'Unknown Type',
+        );
+      } else {
+        // 강의 파일 + 실시간 자막인 경우
+        page = RecordPage(
+          lecturefileId: file['id'] ?? 'Unknown id',
+          lectureFolderId: lectureFolderId,
+          noteName: file['file_name'] ?? 'Unknown Note',
+          fileUrl: file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
+          folderName: folderName,
+          recordingState: RecordingState.recorded,
+          lectureName: file['lecture_name'] ?? 'Unknown Lecture',
+          type: file['type'] ?? 'Unknown Type',
         );
       }
-
-      Navigator.push(context, MaterialPageRoute(builder: (context) => page));
-    } catch (e) {
-      print('Error in navigateToPage: $e');
+    } else {
+      // 콜론 파일인 경우
+      page = ColonPage(
+        folderName: folderName,
+        noteName: file['file_name'] ?? 'Unknown Note',
+        lectureName: file['lecture_name'] ?? 'Unknown Lecture',
+        createdAt: file['created_at'] ?? 'Unknown Date',
+        fileUrl: file['file_url'] ?? 'Unknown fileUrl',
+        colonFileId: colonFileId,
+      );
     }
+
+    Navigator.push(context, MaterialPageRoute(builder: (context) => page));
+  } catch (e) {
+    print('Error in navigateToPage: $e');
   }
+}
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -622,16 +624,14 @@ class _MainPageState extends State<MainPage> {
                               });
                             },
                             onMove: () async {
-                              await fetchOtherFolders(
-                                  'lecture', file['folder_id']);
+                              await fetchOtherFolders('lecture', file['folder_id']);
                               showQuickMenu(
                                 context,
                                 file['id'],
                                 'lecture',
                                 file['folder_id'],
                                 moveItem,
-                                () => fetchOtherFolders(
-                                    'lecture', file['folder_id']),
+                                () => fetchOtherFolders('lecture', file['folder_id']),
                                 folderList,
                                 (selectedFolder) {
                                   setState(() {
@@ -640,6 +640,7 @@ class _MainPageState extends State<MainPage> {
                                 },
                               );
                             },
+
                           ),
                         ),
                       );

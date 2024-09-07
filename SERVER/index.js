@@ -13,8 +13,8 @@ app.use(bodyParser.json());
 app.use(cors());
 
 const db = mysql.createPool({
-    host: 'database-comma.cx4q2cgwkin7.us-east-2.rds.amazonaws.com',
-    user: 'comma',
+    host: 'wem-comma-db.c724coieckpw.ap-northeast-2.rds.amazonaws.com',
+    user: 'admin',
     password: 'comma0812!',
     database: 'comma'
 });

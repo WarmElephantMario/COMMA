@@ -10,6 +10,9 @@
 .svn/
 migrate_working_dir/
 
+#PEM KEY
+*.pem
+
 # IntelliJ related
 *.iml
 *.ipr
