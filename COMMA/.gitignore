@@ -1,6 +1,6 @@
 # Environment variables
 .env
-lib/env/env.g.dart
+COMMA\lib\env\env.g.dart
 
 # Miscellaneous
 *.class
