@@ -13,7 +13,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 const db = mysql.createPool({
-    host: 'database-comma.cx4q2cgwkin7.us-east-2.rds.amazonaws.com',
+    host: 'comma-db-restore.cx4q2cgwkin7.us-east-2.rds.amazonaws.com',
     user: 'comma',
     password: 'comma0812!',
     database: 'comma'
