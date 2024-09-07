@@ -1,3 +1,6 @@
+
+.DS_Store
+
 # Miscellaneous
 *.class
 *.log
@@ -9,6 +12,7 @@
 .history
 .svn/
 migrate_working_dir/
+
 
 #PEM KEY
 *.pem
@@ -44,3 +48,4 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
