@@ -472,7 +472,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
   }
 
   Future<List<String>> uploadImagesToFirebase(
-      List<Uint8List> images, int userKey) async {
+      List<Uint8List> images, String userKey) async {
     List<String> downloadUrls = [];
 
     for (int i = 0; i < images.length; i++) {
@@ -492,7 +492,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
   }
 
   Future<String> callChatGPT4APIForAlternativeText(
-      List<String> imageUrls, int userKey, String lectureFileName) async {
+      List<String> imageUrls, String userKey, String lectureFileName) async {
     const String apiKey = Env.apiKey;
     final Uri apiUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
     final String promptForAlternativeText = '''
@@ -727,7 +727,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
     }
   }
 
-  Future<List<String>> handlePdfUpload(Uint8List pdfBytes, int userKey) async {
+  Future<List<String>> handlePdfUpload(Uint8List pdfBytes, String userKey) async {
     try {
       // PDF를 이미지로 변환
       print('Starting PDF to image conversion...');
