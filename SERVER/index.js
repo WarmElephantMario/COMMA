@@ -289,7 +289,7 @@ app.post('/api/signup_info', (req, res) => {
     console.log('전달된 유저아이디:', userId);
     console.log('생성된 닉네임:', usernickname);
 
-    if (!userId || !userNickname) {
+    if (!userId || !usernickname) {
         return res.status(400).json({ success: false, error: 'User ID and nickname are required.' });
     }
 
