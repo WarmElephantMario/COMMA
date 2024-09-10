@@ -296,6 +296,7 @@ app.post('/api/signup_info', (req, res) => {
     const sqlQuery = `INSERT INTO user_table (user_id, user_nickname) VALUES (?, ?)`;
     db.query(sqlQuery, [userId, usernickname], (err, result) => {
         if (err) {
+            console.error('Error inserting into user_table:', err); // 에러 로그 출력
             return res.status(500).json({ success: false, error: err.message });
         }
 
