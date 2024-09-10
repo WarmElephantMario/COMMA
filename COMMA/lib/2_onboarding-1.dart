@@ -53,7 +53,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
 // DB에 새로운 사용자 정보 저장 후 userKey 반환
 Future<int> createUserInDB(String userId, String userNickname) async {
-  // 예시로, DB에 INSERT 후 생성된 userKey를 반환하는 로직
+  
   final response = await http.post(
     Uri.parse('${API.baseUrl}/api/signup_info'),
     headers: {
