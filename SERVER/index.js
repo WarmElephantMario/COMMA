@@ -301,6 +301,7 @@ app.post('/api/signup_info', (req, res) => {
         }
 
         const userKey = result.insertId; // 삽입된 사용자의 ID를 가져옴
+        console.log('Generated userKey:', userKey);
 
         // 기본 폴더 생성
         const lectureFolderQuery = 'INSERT INTO LectureFolders (folder_name, userKey) VALUES (?, ?)';
@@ -322,7 +323,7 @@ app.post('/api/signup_info', (req, res) => {
             }
         });
 
-        return res.json({ success: true });
+        return res.status(200).json({ success: true, userKey: userKey });
     });
 });
 
