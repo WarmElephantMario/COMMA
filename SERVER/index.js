@@ -284,26 +284,24 @@ app.post('/api/signup_info', (req, res) => {
     console.log('API 요청 수신: /api/signup_info');
 
     const userId = req.body.user_id;
-    const userEmail = req.body.user_email;
-    const userPassword = req.body.user_password;
-    const hashedPassword = crypto.createHash('md5').update(userPassword).digest('hex');
     const usernickname = req.body.user_nickname;
 
-    console.log('전달된 아이디:', userId);
-    console.log('전달된 이메일:', userEmail);
+    console.log('전달된 유저아이디:', userId);
     console.log('생성된 닉네임:', usernickname);
 
-    if (!userEmail || !userId || !userPassword) {
-        return res.status(400).json({ success: false, error: 'You must fill all values.' });
+    if (!userId || !usernickname) {
+        return res.status(400).json({ success: false, error: 'User ID and nickname are required.' });
     }
 
-    const sqlQuery = `INSERT INTO user_table (user_id, user_email, user_password, user_nickname) VALUES (?, ?, ?, ?)`;
-    db.query(sqlQuery, [userId, userEmail, hashedPassword, usernickname], (err, result) => {
+    const sqlQuery = `INSERT INTO user_table (user_id, user_nickname) VALUES (?, ?)`;
+    db.query(sqlQuery, [userId, usernickname], (err, result) => {
         if (err) {
+            console.error('Error inserting into user_table:', err); // 에러 로그 출력
             return res.status(500).json({ success: false, error: err.message });
         }
 
         const userKey = result.insertId; // 삽입된 사용자의 ID를 가져옴
+        console.log('Generated userKey:', userKey);
 
         // 기본 폴더 생성
         const lectureFolderQuery = 'INSERT INTO LectureFolders (folder_name, userKey) VALUES (?, ?)';
@@ -325,7 +323,7 @@ app.post('/api/signup_info', (req, res) => {
             }
         });
 
-        return res.json({ success: true });
+        return res.status(200).json({ success: true, userKey: userKey });
     });
 });
 
