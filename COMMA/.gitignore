@@ -1,3 +1,7 @@
+# Environment variables
+.env
+COMMA/lib/env/env.g.dart
+
 # Miscellaneous
 *.class
 *.log
