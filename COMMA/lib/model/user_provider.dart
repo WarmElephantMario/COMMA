@@ -15,15 +15,17 @@ class UserProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // Setter for userKey (userKey를 String으로 처리)
+  // Setter for userKey
   void setUserID(String userId) {
     if (_user != null) {
       _user = User(
+        _user!.userKey,
         userId,  // int.parse() 제거, 바로 userId 사용
         _user!.user_nickname,
       );
     } else {
       _user = User(
+        0,
         userId,  // int.parse() 제거, 바로 userId 사용
         'New User',  // 기본 닉네임 설정
       );
@@ -36,8 +38,9 @@ class UserProvider with ChangeNotifier {
   void updateUserNickname(String newNickname) {
     if (_user != null) {
       _user = User(
-        _user!.userKey,
-        newNickname,
+        _user!.userKey,  
+        _user!.userId,  
+        newNickname,   
       );
       notifyListeners();
     }

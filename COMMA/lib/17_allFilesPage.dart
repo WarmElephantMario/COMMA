@@ -11,7 +11,7 @@ import 'components.dart'; // showCustomMenu 함수가 있는 파일을 import
 
 
 class AllFilesPage extends StatefulWidget {
-  final String userKey;
+  final int userKey;
   final String fileType;
 
   const AllFilesPage({

@@ -591,7 +591,7 @@ class _RecordPageState extends State<RecordPage> {
   }
 
   Future<int> createColonFolder(String folderName, String noteName,
-      String fileUrl, String lectureName, int type, String? userKey) async {
+      String fileUrl, String lectureName, int type, int? userKey) async {
     var url = '${API.baseUrl}/api/create-colon';
 
     var body = {
