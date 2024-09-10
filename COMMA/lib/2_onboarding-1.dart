@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_plugin/16_homepage_move.dart';
 import 'package:flutter_plugin/api/api.dart';
+import 'package:flutter_plugin/model/user.dart';
 import 'package:flutter_plugin/model/user_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -50,24 +51,28 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     _focusNode.requestFocus();
   }
 
-  Future<void> createUserInDB(String userId, String nickname) async {
+// DB에 새로운 사용자 정보 저장 후 userKey 반환
+Future<int> createUserInDB(String userId, String userNickname) async {
+  // 예시로, DB에 INSERT 후 생성된 userKey를 반환하는 로직
   final response = await http.post(
     Uri.parse('${API.baseUrl}/api/signup_info'),
     headers: {
       'Content-Type': 'application/json',
     },
     body: jsonEncode({
-      'user_id': userId,  // UUID를 user_id로 전송
-      'user_nickname': nickname,
+      'user_id': userId,
+      'user_nickname': userNickname,
     }),
   );
 
   if (response.statusCode == 200) {
-    print('User created in DB successfully.');
+    final responseBody = jsonDecode(response.body);
+    return responseBody['userKey']; // 서버에서 반환된 userKey
   } else {
-    print('Failed to create user in DB: ${response.body}');
+    throw Exception('Failed to create user in DB');
   }
 }
+
 
   @override
   Widget build(BuildContext context) {
@@ -211,12 +216,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           await prefs.setString('user_id', userId);
                           await prefs.setString('user_nickname', userNickname);
 
-                           // DB에 새로운 사용자 정보 저장
-                          await createUserInDB(userId, userNickname);
+                           // DB에 새로운 사용자 정보 저장 후 userKey 받아옴
+                          int userKey = await createUserInDB(userId, userNickname);
+
+                          // userKey를 로컬 저장소에 저장
+                          await prefs.setInt('user_key', userKey);
                         }
 
-                        // userProvider에 설정 (필요 시)
-                        Provider.of<UserProvider>(context, listen: false).setUserID(userId);
+                        // 로컬 저장소에서 userKey와 user_nickname 불러오기
+                        int? userKey = prefs.getInt('user_key');
+                        String? userNickname = prefs.getString('user_nickname');
+
+                        if (userKey != null && userNickname != null) {
+                          // UserProvider에 설정
+                          Provider.of<UserProvider>(context, listen: false).setUser(
+                            User(userKey, userId!, userNickname)
+                          );
+                        }
 
                         Navigator.push(
                           context,
