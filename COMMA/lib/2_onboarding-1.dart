@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_plugin/16_homepage_move.dart';
@@ -10,8 +11,8 @@ import 'package:uuid/uuid.dart';
 import '3_onboarding-2.dart';
 import '4_onboarding-3.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';  // jsonEncode를 사용하기 위한 라이브러리 임포트
-
+import 'dart:convert'; // jsonEncode를 사용하기 위한 라이브러리 임포트
+import '10_typeselect.dart';
 
 void main() {
   runApp(FigmaToCodeApp());
@@ -52,27 +53,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
 // DB에 새로운 사용자 정보 저장 후 userKey 반환
-Future<int> createUserInDB(String userId, String userNickname) async {
-  
-  final response = await http.post(
-    Uri.parse('${API.baseUrl}/api/signup_info'),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: jsonEncode({
-      'user_id': userId,
-      'user_nickname': userNickname,
-    }),
-  );
+  Future<int> createUserInDB(String userId, String userNickname) async {
+    final response = await http.post(
+      Uri.parse('${API.baseUrl}/api/signup_info'),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'user_id': userId,
+        'user_nickname': userNickname,
+      }),
+    );
 
-  if (response.statusCode == 200) {
-    final responseBody = jsonDecode(response.body);
-    return responseBody['userKey']; // 서버에서 반환된 userKey
-  } else {
-    throw Exception('Failed to create user in DB');
+    if (response.statusCode == 200) {
+      final responseBody = jsonDecode(response.body);
+      return responseBody['userKey']; // 서버에서 반환된 userKey
+    } else {
+      throw Exception('Failed to create user in DB');
+    }
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -205,19 +204,28 @@ Future<int> createUserInDB(String userId, String userNickname) async {
                             size.height * 0.065), // Button size
                       ),
                       onPressed: () async {
-                        SharedPreferences prefs = await SharedPreferences.getInstance();
-                        String? userId = prefs.getString('user_id');  // UUID를 user_id로 사용
+                        print('버튼 누름');
+                        SharedPreferences prefs =
+                            await SharedPreferences.getInstance();
+                        String? userId =
+                            prefs.getString('user_id'); // UUID를 user_id로 사용
 
                         if (userId == null) {
+                          print('유저아이디 없음');
                           // userKey 없으면 새로 생성
                           userId = Uuid().v4(); // UUID 생성
+                          print('Generated userId : $userId');
 
                           String userNickname = 'New User';
                           await prefs.setString('user_id', userId);
                           await prefs.setString('user_nickname', userNickname);
 
-                           // DB에 새로운 사용자 정보 저장 후 userKey 받아옴
-                          int userKey = await createUserInDB(userId, userNickname);
+                          print('Generated user_id : $userId');
+                          print('Generated user_nickname : $userNickname');
+
+                          // DB에 새로운 사용자 정보 저장 후 userKey 받아옴
+                          int userKey =
+                              await createUserInDB(userId, userNickname);
 
                           // userKey를 로컬 저장소에 저장
                           await prefs.setInt('user_key', userKey);
@@ -229,14 +237,15 @@ Future<int> createUserInDB(String userId, String userNickname) async {
 
                         if (userKey != null && userNickname != null) {
                           // UserProvider에 설정
-                          Provider.of<UserProvider>(context, listen: false).setUser(
-                            User(userKey, userId!, userNickname)
-                          );
+                          Provider.of<UserProvider>(context, listen: false)
+                              .setUser(
+                                  User(userKey, userId!, userNickname, null));
                         }
 
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => MainPage()),
+                          MaterialPageRoute(
+                              builder: (context) => DisabilitySelectionPage()),
                         );
                       },
                       child: const Text(

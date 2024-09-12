@@ -19,16 +19,16 @@ class UserProvider with ChangeNotifier {
   void setUserID(String userId) {
     if (_user != null) {
       _user = User(
-        _user!.userKey,
-        userId,  // int.parse() 제거, 바로 userId 사용
-        _user!.user_nickname,
-      );
+          _user!.userKey,
+          userId, // int.parse() 제거, 바로 userId 사용
+          _user!.user_nickname,
+          null);
     } else {
       _user = User(
-        0,
-        userId,  // int.parse() 제거, 바로 userId 사용
-        'New User',  // 기본 닉네임 설정
-      );
+          0,
+          userId, // int.parse() 제거, 바로 userId 사용
+          'New User', // 기본 닉네임 설정
+          null);
     }
     _isLoggedIn = true;
     notifyListeners();
@@ -37,11 +37,16 @@ class UserProvider with ChangeNotifier {
   // 닉네임 업데이트
   void updateUserNickname(String newNickname) {
     if (_user != null) {
-      _user = User(
-        _user!.userKey,  
-        _user!.userId,  
-        newNickname,   
-      );
+      _user = User(_user!.userKey, _user!.userId, newNickname, null);
+      notifyListeners();
+    }
+  }
+
+  // 타입 업데이트
+  void updateDisType(int disType) {
+    if (_user != null) {
+      _user =
+          User(_user!.userKey, _user!.userId, _user!.user_nickname, disType);
       notifyListeners();
     }
   }
