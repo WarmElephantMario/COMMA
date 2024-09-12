@@ -164,7 +164,23 @@ class _LectureStartPageState extends State<LectureStartPage> {
             Center(
               child: ClickButton(
                 text: '강의실 입장하기',
-                onPressed: () {
+                onPressed: () async{
+                   // lecturefileId에 existLecture 값을 1로 업데이트하는 API 호출
+                if (widget.lecturefileId != null) {
+                  final response = await http.post(
+                    Uri.parse('${API.baseUrl}/update-existLecture'), 
+                    headers: {'Content-Type': 'application/json'},
+                    body: jsonEncode({
+                      'lecturefileId': widget.lecturefileId,
+                      'existLecture': 1,
+                    }),
+                  );
+                  if (response.statusCode == 200) {
+                    print('existLecture 업데이트 성공');
+                  } else {
+                    print('existLecture 업데이트 실패');
+                  }
+                }
                   Navigator.push(
                     context,
                     MaterialPageRoute(
