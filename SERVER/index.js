@@ -1083,6 +1083,21 @@ app.get('/api/get-alt-url/:colonfile_id', (req, res) => {
     });
 });
 
+// existLecture 값을 무조건 1로 업데이트
+app.post('/api/update-existLecture', (req, res) => {
+    const { lectureFileId } = req.body;
+
+    const updateQuery = 'UPDATE LectureFiles SET existLecture = 1 WHERE id = ?';
+    db.query(updateQuery, [lectureFileId], (err, result) => {
+        if (err) {
+            console.error('Failed to update existLecture:', err);
+            return res.status(500).json({ error: 'Failed to update existLecture' });
+        }
+        res.status(200).json({ message: 'existLecture updated to 1 successfully' });
+    });
+});
+
+
 
 app.listen(port, () => {
     console.log(`Server started on port ${port}`);
