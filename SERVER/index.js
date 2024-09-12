@@ -1097,7 +1097,26 @@ app.post('/api/update-existLecture', (req, res) => {
     });
 });
 
-
+// API 엔드포인트: lecturefileId로 existLecture 값을 확인
+app.get('/api/checkExistLecture/:lectureFileId', (req, res) => {
+    const lecturefileId = req.params.lectureFileId;
+  
+    const query = 'SELECT existLecture FROM LectureFiles WHERE id = ?';
+    db.query(query, [lectureFileId], (err, result) => {
+      if (err) {
+        console.error('Error checking existLecture:', err);
+        return res.status(500).json({ error: 'Failed to check existLecture' });
+      }
+  
+      if (result.length > 0) {
+        // lecturefileId에 대한 existLecture 값을 반환
+        res.status(200).json({ existLecture: result[0].existLecture });
+      } else {
+        // 해당 lecturefileId가 없는 경우
+        res.status(404).json({ error: 'Lecture file not found' });
+      }
+    });
+  });
 
 app.listen(port, () => {
     console.log(`Server started on port ${port}`);
