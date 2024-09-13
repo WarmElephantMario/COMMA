@@ -60,10 +60,26 @@ class _LearningPreparationState extends State<LearningPreparation> {
   @override
   void initState() {
     super.initState();
+
+    // 유저의 타입에 따라 학습 유형 자동 설정
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userDisType = userProvider.user?.dis_type; // 유저의 dis_type 가져오기
+
+    if (userDisType == 0) {
+      // 시각장애인용 모드 (대체텍스트)
+      isAlternativeTextEnabled = true;
+      isRealTimeSttEnabled = false;
+    } else if (userDisType == 1) {
+      // 청각장애인용 모드 (실시간 자막)
+      isAlternativeTextEnabled = false;
+      isRealTimeSttEnabled = true;
+    }
+
+    // 폴더 목록 불러오기
     fetchFolderList();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _focusNode.requestFocus(); // 페이지 빌드 후 초점을 설정하는 부분
+      _focusNode.requestFocus(); // 페이지 빌드 후 초점 설정
     });
   }
 
@@ -827,6 +843,9 @@ class _LearningPreparationState extends State<LearningPreparation> {
 
   @override
   Widget build(BuildContext context) {
+    // 학습 유형에 따라 제목 설정
+    String titleText =
+        isAlternativeTextEnabled ? '대체텍스트 생성 학습 준비하기' : '실시간 자막 생성 학습 준비하기';
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(toolbarHeight: 0),
@@ -838,9 +857,9 @@ class _LearningPreparationState extends State<LearningPreparation> {
             focusNode: _focusNode, // 추가된 부분
             child: Semantics(
               focusable: true,
-              child: const Text(
-                '오늘의 학습 준비하기',
-                style: TextStyle(
+              child: Text(
+                titleText,
+                style: const TextStyle(
                   color: Color(0xFF414141),
                   fontSize: 24,
                   fontFamily: 'DM Sans',
@@ -848,31 +867,6 @@ class _LearningPreparationState extends State<LearningPreparation> {
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 30),
-          const Text(
-            '학습 유형을 선택해주세요.',
-            style: TextStyle(
-                color: Color(0xFF575757),
-                fontSize: 16,
-                fontFamily: 'DM Sans',
-                fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 15),
-          CustomRadioButton(
-            label: '대체텍스트 생성',
-            value: true,
-            groupValue: isAlternativeTextEnabled,
-            onChanged: _onLearningTypeChanged,
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          CustomRadioButton(
-            label: '실시간 자막 생성',
-            value: false,
-            groupValue: isAlternativeTextEnabled,
-            onChanged: _onLearningTypeChanged,
           ),
           const SizedBox(height: 50),
           const Text(

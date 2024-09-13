@@ -1081,6 +1081,31 @@ app.get('/api/get-alt-url/:colonfile_id', (req, res) => {
     });
 });
 
+// 사용자 학습 유형(장애 타입) 업데이트 API
+app.post('/api/user/:userKey/update-type', (req, res) => {
+    const userKey = req.params.userKey;
+    const { type } = req.body;
+  
+    const sql = 'UPDATE user_table SET dis_type = ? WHERE userKey = ?';
+  
+    // 콜백 방식으로 쿼리 실행
+    db.query(sql, [type, userKey], (error, result) => {
+      if (error) {
+        console.error('DB 에러:', error.message);
+        return res.status(500).json({ success: false, message: `DB 오류: ${error.message}` });
+      }
+  
+      // 업데이트 성공 시
+      if (result.affectedRows > 0) {
+        return res.status(200).json({ success: true, message: '학습 유형이 업데이트되었습니다.' });
+      } else {
+        return res.status(404).json({ success: false, message: '사용자를 찾을 수 없습니다.' });
+      }
+    });
+  });
+  
+  
+
 
 app.listen(port, () => {
     console.log(`Server started on port ${port}`);
