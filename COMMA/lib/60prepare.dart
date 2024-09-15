@@ -720,12 +720,62 @@ class _LearningPreparationState extends State<LearningPreparation> {
         uniqueKeywords = uniqueKeywords.sublist(0, 100);
       }
 
+      // ,기준으로 분리? => 로직 수정 필요
+    String keywordContent = uniqueKeywords.join(',');
+
+    // 키워드 파이어베이스에 저장하기 
+    final directory = await getTemporaryDirectory();
+    final filePath =
+        path.join(directory.path, '${DateTime.now().millisecondsSinceEpoch}_keywords.txt');
+
+    final file = File(filePath);
+    await file.writeAsString(keywordContent);
+
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final storageRef = FirebaseStorage.instance.ref().child(
+        'keywords/${userProvider.user!.userKey}/${getFolderIdByName(_selectedFolder)}/$lecturefileId/${path.basename(filePath)}');
+    UploadTask uploadTask = storageRef.putFile(file);
+
+    TaskSnapshot taskSnapshot = await uploadTask;
+    String keywordsFileUrl = await taskSnapshot.ref.getDownloadURL();
+    print('Keywords file stored at URL: $keywordsFileUrl');
+
+    // Delete the temporary file
+    await file.delete();
+
+    // DB에 lecturefile_id와 keywords_url 저장
+    await insertKeywordsIntoDB(lecturefileId!, keywordsFileUrl);
+
       return uniqueKeywords;
     } catch (e) {
       print('Error: $e');
       return [];
     }
   }
+
+// Keywords_table에 lecturefile_id와 keywords_url 삽입
+Future<void> insertKeywordsIntoDB(int lecturefileId, String keywordsFileUrl) async {
+  try {
+    final response = await http.post(
+      Uri.parse('${API.baseUrl}/api/insert-keywords'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode({
+        'lecturefileId': lecturefileId,
+        'keywordsFileUrl': keywordsFileUrl,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      print('Keywords successfully inserted into DB.');
+    } else {
+      print('Failed to insert keywords into DB.');
+    }
+  } catch (e) {
+    print('Error inserting keywords into DB: $e');
+  }
+}
 
   Future<List<String>> handlePdfUpload(Uint8List pdfBytes, int userKey) async {
     try {
