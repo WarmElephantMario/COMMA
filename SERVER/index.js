@@ -13,8 +13,8 @@ app.use(bodyParser.json());
 app.use(cors());
 
 const db = mysql.createPool({
-    host: 'comma-db-restore.cx4q2cgwkin7.us-east-2.rds.amazonaws.com',
-    user: 'comma',
+    host: 'wem-comma-db.c724coieckpw.ap-northeast-2.rds.amazonaws.com',
+    user: 'admin',
     password: 'comma0812!',
     database: 'comma'
 });
@@ -1099,7 +1099,7 @@ app.post('/api/update-existLecture', (req, res) => {
 
 // API 엔드포인트: lecturefileId로 existLecture 값을 확인
 app.get('/api/checkExistLecture/:lectureFileId', (req, res) => {
-    const lecturefileId = req.params.lectureFileId;
+    const lectureFileId = req.params.lectureFileId;
   
     const query = 'SELECT existLecture FROM LectureFiles WHERE id = ?';
     db.query(query, [lectureFileId], (err, result) => {
@@ -1117,6 +1117,30 @@ app.get('/api/checkExistLecture/:lectureFileId', (req, res) => {
       }
     });
   });
+
+  app.get('/api/getKeywords/:lecturefile_id', (req, res) => {
+    const { lecturefile_id } = req.params; // 이름을 lecturefile_id로 수정
+
+    if (!lecturefile_id) {
+        return res.status(400).json({ success: false, error: 'You must provide lecturefile_id.' });
+    }
+
+    const sql = 'SELECT keywords_url FROM Keywords_table WHERE lecturefile_id = ?';
+    db.query(sql, [lecturefile_id], (err, result) => {
+        if (err) {
+            return res.status(500).json({ success: false, error: err.message });
+        }
+
+        if (result.length === 0) {
+            return res.status(404).json({ success: false, error: 'No keywords found for the given lecturefile_id.' });
+        }
+
+        const keywordsUrl = result[0].keywords_url;
+        res.json({ success: true, keywordsUrl });
+    });
+});
+
+
 
 app.listen(port, () => {
     console.log(`Server started on port ${port}`);
