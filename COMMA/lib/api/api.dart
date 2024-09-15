@@ -5,5 +5,5 @@
 // }
 
 class API {
-  static const baseUrl = 'http://10.1.0.18:3000';
+  static const baseUrl = 'http://192.168.219.169:3000';
 }
