@@ -82,6 +82,7 @@ Future<void> _checkUserKey() async {
       }
     } else {
       print('유저키 없음');
+      
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => OnboardingScreen()),
