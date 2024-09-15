@@ -434,6 +434,7 @@ class _MainPageState extends State<MainPage> {
           createdAt: file['created_at'] ?? 'Unknown Date',
           fileUrl: file['file_url'] ?? 'Unknown fileUrl',
           colonFileId: colonFileId,
+          folderId: file['folder_id'] ?? 'Unknown folderId',
         );
       }
 

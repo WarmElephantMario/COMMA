@@ -11,7 +11,7 @@ import '../api/api.dart';
 
 class FolderFilesScreen extends StatefulWidget {
   final String folderName;
-  final int folderId;
+  final int? folderId;
   final String folderType;
 
   const FolderFilesScreen({
@@ -154,12 +154,14 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
             lecturefileId: file['id'],
           )
         : ColonPage(
+
             folderName: folderName,
             noteName: file['file_name'] ?? 'Unknown Note',
             lectureName: file['lecture_name'] ?? 'Unknown Lecture',
             createdAt: file['created_at'] ?? 'Unknown Date',
             fileUrl: file['file_url'] ?? 'Unknown fileUrl',
             colonFileId: file['id'] ?? 'Unknown id',
+            folderId : file['folder_id'] ?? 'Unknown folderId',
           );
 
     Navigator.push(context, MaterialPageRoute(builder: (context) => page));
