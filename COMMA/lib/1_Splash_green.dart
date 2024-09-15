@@ -88,6 +88,14 @@ Future<void> _checkUserKey() async {
         MaterialPageRoute(builder: (context) => OnboardingScreen()),
       );
     }
+  } else {
+      print('유저아이디(기기값) 없음');
+      
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => OnboardingScreen()),
+      );
+
   }
 }
 
