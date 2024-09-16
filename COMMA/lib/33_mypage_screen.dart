@@ -95,8 +95,39 @@ class _MyPageScreenState extends State<MyPageScreen> {
     }
   }
 
+  Future<void> _updateDisType(int updatedDisType) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userKey = userProvider.user?.userKey ?? 0;
+
+    final response = await http.put(
+      Uri.parse('${API.baseUrl}/api/update_dis_type'),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'userKey': userKey,
+        'dis_type': updatedDisType,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      var responseBody = jsonDecode(response.body);
+      if (responseBody['success']) {
+        userProvider.updateDisType(updatedDisType); // Update in the provider
+        Fluttertoast.showToast(msg: '학습 모드가 성공적으로 업데이트되었습니다.');
+      } else {
+        Fluttertoast.showToast(msg: '학습 모드 업데이트 중 오류가 발생했습니다.');
+      }
+    } else {
+      Fluttertoast.showToast(msg: '서버 오류: 학습 모드 업데이트 실패');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    int disType = userProvider.user?.dis_type ?? 0;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -154,6 +185,70 @@ class _MyPageScreenState extends State<MyPageScreen> {
               },
             );
           }),
+        SizedBox(height: 50), 
+
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20.0),
+              child: Text(
+                '학습 모드를 변경하시려면 스위치를 당겨 재부팅하세요',
+                textAlign: TextAlign.center, // 중앙 정렬
+                style: TextStyle(
+                    fontSize: 16.0, color: Colors.grey[600]), // 글씨 크기 수정
+              ),
+            ),
+          ),
+
+            // 스위치와 설명 텍스트 추가
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center, // 중앙에 위치하도록 설정
+            children: [
+              // 스위치 왼쪽 설명: 시각장애인 모드
+              Padding(
+                padding: const EdgeInsets.only(right: 8.0), // 간격 추가
+                child: Text(
+                  '시각장애인 모드', // 스위치 왼쪽 텍스트
+                  style: TextStyle(fontSize: 16.0), // 글씨 크기 키움
+                ),
+              ),
+              SizedBox(width: 15,), 
+
+              // 스위치 위젯
+              Transform.scale(
+                scale: 1.5, // 스위치 크기
+                child: Switch(
+                  value: disType == 1, // If disType is 1, the switch is on
+                  onChanged: (bool newValue) async {
+                    // Update the dis_type value and call the backend
+                    int updatedDisType = newValue ? 1 : 0;
+                    await _updateDisType(updatedDisType); // Update in the database
+
+                    // After updating, restart the app by navigating to SplashScreen
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              SplashScreen()), // Navigate to splash screen
+                    );
+                  },
+                  activeTrackColor: Colors.teal, // 스위치 켜진 상태의 트랙 색상 (초록색)
+                  activeColor: Colors.white, // 스위치 켜진 상태의 thumb(단추) 색상 (흰색)
+                  inactiveTrackColor: Colors.teal, // 스위치 꺼진 상태의 트랙 색상 (초록색)
+                  inactiveThumbColor: Colors.white, // 스위치 꺼진 상태의 thumb(단추) 색상 (흰색)
+                ),
+              ),
+
+              SizedBox(width: 15,), 
+              // 스위치 오른쪽 설명: 청각장애인 모드
+              Padding(
+                padding: const EdgeInsets.only(left: 8.0), // 간격 추가
+                child: Text(
+                  '청각장애인 모드', // 스위치 오른쪽 텍스트
+                  style: TextStyle(fontSize: 16.0), // 글씨 크기 키움
+                ),
+              ),
+            ],
+          ),
         ],
       ),
       bottomNavigationBar:
