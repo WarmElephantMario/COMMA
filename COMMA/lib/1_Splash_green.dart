@@ -11,6 +11,9 @@ import 'model/user.dart';
 import 'package:http/http.dart' as http;
 import 'api/api.dart';
 
+import 'package:http/http.dart' as http;
+import 'api/api.dart';
+
 Future<Map<String, dynamic>?> _fetchUserDetails(int userKey) async {
   try {
     final response = await http.get(Uri.parse('${API.baseUrl}/api/user-details/$userKey'));
@@ -32,6 +35,7 @@ Future<Map<String, dynamic>?> _fetchUserDetails(int userKey) async {
 }
 
 
+
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -47,13 +51,14 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
 Future<void> _checkUserKey() async {
-  print('유저키 확인');
+  print('user_id 확인');
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userId = prefs.getString('user_id');
+  print('유저아이디 : $userId');
 
   if (userId != null) {
-    print('유저아이디 존재함 --> mainpage로 이동');
-    print('유저아이디 : $userId');
+    print('유저아이디 존재함 (기기번호 생성된 적 있음) --> mainpage로 이동');
+    
 
     // 로컬 저장소에서 userKey만 불러오기
     int? userKey = prefs.getInt('user_key');
@@ -66,7 +71,6 @@ Future<void> _checkUserKey() async {
       if (userDetails != null) {
         String userNickname = userDetails['user_nickname'];
         int disType = userDetails['dis_type'];
-
         // UserProvider에 닉네임 설정
         Provider.of<UserProvider>(context, listen: false)
             .setUser(User(userKey, userId!, userNickname, null));
@@ -81,7 +85,7 @@ Future<void> _checkUserKey() async {
         );
       }
     } else {
-      print('유저키 없음');
+      print('유저키 없음 (userId는 만들었는데 userKey 생성엔 실패했던 케이스)');
       
       Navigator.pushReplacement(
         context,
@@ -89,13 +93,13 @@ Future<void> _checkUserKey() async {
       );
     }
   } else {
-      print('유저아이디(기기값) 없음');
-      
+      print('유저아이디 없음 (기기번호 생성된 적 없음)  --> 온보딩으로 이동');
+
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => OnboardingScreen()),
       );
-
   }
 }
 
