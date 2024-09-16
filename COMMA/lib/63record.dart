@@ -1300,62 +1300,6 @@ class _RecordPageState extends State<RecordPage> {
                                     await loadAndProcessLectureData(
                                         widget.lecturefileId);
 
-                                    //나눈 페이지를 하나씩 firebase에 업로드 (수정필요)
-                                    // for (var i = 0;
-                                    //     i < pageScripts.entries.length;
-                                    //     i++) {
-                                    //   var entry =
-                                    //       pageScripts.entries.elementAt(i);
-                                    //   String fileName = entry.key;
-                                    //   String scriptContent = entry.value;
-
-                                    //   print('Processing file: $fileName');
-
-                                    //   final directory =
-                                    //       await getTemporaryDirectory();
-                                    //   final filePath =
-                                    //       path.join(directory.path, fileName);
-
-                                    //   final file = File(filePath);
-                                    //   await file.writeAsString(scriptContent);
-
-                                    //   print('File written: $filePath');
-
-                                    //   final userProvider =
-                                    //       Provider.of<UserProvider>(context,
-                                    //           listen: false);
-                                    //   final storageRef =
-                                    //       FirebaseStorage.instance.ref().child(
-                                    //           'response2/$userKey/${colonDetails['folder_id']}/${colonFileId}/${fileName}');
-
-                                    //   print(
-                                    //       'Firebase storage path: ${storageRef.fullPath}');
-
-                                    //   UploadTask uploadTask =
-                                    //       storageRef.putFile(file);
-
-                                    //   TaskSnapshot taskSnapshot =
-                                    //       await uploadTask;
-                                    //   String responseUrl = await taskSnapshot
-                                    //       .ref
-                                    //       .getDownloadURL();
-                                    //   print(
-                                    //       'GPT Response stored URL: $responseUrl');
-
-                                    //   progressNotifier.value =
-                                    //       (i + 1) / pageScripts.entries.length;
-
-                                    // page 번호를 Record_table 데이터베이스에 삽입
-                                    // int pageIndex = int.parse(fileName
-                                    //     .replaceAll(RegExp(r'[^0-9]'), ''));
-                                    // await insertDividedScript(
-                                    //     colonFileId, pageIndex, responseUrl);
-
-                                    //해당되는 record_url 열에 id를 받아와 해당 열에 page 삽입하기
-
-                                    //   await file.delete();
-                                    // }
-
                                     // (5)-1 CreatingDialog pop 하기
                                     Navigator.of(context, rootNavigator: true)
                                         .pop();

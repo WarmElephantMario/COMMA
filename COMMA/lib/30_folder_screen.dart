@@ -129,20 +129,6 @@ class _FolderScreenState extends State<FolderScreen> {
     }
   }
 
-  // Future<void> _renameFolder(String folderType, int id, String newName) async {
-  //   final url = Uri.parse(
-  //       '${API.baseUrl}/api/${folderType == 'lecture' ? 'lecture' : 'colon'}-folders/$id');
-  //   try {
-  //     final response = await http.put(url,
-  //         body: jsonEncode({'folder_name': newName}),
-  //         headers: {'Content-Type': 'application/json'});
-  //     if (response.statusCode != 200) {
-  //       throw Exception('Failed to rename folder');
-  //     }
-  //   } catch (e) {
-  //     print(e);
-  //   }
-  // }
 
   Future<void> _deleteFolder(String folderType, int id) async {
     final url = Uri.parse(
