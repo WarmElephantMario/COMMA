@@ -8,6 +8,10 @@ import 'package:flutter_plugin/63record.dart'; // RecordPage import
 import 'package:provider/provider.dart';
 import '../model/user_provider.dart';
 import '../api/api.dart';
+import 'package:flutter_plugin/62lecture_start.dart';
+
+import 'package:provider/provider.dart';
+
 
 class FolderFilesScreen extends StatefulWidget {
   final String folderName;
@@ -41,6 +45,8 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
     fetchFiles();
   }
 
+
+
   Future<void> fetchFiles() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userKey = userProvider.user?.userKey;
@@ -61,7 +67,8 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
               'id': file['id'], // 파일 ID 추가
               'folder_id': file['folder_id'] ?? 0, // 폴더 ID 추가
               'lecture_name':
-                  file['lecture_name'] ?? 'Unknown Lecture' // 강의 이름 추가
+                  file['lecture_name'] ?? 'Unknown Lecture' ,// 강의 이름 추가
+              // 'alternative_text_url':file['alternative_text_url']?? ''
             };
           }).toList();
         });
@@ -117,25 +124,119 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
     return DateFormat('yyyy/MM/dd HH:mm').format(parsedDateTime);
   }
 
-  // 강의 파일 클릭 이벤트에서 폴더 이름 조회
-  void fetchFolderAndNavigate(BuildContext context, int folderId,
-      String fileType, Map<String, dynamic> file) async {
-    try {
-      final response = await http.get(
-          Uri.parse('${API.baseUrl}/api/getFolderName/$fileType/$folderId'));
-      if (response.statusCode == 200) {
-        var data = jsonDecode(response.body);
-        navigateToPage(
-            context, data['folder_name'] ?? 'Unknown Folder', file, fileType);
+// 데베에서 keywords 가져오기
+Future<List<String>> fetchKeywords(int lecturefileId) async {
+  try {
+    final response = await http.get(Uri.parse('${API.baseUrl}/api/getKeywords/$lecturefileId'));
+
+    if (response.statusCode == 200) {
+      final responseData = jsonDecode(response.body);
+
+      if (responseData['success'] == true) {
+        final String keywordsUrl = responseData['keywordsUrl'];
+
+        // keywords_url에서 키워드 리스트를 가져옴
+        return await fetchKeywordsFromUrl(keywordsUrl);
       } else {
-        print('Failed to load folder name: ${response.statusCode}');
-        navigateToPage(context, 'Unknown Folder', file, fileType);
+        print('Error fetching keywords: ${responseData['error']}');
+        return [];
       }
-    } catch (e) {
-      print('Error fetching folder name: $e');
-      navigateToPage(context, 'Unknown Folder', file, fileType);
+    } else {
+      print('Failed to fetch keywords with status: ${response.statusCode}');
+      return [];
     }
+  } catch (e) {
+    print('Error: $e');
+    return [];
   }
+}
+
+// keywords_url에서 키워드 리스트를 가져오는 함수
+Future<List<String>> fetchKeywordsFromUrl(String keywordsUrl) async {
+  try {
+    final response = await http.get(Uri.parse(keywordsUrl));
+
+    if (response.statusCode == 200) {
+      // UTF-8로 디코딩 처리
+      final String content = utf8.decode(response.bodyBytes);
+      return content.split(','); // ,로 분리하여 키워드 리스트 반환
+    } else {
+      print('Failed to fetch keywords from URL');
+      return [];
+    }
+  } catch (e) {
+    print('Error fetching keywords from URL: $e');
+    return [];
+  }
+}
+
+
+
+void fetchFolderAndNavigate(BuildContext context, int folderId,
+    String fileType, Map<String, dynamic> file) async {
+  try {
+    final lectureFileId = file['id']; // lectureFileId 가져오기
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userDisType = userProvider.user?.dis_type; // 유저의 dis_type 가져오기
+
+    // 1. 먼저 lecturefileId로 existLecture 값을 확인하는 API 요청
+    final existLectureResponse = await http.get(
+        Uri.parse('${API.baseUrl}/api/checkExistLecture/$lectureFileId'));
+
+    if (existLectureResponse.statusCode == 200) {
+      var existLectureData = jsonDecode(existLectureResponse.body);
+
+      // 2. existLecture가 0이면 LectureStartPage로 이동
+      if (existLectureData['existLecture'] == 0) {
+        // 키워드 fetch 후 LectureStartPage로 이동
+        List<String> keywords = await fetchKeywords(lectureFileId);
+
+        // 폴더 이름 가져오기
+        // final response = await http.get(
+        //     Uri.parse('${API.baseUrl}/api/getFolderName/$fileType/$folderId'));
+        // if (response.statusCode == 200) {
+        //   var data = jsonDecode(response.body);
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => LectureStartPage(
+                lectureFolderId: file['folder_id'],
+                lecturefileId: file['id'],
+                lectureName: file['lecture_name'] ?? 'Unknown Lecture',
+                fileURL: file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
+                type: userDisType!, // 수정
+                selectedFolder: widget.folderName, // 폴더 이름
+                noteName: file['file_name'] ?? 'Unknown Note',
+                responseUrl: file['alternative_text_url'] ?? 'https://defaulturl.com/defaultfile.txt', // null 또는 실제 값
+                keywords: keywords, // 키워드 목록
+              ),
+            ),
+          );
+        // }
+      } else if (existLectureData['existLecture'] == 1) {
+        // existLecture가 1이면 기존 페이지로 이동
+        final response = await http.get(
+            Uri.parse('${API.baseUrl}/api/getFolderName/$fileType/$folderId'));
+        if (response.statusCode == 200) {
+          var data = jsonDecode(response.body);
+          navigateToPage(
+              context, data['folder_name'] ?? 'Unknown Folder', file, fileType);
+        } else {
+          print('Failed to load folder name: ${response.statusCode}');
+          navigateToPage(context, 'Unknown Folder', file, fileType);
+        }
+      }
+    } else {
+      print('Failed to check existLecture: ${existLectureResponse.statusCode}');
+    }
+  } catch (e) {
+    print('Error fetching folder name or existLecture: $e');
+    navigateToPage(context, 'Unknown Folder', file, fileType);
+  }
+}
+
+
 
   // 강의 파일 또는 콜론 파일 페이지로 네비게이션
   void navigateToPage(BuildContext context, String folderName,
@@ -150,7 +251,7 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
             recordingState: RecordingState.recorded,
             lectureName: file['lecture_name'] ?? 'Unknown Lecture',
             responseUrl: 'https://defaulturl.com/defaultfile.txt', //수정 필요
-            type: 1, //수정 필요
+            type: 0, //수정 필요
             lecturefileId: file['id'],
           )
         : ColonPage(
