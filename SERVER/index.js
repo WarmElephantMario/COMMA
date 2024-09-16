@@ -72,6 +72,7 @@ app.put('/api/update_dis_type', (req, res) => {
 
 
 
+
 // 사용자 ID 기반으로 강의 폴더 목록 가져오기
 app.get('/api/lecture-folders/:userKey', (req, res) => {
     const userKey = req.params.userKey;
