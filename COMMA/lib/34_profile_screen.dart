@@ -43,8 +43,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     nickname = userProvider.user?.user_nickname ?? "-";
-    email = userProvider.user?.user_email ?? "-";
-    id = userProvider.user?.user_id ?? "-";
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
@@ -223,7 +221,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final userProvider = Provider.of<UserProvider>(context);
 
     nickname = userProvider.user?.user_nickname ?? "-";
-    email = userProvider.user?.user_email ?? "-";
 
     return Scaffold(
       appBar: AppBar(

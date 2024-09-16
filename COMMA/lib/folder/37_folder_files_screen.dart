@@ -172,12 +172,10 @@ Future<List<String>> fetchKeywordsFromUrl(String keywordsUrl) async {
 
 
 
-// 강의 파일 클릭 이벤트에서 폴더 이름 조회 및 existLecture 확인
 void fetchFolderAndNavigate(BuildContext context, int folderId,
     String fileType, Map<String, dynamic> file) async {
   try {
     final lectureFileId = file['id']; // lectureFileId 가져오기
-    //print(lectureFileId);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userDisType = userProvider.user?.dis_type; // 유저의 dis_type 가져오기
 
@@ -192,23 +190,30 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
       if (existLectureData['existLecture'] == 0) {
         // 키워드 fetch 후 LectureStartPage로 이동
         List<String> keywords = await fetchKeywords(lectureFileId);
-      
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => LectureStartPage(
-              lectureFolderId: file['folder_id'],
-              lecturefileId: file['id'],
-              lectureName: file['lecture_name'] ?? 'Unknown Lecture',
-              fileURL: file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
-              type: userDisType!, // 수정
-              selectedFolder: widget.folderName, // 폴더 이름, 필요시 수정
-              noteName: file['file_name'] ?? 'Unknown Note',
-              responseUrl: file['alternative_text_url'] ?? 'https://defaulturl.com/defaultfile.txt', // null 또는 실제 값
-              keywords: keywords, // 키워드 목록, 필요시 수정
+
+        // 폴더 이름 가져오기
+        // final response = await http.get(
+        //     Uri.parse('${API.baseUrl}/api/getFolderName/$fileType/$folderId'));
+        // if (response.statusCode == 200) {
+        //   var data = jsonDecode(response.body);
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => LectureStartPage(
+                lectureFolderId: file['folder_id'],
+                lecturefileId: file['id'],
+                lectureName: file['lecture_name'] ?? 'Unknown Lecture',
+                fileURL: file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
+                type: userDisType!, // 수정
+                selectedFolder: widget.folderName, // 폴더 이름
+                noteName: file['file_name'] ?? 'Unknown Note',
+                responseUrl: file['alternative_text_url'] ?? 'https://defaulturl.com/defaultfile.txt', // null 또는 실제 값
+                keywords: keywords, // 키워드 목록
+              ),
             ),
-          ),
-        );
+          );
+        // }
       } else if (existLectureData['existLecture'] == 1) {
         // existLecture가 1이면 기존 페이지로 이동
         final response = await http.get(

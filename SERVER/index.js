@@ -13,8 +13,8 @@ app.use(bodyParser.json());
 app.use(cors());
 
 const db = mysql.createPool({
-    host: 'comma-db-restore.cx4q2cgwkin7.us-east-2.rds.amazonaws.com',
-    user: 'comma',
+    host: 'wem-comma-db.c724coieckpw.ap-northeast-2.rds.amazonaws.com',
+    user: 'admin',
     password: 'comma0812!',
     database: 'comma'
 });
@@ -1117,6 +1117,50 @@ app.get('/api/checkExistLecture/:lectureFileId', (req, res) => {
       }
     });
   });
+
+  // 키워드 데이터 삽입 API
+app.post('/api/insert-keywords', (req, res) => {
+    const { lecturefile_id, keywords_url } = req.body;
+
+    // lecturefile_id 또는 keywords_url이 없을 경우 오류 반환
+    if (!lecturefile_id || !keywords_url) {
+        return res.status(400).json({ success: false, error: 'You must provide lecturefile_id and keywords_url.' });
+    }
+
+    // SQL 쿼리 작성 및 실행
+    const sql = 'INSERT INTO Keywords_table (lecturefile_id, keywords_url) VALUES (?, ?)';
+    db.query(sql, [lecturefile_id, keywords_url], (err, result) => {
+        if (err) {
+            return res.status(500).json({ success: false, error: err.message });
+        }
+        // 성공 시 삽입된 id와 함께 응답
+        res.json({ success: true, id: result.insertId, lecturefile_id, keywords_url });
+    });
+});
+
+// Keywords_table에서 lecturefile_id로 키워드 조회하는 API
+app.get('/api/getKeywords/:lecturefile_id', (req, res) => {
+    const { lecturefile_id } = req.params;
+
+    if (!lecturefile_id) {
+        return res.status(400).json({ success: false, error: 'You must provide lecturefile_id.' });
+    }
+
+    const sql = 'SELECT keywords_url FROM Keywords_table WHERE lecturefile_id = ?';
+    db.query(sql, [lecturefile_id], (err, result) => {
+        if (err) {
+            return res.status(500).json({ success: false, error: err.message });
+        }
+
+        if (result.length === 0) {
+            return res.status(404).json({ success: false, error: 'No keywords found for the given lecturefile_id.' });
+        }
+
+        const keywordsUrl = result[0].keywords_url;
+        res.json({ success: true, keywordsUrl });
+    });
+});
+
 
 app.listen(port, () => {
     console.log(`Server started on port ${port}`);
