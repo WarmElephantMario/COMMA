@@ -47,13 +47,14 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
 Future<void> _checkUserKey() async {
-  print('유저키 확인');
+  print('user_id 확인');
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String? userId = prefs.getString('user_id');
+  print('유저아이디 : $userId');
 
   if (userId != null) {
-    print('유저아이디 존재함 --> mainpage로 이동');
-    print('유저아이디 : $userId');
+    print('유저아이디 존재함 (기기번호 생성된 적 있음) --> mainpage로 이동');
+    
 
     // 로컬 저장소에서 userKey만 불러오기
     int? userKey = prefs.getInt('user_key');
@@ -81,7 +82,7 @@ Future<void> _checkUserKey() async {
         );
       }
     } else {
-      print('유저키 없음');
+      print('유저키 없음 (userId는 만들었는데 userKey 생성엔 실패했던 케이스)');
       
       Navigator.pushReplacement(
         context,
@@ -89,7 +90,7 @@ Future<void> _checkUserKey() async {
       );
     }
   } else {
-      print('유저아이디(기기값) 없음');
+      print('유저아이디 없음 (기기번호 생성된 적 없음)  --> 온보딩으로 이동');
       
       Navigator.pushReplacement(
         context,

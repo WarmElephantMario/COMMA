@@ -205,16 +205,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ),
                       onPressed: () async {
                         print('버튼 누름');
-                        SharedPreferences prefs =
-                            await SharedPreferences.getInstance();
-                        String? userId =
-                            prefs.getString('user_id'); // UUID를 user_id로 사용
+                        SharedPreferences prefs = await SharedPreferences.getInstance();
+                        String? userId = prefs.getString('user_id'); // UUID를 user_id로 사용
 
                         if (userId == null) {
                           print('유저아이디 없음');
-                          // userKey 없으면 새로 생성
+
+                          // userId 없으면 새로 생성
                           userId = Uuid().v4(); // UUID 생성
-                          print('Generated userId : $userId');
 
                           String userNickname = 'New User';
                           await prefs.setString('user_id', userId);
@@ -224,8 +222,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           print('Generated user_nickname : $userNickname');
 
                           // DB에 새로운 사용자 정보 저장 후 userKey 받아옴
-                          int userKey =
-                              await createUserInDB(userId, userNickname);
+                          int userKey = await createUserInDB(userId, userNickname);
 
                           // userKey를 로컬 저장소에 저장
                           await prefs.setInt('user_key', userKey);

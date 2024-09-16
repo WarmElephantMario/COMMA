@@ -44,6 +44,33 @@ app.get('/api/user-details/:userKey', (req, res) => {
     });
 });
 
+// 학습 모드(dis_type) 변경하기
+app.put('/api/update_dis_type', (req, res) => {
+    const userKey = req.body.userKey;
+    const newDisType = req.body.dis_type;
+
+    console.log(`Received request to update dis_type for userKey: ${userKey} to dis_type: ${newDisType}`);
+
+    // 데이터베이스 업데이트 쿼리
+    const query = 'UPDATE user_table SET dis_type = ? WHERE userKey = ?';
+    db.query(query, [newDisType, userKey], (err, result) => {
+        if (err) {
+            console.error(`Error updating dis_type for userKey: ${userKey} - ${err.message}`);
+            return res.status(500).send({ success: false, error: err.message });
+        }
+
+        console.log(`Query Result: `, result);  // 쿼리 결과 로그 추가
+        if (result.affectedRows === 0) {
+            console.log(`No rows updated for userKey: ${userKey}`);
+            return res.status(404).send({ success: false, error: 'User not found' });
+        }
+
+        console.log(`dis_type updated successfully for userKey: ${userKey}`);
+        res.send({ success: true });
+    });
+});
+
+
 
 // 사용자 ID 기반으로 강의 폴더 목록 가져오기
 app.get('/api/lecture-folders/:userKey', (req, res) => {
