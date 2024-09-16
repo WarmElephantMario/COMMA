@@ -11,27 +11,6 @@ import 'model/user.dart';
 import 'package:http/http.dart' as http;
 import 'api/api.dart';
 
-Future<Map<String, dynamic>?> _fetchUserDetails(int userKey) async {
-  try {
-    final response = await http.get(Uri.parse('${API.baseUrl}/api/user-details/$userKey'));
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return {
-        'user_nickname': data['user_nickname'],
-        'dis_type': data['dis_type']
-      };
-    } else {
-      print('Failed to load user details: ${response.statusCode}');
-      return null;
-    }
-  } catch (e) {
-    print('Error fetching user details: $e');
-    return null;
-  }
-}
-
-
 import 'package:http/http.dart' as http;
 import 'api/api.dart';
 
@@ -54,6 +33,7 @@ Future<Map<String, dynamic>?> _fetchUserDetails(int userKey) async {
     return null;
   }
 }
+
 
 
 class SplashScreen extends StatefulWidget {
