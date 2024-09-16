@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_plugin/folder/37_folder_files_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:http/http.dart' as http;
@@ -18,6 +19,7 @@ class ColonPage extends StatefulWidget {
   final dynamic createdAt;
   final String? fileUrl;
   final int? colonFileId;
+  final int? folderId;
 
   const ColonPage({
     Key? key,
@@ -27,6 +29,7 @@ class ColonPage extends StatefulWidget {
     required this.createdAt,
     this.fileUrl,
     this.colonFileId,
+    this.folderId
   }) : super(key: key);
 
   @override
@@ -210,133 +213,228 @@ class _ColonPageState extends State<ColonPage> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-    canPop: false ,
-    child:  Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        toolbarHeight: 0,
-      ),
-      body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const LearningPreparation()),
-                                );
-                              },
-                              child: const Text(
-                                '종료',
-                                style: TextStyle(
-                                  color: Color(0xFFFFA17A),
-                                  fontSize: 16,
+      canPop: false,
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          toolbarHeight: 0,
+        ),
+        body: isLoading
+            ? Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              TextButton(
+                                onPressed: () {
+                                  if (widget.colonFileId != null) {
+                                    print(
+                                        'colonFileId: ${widget.colonFileId}'); // colonFileId 로그 출력
+                                  } else {
+                                    print('Error: colonFileId is null.');
+                                  }
+
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => FolderFilesScreen(
+                                        folderName: widget.folderName, // 현재 콜론 파일의 폴더 이름
+                                        folderId: widget.folderId!, // 현재 콜론 파일의 폴더 ID
+                                        folderType: 'Colon', // 폴더 타입은 'colon'으로 지정
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: const Text(
+                                  '종료',
+                                  style: TextStyle(
+                                    color: Color(0xFFFFA17A),
+                                    fontSize: 16,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Image.asset('assets/folder_search.png'),
-                            const SizedBox(width: 8),
-                            Text(
-                              '폴더 분류 > ${widget.folderName}', // 폴더 이름 사용
-                              style: const TextStyle(
-                                color: Color(0xFF575757),
-                                fontSize: 12,
-                                fontFamily: 'DM Sans',
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Image.asset('assets/folder_search.png'),
+                              const SizedBox(width: 8),
+                              Text(
+                                '폴더 분류 > ${widget.folderName}', // 폴더 이름 사용
+                                style: const TextStyle(
+                                  color: Color(0xFF575757),
+                                  fontSize: 12,
+                                  fontFamily: 'DM Sans',
+                                ),
                               ),
+                            ],
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            widget.noteName, // 노트 이름 사용
+                            style: const TextStyle(
+                              color: Color(0xFF414141),
+                              fontSize: 20,
+                              fontFamily: 'DM Sans',
+                              fontWeight: FontWeight.bold,
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 5),
-                        Text(
-                          widget.noteName, // 노트 이름 사용
-                          style: const TextStyle(
-                            color: Color(0xFF414141),
-                            fontSize: 20,
-                            fontFamily: 'DM Sans',
-                            fontWeight: FontWeight.bold,
                           ),
-                        ),
-                        const SizedBox(height: 5),
-                        Text(
-                          '강의 자료 : ${widget.lectureName}',
-                          style: const TextStyle(
-                            color: Color(0xFF575757),
-                            fontSize: 12,
-                            fontFamily: 'DM Sans',
-                          ),
-                        ),
-                        const SizedBox(height: 5), // 추가된 날짜와 시간을 위한 공간
-                        Text(
-                          _formatDate(
-                              widget.createdAt), // 데이터베이스에서 가져온 생성 날짜 및 시간 사용
-                          style: const TextStyle(
-                            color: Color(0xFF575757),
-                            fontSize: 12,
-                            fontFamily: 'DM Sans',
-                          ),
-                        ),
-                        const SizedBox(height: 20), // 강의 자료 밑에 여유 공간 추가
-                        Row(
-                          children: [
-                            ClickButton(
-                              text: '콜론(:) 다운하기',
-                              onPressed: () {},
-                              width: MediaQuery.of(context).size.width * 0.3,
-                              height: 40.0,
+                          const SizedBox(height: 5),
+                          Text(
+                            '강의 자료 : ${widget.lectureName}',
+                            style: const TextStyle(
+                              color: Color(0xFF575757),
+                              fontSize: 12,
+                              fontFamily: 'DM Sans',
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                      ],
+                          ),
+                          const SizedBox(height: 5), // 추가된 날짜와 시간을 위한 공간
+                          Text(
+                            _formatDate(
+                                widget.createdAt), // 데이터베이스에서 가져온 생성 날짜 및 시간 사용
+                            style: const TextStyle(
+                              color: Color(0xFF575757),
+                              fontSize: 12,
+                              fontFamily: 'DM Sans',
+                            ),
+                          ),
+                          const SizedBox(height: 20), // 강의 자료 밑에 여유 공간 추가
+                          Row(
+                            children: [
+                              ClickButton(
+                                text: '콜론(:) 다운하기',
+                                onPressed: () {},
+                                width: MediaQuery.of(context).size.width * 0.3,
+                                height: 40.0,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
                     ),
-                  ),
-                  if (widget.lectureName.endsWith('.pdf') &&
-                      widget.fileUrl != null)
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      itemCount: pages.length * 2,
-                      itemBuilder: (context, index) {
-                        if (index.isEven) {
-                          final pageIndex = index ~/ 2;
-                          final pageImage = pages[pageIndex];
-                          return GestureDetector(
+                    if (widget.lectureName.endsWith('.pdf') &&
+                        widget.fileUrl != null)
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount: pages.length * 2,
+                        itemBuilder: (context, index) {
+                          if (index.isEven) {
+                            final pageIndex = index ~/ 2;
+                            final pageImage = pages[pageIndex];
+                            return GestureDetector(
+                              onTap: () {
+                                if (type == 0) {
+                                  _toggleBlur(pageIndex + 1);
+                                }
+                              },
+                              child: Stack(
+                                children: [
+                                  Container(
+                                    width: double.infinity,
+                                    height: MediaQuery.of(context).size.height -
+                                        200, // 화면 높이에 맞춤
+                                    child: Image.memory(
+                                      pageImage.bytes,
+                                      // 수정
+                                      //fit: BoxFit.cover, // 이미지를 전체 화면에 맞춤
+                                    ),
+                                  ),
+                                  if (_blurredPages.contains(pageIndex + 1) &&
+                                      type == 0)
+                                    Container(
+                                      width: double.infinity,
+                                      height:
+                                          MediaQuery.of(context).size.height -
+                                              200, // 화면 높이에 맞춤
+                                      color: Colors.black.withOpacity(0.5),
+                                      child: Center(
+                                        child: Text(
+                                          pageTexts[pageIndex + 1] ??
+                                              '텍스트가 없습니다.',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontFamily: 'DM Sans',
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            );
+                          } else {
+                            final pageIndex = index ~/ 2;
+                            return Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 8.0),
+                              child: FutureBuilder<List<String>>(
+                                future: _fetchPageTexts(pageIndex),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return CircularProgressIndicator();
+                                  } else if (snapshot.hasError) {
+                                    return Text('Error: ${snapshot.error}');
+                                  } else {
+                                    final pageTexts = snapshot.data ?? [];
+                                    return Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: pageTexts.map((text) {
+                                        return Padding(
+                                          padding: const EdgeInsets.fromLTRB(
+                                              20, 10, 20, 10),
+                                          child: Text(
+                                            text,
+                                            style: TextStyle(
+                                                color: Color(0xFF414141),
+                                                fontSize: 17,
+                                                fontWeight: FontWeight.w500,
+                                                height: 1.8,
+                                                fontFamily:
+                                                    GoogleFonts.ibmPlexSansKr()
+                                                        .fontFamily),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    );
+                                  }
+                                },
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    if ((widget.lectureName.endsWith('.png') ||
+                            widget.lectureName.endsWith('.jpg') ||
+                            widget.lectureName.endsWith('.jpeg')) &&
+                        imageData != null)
+                      Column(
+                        children: [
+                          GestureDetector(
                             onTap: () {
                               if (type == 0) {
-                                _toggleBlur(pageIndex + 1);
+                                _toggleBlur(1);
                               }
                             },
                             child: Stack(
                               children: [
-                                Container(
+                                Image.memory(
+                                  imageData!,
+                                  fit: BoxFit.cover, // 이미지를 전체 화면에 맞춤
                                   width: double.infinity,
-                                  height: MediaQuery.of(context).size.height -
-                                      200, // 화면 높이에 맞춤
-                                  child: Image.memory(
-                                    pageImage.bytes,
-                                    // 수정
-                                    //fit: BoxFit.cover, // 이미지를 전체 화면에 맞춤
-                                  ),
                                 ),
-                                if (_blurredPages.contains(pageIndex + 1) &&
-                                    type == 0)
+                                if (_blurredPages.contains(1) && type == 0)
                                   Container(
                                     width: double.infinity,
                                     height: MediaQuery.of(context).size.height -
@@ -344,8 +442,7 @@ class _ColonPageState extends State<ColonPage> {
                                     color: Colors.black.withOpacity(0.5),
                                     child: Center(
                                       child: Text(
-                                        pageTexts[pageIndex + 1] ??
-                                            '텍스트가 없습니다.',
+                                        pageTexts[1] ?? '이미지의 텍스트가 없습니다.',
                                         style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 16,
@@ -356,13 +453,11 @@ class _ColonPageState extends State<ColonPage> {
                                   ),
                               ],
                             ),
-                          );
-                        } else {
-                          final pageIndex = index ~/ 2;
-                          return Padding(
+                          ),
+                          Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
                             child: FutureBuilder<List<String>>(
-                              future: _fetchPageTexts(pageIndex),
+                              future: _fetchPageTexts(0), // 이미지 파일은 1 페이지로 간주
                               builder: (context, snapshot) {
                                 if (snapshot.connectionState ==
                                     ConnectionState.waiting) {
@@ -376,18 +471,15 @@ class _ColonPageState extends State<ColonPage> {
                                         CrossAxisAlignment.start,
                                     children: pageTexts.map((text) {
                                       return Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                            20, 10, 20, 10),
+                                        padding:
+                                            const EdgeInsets.only(bottom: 8.0),
                                         child: Text(
                                           text,
-                                          style: TextStyle(
-                                              color: Color(0xFF414141),
-                                              fontSize: 17,
-                                              fontWeight: FontWeight.w500,
-                                              height: 1.8,
-                                              fontFamily:
-                                                  GoogleFonts.ibmPlexSansKr()
-                                                      .fontFamily),
+                                          style: const TextStyle(
+                                            color: Color(0xFF414141),
+                                            fontSize: 16,
+                                            fontFamily: 'DM Sans',
+                                          ),
                                         ),
                                       );
                                     }).toList(),
@@ -395,90 +487,15 @@ class _ColonPageState extends State<ColonPage> {
                                 }
                               },
                             ),
-                          );
-                        }
-                      },
-                    ),
-                  if ((widget.lectureName.endsWith('.png') ||
-                          widget.lectureName.endsWith('.jpg') ||
-                          widget.lectureName.endsWith('.jpeg')) &&
-                      imageData != null)
-                    Column(
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            if (type == 0) {
-                              _toggleBlur(1);
-                            }
-                          },
-                          child: Stack(
-                            children: [
-                              Image.memory(
-                                imageData!,
-                                fit: BoxFit.cover, // 이미지를 전체 화면에 맞춤
-                                width: double.infinity,
-                              ),
-                              if (_blurredPages.contains(1) && type == 0)
-                                Container(
-                                  width: double.infinity,
-                                  height: MediaQuery.of(context).size.height -
-                                      200, // 화면 높이에 맞춤
-                                  color: Colors.black.withOpacity(0.5),
-                                  child: Center(
-                                    child: Text(
-                                      pageTexts[1] ?? '이미지의 텍스트가 없습니다.',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                        fontFamily: 'DM Sans',
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                            ],
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: FutureBuilder<List<String>>(
-                            future: _fetchPageTexts(0), // 이미지 파일은 1 페이지로 간주
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return CircularProgressIndicator();
-                              } else if (snapshot.hasError) {
-                                return Text('Error: ${snapshot.error}');
-                              } else {
-                                final pageTexts = snapshot.data ?? [];
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: pageTexts.map((text) {
-                                    return Padding(
-                                      padding:
-                                          const EdgeInsets.only(bottom: 8.0),
-                                      child: Text(
-                                        text,
-                                        style: const TextStyle(
-                                          color: Color(0xFF414141),
-                                          fontSize: 16,
-                                          fontFamily: 'DM Sans',
-                                        ),
-                                      ),
-                                    );
-                                  }).toList(),
-                                );
-                              }
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                ],
+                        ],
+                      ),
+                  ],
+                ),
               ),
-            ),
-      bottomNavigationBar:
-          buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
-    ),
+        bottomNavigationBar:
+            buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
+      ),
     );
   }
 
@@ -488,17 +505,17 @@ class _ColonPageState extends State<ColonPage> {
       final urls = pageScripts[pageIndex]!;
       List<String> texts = [];
       for (var url in urls) {
-        print('Fetching text from URL: $url'); // URL 출력
+        //print('Fetching text from URL: $url'); // URL 출력
         try {
           final response = await http.get(Uri.parse(url));
           if (response.statusCode == 200) {
             try {
               // UTF-8로 시도
               final text = utf8.decode(response.bodyBytes);
-              print('Loaded text for page $pageIndex: $text'); // 로드된 텍스트 출력
+              //print('Loaded text for page $pageIndex: $text'); // 로드된 텍스트 출력
               texts.add(text);
             } catch (e) {
-              print('Error decoding text as UTF-8 for page $pageIndex: $e');
+              //print('Error decoding text as UTF-8 for page $pageIndex: $e');
               try {
                 // EUC-KR로 수동으로 디코딩
                 final eucKrBytes = response.bodyBytes;

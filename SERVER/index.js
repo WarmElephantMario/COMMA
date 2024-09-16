@@ -29,6 +29,22 @@ db.getConnection((err, connection) => {
     connection.release(); // 연결 해제
 });
 
+
+// 기기에 저장된 userKey 해당하는 dis_type과 닉네임 불러오기
+app.get('/api/user-details/:userKey', (req, res) => {
+    const userKey = req.params.userKey;
+    const sql = 'SELECT user_nickname, dis_type FROM user_table WHERE userKey = ?';
+    db.query(sql, [userKey], (err, result) => {
+        if (err) throw err;
+        if (result.length > 0) {
+            res.send(result[0]); // 유저 정보를 반환
+        } else {
+            res.status(404).send('User not found');
+        }
+    });
+});
+
+
 // 사용자 ID 기반으로 강의 폴더 목록 가져오기
 app.get('/api/lecture-folders/:userKey', (req, res) => {
     const userKey = req.params.userKey;
