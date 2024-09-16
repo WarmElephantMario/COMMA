@@ -1,3 +1,56 @@
+
+## 강의실 입장하기 변경 사항
+
+### 화면 플로우
+
+- **강의실 입장하기 클릭 O**
+  - 폴더 → 파일 → `RecordPage`
+  - 홈 → 파일 → `RecordPage`
+  - 홈 → 전체보기 → 파일 → `RecordPage`
+
+- **강의실 입장하기 클릭 X**
+  - 폴더 → 파일 → `LectureStartPage`
+  - 홈 → 파일 → `LectureStartPage`
+  - 홈 → 전체보기 → 파일 → `LectureStartPage`
+
+### 코드 플로우
+
+#### 1. **60prepare.dart**
+   - `callChatGPT4APIForKeywords()`: 키워드 추출값을 파이어베이스에 업로드하는 기능 추가
+   - `insertKeywordsIntoDB()`: 키워드 파이어베이스 업로드 URL을 DB에 저장
+   - **파이어베이스 파일 구조**: `Keywords/userKey/folderId/fileId/~~_.keywords.txt`
+   - **DB 테이블 구조**:
+
+     ```sql
+     CREATE TABLE `Keywords_table` (
+       `id` int NOT NULL AUTO_INCREMENT,
+       `lecturefile_id` int DEFAULT NULL,
+       `keywords_url` varchar(2048) DEFAULT NULL,
+       PRIMARY KEY (`id`),
+       KEY `fk4_lecturefile` (`lecturefile_id`),
+       CONSTRAINT `fk4_lecturefile` FOREIGN KEY (`lecturefile_id`) REFERENCES `LectureFiles` (`id`) ON DELETE CASCADE
+     );
+     ```
+
+#### 2. **62lecture_start.dart**
+   - **강의실 입장하기 버튼 클릭**: `LectureFiles` 테이블의 `existLecture` 값을 1로 업데이트
+
+#### 3. **37**, **16**, **17**
+   - `fetchFolderAndNavigate()`: `existLecture` 값이 1이면 `LectureStartPage`로 이동
+   - `fetchKeywords()`: `LectureStartPage`로 이동할 때 DB에서 키워드를 불러오는 함수
+
+#### 4. **index.js**
+   - `existLecture` 값을 1로 업데이트하는 기능
+   - `lecturefileId`로 `existLecture` 값을 확인하는 기능
+   - 키워드 데이터를 DB에 삽입
+   - `Keywords_table`에서 `lecturefile_id`로 키워드를 조회하는 API
+
+---
+
+## 10_typeselect 디자인 수정
+
+
+
 # 수정 및 변경 사항
 *- dis_type : 0(시각장애인용, 대체텍스트 생성) / 1(청각장애인용, 실시간자막 생성)*<br>
 *- GPT API KEY는 최신 키로 바꿔서 사용하세요*<br>
