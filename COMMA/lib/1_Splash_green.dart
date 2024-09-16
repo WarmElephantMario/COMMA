@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import '16_homepage_move.dart';
 import 'model/user_provider.dart';
 import 'model/user.dart';
+
 import 'package:http/http.dart' as http;
 import 'api/api.dart';
 
@@ -91,12 +92,11 @@ Future<void> _checkUserKey() async {
     }
   } else {
       print('유저아이디 없음 (기기번호 생성된 적 없음)  --> 온보딩으로 이동');
-      
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => OnboardingScreen()),
       );
-
   }
 }
 
