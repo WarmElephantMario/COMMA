@@ -44,6 +44,34 @@ app.get('/api/user-details/:userKey', (req, res) => {
     });
 });
 
+// 학습 모드(dis_type) 변경하기
+app.put('/api/update_dis_type', (req, res) => {
+    const userKey = req.body.userKey;
+    const newDisType = req.body.dis_type;
+
+    console.log(`Received request to update dis_type for userKey: ${userKey} to dis_type: ${newDisType}`);
+
+    // 데이터베이스 업데이트 쿼리
+    const query = 'UPDATE user_table SET dis_type = ? WHERE userKey = ?';
+    db.query(query, [newDisType, userKey], (err, result) => {
+        if (err) {
+            console.error(`Error updating dis_type for userKey: ${userKey} - ${err.message}`);
+            return res.status(500).send({ success: false, error: err.message });
+        }
+
+        console.log(`Query Result: `, result);  // 쿼리 결과 로그 추가
+        if (result.affectedRows === 0) {
+            console.log(`No rows updated for userKey: ${userKey}`);
+            return res.status(404).send({ success: false, error: 'User not found' });
+        }
+
+        console.log(`dis_type updated successfully for userKey: ${userKey}`);
+        res.send({ success: true });
+    });
+});
+
+
+
 
 // 사용자 ID 기반으로 강의 폴더 목록 가져오기
 app.get('/api/lecture-folders/:userKey', (req, res) => {
@@ -300,26 +328,24 @@ app.post('/api/signup_info', (req, res) => {
     console.log('API 요청 수신: /api/signup_info');
 
     const userId = req.body.user_id;
-    const userEmail = req.body.user_email;
-    const userPassword = req.body.user_password;
-    const hashedPassword = crypto.createHash('md5').update(userPassword).digest('hex');
     const usernickname = req.body.user_nickname;
 
-    console.log('전달된 아이디:', userId);
-    console.log('전달된 이메일:', userEmail);
+    console.log('전달된 유저아이디:', userId);
     console.log('생성된 닉네임:', usernickname);
 
-    if (!userEmail || !userId || !userPassword) {
-        return res.status(400).json({ success: false, error: 'You must fill all values.' });
+    if (!userId || !usernickname) {
+        return res.status(400).json({ success: false, error: 'User ID and nickname are required.' });
     }
 
-    const sqlQuery = `INSERT INTO user_table (user_id, user_email, user_password, user_nickname) VALUES (?, ?, ?, ?)`;
-    db.query(sqlQuery, [userId, userEmail, hashedPassword, usernickname], (err, result) => {
+    const sqlQuery = `INSERT INTO user_table (user_id, user_nickname) VALUES (?, ?)`;
+    db.query(sqlQuery, [userId, usernickname], (err, result) => {
         if (err) {
+            console.error('Error inserting into user_table:', err); // 에러 로그 출력
             return res.status(500).json({ success: false, error: err.message });
         }
 
         const userKey = result.insertId; // 삽입된 사용자의 ID를 가져옴
+        console.log('Generated userKey:', userKey);
 
         // 기본 폴더 생성
         const lectureFolderQuery = 'INSERT INTO LectureFolders (folder_name, userKey) VALUES (?, ?)';
@@ -341,7 +367,7 @@ app.post('/api/signup_info', (req, res) => {
             }
         });
 
-        return res.json({ success: true });
+        return res.status(200).json({ success: true, userKey: userKey });
     });
 });
 
@@ -851,7 +877,7 @@ app.get('/api/get-alternative-text-url', (req, res) => {
 
     const sql = `
         SELECT alternative_text_url
-        FROM Alt_table
+        FROM Alt_table2
         WHERE lecturefile_id = ?
     `;
 
@@ -1099,23 +1125,69 @@ app.get('/api/get-alt-url/:colonfile_id', (req, res) => {
     });
 });
 
+// 사용자 학습 유형(장애 타입) 업데이트 API
+app.post('/api/user/:userKey/update-type', (req, res) => {
+    const userKey = req.params.userKey;
+    const { type } = req.body;
+  
+    const sql = 'UPDATE user_table SET dis_type = ? WHERE userKey = ?';
+  
+    // 콜백 방식으로 쿼리 실행
+    db.query(sql, [type, userKey], (error, result) => {
+      if (error) {
+        console.error('DB 에러:', error.message);
+        return res.status(500).json({ success: false, message: `DB 오류: ${error.message}` });
+      }
+  
+      // 업데이트 성공 시
+      if (result.affectedRows > 0) {
+        return res.status(200).json({ success: true, message: '학습 유형이 업데이트되었습니다.' });
+      } else {
+        return res.status(404).json({ success: false, message: '사용자를 찾을 수 없습니다.' });
+      }
+    });
+  });
+  
 // existLecture 값을 무조건 1로 업데이트
 app.post('/api/update-existLecture', (req, res) => {
-    const { lectureFileId } = req.body;
+    const {lecturefileId} = req.body;
+
+    // lectureFileId가 제대로 전달되었는지 확인
+    console.log('Received lecturefileId:', lecturefileId);
+
+    if (!lecturefileId) {
+        console.error('lectureFileId is missing');
+        return res.status(400).json({ error: 'lectureFileId is required' });
+    }
 
     const updateQuery = 'UPDATE LectureFiles SET existLecture = 1 WHERE id = ?';
-    db.query(updateQuery, [lectureFileId], (err, result) => {
+
+    // 쿼리 실행 전에 로그 출력
+    console.log('Executing query:', updateQuery, 'with lecturefileId:', lecturefileId);
+
+    db.query(updateQuery, [lecturefileId], (err, result) => {
         if (err) {
             console.error('Failed to update existLecture:', err);
             return res.status(500).json({ error: 'Failed to update existLecture' });
         }
+
+        // 결과 로그 출력
+        console.log('Update result:', result);
+
+        if (result.affectedRows === 0) {
+            console.log('No rows were updated, check if lectureFileId exists in the database.');
+            return res.status(404).json({ error: 'No lecture found with the provided lectureFileId' });
+        }
+
         res.status(200).json({ message: 'existLecture updated to 1 successfully' });
     });
 });
 
+
+
 // API 엔드포인트: lecturefileId로 existLecture 값을 확인
 app.get('/api/checkExistLecture/:lectureFileId', (req, res) => {
-    const lecturefileId = req.params.lectureFileId;
+    const lectureFileId = req.params.lectureFileId;
   
     const query = 'SELECT existLecture FROM LectureFiles WHERE id = ?';
     db.query(query, [lectureFileId], (err, result) => {
@@ -1136,21 +1208,21 @@ app.get('/api/checkExistLecture/:lectureFileId', (req, res) => {
 
   // 키워드 데이터 삽입 API
 app.post('/api/insert-keywords', (req, res) => {
-    const { lecturefile_id, keywords_url } = req.body;
+    const { lecturefileId, keywordsFileUrl } = req.body;
 
     // lecturefile_id 또는 keywords_url이 없을 경우 오류 반환
-    if (!lecturefile_id || !keywords_url) {
-        return res.status(400).json({ success: false, error: 'You must provide lecturefile_id and keywords_url.' });
+    if (!lecturefileId || !keywordsFileUrl) {
+        return res.status(400).json({ success: false, error: 'You must provide lecturefileId and keywordsFileUrl.' });
     }
 
     // SQL 쿼리 작성 및 실행
     const sql = 'INSERT INTO Keywords_table (lecturefile_id, keywords_url) VALUES (?, ?)';
-    db.query(sql, [lecturefile_id, keywords_url], (err, result) => {
+    db.query(sql, [lecturefileId, keywordsFileUrl], (err, result) => {
         if (err) {
             return res.status(500).json({ success: false, error: err.message });
         }
         // 성공 시 삽입된 id와 함께 응답
-        res.json({ success: true, id: result.insertId, lecturefile_id, keywords_url });
+        res.json({ success: true, id: result.insertId, lecturefileId, keywordsFileUrl });
     });
 });
 
@@ -1176,6 +1248,8 @@ app.get('/api/getKeywords/:lecturefile_id', (req, res) => {
         res.json({ success: true, keywordsUrl });
     });
 });
+
+
 
 
 app.listen(port, () => {
