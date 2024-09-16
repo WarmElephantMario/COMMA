@@ -35,7 +35,7 @@
 #### 2. **62lecture_start.dart**
    - **강의실 입장하기 버튼 클릭**: `LectureFiles` 테이블의 `existLecture` 값을 1로 업데이트
 
-#### 3. **37**, **16**, **17**
+#### 3. **37_folder_files_screen**, **16_homepage_move**, **17_allFilesPage**
    - `fetchFolderAndNavigate()`: `existLecture` 값이 1이면 `LectureStartPage`로 이동
    - `fetchKeywords()`: `LectureStartPage`로 이동할 때 DB에서 키워드를 불러오는 함수
 
