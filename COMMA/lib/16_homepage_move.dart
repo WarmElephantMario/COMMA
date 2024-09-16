@@ -527,6 +527,7 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
           createdAt: file['created_at'] ?? 'Unknown Date',
           fileUrl: file['file_url'] ?? 'Unknown fileUrl',
           colonFileId: colonFileId,
+          folderId: file['folder_id'] ?? 'Unknown folderId',
         );
       }
 
