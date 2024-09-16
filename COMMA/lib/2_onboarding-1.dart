@@ -212,7 +212,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           print('유저아이디 없음');
 
                           // userId 없으면 새로 생성
+
                           userId = Uuid().v4(); // UUID 생성
+                          print('Generated userId : $userId');
 
                           String userNickname = 'New User';
                           await prefs.setString('user_id', userId);
@@ -223,6 +225,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
                           // DB에 새로운 사용자 정보 저장 후 userKey 받아옴
                           int userKey = await createUserInDB(userId, userNickname);
+
 
                           // userKey를 로컬 저장소에 저장
                           await prefs.setInt('user_key', userKey);
