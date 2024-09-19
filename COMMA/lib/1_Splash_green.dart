@@ -62,12 +62,12 @@ Future<void> _checkUserKey() async {
 
     // 로컬 저장소에서 userKey만 불러오기
     int? userKey = prefs.getInt('userKey');
+
     if (userKey != null) {
       print('유저키 : $userKey');
 
       // 유저 정보 API 호출로 닉네임과 타입 가져오기
       final userDetails = await _fetchUserDetails(userKey);
-      print('여기');
 
       if (userDetails != null) {
         String userNickname = userDetails['user_nickname'];
