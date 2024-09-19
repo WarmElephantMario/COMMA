@@ -97,6 +97,7 @@ app.put('/api/update_dis_type', (req, res) => {
 
 
 
+
 // 사용자 ID 기반으로 강의 폴더 목록 가져오기
 app.get('/api/lecture-folders/:userKey', (req, res) => {
     const userKey = req.params.userKey;
@@ -806,7 +807,7 @@ app.get('/api/get-alternative-text-url', (req, res) => {
 
     const sql = `
         SELECT alternative_text_url
-        FROM Alt_table
+        FROM Alt_table2
         WHERE lecturefile_id = ?
     `;
 
@@ -1053,6 +1054,132 @@ app.get('/api/get-alt-url/:colonfile_id', (req, res) => {
         res.json({ success: true, lecturefile_id, alternative_text_url, page });
     });
 });
+
+// 사용자 학습 유형(장애 타입) 업데이트 API
+app.post('/api/user/:userKey/update-type', (req, res) => {
+    const userKey = req.params.userKey;
+    const { type } = req.body;
+  
+    const sql = 'UPDATE user_table SET dis_type = ? WHERE userKey = ?';
+  
+    // 콜백 방식으로 쿼리 실행
+    db.query(sql, [type, userKey], (error, result) => {
+      if (error) {
+        console.error('DB 에러:', error.message);
+        return res.status(500).json({ success: false, message: `DB 오류: ${error.message}` });
+      }
+  
+      // 업데이트 성공 시
+      if (result.affectedRows > 0) {
+        return res.status(200).json({ success: true, message: '학습 유형이 업데이트되었습니다.' });
+      } else {
+        return res.status(404).json({ success: false, message: '사용자를 찾을 수 없습니다.' });
+      }
+    });
+  });
+  
+// existLecture 값을 무조건 1로 업데이트
+app.post('/api/update-existLecture', (req, res) => {
+    const {lecturefileId} = req.body;
+
+    // lectureFileId가 제대로 전달되었는지 확인
+    console.log('Received lecturefileId:', lecturefileId);
+
+    if (!lecturefileId) {
+        console.error('lectureFileId is missing');
+        return res.status(400).json({ error: 'lectureFileId is required' });
+    }
+
+    const updateQuery = 'UPDATE LectureFiles SET existLecture = 1 WHERE id = ?';
+
+    // 쿼리 실행 전에 로그 출력
+    console.log('Executing query:', updateQuery, 'with lecturefileId:', lecturefileId);
+
+    db.query(updateQuery, [lecturefileId], (err, result) => {
+        if (err) {
+            console.error('Failed to update existLecture:', err);
+            return res.status(500).json({ error: 'Failed to update existLecture' });
+        }
+
+        // 결과 로그 출력
+        console.log('Update result:', result);
+
+        if (result.affectedRows === 0) {
+            console.log('No rows were updated, check if lectureFileId exists in the database.');
+            return res.status(404).json({ error: 'No lecture found with the provided lectureFileId' });
+        }
+
+        res.status(200).json({ message: 'existLecture updated to 1 successfully' });
+    });
+});
+
+
+
+// API 엔드포인트: lecturefileId로 existLecture 값을 확인
+app.get('/api/checkExistLecture/:lectureFileId', (req, res) => {
+    const lectureFileId = req.params.lectureFileId;
+  
+    const query = 'SELECT existLecture FROM LectureFiles WHERE id = ?';
+    db.query(query, [lectureFileId], (err, result) => {
+      if (err) {
+        console.error('Error checking existLecture:', err);
+        return res.status(500).json({ error: 'Failed to check existLecture' });
+      }
+  
+      if (result.length > 0) {
+        // lecturefileId에 대한 existLecture 값을 반환
+        res.status(200).json({ existLecture: result[0].existLecture });
+      } else {
+        // 해당 lecturefileId가 없는 경우
+        res.status(404).json({ error: 'Lecture file not found' });
+      }
+    });
+  });
+
+  // 키워드 데이터 삽입 API
+app.post('/api/insert-keywords', (req, res) => {
+    const { lecturefileId, keywordsFileUrl } = req.body;
+
+    // lecturefile_id 또는 keywords_url이 없을 경우 오류 반환
+    if (!lecturefileId || !keywordsFileUrl) {
+        return res.status(400).json({ success: false, error: 'You must provide lecturefileId and keywordsFileUrl.' });
+    }
+
+    // SQL 쿼리 작성 및 실행
+    const sql = 'INSERT INTO Keywords_table (lecturefile_id, keywords_url) VALUES (?, ?)';
+    db.query(sql, [lecturefileId, keywordsFileUrl], (err, result) => {
+        if (err) {
+            return res.status(500).json({ success: false, error: err.message });
+        }
+        // 성공 시 삽입된 id와 함께 응답
+        res.json({ success: true, id: result.insertId, lecturefileId, keywordsFileUrl });
+    });
+});
+
+// Keywords_table에서 lecturefile_id로 키워드 조회하는 API
+app.get('/api/getKeywords/:lecturefile_id', (req, res) => {
+    const { lecturefile_id } = req.params;
+
+    if (!lecturefile_id) {
+        return res.status(400).json({ success: false, error: 'You must provide lecturefile_id.' });
+    }
+
+    const sql = 'SELECT keywords_url FROM Keywords_table WHERE lecturefile_id = ?';
+    db.query(sql, [lecturefile_id], (err, result) => {
+        if (err) {
+            return res.status(500).json({ success: false, error: err.message });
+        }
+
+        if (result.length === 0) {
+            return res.status(404).json({ success: false, error: 'No keywords found for the given lecturefile_id.' });
+        }
+
+        const keywordsUrl = result[0].keywords_url;
+        res.json({ success: true, keywordsUrl });
+    });
+});
+
+
 
 
 app.listen(port, () => {

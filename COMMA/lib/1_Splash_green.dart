@@ -11,6 +11,9 @@ import 'model/user.dart';
 import 'package:http/http.dart' as http;
 import 'api/api.dart';
 
+import 'package:http/http.dart' as http;
+import 'api/api.dart';
+
 Future<Map<String, dynamic>?> _fetchUserDetails(int userKey) async {
   try {
     final response = await http.get(Uri.parse('${API.baseUrl}/api/user-details/$userKey'));
@@ -30,6 +33,7 @@ Future<Map<String, dynamic>?> _fetchUserDetails(int userKey) async {
     return null;
   }
 }
+
 
 
 class SplashScreen extends StatefulWidget {
@@ -67,7 +71,6 @@ Future<void> _checkUserKey() async {
       if (userDetails != null) {
         String userNickname = userDetails['user_nickname'];
         int disType = userDetails['dis_type'];
-
         // UserProvider에 닉네임 설정
         Provider.of<UserProvider>(context, listen: false)
             .setUser(User(userKey, userId!, userNickname, null));
@@ -91,12 +94,12 @@ Future<void> _checkUserKey() async {
     }
   } else {
       print('유저아이디 없음 (기기번호 생성된 적 없음)  --> 온보딩으로 이동');
-      
+
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => OnboardingScreen()),
       );
-
   }
 }
 

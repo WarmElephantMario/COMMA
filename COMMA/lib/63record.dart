@@ -100,7 +100,7 @@ class _RecordPageState extends State<RecordPage> {
       _loadRecordedTexts(); // 녹음된 자막 로드
     }
     if (_recordingState == RecordingState.initial) {
-      _insertInitialData();
+      // _insertInitialData();
     }
     _checkFileType();
     if (widget.type == 0) {
@@ -442,36 +442,35 @@ class _RecordPageState extends State<RecordPage> {
     }
   }
 
-  Future<void> _insertInitialData() async {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userKey = userProvider.user?.userKey;
+  // Future<void> _insertInitialData() async {
+  //   final userProvider = Provider.of<UserProvider>(context, listen: false);
+  //   final userKey = userProvider.user?.userKey;
 
-    print('Alt_table에 대체텍스트 url 저장하겠습니다');
-    print('Alt_table에 대체텍스트 url 저장하겠습니다');
+  //   print('Alt_table에 대체텍스트 url 저장하겠습니다');
 
-    var altTableUrl = '${API.baseUrl}/api/alt-table';
-    var altTableBody = {
-      'lecturefile_id': widget.lecturefileId,
-      'colonfile_id': null,
-      'alternative_text_url': widget.responseUrl ?? '',
-    };
+  //   var altTableUrl = '${API.baseUrl}/api/alt-table';
+  //   var altTableBody = {
+  //     'lecturefile_id': widget.lecturefileId,
+  //     'colonfile_id': null,
+  //     'alternative_text_url': widget.responseUrl ?? '',
+  //   };
 
-    var altTableResponse = await http.post(
-      Uri.parse(altTableUrl),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(altTableBody),
-    );
+  //   var altTableResponse = await http.post(
+  //     Uri.parse(altTableUrl),
+  //     headers: {'Content-Type': 'application/json'},
+  //     body: jsonEncode(altTableBody),
+  //   );
 
-    if (altTableResponse.statusCode == 200) {
-      print('Alt_table에 대체텍스트 url 저장 완료');
-      print('대체텍스트 url 로드하겠습니다');
-      await _loadPageTexts();
-      print('대체텍스트 url 로드 완료');
-    } else {
-      print('Failed to add alt table entry: ${altTableResponse.statusCode}');
-      print(altTableResponse.body);
-    }
-  }
+  //   if (altTableResponse.statusCode == 200) {
+  //     print('Alt_table에 대체텍스트 url 저장 완료');
+  //     print('대체텍스트 url 로드하겠습니다');
+  //     await _loadPageTexts();
+  //     print('대체텍스트 url 로드 완료');
+  //   } else {
+  //     print('Failed to add alt table entry: ${altTableResponse.statusCode}');
+  //     print(altTableResponse.body);
+  //   }
+  // }
 
   Future<void> _fetchCreatedAt() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);

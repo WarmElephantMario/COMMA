@@ -49,3 +49,5 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Hide environment files with sensitive information
+lib/env/env.g.dart

@@ -17,7 +17,6 @@ class DisabilitySelectionPage extends StatelessWidget {
   }
 
   // DB에 학습 유형 저장
-// DB에 학습 유형 저장
   Future<void> _saveDisabilityTypeToDB(
       int userKey, int type, UserProvider userProvider) async {
     try {
@@ -51,29 +50,38 @@ class DisabilitySelectionPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('학습 유형 선택'),
-        centerTitle: true,
-      ),
+      backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            const SizedBox(height: 150),
             const Text(
-              '사용할 학습 유형을 선택하세요',
+              '사용자 학습 유형을 선택해주세요',
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 40),
-            ElevatedButton(
-              onPressed: () async {
+            const SizedBox(height: 10),
+            const Text(
+              '오늘도\nCOMMA와 함께 힘차게 공부해요!',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Color(0xFF245B3A),
+                fontSize: 14,
+                fontFamily: 'DM Sans',
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 100),
+            GestureDetector(
+              onTap: () async {
                 final userProvider =
                     Provider.of<UserProvider>(context, listen: false);
 
@@ -93,17 +101,31 @@ class DisabilitySelectionPage extends StatelessWidget {
                   ),
                 );
               },
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 15),
-              ),
-              child: const Text(
-                '시각 장애인용 모드 (대체 텍스트)',
-                style: TextStyle(fontSize: 18),
+              child: Container(
+                width: size.width * 0.9,
+                height: size.height * 0.065,
+                decoration: ShapeDecoration(
+                  color: const Color.fromRGBO(54, 174, 146, 1.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: const Center(
+                  child: Text(
+                    '시각 장애인용 모드 (대체 텍스트)',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontFamily: 'DM Sans',
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
               ),
             ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
+            const SizedBox(height: 16),
+            GestureDetector(
+              onTap: () async {
                 final userProvider =
                     Provider.of<UserProvider>(context, listen: false);
 
@@ -123,12 +145,26 @@ class DisabilitySelectionPage extends StatelessWidget {
                   ),
                 );
               },
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 15),
-              ),
-              child: const Text(
-                '청각 장애인용 모드 (실시간 자막)',
-                style: TextStyle(fontSize: 18),
+              child: Container(
+                width: size.width * 0.9,
+                height: size.height * 0.065,
+                decoration: ShapeDecoration(
+                  color: const Color.fromRGBO(54, 174, 146, 1.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: const Center(
+                  child: Text(
+                    '청각 장애인용 모드 (실시간 자막)',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontFamily: 'DM Sans',
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
               ),
             ),
           ],

@@ -41,6 +41,8 @@ class _LectureStartPageState extends State<LectureStartPage> {
   @override
   void initState() {
     super.initState();
+    // 키워드가 잘 넘어왔는지 확인하기 위해 콘솔에 출력
+    print("LectureStartPage Keywords: ${widget.keywords}");
   }
 
   void _onItemTapped(int index) {
@@ -164,7 +166,33 @@ class _LectureStartPageState extends State<LectureStartPage> {
             Center(
               child: ClickButton(
                 text: '강의실 입장하기',
-                onPressed: () {
+                onPressed: () async{
+                   // lecturefileId에 existLecture 값을 1로 업데이트하는 API 호출
+                if (widget.lecturefileId != null) {
+                  print("existLecture update");
+                  print(widget.lecturefileId);
+                  try {
+                    final response = await http.post(
+                      Uri.parse('${API.baseUrl}/api/update-existLecture'),
+                      headers: {'Content-Type': 'application/json'},
+                      body: jsonEncode({
+                        'lecturefileId': widget.lecturefileId
+                      }),
+                    );
+
+                    if (response.statusCode == 200) {
+                      print('existLecture 업데이트 성공');
+                    } else {
+                      print('existLecture 업데이트 실패');
+                      print('Response status: ${response.statusCode}');
+                      print('Response body: ${response.body}');
+                    }
+                  } catch (e) {
+                    // 에러 발생 시 예외 메시지 출력
+                    print('Error occurred during existLecture update: $e');
+                  }
+                }
+
                   Navigator.push(
                     context,
                     MaterialPageRoute(
