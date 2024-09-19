@@ -40,19 +40,27 @@ class _AllFilesPageState extends State<AllFilesPage> {
     
   }
 
-  Future<void> fetchFiles() async {
+Future<void> fetchFiles() async {
+  final userProvider = Provider.of<UserProvider>(context, listen: false);
+  final userKey = userProvider.user?.userKey;
+  final disType = userProvider.user?.dis_type;
+
+  if (userKey != null && disType != null) {
+    final fileType = widget.fileType == 'lecture' ? 'Lecture' : 'Colon';
     final response = await http.get(Uri.parse(
-        '${API.baseUrl}/api/get${widget.fileType == 'lecture' ? 'Lecture' : 'Colon'}Files/${widget.userKey}'));
+        '${API.baseUrl}/api/get${fileType}Files/$userKey?disType=$disType'));
 
     if (response.statusCode == 200) {
       setState(() {
-        files =
-            List<Map<String, dynamic>>.from(jsonDecode(response.body)['files']);
+        files = List<Map<String, dynamic>>.from(
+            jsonDecode(response.body)['files']);
       });
     } else {
-      throw Exception('Failed to load files');
+      throw Exception('Failed to load $fileType files');
     }
   }
+}
+
 
   String formatDateTimeToKorean(String? dateTime) {
     if (dateTime == null || dateTime.isEmpty) return 'Unknown';

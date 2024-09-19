@@ -228,11 +228,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
 
                           // userKey를 로컬 저장소에 저장
-                          await prefs.setInt('user_key', userKey);
+                          await prefs.setInt('userKey', userKey);
+                        } else { //userId는 있는데 userKey 생성 안된 경우
+                            String userNickname = 'New User';
+                            await prefs.setString('user_nickname', userNickname);
+
+                            print('current user_id : $userId');
+                            print('Generated user_nickname : $userNickname');
+
+                          // DB에 새로운 사용자 정보 저장 후 userKey 받아옴
+                          int userKey = await createUserInDB(userId, userNickname);
+
+                          // userKey를 로컬 저장소에 저장
+                          await prefs.setInt('userKey', userKey);
+
                         }
 
                         // 로컬 저장소에서 userKey와 user_nickname 불러오기
-                        int? userKey = prefs.getInt('user_key');
+                        int? userKey = prefs.getInt('userKey');
                         String? userNickname = prefs.getString('user_nickname');
 
                         if (userKey != null && userNickname != null) {
