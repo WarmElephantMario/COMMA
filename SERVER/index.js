@@ -49,24 +49,24 @@ app.get('/api/user-details/:userKey', (req, res) => {
 app.post('/api/user/:userKey/update-type', (req, res) => {
     const userKey = req.params.userKey;
     const { type } = req.body;
-  
+
     const sql = 'UPDATE user_table SET dis_type = ? WHERE userKey = ?';
-  
+
     // 콜백 방식으로 쿼리 실행
     db.query(sql, [type, userKey], (error, result) => {
-      if (error) {
-        console.error('DB 에러:', error.message);
-        return res.status(500).json({ success: false, message: `DB 오류: ${error.message}` });
-      }
-  
-      // 업데이트 성공 시
-      if (result.affectedRows > 0) {
-        return res.status(200).json({ success: true, message: '학습 유형이 업데이트되었습니다.' });
-      } else {
-        return res.status(404).json({ success: false, message: '사용자를 찾을 수 없습니다.' });
-      }
+        if (error) {
+            console.error('DB 에러:', error.message);
+            return res.status(500).json({ success: false, message: `DB 오류: ${error.message}` });
+        }
+
+        // 업데이트 성공 시
+        if (result.affectedRows > 0) {
+            return res.status(200).json({ success: true, message: '학습 유형이 업데이트되었습니다.' });
+        } else {
+            return res.status(404).json({ success: false, message: '사용자를 찾을 수 없습니다.' });
+        }
     });
-  });
+});
 
 
 // 학습 모드(dis_type) 변경하기 => 마이페이지에서 스위치 당겨서 변경 시
@@ -253,17 +253,23 @@ app.put('/api/:fileType-files/move/:id', (req, res) => {
 });
 
 // **** 특정 사용자의 특정 폴더 속 파일 목록 가져오기 --> type 특정해서 가져오는 걸로 수정
-
+//37번 파일 fetchFiles()
 // 특정 폴더의 파일 목록 가져오기 (특정 사용자)
 app.get('/api/:fileType-files/:folderId', (req, res) => {
     const folderId = req.params.folderId;
     const fileType = req.params.fileType;
     const userKey = req.query.userKey;
+    const disType = req.query.disType;
     const tableName = fileType === 'lecture' ? 'LectureFiles' : 'ColonFiles';
     const joinTable = fileType === 'lecture' ? 'LectureFolders' : 'ColonFolders';
-    const sql = `SELECT ${tableName}.* FROM ${tableName} INNER JOIN ${joinTable} ON ${tableName}.folder_id = ${joinTable}.id WHERE ${joinTable}.userKey = ? AND ${tableName}.folder_id = ?`;
+    const sql = `SELECT ${tableName}.* FROM ${tableName} 
+                 INNER JOIN ${joinTable} 
+                 ON ${tableName}.folder_id = ${joinTable}.id 
+                 WHERE ${joinTable}.userKey = ? 
+                 AND ${tableName}.folder_id = ? 
+                 AND ${tableName}.type = ?`; // dis_type 필터링 추가
 
-    db.query(sql, [userKey, folderId], (err, result) => {
+    db.query(sql, [userKey, folderId, disType], (err, result) => {
         if (err) {
             console.error('Failed to fetch files:', err);
             return res.status(500).send('Failed to fetch files');
@@ -522,23 +528,23 @@ app.post('/api/lecture-files', (req, res) => {
 // Lecture details 업데이트 엔드포인트
 app.post('/api/update-lecture-details', (req, res) => {
     const { lecturefileId, file_url, lecture_name, type } = req.body;
-  
+
     console.log('Received data:', { lecturefileId, file_url, lecture_name, type });
-  
+
     if (!lecturefileId || !file_url || !lecture_name || type == null) {
-      return res.status(400).send({ error: 'Missing required fields' });
+        return res.status(400).send({ error: 'Missing required fields' });
     }
-  
+
     const sql = 'UPDATE LectureFiles SET file_url = ?, lecture_name = ?, type = ? WHERE id = ?';
     db.query(sql, [file_url, lecture_name, type, lecturefileId], (err, results) => {
-      if (err) {
-        console.error('Database query error:', err);
-        return res.status(500).send({ error: 'Database query error' });
-      }
-      res.send({ success: true, message: 'Lecture details updated successfully' });
+        if (err) {
+            console.error('Database query error:', err);
+            return res.status(500).send({ error: 'Database query error' });
+        }
+        res.send({ success: true, message: 'Lecture details updated successfully' });
     });
-  });
-  
+});
+
 
 //대체텍스트 파일 생성 시 responseUrl 저장
 app.post('/api/alt-table', (req, res) => {
@@ -637,7 +643,7 @@ app.get('/api/check-exist-colon', (req, res) => {
 
     const query = 'SELECT existColon FROM LectureFiles WHERE id = ?';
     console.log(`Executing query: ${query} with lecturefileId: ${parsedLecturefileId}`);
-    
+
     db.query(query, [parsedLecturefileId], (err, results) => {
         if (err) {
             console.error('Failed to check existColon:', err);
@@ -676,29 +682,7 @@ app.get('/api/get-file-created-at', (req, res) => {
     });
 });
 
-//콜론 파일 created_at 가져오기
-// Get colon file details
-// app.get('/api/get-colon-file', (req, res) => {
-//     const { folderName } = req.query;
 
-//     const query = `
-//         SELECT f.id, f.file_name, f.file_url, f.created_at
-//         FROM ColonFiles f
-//         JOIN ColonFolders c ON f.folder_id = c.id
-//         WHERE c.folder_name = ?
-//         ORDER BY f.created_at DESC
-//         LIMIT 1`;
-
-//     db.query(query, [folderName], (err, results) => {
-//         if (err) {
-//             return res.status(500).json({ error: 'Failed to fetch file details' });
-//         }
-//         if (results.length === 0) {
-//             return res.status(404).json({ error: 'File not found' });
-//         }
-//         res.status(200).json(results[0]);
-//     });
-// });
 
 // 폴더 이름 가져오기 - 강의 폴더 또는 콜론 폴더 구분
 app.get('/api/getFolderName/:fileType/:folderId', (req, res) => {
@@ -725,19 +709,19 @@ app.get('/api/getFolderName/:fileType/:folderId', (req, res) => {
 app.get('/api/getFileId', (req, res) => {
     const fileUrl = req.query.file_url;
     const sql = 'SELECT id FROM LectureFiles WHERE file_url = ?';
-    
+
     db.query(sql, [fileUrl], (err, results) => {
-      if (err) {
-        res.status(500).send(err);
-      } else {
-        if (results.length > 0) {
-          res.json({ id: results[0].id });
+        if (err) {
+            res.status(500).send(err);
         } else {
-          res.status(404).send({ message: 'File not found' });
+            if (results.length > 0) {
+                res.json({ id: results[0].id });
+            } else {
+                res.status(404).send({ message: 'File not found' });
+            }
         }
-      }
     });
-  });
+});
 
 
 
@@ -746,13 +730,15 @@ app.get('/api/getFileId', (req, res) => {
 // 사용자별 최신 강의 파일을 가져오는 API 엔드포인트
 app.get('/api/getLectureFiles/:userKey', (req, res) => {
     const userKey = req.params.userKey;
+    const disType = req.query.disType; // dis_type 추가
     const sql = `
         SELECT LectureFiles.* FROM LectureFiles
         INNER JOIN LectureFolders ON LectureFiles.folder_id = LectureFolders.id
-        WHERE LectureFolders.userKey = ?
+        WHERE LectureFolders.userKey = ? AND LectureFiles.type = ?  
         ORDER BY LectureFiles.created_at DESC
     `;
-    db.query(sql, [userKey], (err, results) => {
+
+    db.query(sql, [userKey, disType], (err, results) => {
         if (err) {
             res.status(500).send(err);
         } else {
@@ -760,18 +746,21 @@ app.get('/api/getLectureFiles/:userKey', (req, res) => {
         }
     });
 });
+
 
 // **** 현재 로그인한 userKey뿐 아니라, dis_type까지 고려해서 파일 가져와야 함 ///
 
 // 사용자별 최신 콜론 파일을 가져오는 API 엔드포인트
 app.get('/api/getColonFiles/:userKey', (req, res) => {
     const userKey = req.params.userKey;
+    const disType = req.query.disType; // dis_type 추가
     const sql = `
     SELECT ColonFiles.* FROM ColonFiles
     INNER JOIN ColonFolders ON ColonFiles.folder_id = ColonFolders.id
-    WHERE ColonFolders.userKey = ?
+    WHERE ColonFolders.userKey = ? AND ColonFiles.type = ? 
     ORDER BY ColonFiles.created_at DESC`;
-    db.query(sql, [userKey], (err, results) => {
+    
+    db.query(sql, [userKey, disType], (err, results) => {
         if (err) {
             res.status(500).send(err);
         } else {
@@ -779,6 +768,7 @@ app.get('/api/getColonFiles/:userKey', (req, res) => {
         }
     });
 });
+
 
 
 // 강의 폴더 이름 가져오기
@@ -903,7 +893,7 @@ app.get('/api/get-colon-details', (req, res) => {
 
     const query = 'SELECT folder_id, file_name, file_url, lecture_name, created_at, type FROM ColonFiles WHERE id = ?';
     console.log(`Executing query: ${query} with colonId: ${parsedColonId}`);
-    
+
     db.query(query, [parsedColonId], (err, results) => {
         if (err) {
             console.error('Failed to get colon details:', err);
@@ -989,56 +979,56 @@ app.get('/api/get-page-scripts', (req, res) => {
 // 특정 lecturefile_id 행에 colonfile_id 업데이트하기
 app.post('/api/update-alt-table', (req, res) => {
     const { lecturefileId, colonFileId } = req.body;
-  
+
     console.log('Received data:', { lecturefileId, colonFileId }); // 로그 추가
-  
+
     if (!lecturefileId || !colonFileId) {
-      console.log('Missing required fields'); // 로그 추가
-      return res.status(400).send({ error: 'Missing required fields' });
+        console.log('Missing required fields'); // 로그 추가
+        return res.status(400).send({ error: 'Missing required fields' });
     }
-  
+
     const sql = 'UPDATE Alt_table SET colonfile_id = ? WHERE lecturefile_id = ?';
     db.query(sql, [colonFileId, lecturefileId], (err, results) => {
-      if (err) {
-        console.error('Database query error:', err); // 로그 추가
-        res.status(500).send('Internal server error');
-      } else {
-        if (results.affectedRows > 0) {
-          console.log('Update successful'); // 로그 추가
-          res.status(200).send('Update successful');
+        if (err) {
+            console.error('Database query error:', err); // 로그 추가
+            res.status(500).send('Internal server error');
         } else {
-          console.log('Lecturefile not found'); // 로그 추가
-          res.status(404).send('Lecturefile not found');
+            if (results.affectedRows > 0) {
+                console.log('Update successful'); // 로그 추가
+                res.status(200).send('Update successful');
+            } else {
+                console.log('Lecturefile not found'); // 로그 추가
+                res.status(404).send('Lecturefile not found');
+            }
         }
-      }
     });
-  });
+});
 
 // Alt_table의 특정 colonfile_id 행에서 URL 가져오기
 app.get('/api/get-alt-url/:colonfile_id', (req, res) => {
     const colonfile_id = req.params.colonfile_id;
     console.log(`Received request for colonfile_id: ${colonfile_id}`); // 로그 추가
     const sql = 'SELECT alternative_text_url FROM Alt_table WHERE colonfile_id = ?';
-  
+
     db.query(sql, [colonfile_id], (err, results) => {
-      if (err) {
-        console.error('Failed to fetch alternative text URL:', err);
-        res.status(500).send('Failed to fetch alternative text URL');
-      } else {
-        console.log('Query results:', results); // 로그 추가
-        if (results.length > 0) {
-          console.log(`Found URL: ${results[0].alternative_text_url}`); // 로그 추가
-          res.json({ alternative_text_url: results[0].alternative_text_url });
+        if (err) {
+            console.error('Failed to fetch alternative text URL:', err);
+            res.status(500).send('Failed to fetch alternative text URL');
         } else {
-          console.log('No URL found for the given colonfile_id'); // 로그 추가
-          res.status(404).send('No URL found for the given colonfile_id');
+            console.log('Query results:', results); // 로그 추가
+            if (results.length > 0) {
+                console.log(`Found URL: ${results[0].alternative_text_url}`); // 로그 추가
+                res.json({ alternative_text_url: results[0].alternative_text_url });
+            } else {
+                console.log('No URL found for the given colonfile_id'); // 로그 추가
+                res.status(404).send('No URL found for the given colonfile_id');
+            }
         }
-      }
     });
-  });
-  
-  //쪼개 대체 삽입
-  app.post('/api/alt-table2', (req, res) => {
+});
+
+//쪼개 대체 삽입
+app.post('/api/alt-table2', (req, res) => {
     console.log('POST /api/alt-table2 called');
     const { lecturefile_id, alternative_text_url, page } = req.body;
 
@@ -1059,28 +1049,28 @@ app.get('/api/get-alt-url/:colonfile_id', (req, res) => {
 app.post('/api/user/:userKey/update-type', (req, res) => {
     const userKey = req.params.userKey;
     const { type } = req.body;
-  
+
     const sql = 'UPDATE user_table SET dis_type = ? WHERE userKey = ?';
-  
+
     // 콜백 방식으로 쿼리 실행
     db.query(sql, [type, userKey], (error, result) => {
-      if (error) {
-        console.error('DB 에러:', error.message);
-        return res.status(500).json({ success: false, message: `DB 오류: ${error.message}` });
-      }
-  
-      // 업데이트 성공 시
-      if (result.affectedRows > 0) {
-        return res.status(200).json({ success: true, message: '학습 유형이 업데이트되었습니다.' });
-      } else {
-        return res.status(404).json({ success: false, message: '사용자를 찾을 수 없습니다.' });
-      }
+        if (error) {
+            console.error('DB 에러:', error.message);
+            return res.status(500).json({ success: false, message: `DB 오류: ${error.message}` });
+        }
+
+        // 업데이트 성공 시
+        if (result.affectedRows > 0) {
+            return res.status(200).json({ success: true, message: '학습 유형이 업데이트되었습니다.' });
+        } else {
+            return res.status(404).json({ success: false, message: '사용자를 찾을 수 없습니다.' });
+        }
     });
-  });
-  
+});
+
 // existLecture 값을 무조건 1로 업데이트
 app.post('/api/update-existLecture', (req, res) => {
-    const {lecturefileId} = req.body;
+    const { lecturefileId } = req.body;
 
     // lectureFileId가 제대로 전달되었는지 확인
     console.log('Received lecturefileId:', lecturefileId);
@@ -1118,25 +1108,25 @@ app.post('/api/update-existLecture', (req, res) => {
 // API 엔드포인트: lecturefileId로 existLecture 값을 확인
 app.get('/api/checkExistLecture/:lectureFileId', (req, res) => {
     const lectureFileId = req.params.lectureFileId;
-  
+
     const query = 'SELECT existLecture FROM LectureFiles WHERE id = ?';
     db.query(query, [lectureFileId], (err, result) => {
-      if (err) {
-        console.error('Error checking existLecture:', err);
-        return res.status(500).json({ error: 'Failed to check existLecture' });
-      }
-  
-      if (result.length > 0) {
-        // lecturefileId에 대한 existLecture 값을 반환
-        res.status(200).json({ existLecture: result[0].existLecture });
-      } else {
-        // 해당 lecturefileId가 없는 경우
-        res.status(404).json({ error: 'Lecture file not found' });
-      }
-    });
-  });
+        if (err) {
+            console.error('Error checking existLecture:', err);
+            return res.status(500).json({ error: 'Failed to check existLecture' });
+        }
 
-  // 키워드 데이터 삽입 API
+        if (result.length > 0) {
+            // lecturefileId에 대한 existLecture 값을 반환
+            res.status(200).json({ existLecture: result[0].existLecture });
+        } else {
+            // 해당 lecturefileId가 없는 경우
+            res.status(404).json({ error: 'Lecture file not found' });
+        }
+    });
+});
+
+// 키워드 데이터 삽입 API
 app.post('/api/insert-keywords', (req, res) => {
     const { lecturefileId, keywordsFileUrl } = req.body;
 

@@ -47,35 +47,67 @@ class _MainPageState extends State<MainPage> {
     super.dispose();
   }
 
-  Future<void> fetchLectureFiles() async {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final response = await http.get(Uri.parse(
-        '${API.baseUrl}/api/getLectureFiles/${userProvider.user!.userKey}'));
+Future<void> fetchLectureFiles() async {
+  final userProvider = Provider.of<UserProvider>(context, listen: false);
+  final userKey = userProvider.user?.userKey;
+  final disType = userProvider.user?.dis_type; // dis_type 값 가져오기
 
-    if (response.statusCode == 200) {
-      setState(() {
-        lectureFiles =
-            List<Map<String, dynamic>>.from(jsonDecode(response.body)['files']);
-      });
-    } else {
-      throw Exception('Failed to load lecture files');
+  if (userKey != null && disType != null) {
+    try {
+      print('Fetching lecture files for userKey: $userKey and disType: $disType');
+      
+      final response = await http.get(Uri.parse(
+        '${API.baseUrl}/api/getLectureFiles/$userKey?disType=$disType', // dis_type 파라미터 추가
+      ));
+
+      print('Response status code: ${response.statusCode}'); // 상태 코드 로그
+
+      if (response.statusCode == 200) {
+        print('Lecture files fetched successfully'); // 성공 로그
+        final List<Map<String, dynamic>> fileData = List<Map<String, dynamic>>.from(
+          jsonDecode(response.body)['files']
+        );
+        setState(() {
+          lectureFiles = fileData;
+        });
+      } else {
+        print('Failed to load lecture files. Status code: ${response.statusCode}');
+        print('Response body: ${response.body}'); // 응답 본문 로그
+        throw Exception('Failed to load lecture files');
+      }
+    } catch (e, stacktrace) {
+      print('Error occurred while fetching lecture files: $e');
+      print('Stacktrace: $stacktrace'); // 스택 트레이스 로그
+      throw Exception('Failed to fetch lecture files: $e');
+    }
+  } else {
+    print('UserKey or disType is null');
+  }
+}
+
+
+
+Future<void> fetchColonFiles() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userKey = userProvider.user?.userKey;
+    final disType = userProvider.user?.dis_type; // dis_type 값 가져오기
+
+    if (userKey != null && disType != null) {
+      final response = await http.get(Uri.parse(
+        '${API.baseUrl}/api/getColonFiles/$userKey?disType=$disType', // dis_type 파라미터 추가
+      ));
+
+      if (response.statusCode == 200) {
+        setState(() {
+          colonFiles =
+              List<Map<String, dynamic>>.from(jsonDecode(response.body)['files']);
+        });
+      } else {
+        throw Exception('Failed to load colon files');
+      }
     }
   }
 
-  Future<void> fetchColonFiles() async {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final response = await http.get(Uri.parse(
-        '${API.baseUrl}/api/getColonFiles/${userProvider.user!.userKey}'));
-
-    if (response.statusCode == 200) {
-      setState(() {
-        colonFiles =
-            List<Map<String, dynamic>>.from(jsonDecode(response.body)['files']);
-      });
-    } else {
-      throw Exception('Failed to load colon files');
-    }
-  }
 
   Future<void> fetchOtherFolders(String fileType, int currentFolderId) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);

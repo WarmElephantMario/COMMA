@@ -10,7 +10,7 @@ class User {
       json['userKey'], json['userId'], json['user_nickname'], json['dis_type']);
 
   Map<String, dynamic> toJson() => {
-        'userKey': userKey, // toString() 필요 없음
+        'userKey': userKey, 
         'userId': userId,
         'user_nickname': user_nickname,
         'dis_type': dis_type

@@ -61,23 +61,30 @@ Future<void> _checkUserKey() async {
     
 
     // 로컬 저장소에서 userKey만 불러오기
-    int? userKey = prefs.getInt('user_key');
+    int? userKey = prefs.getInt('userKey');
     if (userKey != null) {
       print('유저키 : $userKey');
 
       // 유저 정보 API 호출로 닉네임과 타입 가져오기
       final userDetails = await _fetchUserDetails(userKey);
+      print('여기');
 
       if (userDetails != null) {
         String userNickname = userDetails['user_nickname'];
         int disType = userDetails['dis_type'];
+        print('${disType}');
+
         // UserProvider에 닉네임 설정
-        Provider.of<UserProvider>(context, listen: false)
-            .setUser(User(userKey, userId!, userNickname, null));
+        Provider.of<UserProvider>(context, listen: false).setUser(User(userKey, userId!, userNickname, null));
+        print('여기22');
 
         // UserProvider에 타입 업데이트
-        Provider.of<UserProvider>(context, listen: false)
-            .updateDisType(disType);
+        Provider.of<UserProvider>(context, listen: false).updateDisType(disType);
+        // print('disType 성공적으로 Provider에 들어갔는지 확인하겠습니다');
+        // final userProvider = Provider.of<UserProvider>(context, listen: false);
+        // final disType2 = userProvider.user?.dis_type;
+        // print('${disType2}');
+        
 
         Navigator.pushReplacement(
           context,
