@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_plugin/components.dart';
+import '../model/44_font_size_provider.dart';
+import 'package:provider/provider.dart';
+
 
 class ChangePasswordPage extends StatefulWidget {
   const ChangePasswordPage({super.key});
@@ -19,7 +22,12 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) {    
+    // 폰트 크기 비율을 Provider에서 가져옴
+    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
+    // 디스플레이 비율을 가져옴
+    final scaleFactor = fontSizeProvider.scaleFactor;
+
     return WillPopScope(
     onWillPop: () async {
       return false; // 뒤로 가기 버튼을 눌렀을 때 아무 반응도 하지 않도록 설정
@@ -41,10 +49,10 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            const Text(
+            Text(
               '새로운 비밀번호를 입력해주세요.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16, color: Colors.grey),
+              style: TextStyle(fontSize: 16 * scaleFactor , color: Colors.grey),
             ),
             const SizedBox(height: 20),
             TextField(

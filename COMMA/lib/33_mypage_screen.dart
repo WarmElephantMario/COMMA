@@ -10,6 +10,8 @@ import 'package:provider/provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'api/api.dart';
 import '1_Splash_green.dart';
+import 'mypage/43_font_size_page.dart';
+import '../model/44_font_size_provider.dart';
 
 // MyPageScreen 클래스 정의
 class MyPageScreen extends StatefulWidget {
@@ -45,6 +47,10 @@ class _MyPageScreenState extends State<MyPageScreen> {
   }
 
   Widget _buildCard(BuildContext context, String title, VoidCallback onTap) {
+      // 폰트 크기 비율을 Provider에서 가져옴
+    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
+    // 디스플레이 비율을 가져옴
+    final scaleFactor = fontSizeProvider.scaleFactor;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: Container(
@@ -125,6 +131,10 @@ class _MyPageScreenState extends State<MyPageScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 폰트 크기 비율을 Provider에서 가져옴
+    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
+    // 디스플레이 비율을 가져옴
+    final scaleFactor = fontSizeProvider.scaleFactor;
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     int disType = userProvider.user?.dis_type ?? 0;
 
@@ -185,6 +195,10 @@ class _MyPageScreenState extends State<MyPageScreen> {
               },
             );
           }),
+          _buildCard(context, '글씨 크기 조정', () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const FontSizePage()));
+          }),
         SizedBox(height: 50), 
 
           Center(
@@ -194,7 +208,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                 '학습 모드를 변경하시려면 스위치를 당겨 재부팅하세요',
                 textAlign: TextAlign.center, // 중앙 정렬
                 style: TextStyle(
-                    fontSize: 16.0, color: Colors.grey[600]), // 글씨 크기 수정
+                    fontSize: 16.0 *scaleFactor, color: Colors.grey[600]), // 글씨 크기 수정
               ),
             ),
           ),
@@ -204,12 +218,16 @@ class _MyPageScreenState extends State<MyPageScreen> {
             mainAxisAlignment: MainAxisAlignment.center, // 중앙에 위치하도록 설정
             children: [
               // 스위치 왼쪽 설명: 시각장애인 모드
-              Padding(
+              Expanded(
+              child:Padding(
                 padding: const EdgeInsets.only(right: 8.0), // 간격 추가
                 child: Text(
                   '시각장애인 모드', // 스위치 왼쪽 텍스트
-                  style: TextStyle(fontSize: 16.0), // 글씨 크기 키움
+                  style: TextStyle(fontSize: 16.0*scaleFactor), // 글씨 크기 키움
+                  overflow: TextOverflow.ellipsis, // 텍스트가 너무 길 경우 생략 부호 표시
                 ),
+                
+              ),
               ),
               SizedBox(width: 15,), 
 
@@ -240,13 +258,16 @@ class _MyPageScreenState extends State<MyPageScreen> {
 
               SizedBox(width: 15,), 
               // 스위치 오른쪽 설명: 청각장애인 모드
-              Padding(
+              Expanded(
+              child : Padding(
                 padding: const EdgeInsets.only(left: 8.0), // 간격 추가
                 child: Text(
                   '청각장애인 모드', // 스위치 오른쪽 텍스트
-                  style: TextStyle(fontSize: 16.0), // 글씨 크기 키움
+                  style: TextStyle(fontSize: 16.0*scaleFactor),
+                  overflow: TextOverflow.ellipsis, // 텍스트가 너무 길 경우 생략 부호 표시 // 글씨 크기 키움
                 ),
               ),
+              )
             ],
           ),
         ],

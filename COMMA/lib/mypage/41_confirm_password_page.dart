@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_plugin/components.dart';
 import '40_change_password_page.dart';
+import '../model/44_font_size_provider.dart';
+import 'package:provider/provider.dart';
+
+
 
 class ConfirmPasswordPage extends StatefulWidget {
   const ConfirmPasswordPage({super.key});
@@ -21,6 +25,10 @@ class _ConfirmPasswordPageState extends State<ConfirmPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
+    // 폰트 크기 비율을 Provider에서 가져옴
+    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
+    // 디스플레이 비율을 가져옴
+    final scaleFactor = fontSizeProvider.scaleFactor;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -39,10 +47,10 @@ class _ConfirmPasswordPageState extends State<ConfirmPasswordPage> {
           padding: const EdgeInsets.fromLTRB(16, 30, 16, 16),
           child: Column(
             children: [
-              const Text(
+              Text(
                 '개인정보를 안전하게 보호하기 위해서\n비밀번호를 다시 한번 확인합니다.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Color(0xFF585858)),
+                style: TextStyle(fontSize: 16* scaleFactor, color: Color(0xFF585858)),
               ),
               const SizedBox(height: 40),
               TextField(

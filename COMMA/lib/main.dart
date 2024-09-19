@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import '1_Splash_green.dart'; // SplashScreen import
 import 'model/user_provider.dart'; // UserProvider import
 import 'package:shared_preferences/shared_preferences.dart'; // SharedPreferences for userKey
+import 'model/44_font_size_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,6 +21,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => FontSizeProvider()),
       ],
       child: const MyApp(),
     ),
@@ -31,11 +33,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+     final fontSizeProvider = Provider.of<FontSizeProvider>(context);
+
     return MaterialApp(
       navigatorObservers: [MyNavigatorObserver()],
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         visualDensity: VisualDensity.adaptivePlatformDensity,
+    // 기본 텍스트 테마에 사용자 지정 폰트 크기 비율 적용
+        textTheme: Theme.of(context).textTheme.apply(
+              fontSizeFactor: fontSizeProvider.scaleFactor, // 비율 적용
+            ),
       ),
       home: const SplashScreen(), // 앱 시작 시 SplashScreen으로 이동
     );

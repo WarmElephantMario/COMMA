@@ -9,6 +9,7 @@ import 'api/api.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:fluttertoast/fluttertoast.dart';
+import '../model/44_font_size_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -175,6 +176,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildProfileItem(String label, String value, VoidCallback? onTap,
       {required OrdinalSortKey order, required FocusNode focusNode}) {
+    // 폰트 크기 비율을 Provider에서 가져옴
+    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
+    // 디스플레이 비율을 가져옴
+    final scaleFactor = fontSizeProvider.scaleFactor;
     return Semantics(
       sortKey: order,
       child: Focus(
@@ -199,14 +204,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 Text(
                   label,
-                  style: const TextStyle(
-                      fontSize: 16.0,
+                  style:  TextStyle(
+                      fontSize: 16.0* scaleFactor,
                       fontWeight: FontWeight.bold,
                       color: Colors.black54),
                 ),
                 Text(
                   value,
-                  style: const TextStyle(fontSize: 16.0, color: Colors.black),
+                  style:  TextStyle(fontSize: 16.0* scaleFactor, color: Colors.black),
                 ),
               ],
             ),

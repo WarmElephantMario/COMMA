@@ -10,7 +10,8 @@ import '../model/user_provider.dart';
 import '../api/api.dart';
 import 'package:flutter_plugin/62lecture_start.dart';
 
-import 'package:provider/provider.dart';
+import '../model/44_font_size_provider.dart';
+
 
 
 class FolderFilesScreen extends StatefulWidget {
@@ -270,13 +271,17 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
 
   @override
   Widget build(BuildContext context) {
+    // 폰트 크기 비율을 Provider에서 가져옴
+    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
+    // 디스플레이 비율을 가져옴
+    final scaleFactor = fontSizeProvider.scaleFactor;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
           backgroundColor: Colors.white,
           title: Text(
             widget.folderName,
-            style: const TextStyle(
+            style:  TextStyle(
                 color: Color.fromARGB(255, 48, 48, 48),
                 fontWeight: FontWeight.w600),
           ),
@@ -353,6 +358,10 @@ class FileListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+        // 폰트 크기 비율을 Provider에서 가져옴
+    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
+    // 디스플레이 비율을 가져옴
+    final scaleFactor = fontSizeProvider.scaleFactor;
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
       padding: const EdgeInsets.all(12),
@@ -385,8 +394,8 @@ class FileListItem extends StatelessWidget {
               children: [
                 Text(
                   file['file_name'] ?? 'Unknown',
-                  style: const TextStyle(
-                    fontSize: 16,
+                  style: TextStyle(
+                    fontSize: 16 * scaleFactor,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
@@ -395,8 +404,8 @@ class FileListItem extends StatelessWidget {
                 const SizedBox(height: 5),
                 Text(
                   formatDateTimeToKorean(file['created_at'] ?? ''),
-                  style: const TextStyle(
-                    fontSize: 12,
+                  style: TextStyle(
+                    fontSize: 12 * scaleFactor,
                     color: Color(0xFF6C7A89),
                   ),
                 ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_plugin/components.dart';
+import '../model/44_font_size_provider.dart';
+import 'package:provider/provider.dart';
 
 class HelpPage extends StatefulWidget {
   const HelpPage({super.key});
@@ -19,6 +21,11 @@ class _HelpPageState extends State<HelpPage> {
 
   @override
   Widget build(BuildContext context) {
+    // 폰트 크기 비율을 Provider에서 가져옴
+    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
+    // 디스플레이 비율을 가져옴
+    final scaleFactor = fontSizeProvider.scaleFactor;
+    
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(

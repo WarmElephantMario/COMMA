@@ -9,6 +9,8 @@ import '62lecture_start.dart';
 import '63record.dart';
 import '66colon.dart';
 import 'components.dart'; // showCustomMenu 함수가 있는 파일을 import
+import '../model/44_font_size_provider.dart';
+
 
 
 class AllFilesPage extends StatefulWidget {
@@ -416,16 +418,16 @@ Future<void> fetchOtherFolders(String fileType, int currentFolderId) async {
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      child: const Text(
+                      child:  Text(
                         '취소',
                         style: TextStyle(
                           color: Color.fromRGBO(84, 84, 84, 1),
-                          fontSize: 16,
+                          fontSize: 16 ,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                    const Text(
+                     Text(
                       '다음으로 이동',
                       style: TextStyle(
                         color: Colors.black,
@@ -500,6 +502,10 @@ Future<void> fetchOtherFolders(String fileType, int currentFolderId) async {
 
   @override
   Widget build(BuildContext context) {
+    // 폰트 크기 비율을 Provider에서 가져옴
+    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
+    // 디스플레이 비율을 가져옴
+    final scaleFactor = fontSizeProvider.scaleFactor;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(

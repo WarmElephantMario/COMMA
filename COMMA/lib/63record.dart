@@ -26,6 +26,8 @@ import '62lecture_start.dart';
 import '66colon.dart';
 import 'env/env.dart';
 import 'folder/37_folder_files_screen.dart';
+import '../model/44_font_size_provider.dart';
+
 
 
 enum RecordingState { initial, recording, recorded }
@@ -1060,6 +1062,10 @@ class _RecordPageState extends State<RecordPage> {
 
   @override
   Widget build(BuildContext context) {
+    // 폰트 크기 비율을 Provider에서 가져옴
+    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
+    // 디스플레이 비율을 가져옴
+    final scaleFactor = fontSizeProvider.scaleFactor;
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userKey = userProvider.user?.userKey;
     return WillPopScope(
@@ -1104,9 +1110,9 @@ class _RecordPageState extends State<RecordPage> {
                     },
                     child: Text(
                       _recordingState == RecordingState.initial ? '취소' : '종료',
-                      style: const TextStyle(
+                      style:  TextStyle(
                         color: Color(0xFFFFA17A),
-                        fontSize: 16,
+                        fontSize: 16*scaleFactor,
                       ),
                     ),
                   ),
@@ -1118,9 +1124,9 @@ class _RecordPageState extends State<RecordPage> {
                   const SizedBox(width: 8),
                   Text(
                     '폴더 분류 > ${widget.folderName}',
-                    style: const TextStyle(
+                    style:  TextStyle(
                       color: Color(0xFF575757),
-                      fontSize: 12,
+                      fontSize: 12*scaleFactor,
                       fontFamily: 'DM Sans',
                     ),
                   ),
@@ -1129,9 +1135,9 @@ class _RecordPageState extends State<RecordPage> {
               const SizedBox(height: 5),
               Text(
                 widget.noteName,
-                style: const TextStyle(
+                style:  TextStyle(
                   color: Color(0xFF414141),
-                  fontSize: 20,
+                  fontSize: 20*scaleFactor,
                   fontFamily: 'DM Sans',
                   fontWeight: FontWeight.bold,
                 ),
@@ -1153,9 +1159,9 @@ class _RecordPageState extends State<RecordPage> {
                     const SizedBox(height: 5),
                     Text(
                       _formatDate(_createdAt!),
-                      style: const TextStyle(
+                      style:  TextStyle(
                         color: Color(0xFF575757),
-                        fontSize: 12,
+                        fontSize: 12*scaleFactor,
                         fontFamily: 'DM Sans',
                       ),
                     ),
@@ -1195,7 +1201,7 @@ class _RecordPageState extends State<RecordPage> {
                           iconData: Icons.mic,
                         ),
                         const SizedBox(width: 10),
-                        const Column(
+                        Column(
                           children: [
                             SizedBox(height: 10),
                             Row(
@@ -1207,7 +1213,7 @@ class _RecordPageState extends State<RecordPage> {
                                   '녹음 중',
                                   style: TextStyle(
                                     color: Color(0xFFFFA17A),
-                                    fontSize: 14,
+                                    fontSize: 14 *scaleFactor,
                                     fontFamily: 'DM Sans',
                                   ),
                                 ),
@@ -1366,9 +1372,9 @@ class _RecordPageState extends State<RecordPage> {
                                   ? pageTexts[_currentPage] ??
                                       '페이지 $_currentPage의 텍스트가 없습니다.'
                                   : '텍스트가 없습니다.',
-                              style: const TextStyle(
+                              style:  TextStyle(
                                 color: Colors.white,
-                                fontSize: 12,
+                                fontSize: 12*scaleFactor,
                                 fontWeight: FontWeight.normal,
                               ),
                             ),
@@ -1386,7 +1392,7 @@ class _RecordPageState extends State<RecordPage> {
                       _recognizedText + ' ' + _interimText,
                       style: TextStyle(
                         color: Colors.black,
-                        fontSize: 17,
+                        fontSize: 17*scaleFactor,
                         fontWeight: FontWeight.w500,
                         fontFamily: GoogleFonts.ibmPlexSansKr().fontFamily,
                         height: 1.8,
@@ -1403,7 +1409,7 @@ class _RecordPageState extends State<RecordPage> {
                       _recognizedText,
                       style: TextStyle(
                         color: Colors.black,
-                        fontSize: 17,
+                        fontSize: 17*scaleFactor,
                         fontWeight: FontWeight.w500,
                         fontFamily: GoogleFonts.ibmPlexSansKr().fontFamily,
                         height: 1.8,

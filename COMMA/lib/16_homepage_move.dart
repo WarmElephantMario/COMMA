@@ -12,6 +12,8 @@ import '66colon.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import '12_hompage_search.dart';
+import '../model/44_font_size_provider.dart';
+
 // import 'popscope.dart';
 
 class MainPage extends StatefulWidget {
@@ -539,6 +541,10 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
 
   @override
   Widget build(BuildContext context) {
+    // 폰트 크기 비율을 Provider에서 가져옴
+    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
+    // 디스플레이 비율을 가져옴
+    final scaleFactor = fontSizeProvider.scaleFactor;
     // final size = MediaQuery.of(context).size;
     final userProvider = Provider.of<UserProvider>(context);
     return PopScope(
@@ -586,11 +592,11 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
                       Text.rich(
                         TextSpan(
                           children: [
-                            const TextSpan(
+                             TextSpan(
                               text: '안녕하세요, ',
                               style: TextStyle(
                                 color: Colors.black,
-                                fontSize: 24,
+                                fontSize: 24* scaleFactor,
                                 fontFamily: 'DM Sans',
                                 fontWeight: FontWeight.w500,
                                 height: 1.5,
@@ -598,19 +604,19 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
                             ),
                             TextSpan(
                               text: userProvider.user?.user_nickname ?? 'Guest',
-                              style: const TextStyle(
+                              style:  TextStyle(
                                 color: Color(0xFF36AE92), // 원하는 색상으로 설정
-                                fontSize: 24,
+                                fontSize: 24* scaleFactor,
                                 fontFamily: 'DM Sans',
                                 fontWeight: FontWeight.w700,
                                 height: 1.5,
                               ),
                             ),
-                            const TextSpan(
+                             TextSpan(
                               text: ' 님',
                               style: TextStyle(
                                 color: Colors.black,
-                                fontSize: 24,
+                                fontSize: 24* scaleFactor,
                                 fontFamily: 'DM Sans',
                                 fontWeight: FontWeight.w500,
                                 height: 1.5,
@@ -626,11 +632,11 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                     Text(
                       '최근에 학습한 강의 파일이에요.',
                       style: TextStyle(
                         color: Color(0xFF575757),
-                        fontSize: 13,
+                        fontSize: 13* scaleFactor,
                         fontFamily: 'Raleway',
                         fontWeight: FontWeight.w500,
                         height: 1.5,
@@ -648,13 +654,13 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
                           ),
                         );
                       },
-                      child: const Row(
+                      child:  Row(
                         children: [
                           Text(
                             '전체 보기',
                             style: TextStyle(
                               color: Color(0xFF36AE92),
-                              fontSize: 12,
+                              fontSize: 12* scaleFactor,
                               fontFamily: 'Mulish',
                               fontWeight: FontWeight.w800,
                               height: 1.5,
@@ -674,11 +680,11 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
                 const SizedBox(height: 8),
                 ...(lectureFiles.isEmpty
                     ? [
-                        const Text(
+                         Text(
                           '최근에 학습한 강의 자료가 없어요.',
                           style: TextStyle(
                             color: Colors.black,
-                            fontSize: 13,
+                            fontSize: 13* scaleFactor,
                             fontFamily: 'Raleway',
                             fontWeight: FontWeight.w700,
                             height: 1.5,
@@ -741,11 +747,11 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                     Text(
                       '최근에 학습한 콜론 파일이에요.',
                       style: TextStyle(
                         color: Color(0xFF575757),
-                        fontSize: 13,
+                        fontSize: 13* scaleFactor,
                         fontFamily: 'Raleway',
                         fontWeight: FontWeight.w500,
                         height: 1.5,
@@ -763,13 +769,13 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
                           ),
                         );
                       },
-                      child: const Row(
+                      child:  Row(
                         children: [
                           Text(
                             '전체 보기',
                             style: TextStyle(
                               color: Color(0xFF36AE92),
-                              fontSize: 12,
+                              fontSize: 12* scaleFactor,
                               fontFamily: 'Mulish',
                               fontWeight: FontWeight.w800,
                               height: 1.5,
@@ -789,11 +795,11 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
                 const SizedBox(height: 8),
                 ...(colonFiles.isEmpty
                     ? [
-                        const Text(
+                         Text(
                           '최근에 학습한 콜론 자료가 없어요.',
                           style: TextStyle(
                             color: Colors.black,
-                            fontSize: 13,
+                            fontSize: 13* scaleFactor,
                             fontFamily: 'Raleway',
                             fontWeight: FontWeight.w700,
                             height: 1.5,
