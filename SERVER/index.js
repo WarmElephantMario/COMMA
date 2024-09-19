@@ -343,58 +343,57 @@ app.post('/api/delete_user', async (req, res) => {
         return res.status(400).json({ success: false, error: "사용자를 찾을 수 없습니다" });
     }
 
-    db.beginTransaction(async (err) => {
-        if (err) {
-            console.error('Transaction error:', err);
-            return res.status(500).json({ success: false, error: 'Transaction error' });
-        }
+    try {
+        // 트랜잭션 시작
+        await db.promise().query('START TRANSACTION');
 
-        try {
-            // Delete related lecturefiles
-            const [lectureFilesResult] = await db.promise().query(
-                'DELETE FROM LectureFiles WHERE folder_id IN (SELECT id FROM LectureFolders WHERE userKey = ?)',
-                [userKey]
-            );
-            console.log('Deleted lecturefiles:', lectureFilesResult.affectedRows);
+        // 관련 lecturefiles 삭제
+        const [lectureFilesResult] = await db.promise().query(
+            'DELETE FROM LectureFiles WHERE folder_id IN (SELECT id FROM LectureFolders WHERE userKey = ?)',
+            [userKey]
+        );
+        console.log('Deleted lecturefiles:', lectureFilesResult.affectedRows);
 
-            // Delete related colonfiles
-            const [colonFilesResult] = await db.promise().query(
-                'DELETE FROM ColonFiles WHERE folder_id IN (SELECT id FROM ColonFolders WHERE userKey = ?)',
-                [userKey]
-            );
-            console.log('Deleted colonfiles:', colonFilesResult.affectedRows);
+        // 관련 colonfiles 삭제
+        const [colonFilesResult] = await db.promise().query(
+            'DELETE FROM ColonFiles WHERE folder_id IN (SELECT id FROM ColonFolders WHERE userKey = ?)',
+            [userKey]
+        );
+        console.log('Deleted colonfiles:', colonFilesResult.affectedRows);
 
-            // Delete related lecturefolders
-            const [lectureFoldersResult] = await db.promise().query('DELETE FROM LectureFolders WHERE userKey = ?', [userKey]);
-            console.log('Deleted lecturefolders:', lectureFoldersResult.affectedRows);
+        // 관련 lecturefolders 삭제
+        const [lectureFoldersResult] = await db.promise().query(
+            'DELETE FROM LectureFolders WHERE userKey = ?',
+            [userKey]
+        );
+        console.log('Deleted lecturefolders:', lectureFoldersResult.affectedRows);
 
-            // Delete related colonfolders
-            const [colonFoldersResult] = await db.promise().query('DELETE FROM ColonFolders WHERE userKey = ?', [userKey]);
-            console.log('Deleted colonfolders:', colonFoldersResult.affectedRows);
+        // 관련 colonfolders 삭제
+        const [colonFoldersResult] = await db.promise().query(
+            'DELETE FROM ColonFolders WHERE userKey = ?',
+            [userKey]
+        );
+        console.log('Deleted colonfolders:', colonFoldersResult.affectedRows);
 
-            // Delete the user
-            const [userResult] = await db.promise().query('DELETE FROM user_table WHERE userKey = ?', [userKey]);
-            console.log('Deleted user:', userResult.affectedRows);
+        // 사용자 삭제
+        const [userResult] = await db.promise().query(
+            'DELETE FROM user_table WHERE userKey = ?',
+            [userKey]
+        );
+        console.log('Deleted user:', userResult.affectedRows);
 
-            db.commit((commitErr) => {
-                if (commitErr) {
-                    db.rollback(() => {
-                        console.error('Commit error:', commitErr);
-                        return res.status(500).json({ success: false, error: 'Commit error' });
-                    });
-                } else {
-                    console.log('User and related data deleted successfully.');
-                    res.json({ success: true });
-                }
-            });
-        } catch (error) {
-            db.rollback(() => {
-                console.error('Transaction error:', error);
-                res.status(500).json({ success: false, error: 'Database error' });
-            });
-        }
-    });
+        // 트랜잭션 커밋
+        await db.promise().query('COMMIT');
+        console.log('User and related data deleted successfully.');
+        res.json({ success: true });
+    } catch (error) {
+        // 오류 발생 시 트랜잭션 롤백
+        await db.promise().query('ROLLBACK');
+        console.error('Transaction error:', error);
+        res.status(500).json({ success: false, error: 'Database error' });
+    }
 });
+
 
 
 

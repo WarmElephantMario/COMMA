@@ -15,25 +15,6 @@ class UserProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // // Setter for userKey
-  // void setUserKey(String userId) {
-  //   if (_user != null) {
-  //     _user = User(
-  //         _user!.userKey,
-  //         userId, // int.parse() 제거, 바로 userId 사용
-  //         _user!.user_nickname,
-  //         null);
-  //   } else {
-  //     _user = User(
-  //         0,
-  //         userId, // int.parse() 제거, 바로 userId 사용
-  //         'New User', // 기본 닉네임 설정
-  //         null);
-  //   }
-  //   _isLoggedIn = true;
-  //   notifyListeners();
-  // }
-
   // 닉네임 업데이트
   void updateUserNickname(String newNickname) {
     if (_user != null) {
@@ -51,6 +32,25 @@ class UserProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+//  // 회원탈퇴 시 UserKey 기록을 Provider에서 삭제
+//   void setUserKeytoNULL() {
+//     if (_user != null) {
+//       _user = User(
+//           null,
+//           _user!.userId, 
+//           _user!.user_nickname,
+//           null);
+//     } else {
+//       _user = User(
+//           null,
+//           _user!.userId, // int.parse() 제거, 바로 userId 사용
+//           'New User', // 기본 닉네임 설정
+//           null);
+//     }
+//     _isLoggedIn = true;
+//     notifyListeners();
+//   }
 
   // 로그아웃
   void logOut() {
