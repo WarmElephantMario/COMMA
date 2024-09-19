@@ -44,7 +44,32 @@ app.get('/api/user-details/:userKey', (req, res) => {
     });
 });
 
-// 학습 모드(dis_type) 변경하기
+
+// 사용자 학습 유형(장애 타입) 업데이트 API => typeselect 페이지에서 최초에 설정 시
+app.post('/api/user/:userKey/update-type', (req, res) => {
+    const userKey = req.params.userKey;
+    const { type } = req.body;
+  
+    const sql = 'UPDATE user_table SET dis_type = ? WHERE userKey = ?';
+  
+    // 콜백 방식으로 쿼리 실행
+    db.query(sql, [type, userKey], (error, result) => {
+      if (error) {
+        console.error('DB 에러:', error.message);
+        return res.status(500).json({ success: false, message: `DB 오류: ${error.message}` });
+      }
+  
+      // 업데이트 성공 시
+      if (result.affectedRows > 0) {
+        return res.status(200).json({ success: true, message: '학습 유형이 업데이트되었습니다.' });
+      } else {
+        return res.status(404).json({ success: false, message: '사용자를 찾을 수 없습니다.' });
+      }
+    });
+  });
+
+
+// 학습 모드(dis_type) 변경하기 => 마이페이지에서 스위치 당겨서 변경 시
 app.put('/api/update_dis_type', (req, res) => {
     const userKey = req.body.userKey;
     const newDisType = req.body.dis_type;
@@ -226,6 +251,8 @@ app.put('/api/:fileType-files/move/:id', (req, res) => {
     });
 });
 
+// **** 특정 사용자의 특정 폴더 속 파일 목록 가져오기 --> type 특정해서 가져오는 걸로 수정
+
 // 특정 폴더의 파일 목록 가져오기 (특정 사용자)
 app.get('/api/:fileType-files/:folderId', (req, res) => {
     const folderId = req.params.folderId;
@@ -244,85 +271,9 @@ app.get('/api/:fileType-files/:folderId', (req, res) => {
     });
 });
 
-// 회원가입_이메일 중복확인
-app.post('/api/validate_email', (req, res) => {
-    const userEmail = req.body.user_email;
-
-    console.log('API 요청 수신: /api/validate_email');
-    console.log('전달된 이메일 주소:', userEmail);
-
-    if (!userEmail) {
-        return res.status(400).json({ success: false, error: "Invalid input", email: userEmail });
-    }
-
-    const sqlQuery = "SELECT * FROM user_table WHERE user_email = ?";
-    db.query(sqlQuery, [userEmail], (err, result) => {
-        if (err) {
-            console.error('Query failed:', err);
-            return res.status(500).json({ success: false, error: "Query failed" });
-        }
-
-        if (result.length > 0) {
-            res.json({ existEmail: true });
-        } else {
-            res.json({ existEmail: false });
-        }
-    });
-});
 
 
-// 이메일 전송 설정
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: 'warmelephantmario@gmail.com',
-        pass: 'yfqu msgv zqwq kuja',
-    },
-});
-
-// 인증 코드 저장을 위한 메모리 저장소 
-const verificationCodes = {};
-
-
-//회원가입_인증번호 전송
-app.post('/api/send_verification_code', (req, res) => {
-    const userEmail = req.body.user_email;
-    const verificationCode = Math.floor(100000 + Math.random() * 900000); // 6자리 랜덤 코드 생성
-
-    const mailOptions = {
-      from: 'warmelephantmario@gmail.com',
-      to: userEmail,
-      subject: 'Your Verification Code',
-      text: `Your verification code is ${verificationCode}`,
-    };
-  
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error('Error sending email: ', error);
-        return res.status(500).json({ success: false, error: error.toString() });
-      } else {
-        console.log('Email sent: ' + info.response);
-        verificationCodes[userEmail] = verificationCode; 
-        return res.status(200).json({ success: true });
-      }
-    });
-  });
-
-  // 회원가입_인증번호 확인
-app.post('/api/verify_code', (req, res) => {
-    const { user_email, verification_code } = req.body;
-
-    // 저장된 인증 코드와 비교
-    if (verificationCodes[user_email] && verificationCodes[user_email] == verification_code) {
-        delete verificationCodes[user_email]; // 사용된 인증 코드는 삭제
-        return res.status(200).json({ success: true });
-    } else {
-        return res.status(400).json({ success: false, error: 'Invalid verification code' });
-    }
-});
-
-
-// 회원가입_정보 저장
+// 회원가입 (해당 userId로 최초접속 시 회원 등록하면서 userKey 반환)
 app.post('/api/signup_info', (req, res) => {
     console.log('API 요청 수신: /api/signup_info');
 
@@ -370,34 +321,6 @@ app.post('/api/signup_info', (req, res) => {
     });
 });
 
-// 로그인 처리
-app.post('/api/login', (req, res) => {
-    console.log('API 요청 수신: /api/login');
-
-    const userId = req.body.user_id;
-    const userPassword = req.body.user_password;
-
-    // 비밀번호를 MD5로 해시
-    const hashedPassword = crypto.createHash('md5').update(userPassword).digest('hex');
-
-    if (!userId || !userPassword) {
-        return res.status(400).json({ success: false, error: 'You must fill all values.' });
-    }
-
-    const sqlQuery = `SELECT * FROM user_table WHERE user_id = ? AND user_password = ?`;
-    db.query(sqlQuery, [userId, hashedPassword], (err, result) => {
-        if (err) {
-            return res.status(500).json({ success: false, error: err.message });
-        }
-
-
-        if (result.length > 0) {
-            return res.json({ success: true, userData: result[0] });
-        } else {
-            return res.json({ success: false, error: 'Invalid ID or password' });
-        }
-    });
-});
 
 // 회원 탈퇴
 app.post('/api/delete_user', async (req, res) => {
@@ -815,6 +738,10 @@ app.get('/api/getFileId', (req, res) => {
     });
   });
 
+
+
+// **** 현재 로그인한 userKey뿐 아니라, dis_type까지 고려해서 파일 가져와야 함 ///
+
 // 사용자별 최신 강의 파일을 가져오는 API 엔드포인트
 app.get('/api/getLectureFiles/:userKey', (req, res) => {
     const userKey = req.params.userKey;
@@ -833,6 +760,8 @@ app.get('/api/getLectureFiles/:userKey', (req, res) => {
     });
 });
 
+// **** 현재 로그인한 userKey뿐 아니라, dis_type까지 고려해서 파일 가져와야 함 ///
+
 // 사용자별 최신 콜론 파일을 가져오는 API 엔드포인트
 app.get('/api/getColonFiles/:userKey', (req, res) => {
     const userKey = req.params.userKey;
@@ -849,6 +778,7 @@ app.get('/api/getColonFiles/:userKey', (req, res) => {
         }
     });
 });
+
 
 // 강의 폴더 이름 가져오기
 app.get('/api/get-folder-name', (req, res) => {
@@ -1123,31 +1053,6 @@ app.get('/api/get-alt-url/:colonfile_id', (req, res) => {
         res.json({ success: true, lecturefile_id, alternative_text_url, page });
     });
 });
-
-// 사용자 학습 유형(장애 타입) 업데이트 API
-app.post('/api/user/:userKey/update-type', (req, res) => {
-    const userKey = req.params.userKey;
-    const { type } = req.body;
-  
-    const sql = 'UPDATE user_table SET dis_type = ? WHERE userKey = ?';
-  
-    // 콜백 방식으로 쿼리 실행
-    db.query(sql, [type, userKey], (error, result) => {
-      if (error) {
-        console.error('DB 에러:', error.message);
-        return res.status(500).json({ success: false, message: `DB 오류: ${error.message}` });
-      }
-  
-      // 업데이트 성공 시
-      if (result.affectedRows > 0) {
-        return res.status(200).json({ success: true, message: '학습 유형이 업데이트되었습니다.' });
-      } else {
-        return res.status(404).json({ success: false, message: '사용자를 찾을 수 없습니다.' });
-      }
-    });
-  });
-  
-  
 
 
 app.listen(port, () => {
