@@ -11,9 +11,6 @@ import 'model/user.dart';
 import 'package:http/http.dart' as http;
 import 'api/api.dart';
 
-import 'package:http/http.dart' as http;
-import 'api/api.dart';
-
 Future<Map<String, dynamic>?> _fetchUserDetails(int userKey) async {
   try {
     final response = await http.get(Uri.parse('${API.baseUrl}/api/user-details/$userKey'));
@@ -57,14 +54,13 @@ Future<void> _checkUserKey() async {
   print('유저아이디 : $userId');
 
   if (userId != null) {
-    print('유저아이디 존재함 (기기번호 생성된 적 있음) --> mainpage로 이동');
+    print('유저아이디 존재함 (기기번호 생성된 적 있음)');
     
-
     // 로컬 저장소에서 userKey만 불러오기
     int? userKey = prefs.getInt('userKey');
 
     if (userKey != null) {
-      print('유저키 : $userKey');
+      print('유저키도 존재함 : $userKey');
 
       // 유저 정보 API 호출로 닉네임과 타입 가져오기
       final userDetails = await _fetchUserDetails(userKey);
@@ -80,10 +76,7 @@ Future<void> _checkUserKey() async {
 
         // UserProvider에 타입 업데이트
         Provider.of<UserProvider>(context, listen: false).updateDisType(disType);
-        // print('disType 성공적으로 Provider에 들어갔는지 확인하겠습니다');
-        // final userProvider = Provider.of<UserProvider>(context, listen: false);
-        // final disType2 = userProvider.user?.dis_type;
-        // print('${disType2}');
+        
         
 
         Navigator.pushReplacement(
