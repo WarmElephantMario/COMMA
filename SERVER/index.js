@@ -45,6 +45,7 @@ app.get('/api/user-details/:userKey', (req, res) => {
 });
 
 
+
 // 사용자 학습 유형(장애 타입) 업데이트 API => typeselect 페이지에서 최초에 설정 시
 app.post('/api/user/:userKey/update-type', (req, res) => {
     const userKey = req.params.userKey;
@@ -70,6 +71,7 @@ app.post('/api/user/:userKey/update-type', (req, res) => {
 
 
 // 학습 모드(dis_type) 변경하기 => 마이페이지에서 스위치 당겨서 변경 시
+
 app.put('/api/update_dis_type', (req, res) => {
     const userKey = req.body.userKey;
     const newDisType = req.body.dis_type;
@@ -1108,7 +1110,6 @@ app.post('/api/update-existLecture', (req, res) => {
 // API 엔드포인트: lecturefileId로 existLecture 값을 확인
 app.get('/api/checkExistLecture/:lectureFileId', (req, res) => {
     const lectureFileId = req.params.lectureFileId;
-
     const query = 'SELECT existLecture FROM LectureFiles WHERE id = ?';
     db.query(query, [lectureFileId], (err, result) => {
         if (err) {
