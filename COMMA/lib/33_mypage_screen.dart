@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'components.dart';
-import '34_profile_screen.dart';
-import 'mypage/41_confirm_password_page.dart';
 import 'mypage/42_help_page.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -25,6 +25,8 @@ class _MyPageScreenState extends State<MyPageScreen> {
   int _selectedIndex = 3;
   final FocusNode _appBarFocusNode = FocusNode();
 
+  String nickname = "-";
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -34,6 +36,8 @@ class _MyPageScreenState extends State<MyPageScreen> {
   @override
   void initState() {
     super.initState();
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    nickname = userProvider.user?.user_nickname ?? "-";
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _appBarFocusNode.requestFocus();
@@ -88,6 +92,14 @@ class _MyPageScreenState extends State<MyPageScreen> {
       final responseBody = jsonDecode(response.body);
       if (responseBody['success']) {
         Fluttertoast.showToast(msg: '회원 탈퇴가 완료되었습니다.');
+
+        //userProvider에서 userKey 기록 삭제 (user 기록 전체 비우기)
+        Provider.of<UserProvider>(context, listen: false).logOut();
+
+        // SharedPreferences에서 userKey 삭제
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.remove('userKey');
+
         // SplashGreenScreen 화면으로 이동
         Navigator.pushAndRemoveUntil(
             context,
@@ -101,6 +113,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
     }
   }
 
+  //스위치 당겨서 학습 모드 (dis_type) 변경하기
   Future<void> _updateDisType(int updatedDisType) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userKey = userProvider.user?.userKey ?? 0;
@@ -127,6 +140,113 @@ class _MyPageScreenState extends State<MyPageScreen> {
     } else {
       Fluttertoast.showToast(msg: '서버 오류: 학습 모드 업데이트 실패');
     }
+  }
+
+  //닉네임 업데이트 함수
+  Future<void> _updateNickname(String newNickname) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userKey = userProvider.user?.userKey ?? 0;
+
+    final response = await http.put(
+      Uri.parse('${API.baseUrl}/api/update_nickname'),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'userKey': userKey,
+        'user_nickname': newNickname,
+      }),
+    );
+
+    print('Request body: ${jsonEncode({
+          'userKey': userKey,
+          'user_nickname': newNickname,
+        })}');
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      var responseBody = jsonDecode(response.body);
+      if (responseBody['success']) {
+        userProvider.updateUserNickname(newNickname);
+        Fluttertoast.showToast(msg: '닉네임이 성공적으로 업데이트되었습니다.');
+      } else {
+        Fluttertoast.showToast(msg: '닉네임 업데이트 중 오류가 발생했습니다.');
+      }
+    } else {
+      Fluttertoast.showToast(msg: '서버 오류: 닉네임 업데이트 실패');
+    }
+  }
+
+  //닉네임 수정 dialog 팝업창
+  void _showEditNameDialog() {
+    final TextEditingController nicknameController =
+        TextEditingController(text: nickname);
+
+    final FocusNode titleFocusNode = FocusNode();
+    final FocusNode contentFocusNode = FocusNode();
+    final FocusNode cancelFocusNode = FocusNode();
+    final FocusNode saveFocusNode = FocusNode();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Semantics(
+            sortKey: OrdinalSortKey(1.0),
+            child: Focus(
+              focusNode: titleFocusNode,
+              child: const Text('닉네임 변경하기'),
+            ),
+          ),
+          content: Semantics(
+            sortKey: OrdinalSortKey(2.0),
+            child: Focus(
+              focusNode: contentFocusNode,
+              child: TextField(
+                controller: nicknameController,
+                decoration: const InputDecoration(hintText: '새 닉네임을 입력하세요'),
+              ),
+            ),
+          ),
+          actions: <Widget>[
+            Semantics(
+              sortKey: OrdinalSortKey(3.0),
+              child: Focus(
+                focusNode: cancelFocusNode,
+                child: TextButton(
+                  child: const Text('취소', style: TextStyle(color: Colors.red)),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ),
+            ),
+            Semantics(
+              sortKey: OrdinalSortKey(4.0),
+              child: Focus(
+                focusNode: saveFocusNode,
+                child: TextButton(
+                  child: const Text('저장'),
+                  onPressed: () async {
+                    String newNickname = nicknameController.text;
+                    await _updateNickname(newNickname);
+                    setState(() {
+                      nickname = newNickname;
+                    });
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(context).requestFocus(titleFocusNode);
+    });
   }
 
   @override
@@ -157,39 +277,26 @@ class _MyPageScreenState extends State<MyPageScreen> {
       body: ListView(
         children: <Widget>[
           const SizedBox(height: 15),
-          _buildCard(context, '프로필 정보', () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const ProfileScreen()));
+          _buildCard(context, '닉네임 변경하기', () {
+            _showEditNameDialog();
           }),
-          _buildCard(context, '비밀번호 변경', () {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const ConfirmPasswordPage()));
+          _buildCard(context, '접근성 설정', () {
+            /* 43_accessibility_settings로 이동하는 코드 추가하기
+            
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const Access_Page()));
+            
+             */
           }),
           _buildCard(context, '도움말', () {
             Navigator.push(context,
                 MaterialPageRoute(builder: (context) => const HelpPage()));
           }),
-          _buildCard(context, '로그아웃', () {
-            showConfirmationDialog(
-              context,
-              '로그아웃',
-              '로그아웃 하시겠어요?',
-              () {
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SplashScreen()),
-                  (Route<dynamic> route) => false,
-                );
-              },
-            );
-          }),
           _buildCard(context, '회원탈퇴', () {
             showConfirmationDialog(
               context,
               '회원탈퇴',
-              '회원탈퇴 하시겠어요?',
+              '정말 탈퇴하시겠습니까? \n삭제된 모든 자료는 복구되지 않습니다.',
               () async {
                 await deleteUser(context);
               },

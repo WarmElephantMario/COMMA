@@ -1,5 +1,5 @@
 class User {
-  int userKey; // int -> String으로 변경
+  int userKey; 
   String userId;
   String user_nickname;
   int? dis_type;
