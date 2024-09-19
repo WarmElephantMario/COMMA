@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -10,7 +11,6 @@ import '../model/user_provider.dart';
 import '../api/api.dart';
 import 'package:flutter_plugin/62lecture_start.dart';
 
-import 'package:provider/provider.dart';
 
 
 class FolderFilesScreen extends StatefulWidget {
@@ -47,13 +47,15 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
 
 
 
-  Future<void> fetchFiles() async {
+Future<void> fetchFiles() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userKey = userProvider.user?.userKey;
+    final disType = userProvider.user?.dis_type; // dis_type 값 가져오기
+    print('${disType}');
 
-    if (userKey != null) {
+    if (userKey != null && disType != null) {
       final response = await http.get(Uri.parse(
-        '${API.baseUrl}/api/${widget.folderType}-files/${widget.folderId}?userKey=$userKey',
+        '${API.baseUrl}/api/${widget.folderType}-files/${widget.folderId}?userKey=$userKey&disType=$disType', // dis_type 추가
       ));
 
       if (response.statusCode == 200) {
@@ -67,8 +69,7 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
               'id': file['id'], // 파일 ID 추가
               'folder_id': file['folder_id'] ?? 0, // 폴더 ID 추가
               'lecture_name':
-                  file['lecture_name'] ?? 'Unknown Lecture' ,// 강의 이름 추가
-              // 'alternative_text_url':file['alternative_text_url']?? ''
+                  file['lecture_name'] ?? 'Unknown Lecture', // 강의 이름 추가
             };
           }).toList();
         });
@@ -77,6 +78,7 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
       }
     }
   }
+
 
   Future<void> _renameFile(int id, String newName) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);

@@ -8,7 +8,8 @@ import 'package:intl/intl.dart';
 import '62lecture_start.dart';
 import '63record.dart';
 import '66colon.dart';
-import 'components.dart'; // showCustomMenu 함수가 있는 파일을 import
+import 'components.dart';
+import 'model/user_provider.dart'; // showCustomMenu 함수가 있는 파일을 import
 
 
 class AllFilesPage extends StatefulWidget {
@@ -38,19 +39,27 @@ class _AllFilesPageState extends State<AllFilesPage> {
     
   }
 
-  Future<void> fetchFiles() async {
+Future<void> fetchFiles() async {
+  final userProvider = Provider.of<UserProvider>(context, listen: false);
+  final userKey = userProvider.user?.userKey;
+  final disType = userProvider.user?.dis_type;
+
+  if (userKey != null && disType != null) {
+    final fileType = widget.fileType == 'lecture' ? 'Lecture' : 'Colon';
     final response = await http.get(Uri.parse(
-        '${API.baseUrl}/api/get${widget.fileType == 'lecture' ? 'Lecture' : 'Colon'}Files/${widget.userKey}'));
+        '${API.baseUrl}/api/get${fileType}Files/$userKey?disType=$disType'));
 
     if (response.statusCode == 200) {
       setState(() {
-        files =
-            List<Map<String, dynamic>>.from(jsonDecode(response.body)['files']);
+        files = List<Map<String, dynamic>>.from(
+            jsonDecode(response.body)['files']);
       });
     } else {
-      throw Exception('Failed to load files');
+      throw Exception('Failed to load $fileType files');
     }
   }
+}
+
 
   String formatDateTimeToKorean(String? dateTime) {
     if (dateTime == null || dateTime.isEmpty) return 'Unknown';
