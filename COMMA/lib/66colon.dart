@@ -5,16 +5,13 @@ import 'package:intl/intl.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:http/http.dart' as http;
 import '60prepare.dart';
+import '63record.dart';
 import 'components.dart';
 import 'api/api.dart';
 import 'dart:typed_data';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
 import 'package:charset_converter/charset_converter.dart';
-import '../model/44_font_size_provider.dart';
-import 'package:provider/provider.dart';
-
-
 
 class ColonPage extends StatefulWidget {
   final String folderName;
@@ -216,12 +213,25 @@ class _ColonPageState extends State<ColonPage> {
 
   @override
   Widget build(BuildContext context) {
-    // 폰트 크기 비율을 Provider에서 가져옴
-    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
-    // 디스플레이 비율을 가져옴
-    final scaleFactor = fontSizeProvider.scaleFactor;
     return PopScope(
-      canPop: false,
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
+      if (didPop) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => FolderFilesScreen(
+                folderName: widget.folderName, 
+                folderId: widget.folderId!, 
+                folderType: 'Colon',
+              ),
+            ),
+          );
+        });
+      }
+
+    },
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
@@ -261,11 +271,11 @@ class _ColonPageState extends State<ColonPage> {
                                     ),
                                   );
                                 },
-                                child:  Text(
+                                child: const Text(
                                   '종료',
                                   style: TextStyle(
                                     color: Color(0xFFFFA17A),
-                                    fontSize: 16*scaleFactor,
+                                    fontSize: 16,
                                   ),
                                 ),
                               ),
@@ -277,9 +287,9 @@ class _ColonPageState extends State<ColonPage> {
                               const SizedBox(width: 8),
                               Text(
                                 '폴더 분류 > ${widget.folderName}', // 폴더 이름 사용
-                                style:  TextStyle(
+                                style: const TextStyle(
                                   color: Color(0xFF575757),
-                                  fontSize: 12*scaleFactor,
+                                  fontSize: 12,
                                   fontFamily: 'DM Sans',
                                 ),
                               ),
@@ -288,9 +298,9 @@ class _ColonPageState extends State<ColonPage> {
                           const SizedBox(height: 5),
                           Text(
                             widget.noteName, // 노트 이름 사용
-                            style:  TextStyle(
+                            style: const TextStyle(
                               color: Color(0xFF414141),
-                              fontSize: 20*scaleFactor,
+                              fontSize: 20,
                               fontFamily: 'DM Sans',
                               fontWeight: FontWeight.bold,
                             ),
@@ -298,9 +308,9 @@ class _ColonPageState extends State<ColonPage> {
                           const SizedBox(height: 5),
                           Text(
                             '강의 자료 : ${widget.lectureName}',
-                            style:  TextStyle(
+                            style: const TextStyle(
                               color: Color(0xFF575757),
-                              fontSize: 12*scaleFactor,
+                              fontSize: 12,
                               fontFamily: 'DM Sans',
                             ),
                           ),
@@ -308,9 +318,9 @@ class _ColonPageState extends State<ColonPage> {
                           Text(
                             _formatDate(
                                 widget.createdAt), // 데이터베이스에서 가져온 생성 날짜 및 시간 사용
-                            style:  TextStyle(
+                            style: const TextStyle(
                               color: Color(0xFF575757),
-                              fontSize: 12*scaleFactor,
+                              fontSize: 12,
                               fontFamily: 'DM Sans',
                             ),
                           ),
@@ -369,9 +379,9 @@ class _ColonPageState extends State<ColonPage> {
                                         child: Text(
                                           pageTexts[pageIndex + 1] ??
                                               '텍스트가 없습니다.',
-                                          style:  TextStyle(
+                                          style: const TextStyle(
                                             color: Colors.white,
-                                            fontSize: 16*scaleFactor,
+                                            fontSize: 16,
                                             fontFamily: 'DM Sans',
                                           ),
                                         ),
@@ -406,7 +416,7 @@ class _ColonPageState extends State<ColonPage> {
                                             text,
                                             style: TextStyle(
                                                 color: Color(0xFF414141),
-                                                fontSize: 17*scaleFactor,
+                                                fontSize: 17,
                                                 fontWeight: FontWeight.w500,
                                                 height: 1.8,
                                                 fontFamily:
@@ -451,9 +461,9 @@ class _ColonPageState extends State<ColonPage> {
                                     child: Center(
                                       child: Text(
                                         pageTexts[1] ?? '이미지의 텍스트가 없습니다.',
-                                        style:  TextStyle(
+                                        style: const TextStyle(
                                           color: Colors.white,
-                                          fontSize: 16*scaleFactor,
+                                          fontSize: 16,
                                           fontFamily: 'DM Sans',
                                         ),
                                       ),
@@ -483,9 +493,9 @@ class _ColonPageState extends State<ColonPage> {
                                             const EdgeInsets.only(bottom: 8.0),
                                         child: Text(
                                           text,
-                                          style:  TextStyle(
+                                          style: const TextStyle(
                                             color: Color(0xFF414141),
-                                            fontSize: 16*scaleFactor,
+                                            fontSize: 16,
                                             fontFamily: 'DM Sans',
                                           ),
                                         ),
