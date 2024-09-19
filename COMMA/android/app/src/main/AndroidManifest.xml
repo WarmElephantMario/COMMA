@@ -19,7 +19,7 @@ package="com.comma.myapp">
 
         android:name="${applicationName}"
         android:icon="@mipmap/app_comma"
-        android:enableOnBackInvokedCallback="false">
+        android:enableOnBackInvokedCallback="true">
         
         <activity
             android:name=".MainActivity"

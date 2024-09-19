@@ -218,18 +218,19 @@ class _MyPageScreenState extends State<MyPageScreen> {
             mainAxisAlignment: MainAxisAlignment.center, // 중앙에 위치하도록 설정
             children: [
               // 스위치 왼쪽 설명: 시각장애인 모드
+              SizedBox(width: 30*scaleFactor),
               Expanded(
               child:Padding(
                 padding: const EdgeInsets.only(right: 8.0), // 간격 추가
                 child: Text(
                   '시각장애인 모드', // 스위치 왼쪽 텍스트
-                  style: TextStyle(fontSize: 16.0*scaleFactor), // 글씨 크기 키움
-                  overflow: TextOverflow.ellipsis, // 텍스트가 너무 길 경우 생략 부호 표시
+                  style: TextStyle(fontSize: 15.0*scaleFactor), // 글씨 크기 키움
+                  
                 ),
                 
               ),
               ),
-              SizedBox(width: 15,), 
+              SizedBox(width: 15*scaleFactor), 
 
               // 스위치 위젯
               Transform.scale(
@@ -256,7 +257,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                 ),
               ),
 
-              SizedBox(width: 15,), 
+              SizedBox(width: 15 *scaleFactor), 
               // 스위치 오른쪽 설명: 청각장애인 모드
               Expanded(
               child : Padding(
@@ -264,7 +265,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                 child: Text(
                   '청각장애인 모드', // 스위치 오른쪽 텍스트
                   style: TextStyle(fontSize: 16.0*scaleFactor),
-                  overflow: TextOverflow.ellipsis, // 텍스트가 너무 길 경우 생략 부호 표시 // 글씨 크기 키움
+                  
                 ),
               ),
               )

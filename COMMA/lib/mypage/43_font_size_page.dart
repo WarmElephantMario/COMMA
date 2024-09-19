@@ -49,7 +49,7 @@ class FontSizePage extends StatelessWidget {
           ListTile(
             title: const Text('크게'),
             leading: Radio<double>(
-              value: 1.25, // 크게 비율 (125%)
+              value: 1.2, // 크게 비율 (120%)
               groupValue: fontSizeProvider.scaleFactor,
               activeColor: Colors.teal, // 버튼 색상을 teal로 설정
               onChanged: (double? value) {
@@ -60,7 +60,7 @@ class FontSizePage extends StatelessWidget {
           ListTile(
             title: const Text('엄청 크게'),
             leading: Radio<double>(
-              value: 1.5, // 엄청 크게 비율 (150%)
+              value: 1.3, // 엄청 크게 비율 (130%)
               groupValue: fontSizeProvider.scaleFactor,
               activeColor: Colors.teal, // 버튼 색상을 teal로 설정
               onChanged: (double? value) {

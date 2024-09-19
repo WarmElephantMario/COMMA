@@ -56,6 +56,8 @@ class _LearningPreparationState extends State<LearningPreparation> {
   int _selectedIndex = 2;
   int? lecturefileId;
   int? lectureFolderId;
+  bool isBasicSelected = true; // "기본 설명"이 선택된 상태를 관리
+  bool isDetailSelected = false; // "자세한 설명"이 선택된 상태를 관리
 
   final FocusNode _focusNode = FocusNode(); // 추가된 부분
 
@@ -901,7 +903,7 @@ Future<void> insertKeywordsIntoDB(int lecturefileId, String keywordsFileUrl) asy
     final scaleFactor = fontSizeProvider.scaleFactor;
     // 학습 유형에 따라 제목 설정
     String titleText =
-        isAlternativeTextEnabled ? '대체텍스트 생성 학습 준비하기' : '실시간 자막 생성 학습 준비하기';
+        '학습 준비하기';
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(toolbarHeight: 0),
@@ -969,7 +971,7 @@ Future<void> insertKeywordsIntoDB(int lecturefileId, String keywordsFileUrl) asy
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                      ],
+                    ],    
                     ),
                   ),
                 ),
@@ -1004,6 +1006,40 @@ Future<void> insertKeywordsIntoDB(int lecturefileId, String keywordsFileUrl) asy
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
+                        const SizedBox(width: 50),
+                        Expanded(
+                          child: Text(
+                            '대체텍스트 설명',
+                            style:  TextStyle(
+                              fontSize: 15.5*scaleFactor,
+                              fontFamily: 'DM Sans',
+                              color: Color.fromARGB(255, 70, 70, 70),
+                              fontWeight: FontWeight.w200,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      //   CustomRadioButton3(
+                      //   label: '기본 설명',
+                      //   isSelected: isBasicSelected,
+                      //   onChanged: (bool value) {
+                      //     setState(() {
+                      //       isBasicSelected = value;
+                      //       isDetailSelected = !value; // "기본 설명"이 선택되면 "자세한 설명"은 선택 해제
+                      //     });
+                      //   },
+                      // ),
+                      // const SizedBox(height: 16),
+                      // CustomRadioButton3(
+                      //   label: '자세한 설명',
+                      //   isSelected: isDetailSelected,
+                      //   onChanged: (bool value) {
+                      //     setState(() {
+                      //       isDetailSelected = value;
+                      //       isBasicSelected = !value; // "자세한 설명"이 선택되면 "기본 설명"은 선택 해제
+                      //     });
+                      //   },
+                      // ),
                       ],
                     ),
                   ),
