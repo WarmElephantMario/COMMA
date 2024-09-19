@@ -213,7 +213,24 @@ class _ColonPageState extends State<ColonPage> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
+      if (didPop) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => FolderFilesScreen(
+                folderName: widget.folderName, 
+                folderId: widget.folderId!, 
+                folderType: 'Colon',
+              ),
+            ),
+          );
+        });
+      }
+
+    },
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(

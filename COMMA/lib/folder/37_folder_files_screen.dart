@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_plugin/16_homepage_move.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:flutter_plugin/components.dart';
@@ -272,7 +273,21 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => MainPage()),
+            );
+          });
+        }
+      },
+      
+      child: Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
           backgroundColor: Colors.white,
@@ -330,7 +345,8 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
       ),
       bottomNavigationBar:
           buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
-    );
+    )
+      );
   }
 }
 
