@@ -1,7 +1,5 @@
-import 'dart:convert';
-import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter_plugin/16_homepage_move.dart';
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:flutter_plugin/components.dart';
@@ -11,8 +9,8 @@ import 'package:provider/provider.dart';
 import '../model/user_provider.dart';
 import '../api/api.dart';
 import 'package:flutter_plugin/62lecture_start.dart';
-
-
+import '../model/44_font_size_provider.dart';
+import 'package:flutter_plugin/63record.dart';
 
 class FolderFilesScreen extends StatefulWidget {
   final String folderName;
@@ -46,17 +44,13 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
     fetchFiles();
   }
 
-
-
-Future<void> fetchFiles() async {
+  Future<void> fetchFiles() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userKey = userProvider.user?.userKey;
-    final disType = userProvider.user?.dis_type; // dis_type 값 가져오기
-    print('${disType}');
 
-    if (userKey != null && disType != null) {
+    if (userKey != null) {
       final response = await http.get(Uri.parse(
-        '${API.baseUrl}/api/${widget.folderType}-files/${widget.folderId}?userKey=$userKey&disType=$disType', // dis_type 추가
+        '${API.baseUrl}/api/${widget.folderType}-files/${widget.folderId}?userKey=$userKey',
       ));
 
       if (response.statusCode == 200) {
@@ -71,6 +65,7 @@ Future<void> fetchFiles() async {
               'folder_id': file['folder_id'] ?? 0, // 폴더 ID 추가
               'lecture_name':
                   file['lecture_name'] ?? 'Unknown Lecture', // 강의 이름 추가
+              // 'alternative_text_url':file['alternative_text_url']?? ''
             };
           }).toList();
         });
@@ -79,7 +74,6 @@ Future<void> fetchFiles() async {
       }
     }
   }
-
 
   Future<void> _renameFile(int id, String newName) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
@@ -127,78 +121,64 @@ Future<void> fetchFiles() async {
     return DateFormat('yyyy/MM/dd HH:mm').format(parsedDateTime);
   }
 
-// 데베에서 keywords 가져오기
-Future<List<String>> fetchKeywords(int lecturefileId) async {
-  try {
-    final response = await http.get(Uri.parse('${API.baseUrl}/api/getKeywords/$lecturefileId'));
+  Future<List<String>> fetchKeywords(int lecturefileId) async {
+    try {
+      final response = await http
+          .get(Uri.parse('${API.baseUrl}/api/getKeywords/$lecturefileId'));
 
-    if (response.statusCode == 200) {
-      final responseData = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
 
-      if (responseData['success'] == true) {
-        final String keywordsUrl = responseData['keywordsUrl'];
+        if (responseData['success'] == true) {
+          final String keywordsUrl = responseData['keywordsUrl'];
 
-        // keywords_url에서 키워드 리스트를 가져옴
-        return await fetchKeywordsFromUrl(keywordsUrl);
+          return await fetchKeywordsFromUrl(keywordsUrl);
+        } else {
+          print('Error fetching keywords: ${responseData['error']}');
+          return [];
+        }
       } else {
-        print('Error fetching keywords: ${responseData['error']}');
+        print('Failed to fetch keywords with status: ${response.statusCode}');
         return [];
       }
-    } else {
-      print('Failed to fetch keywords with status: ${response.statusCode}');
+    } catch (e) {
+      print('Error: $e');
       return [];
     }
-  } catch (e) {
-    print('Error: $e');
-    return [];
   }
-}
 
-// keywords_url에서 키워드 리스트를 가져오는 함수
-Future<List<String>> fetchKeywordsFromUrl(String keywordsUrl) async {
-  try {
-    final response = await http.get(Uri.parse(keywordsUrl));
+  Future<List<String>> fetchKeywordsFromUrl(String keywordsUrl) async {
+    try {
+      final response = await http.get(Uri.parse(keywordsUrl));
 
-    if (response.statusCode == 200) {
-      // UTF-8로 디코딩 처리
-      final String content = utf8.decode(response.bodyBytes);
-      return content.split(','); // ,로 분리하여 키워드 리스트 반환
-    } else {
-      print('Failed to fetch keywords from URL');
+      if (response.statusCode == 200) {
+        final String content = utf8.decode(response.bodyBytes);
+        return content.split(',');
+      } else {
+        print('Failed to fetch keywords from URL');
+        return [];
+      }
+    } catch (e) {
+      print('Error fetching keywords from URL: $e');
       return [];
     }
-  } catch (e) {
-    print('Error fetching keywords from URL: $e');
-    return [];
   }
-}
 
+  void fetchFolderAndNavigate(BuildContext context, int folderId,
+      String fileType, Map<String, dynamic> file) async {
+    try {
+      final lectureFileId = file['id'];
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final userDisType = userProvider.user?.dis_type;
 
+      final existLectureResponse = await http.get(
+          Uri.parse('${API.baseUrl}/api/checkExistLecture/$lectureFileId'));
 
-void fetchFolderAndNavigate(BuildContext context, int folderId,
-    String fileType, Map<String, dynamic> file) async {
-  try {
-    final lectureFileId = file['id']; // lectureFileId 가져오기
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userDisType = userProvider.user?.dis_type; // 유저의 dis_type 가져오기
+      if (existLectureResponse.statusCode == 200) {
+        var existLectureData = jsonDecode(existLectureResponse.body);
 
-    // 1. 먼저 lecturefileId로 existLecture 값을 확인하는 API 요청
-    final existLectureResponse = await http.get(
-        Uri.parse('${API.baseUrl}/api/checkExistLecture/$lectureFileId'));
-
-    if (existLectureResponse.statusCode == 200) {
-      var existLectureData = jsonDecode(existLectureResponse.body);
-
-      // 2. existLecture가 0이면 LectureStartPage로 이동
-      if (existLectureData['existLecture'] == 0) {
-        // 키워드 fetch 후 LectureStartPage로 이동
-        List<String> keywords = await fetchKeywords(lectureFileId);
-
-        // 폴더 이름 가져오기
-        // final response = await http.get(
-        //     Uri.parse('${API.baseUrl}/api/getFolderName/$fileType/$folderId'));
-        // if (response.statusCode == 200) {
-        //   var data = jsonDecode(response.body);
+        if (existLectureData['existLecture'] == 0) {
+          List<String> keywords = await fetchKeywords(lectureFileId);
 
           Navigator.push(
             context,
@@ -207,41 +187,39 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
                 lectureFolderId: file['folder_id'],
                 lecturefileId: file['id'],
                 lectureName: file['lecture_name'] ?? 'Unknown Lecture',
-                fileURL: file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
-                type: userDisType!, // 수정
-                selectedFolder: widget.folderName, // 폴더 이름
+                fileURL:
+                    file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
+                type: userDisType!,
+                selectedFolder: widget.folderName,
                 noteName: file['file_name'] ?? 'Unknown Note',
-                responseUrl: file['alternative_text_url'] ?? 'https://defaulturl.com/defaultfile.txt', // null 또는 실제 값
-                keywords: keywords, // 키워드 목록
+                responseUrl: file['alternative_text_url'] ??
+                    'https://defaulturl.com/defaultfile.txt',
+                keywords: keywords,
               ),
             ),
           );
-        // }
-      } else if (existLectureData['existLecture'] == 1) {
-        // existLecture가 1이면 기존 페이지로 이동
-        final response = await http.get(
-            Uri.parse('${API.baseUrl}/api/getFolderName/$fileType/$folderId'));
-        if (response.statusCode == 200) {
-          var data = jsonDecode(response.body);
-          navigateToPage(
-              context, data['folder_name'] ?? 'Unknown Folder', file, fileType);
-        } else {
-          print('Failed to load folder name: ${response.statusCode}');
-          navigateToPage(context, 'Unknown Folder', file, fileType);
+        } else if (existLectureData['existLecture'] == 1) {
+          final response = await http.get(Uri.parse(
+              '${API.baseUrl}/api/getFolderName/$fileType/$folderId'));
+          if (response.statusCode == 200) {
+            var data = jsonDecode(response.body);
+            navigateToPage(
+                context, data['folder_name'] ?? 'Unknown Folder', file, fileType);
+          } else {
+            print('Failed to load folder name: ${response.statusCode}');
+            navigateToPage(context, 'Unknown Folder', file, fileType);
+          }
         }
+      } else {
+        print(
+            'Failed to check existLecture: ${existLectureResponse.statusCode}');
       }
-    } else {
-      print('Failed to check existLecture: ${existLectureResponse.statusCode}');
+    } catch (e) {
+      print('Error fetching folder name or existLecture: $e');
+      navigateToPage(context, 'Unknown Folder', file, fileType);
     }
-  } catch (e) {
-    print('Error fetching folder name or existLecture: $e');
-    navigateToPage(context, 'Unknown Folder', file, fileType);
   }
-}
 
-
-
-  // 강의 파일 또는 콜론 파일 페이지로 네비게이션
   void navigateToPage(BuildContext context, String folderName,
       Map<String, dynamic> file, String fileType) {
     Widget page = fileType == 'lecture'
@@ -253,19 +231,18 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
             folderName: folderName,
             recordingState: RecordingState.recorded,
             lectureName: file['lecture_name'] ?? 'Unknown Lecture',
-            responseUrl: 'https://defaulturl.com/defaultfile.txt', //수정 필요
-            type: 0, //수정 필요
+            responseUrl: 'https://defaulturl.com/defaultfile.txt',
+            type: 0,
             lecturefileId: file['id'],
           )
         : ColonPage(
-
             folderName: folderName,
             noteName: file['file_name'] ?? 'Unknown Note',
             lectureName: file['lecture_name'] ?? 'Unknown Lecture',
             createdAt: file['created_at'] ?? 'Unknown Date',
             fileUrl: file['file_url'] ?? 'Unknown fileUrl',
             colonFileId: file['id'] ?? 'Unknown id',
-            folderId : file['folder_id'] ?? 'Unknown folderId',
+            folderId: file['folder_id'] ?? 'Unknown folderId',
           );
 
     Navigator.push(context, MaterialPageRoute(builder: (context) => page));
@@ -273,27 +250,15 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
 
   @override
   Widget build(BuildContext context) {
-
-    return PopScope(
-      canPop: true,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => MainPage()),
-            );
-          });
-        }
-      },
-      
-      child: Scaffold(
+    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
+    final scaleFactor = fontSizeProvider.scaleFactor;
+    return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
           backgroundColor: Colors.white,
           title: Text(
             widget.folderName,
-            style: const TextStyle(
+            style: TextStyle(
                 color: Color.fromARGB(255, 48, 48, 48),
                 fontWeight: FontWeight.w600),
           ),
@@ -311,10 +276,7 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
                   Map<String, dynamic> file = entry.value;
                   return GestureDetector(
                     onTap: () => fetchFolderAndNavigate(
-                        context,
-                        file['folder_id'],
-                        widget.folderType,
-                        file), // 파일을 탭하면 열기
+                        context, file['folder_id'], widget.folderType, file),
                     child: FileListItem(
                       file: file,
                       onRename: () => showRenameDialog(
@@ -323,9 +285,8 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
                           files,
                           (id, newName) => _renameFile(id, newName),
                           setState,
-                          "파일 이름 바꾸기", // 다이얼로그 제목
-                          "file_name" // 변경할 항목 타입
-                          ),
+                          "파일 이름 바꾸기",
+                          "file_name"),
                       onDelete: () => showConfirmationDialog(
                           context,
                           "정말 파일을 삭제하시겠습니까?",
@@ -345,8 +306,7 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
       ),
       bottomNavigationBar:
           buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
-    )
-      );
+    );
   }
 }
 
@@ -371,6 +331,8 @@ class FileListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
+    final scaleFactor = fontSizeProvider.scaleFactor;
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
       padding: const EdgeInsets.all(12),
@@ -403,33 +365,33 @@ class FileListItem extends StatelessWidget {
               children: [
                 Text(
                   file['file_name'] ?? 'Unknown',
-                  style: const TextStyle(
-                    fontSize: 16,
+                  style: TextStyle(
+                    fontSize: 16 * scaleFactor,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
-                  overflow: TextOverflow.ellipsis, // 텍스트 오버플로우 처리
+                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 5),
+                SizedBox(height: 5),
                 Text(
                   formatDateTimeToKorean(file['created_at'] ?? ''),
-                  style: const TextStyle(
-                    fontSize: 12,
+                  style: TextStyle(
+                    fontSize: 12 * scaleFactor,
                     color: Color(0xFF6C7A89),
                   ),
                 ),
               ],
             ),
           ),
-         GestureDetector(
-          child: ImageIcon(
-                  AssetImage('assets/folder_menu.png'),
-                  color: Color.fromRGBO(255, 161, 122, 1),
-                  ),
-                    onTap: () {
-                      showCustomMenu2(context, onRename, onDelete);
-                    },
-                  ),
+          GestureDetector(
+            child: ImageIcon(
+              AssetImage('assets/folder_menu.png'),
+              color: Color.fromRGBO(255, 161, 122, 1),
+            ),
+            onTap: () {
+              showCustomMenu2(context, onRename, onDelete);
+            },
+          ),
         ],
       ),
     );

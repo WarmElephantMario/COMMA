@@ -7,6 +7,8 @@ import '63record.dart';
 import 'package:provider/provider.dart';
 import 'model/user_provider.dart';
 import 'api/api.dart';
+import '../model/44_font_size_provider.dart';
+
 
 class LectureStartPage extends StatefulWidget {
   final int? lectureFolderId;
@@ -53,6 +55,10 @@ class _LectureStartPageState extends State<LectureStartPage> {
 
   @override
   Widget build(BuildContext context) {
+    // 폰트 크기 비율을 Provider에서 가져옴
+    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
+    // 디스플레이 비율을 가져옴
+    final scaleFactor = fontSizeProvider.scaleFactor;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -64,22 +70,22 @@ class _LectureStartPageState extends State<LectureStartPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 15),
-            const Text(
+             Text(
               '오늘의 학습 시작하기',
               style: TextStyle(
                 color: Color(0xFF414141),
-                fontSize: 24,
+                fontSize: 24*scaleFactor,
                 fontFamily: 'DM Sans',
                 fontWeight: FontWeight.w700,
                 height: 1.2,
               ),
             ),
             const SizedBox(height: 30),
-            const Text(
+             Text(
               '업로드 한 강의 자료의 AI 학습이 완료되었어요!\n학습을 시작하려면 강의실에 입장하세요.',
               style: TextStyle(
                 color: Color(0xFF575757),
-                fontSize: 14,
+                fontSize: 14*scaleFactor,
                 fontFamily: 'DM Sans',
                 fontWeight: FontWeight.w500,
                 height: 1.2,
@@ -102,9 +108,9 @@ class _LectureStartPageState extends State<LectureStartPage> {
                       children: [
                         Text(
                           widget.lectureName,
-                          style: const TextStyle(
+                          style:  TextStyle(
                             color: Color(0xFF575757),
-                            fontSize: 15,
+                            fontSize: 15*scaleFactor,
                             fontFamily: 'DM Sans',
                             fontWeight: FontWeight.w500,
                             height: 1.2,
@@ -127,9 +133,9 @@ class _LectureStartPageState extends State<LectureStartPage> {
                   Expanded(
                     child: Text(
                       '폴더 분류 > ${widget.selectedFolder}',
-                      style: const TextStyle(
+                      style:  TextStyle(
                         color: Color(0xFF575757),
-                        fontSize: 12,
+                        fontSize: 12*scaleFactor,
                         fontFamily: 'DM Sans',
                         fontWeight: FontWeight.w500,
                         height: 1.2,
@@ -149,9 +155,9 @@ class _LectureStartPageState extends State<LectureStartPage> {
                   Expanded(
                     child: Text(
                       widget.noteName!,
-                      style: const TextStyle(
+                      style:  TextStyle(
                         color: Color(0xFF575757),
-                        fontSize: 12,
+                        fontSize: 12*scaleFactor,
                         fontFamily: 'DM Sans',
                         fontWeight: FontWeight.w500,
                         height: 1.2,
@@ -181,6 +187,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
                     );
 
                     if (response.statusCode == 200) {
+                      
                       print('existLecture 업데이트 성공');
                     } else {
                       print('existLecture 업데이트 실패');
