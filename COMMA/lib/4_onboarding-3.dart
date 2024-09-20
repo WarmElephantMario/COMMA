@@ -8,6 +8,7 @@ class Onboarding3 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final theme = Theme.of(context);
 
     return Scaffold(
       body: Focus(
@@ -15,28 +16,28 @@ class Onboarding3 extends StatelessWidget {
         child: Container(
           width: size.width,
           height: size.height,
-          color: Colors.white,
+          color: theme.scaffoldBackgroundColor,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(height: size.height * 0.20),
-              const Text(
+              Text(
                 'AI가 만드는 대체 학습 자료 콜론(:)',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.black,
+                  color: theme.colorScheme.onTertiary,
                   fontSize: 20,
                   fontFamily: 'DM Sans',
                   fontWeight: FontWeight.w700,
                 ),
               ),
               SizedBox(height: size.height * 0.02),
-              const Text(
+              Text(
                 '수업 후에도 편하게 복습할 수 있도록,\nAI가 학습자 맞춤형 대체 학습 자료를 만들어 드려요.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Color(0xFF245B3A),
+                  color: theme.colorScheme.surfaceBright,
                   fontSize: 14,
                   fontFamily: 'DM Sans',
                   fontWeight: FontWeight.w500,
