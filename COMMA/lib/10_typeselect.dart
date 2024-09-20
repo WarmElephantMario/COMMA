@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'api/api.dart';
 import 'dart:convert';
 import 'package:provider/provider.dart';
+import '../model/44_font_size_provider.dart';
 
 class DisabilitySelectionPage extends StatelessWidget {
   const DisabilitySelectionPage({Key? key}) : super(key: key);
@@ -50,6 +51,10 @@ class DisabilitySelectionPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+        // 폰트 크기 비율을 Provider에서 가져옴
+    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
+    // 디스플레이 비율을 가져옴
+    final scaleFactor = fontSizeProvider.scaleFactor;
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
@@ -59,22 +64,22 @@ class DisabilitySelectionPage extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: 150),
-            const Text(
+             Text(
               '사용자 학습 유형을 선택해주세요',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 20*scaleFactor,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 10),
-            const Text(
+             Text(
               '오늘도\nCOMMA와 함께 힘차게 공부해요!',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Color(0xFF245B3A),
-                fontSize: 14,
+                fontSize: 14*scaleFactor,
                 fontFamily: 'DM Sans',
                 fontWeight: FontWeight.w500,
               ),
@@ -110,12 +115,12 @@ class DisabilitySelectionPage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: const Center(
+                child:  Center(
                   child: Text(
                     '시각 장애인용 모드 (대체 텍스트)',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 14,
+                      fontSize: 14 * scaleFactor,
                       fontFamily: 'DM Sans',
                       fontWeight: FontWeight.w700,
                     ),
@@ -154,12 +159,12 @@ class DisabilitySelectionPage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: const Center(
+                child:  Center(
                   child: Text(
                     '청각 장애인용 모드 (실시간 자막)',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 14,
+                      fontSize: 14*scaleFactor,
                       fontFamily: 'DM Sans',
                       fontWeight: FontWeight.w700,
                     ),

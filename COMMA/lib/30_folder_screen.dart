@@ -9,6 +9,8 @@ import 'dart:convert';
 import 'model/user_provider.dart';
 import 'package:provider/provider.dart';
 import 'api/api.dart';
+import '../model/44_font_size_provider.dart';
+
 
 class FolderScreen extends StatefulWidget {
   const FolderScreen({super.key});
@@ -145,6 +147,10 @@ class _FolderScreenState extends State<FolderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 폰트 크기 비율을 Provider에서 가져옴
+    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
+    // 디스플레이 비율을 가져옴
+    final scaleFactor = fontSizeProvider.scaleFactor;
     return Scaffold(
       backgroundColor: Colors.white, // 배경 색상을 흰색으로 설정
       appBar: AppBar(toolbarHeight: 0),
