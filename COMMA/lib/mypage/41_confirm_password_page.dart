@@ -4,8 +4,6 @@ import '40_change_password_page.dart';
 import '../model/44_font_size_provider.dart';
 import 'package:provider/provider.dart';
 
-
-
 class ConfirmPasswordPage extends StatefulWidget {
   const ConfirmPasswordPage({super.key});
 
@@ -50,7 +48,8 @@ class _ConfirmPasswordPageState extends State<ConfirmPasswordPage> {
               Text(
                 '개인정보를 안전하게 보호하기 위해서\n비밀번호를 다시 한번 확인합니다.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16* scaleFactor, color: Color(0xFF585858)),
+                style: TextStyle(
+                    fontSize: 16 * scaleFactor, color: Color(0xFF585858)),
               ),
               const SizedBox(height: 40),
               TextField(

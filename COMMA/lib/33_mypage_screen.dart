@@ -51,23 +51,28 @@ class _MyPageScreenState extends State<MyPageScreen> {
   }
 
   Widget _buildCard(BuildContext context, String title, VoidCallback onTap) {
-      // 폰트 크기 비율을 Provider에서 가져옴
+    // 폰트 크기 비율을 Provider에서 가져옴
     final fontSizeProvider = Provider.of<FontSizeProvider>(context);
     // 디스플레이 비율을 가져옴
     final scaleFactor = fontSizeProvider.scaleFactor;
+    final theme = Theme.of(context);
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: const Color(0xFFEEEEEE), width: 2),
+          color: theme.colorScheme.surfaceContainer,
+          border: Border.all(color: Colors.grey[600]!, width: 2),
           borderRadius: BorderRadius.circular(10),
         ),
         child: ListTile(
           title: Text(title),
-          trailing: const Icon(Icons.arrow_forward_ios),
+          trailing: Icon(
+            Icons.arrow_forward_ios,
+            color: theme.colorScheme.onSecondary,
+          ),
           onTap: onTap,
-          textColor: Colors.black,
+          textColor: theme.colorScheme.onTertiary,
         ),
       ),
     );
@@ -97,8 +102,8 @@ class _MyPageScreenState extends State<MyPageScreen> {
         Provider.of<UserProvider>(context, listen: false).logOut();
 
         // SharedPreferences에서 userKey 삭제
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.remove('userKey');
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.remove('userKey');
 
         // SplashGreenScreen 화면으로 이동
         Navigator.pushAndRemoveUntil(
@@ -188,6 +193,8 @@ class _MyPageScreenState extends State<MyPageScreen> {
     final FocusNode cancelFocusNode = FocusNode();
     final FocusNode saveFocusNode = FocusNode();
 
+    final theme = Theme.of(context);
+
     showDialog(
       context: context,
       builder: (context) {
@@ -196,7 +203,10 @@ class _MyPageScreenState extends State<MyPageScreen> {
             sortKey: OrdinalSortKey(1.0),
             child: Focus(
               focusNode: titleFocusNode,
-              child: const Text('닉네임 변경하기'),
+              child: Text(
+                '닉네임 변경하기',
+                style: TextStyle(color: theme.colorScheme.onTertiary),
+              ),
             ),
           ),
           content: Semantics(
@@ -204,8 +214,11 @@ class _MyPageScreenState extends State<MyPageScreen> {
             child: Focus(
               focusNode: contentFocusNode,
               child: TextField(
+                style: TextStyle(color: theme.colorScheme.onSecondary),
                 controller: nicknameController,
-                decoration: const InputDecoration(hintText: '새 닉네임을 입력하세요'),
+                decoration: InputDecoration(
+                    hintText: '새 닉네임을 입력하세요',
+                    hintStyle: TextStyle(color: theme.colorScheme.onSecondary)),
               ),
             ),
           ),
@@ -215,7 +228,9 @@ class _MyPageScreenState extends State<MyPageScreen> {
               child: Focus(
                 focusNode: cancelFocusNode,
                 child: TextButton(
-                  child: const Text('취소', style: TextStyle(color: Colors.red)),
+                  child: Text('취소',
+                      style: TextStyle(
+                          color: theme.colorScheme.tertiary, fontSize: 15)),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
@@ -227,7 +242,11 @@ class _MyPageScreenState extends State<MyPageScreen> {
               child: Focus(
                 focusNode: saveFocusNode,
                 child: TextButton(
-                  child: const Text('저장'),
+                  child: Text(
+                    '저장',
+                    style: TextStyle(
+                        color: theme.colorScheme.primary, fontSize: 15),
+                  ),
                   onPressed: () async {
                     String newNickname = nicknameController.text;
                     await _updateNickname(newNickname);
@@ -258,21 +277,23 @@ class _MyPageScreenState extends State<MyPageScreen> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     int disType = userProvider.user?.dis_type ?? 0;
 
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         title: Focus(
           focusNode: _appBarFocusNode,
-          child: const Text(
+          child: Text(
             '마이페이지',
             style: TextStyle(
-                color: Color.fromARGB(255, 48, 48, 48),
+                color: theme.colorScheme.onSecondary,
                 fontFamily: 'DM Sans',
                 fontWeight: FontWeight.w700),
           ),
         ),
-        iconTheme: const IconThemeData(color: Color.fromARGB(255, 48, 48, 48)),
+        iconTheme: IconThemeData(color: theme.colorScheme.onSecondary),
       ),
       body: ListView(
         children: <Widget>[
@@ -306,7 +327,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
             Navigator.push(context,
                 MaterialPageRoute(builder: (context) => const FontSizePage()));
           }),
-        SizedBox(height: 50), 
+          SizedBox(height: 50),
 
           Center(
             child: Padding(
@@ -315,29 +336,30 @@ class _MyPageScreenState extends State<MyPageScreen> {
                 '학습 모드를 변경하시려면 스위치를 당겨 재부팅하세요',
                 textAlign: TextAlign.center, // 중앙 정렬
                 style: TextStyle(
-                    fontSize: 16.0 *scaleFactor, color: Colors.grey[600]), // 글씨 크기 수정
+                    fontSize: 16.0 * scaleFactor,
+                    color: theme.colorScheme.onSecondary), // 글씨 크기 수정
               ),
             ),
           ),
 
-            // 스위치와 설명 텍스트 추가
+          // 스위치와 설명 텍스트 추가
           Row(
             mainAxisAlignment: MainAxisAlignment.center, // 중앙에 위치하도록 설정
             children: [
               // 스위치 왼쪽 설명: 시각장애인 모드
-              SizedBox(width: 30*scaleFactor),
+              SizedBox(width: 30 * scaleFactor),
               Expanded(
-              child:Padding(
-                padding: const EdgeInsets.only(right: 8.0), // 간격 추가
-                child: Text(
-                  '시각장애인 모드', // 스위치 왼쪽 텍스트
-                  style: TextStyle(fontSize: 15.0*scaleFactor), // 글씨 크기 키움
-                  
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 8.0), // 간격 추가
+                  child: Text(
+                    '시각장애인 모드', // 스위치 왼쪽 텍스트
+                    style: TextStyle(
+                        fontSize: 16.0 * scaleFactor,
+                        color: theme.colorScheme.onTertiary), // 글씨 크기 키움
+                  ),
                 ),
-                
               ),
-              ),
-              SizedBox(width: 15*scaleFactor), 
+              SizedBox(width: 15 * scaleFactor),
 
               // 스위치 위젯
               Transform.scale(
@@ -347,7 +369,8 @@ class _MyPageScreenState extends State<MyPageScreen> {
                   onChanged: (bool newValue) async {
                     // Update the dis_type value and call the backend
                     int updatedDisType = newValue ? 1 : 0;
-                    await _updateDisType(updatedDisType); // Update in the database
+                    await _updateDisType(
+                        updatedDisType); // Update in the database
 
                     // After updating, restart the app by navigating to SplashScreen
                     Navigator.pushReplacement(
@@ -360,21 +383,23 @@ class _MyPageScreenState extends State<MyPageScreen> {
                   activeTrackColor: Colors.teal, // 스위치 켜진 상태의 트랙 색상 (초록색)
                   activeColor: Colors.white, // 스위치 켜진 상태의 thumb(단추) 색상 (흰색)
                   inactiveTrackColor: Colors.teal, // 스위치 꺼진 상태의 트랙 색상 (초록색)
-                  inactiveThumbColor: Colors.white, // 스위치 꺼진 상태의 thumb(단추) 색상 (흰색)
+                  inactiveThumbColor:
+                      Colors.white, // 스위치 꺼진 상태의 thumb(단추) 색상 (흰색)
                 ),
               ),
 
-              SizedBox(width: 15 *scaleFactor), 
+              SizedBox(width: 15 * scaleFactor),
               // 스위치 오른쪽 설명: 청각장애인 모드
               Expanded(
-              child : Padding(
-                padding: const EdgeInsets.only(left: 8.0), // 간격 추가
-                child: Text(
-                  '청각장애인 모드', // 스위치 오른쪽 텍스트
-                  style: TextStyle(fontSize: 16.0*scaleFactor),
-                  
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 8.0), // 간격 추가
+                  child: Text(
+                    '청각장애인 모드', // 스위치 오른쪽 텍스트
+                    style: TextStyle(
+                        fontSize: 16.0 * scaleFactor,
+                        color: theme.colorScheme.onTertiary),
+                  ),
                 ),
-              ),
               )
             ],
           ),

@@ -13,7 +13,8 @@ import 'api/api.dart';
 
 Future<Map<String, dynamic>?> _fetchUserDetails(int userKey) async {
   try {
-    final response = await http.get(Uri.parse('${API.baseUrl}/api/user-details/$userKey'));
+    final response =
+        await http.get(Uri.parse('${API.baseUrl}/api/user-details/$userKey'));
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
@@ -31,8 +32,6 @@ Future<Map<String, dynamic>?> _fetchUserDetails(int userKey) async {
   }
 }
 
-
-
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -47,62 +46,60 @@ class _SplashScreenState extends State<SplashScreen> {
     _checkUserKey(); // 앱 실행 시 userKey 확인
   }
 
-Future<void> _checkUserKey() async {
-  print('user_id 확인');
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? userId = prefs.getString('user_id');
-  print('유저아이디 : $userId');
+  Future<void> _checkUserKey() async {
+    print('user_id 확인');
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('user_id');
+    print('유저아이디 : $userId');
 
-  if (userId != null) {
-    print('유저아이디 존재함 (기기번호 생성된 적 있음)');
-    
-    // 로컬 저장소에서 userKey만 불러오기
-    int? userKey = prefs.getInt('userKey');
+    if (userId != null) {
+      print('유저아이디 존재함 (기기번호 생성된 적 있음)');
 
-    if (userKey != null) {
-      print('유저키도 존재함 : $userKey');
+      // 로컬 저장소에서 userKey만 불러오기
+      int? userKey = prefs.getInt('userKey');
 
-      // 유저 정보 API 호출로 닉네임과 타입 가져오기
-      final userDetails = await _fetchUserDetails(userKey);
+      if (userKey != null) {
+        print('유저키도 존재함 : $userKey');
 
-      if (userDetails != null) {
-        String userNickname = userDetails['user_nickname'];
-        int disType = userDetails['dis_type'];
-        print('${disType}');
+        // 유저 정보 API 호출로 닉네임과 타입 가져오기
+        final userDetails = await _fetchUserDetails(userKey);
 
-        // UserProvider에 닉네임 설정
-        Provider.of<UserProvider>(context, listen: false).setUser(User(userKey, userId!, userNickname, null));
-        print('여기22');
+        if (userDetails != null) {
+          String userNickname = userDetails['user_nickname'];
+          int disType = userDetails['dis_type'];
+          print('${disType}');
 
-        // UserProvider에 타입 업데이트
-        Provider.of<UserProvider>(context, listen: false).updateDisType(disType);
-        
-        
+          // UserProvider에 닉네임 설정
+          Provider.of<UserProvider>(context, listen: false)
+              .setUser(User(userKey, userId!, userNickname, null));
+          print('여기22');
+
+          // UserProvider에 타입 업데이트
+          Provider.of<UserProvider>(context, listen: false)
+              .updateDisType(disType);
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => MainPage()),
+          );
+        }
+      } else {
+        print('유저키 없음 (userId는 만들었는데 userKey 생성엔 실패했던 케이스)');
 
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => MainPage()),
+          MaterialPageRoute(builder: (context) => OnboardingScreen()),
         );
       }
     } else {
-      print('유저키 없음 (userId는 만들었는데 userKey 생성엔 실패했던 케이스)');
-      
+      print('유저아이디 없음 (기기번호 생성된 적 없음)  --> 온보딩으로 이동');
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => OnboardingScreen()),
       );
     }
-  } else {
-      print('유저아이디 없음 (기기번호 생성된 적 없음)  --> 온보딩으로 이동');
-
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => OnboardingScreen()),
-      );
   }
-}
-
 
   @override
   Widget build(BuildContext context) {

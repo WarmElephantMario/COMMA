@@ -20,7 +20,6 @@ class UserProvider with ChangeNotifier {
     if (_user != null) {
       _user = User(_user!.userKey, _user!.userId, newNickname, null);
       notifyListeners();
-
     }
   }
 
@@ -38,7 +37,7 @@ class UserProvider with ChangeNotifier {
 //     if (_user != null) {
 //       _user = User(
 //           null,
-//           _user!.userId, 
+//           _user!.userId,
 //           _user!.user_nickname,
 //           null);
 //     } else {

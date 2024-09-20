@@ -28,23 +28,86 @@ void main() async {
   );
 }
 
+// ThemeData for Light Theme
+ThemeData lightTheme = ThemeData(
+    brightness: Brightness.light,
+    primaryColor: Color(0xFF36AE92),
+    colorScheme: ColorScheme.fromSwatch().copyWith(
+      surface: Colors.white,
+      surfaceBright: Color(0xFF0D5836),
+      surfaceContainer: Colors.white,
+      primaryContainer: Colors.white,
+      primary: Color(0xFF36AE92),
+      primaryFixed: Color(0x9CE4F0E7),
+      secondary: Color(0xFF005A38),
+      tertiary: Color(0xFFFFA17A),
+      tertiaryContainer: Color(0xFFE0F2F1),
+      onTertiary: Color(0xFF303030),
+      tertiaryFixed: const Color(0xFF4CAF50).withOpacity(0.05),
+      brightness: Brightness.light,
+      onSecondary: Color(0xFF4C4C4C),
+    ),
+    scaffoldBackgroundColor: Colors.white, // Use scaffoldBackgroundColor
+    visualDensity: VisualDensity.adaptivePlatformDensity,
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        backgroundColor:
+            Colors.white, // Background color for BottomNavigationBar
+        selectedItemColor: Colors.teal,
+        unselectedItemColor: Colors.black));
+
+// ThemeData for Dark Theme
+ThemeData darkTheme = ThemeData(
+    brightness: Brightness.dark,
+    primaryColor: Color(0xFF3BBFA0),
+    colorScheme: ColorScheme.fromSwatch().copyWith(
+      surface: Color(0xFF2B2B2B),
+      surfaceBright: Color(0xFF15B06A),
+      surfaceContainer: Color(0xFF383838),
+      primaryContainer: Color(0xFF1E1E1E),
+      primary: Color(0xFF36AE92),
+      primaryFixed: Color.fromARGB(189, 228, 240, 231),
+      secondary: Color.fromARGB(255, 3, 159, 99),
+      tertiary: Color(0xFFFFA17A),
+      tertiaryFixed: Color.fromARGB(255, 61, 61, 61),
+      tertiaryContainer: Color(0xFF626968),
+      onTertiary: Color(0xD2FFFFFF),
+      brightness: Brightness.dark,
+      onSecondary: Color(0xD2FFFFFF),
+    ),
+    scaffoldBackgroundColor: Color(0xFF121212), // Use scaffoldBackgroundColor
+    visualDensity: VisualDensity.adaptivePlatformDensity,
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        backgroundColor:
+            Color(0xFF121212), // Background color for BottomNavigationBar
+        selectedItemColor: Colors.teal,
+        unselectedItemColor: Colors.grey));
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-     final fontSizeProvider = Provider.of<FontSizeProvider>(context);
+    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
 
     return MaterialApp(
       navigatorObservers: [MyNavigatorObserver()],
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-    // 기본 텍스트 테마에 사용자 지정 폰트 크기 비율 적용
-        textTheme: Theme.of(context).textTheme.apply(
-              fontSizeFactor: fontSizeProvider.scaleFactor, // 비율 적용
-            ),
+      // 라이트 및 다크 테마 적용
+      theme: lightTheme.copyWith(
+        // 라이트 테마에 사용자 지정 폰트 크기 비율 적용
+        textTheme: lightTheme.textTheme.apply(
+          fontSizeFactor: fontSizeProvider.scaleFactor,
+        ),
       ),
+      darkTheme: darkTheme.copyWith(
+        // 다크 테마에 사용자 지정 폰트 크기 비율 적용
+        textTheme: darkTheme.textTheme.apply(
+          fontSizeFactor: fontSizeProvider.scaleFactor,
+        ),
+      ),
+
+      themeMode: ThemeMode.dark, // 시스템 설정에 따라 라이트 또는 다크 테마 자동 적용
+
       home: const SplashScreen(), // 앱 시작 시 SplashScreen으로 이동
     );
   }
