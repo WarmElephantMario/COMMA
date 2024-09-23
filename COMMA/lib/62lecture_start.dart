@@ -9,7 +9,6 @@ import 'model/user_provider.dart';
 import 'api/api.dart';
 import '../model/44_font_size_provider.dart';
 
-
 class LectureStartPage extends StatefulWidget {
   final int? lectureFolderId;
   final int? lecturefileId;
@@ -59,8 +58,10 @@ class _LectureStartPageState extends State<LectureStartPage> {
     final fontSizeProvider = Provider.of<FontSizeProvider>(context);
     // 디스플레이 비율을 가져옴
     final scaleFactor = fontSizeProvider.scaleFactor;
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         toolbarHeight: 0,
       ),
@@ -70,22 +71,22 @@ class _LectureStartPageState extends State<LectureStartPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 15),
-             Text(
+            Text(
               '오늘의 학습 시작하기',
               style: TextStyle(
-                color: Color(0xFF414141),
-                fontSize: 24*scaleFactor,
+                color: theme.colorScheme.onTertiary,
+                fontSize: 24 * scaleFactor,
                 fontFamily: 'DM Sans',
                 fontWeight: FontWeight.w700,
                 height: 1.2,
               ),
             ),
             const SizedBox(height: 30),
-             Text(
+            Text(
               '업로드 한 강의 자료의 AI 학습이 완료되었어요!\n학습을 시작하려면 강의실에 입장하세요.',
               style: TextStyle(
-                color: Color(0xFF575757),
-                fontSize: 14*scaleFactor,
+                color: theme.colorScheme.onSecondary,
+                fontSize: 14 * scaleFactor,
                 fontFamily: 'DM Sans',
                 fontWeight: FontWeight.w500,
                 height: 1.2,
@@ -94,7 +95,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
             const SizedBox(height: 30),
             Container(
               decoration: BoxDecoration(
-                color: Colors.teal.shade50,
+                color: theme.colorScheme.tertiaryContainer,
                 borderRadius: BorderRadius.circular(8),
               ),
               padding: const EdgeInsets.all(8),
@@ -108,9 +109,9 @@ class _LectureStartPageState extends State<LectureStartPage> {
                       children: [
                         Text(
                           widget.lectureName,
-                          style:  TextStyle(
-                            color: Color(0xFF575757),
-                            fontSize: 15*scaleFactor,
+                          style: TextStyle(
+                            color: theme.colorScheme.onSecondary,
+                            fontSize: 15 * scaleFactor,
                             fontFamily: 'DM Sans',
                             fontWeight: FontWeight.w500,
                             height: 1.2,
@@ -128,14 +129,17 @@ class _LectureStartPageState extends State<LectureStartPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset('assets/folder_search.png'),
+                  Icon(
+                    Icons.folder_open,
+                    color: theme.colorScheme.onSecondary,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       '폴더 분류 > ${widget.selectedFolder}',
-                      style:  TextStyle(
-                        color: Color(0xFF575757),
-                        fontSize: 12*scaleFactor,
+                      style: TextStyle(
+                        color: theme.colorScheme.onSecondary,
+                        fontSize: 12 * scaleFactor,
                         fontFamily: 'DM Sans',
                         fontWeight: FontWeight.w500,
                         height: 1.2,
@@ -150,14 +154,17 @@ class _LectureStartPageState extends State<LectureStartPage> {
             GestureDetector(
               child: Row(
                 children: [
-                  Image.asset('assets/text.png'),
+                  Icon(
+                    Icons.book_outlined,
+                    color: theme.colorScheme.onSecondary,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       widget.noteName!,
-                      style:  TextStyle(
-                        color: Color(0xFF575757),
-                        fontSize: 12*scaleFactor,
+                      style: TextStyle(
+                        color: theme.colorScheme.onSecondary,
+                        fontSize: 12 * scaleFactor,
                         fontFamily: 'DM Sans',
                         fontWeight: FontWeight.w500,
                         height: 1.2,
@@ -172,33 +179,31 @@ class _LectureStartPageState extends State<LectureStartPage> {
             Center(
               child: ClickButton(
                 text: '강의실 입장하기',
-                onPressed: () async{
-                   // lecturefileId에 existLecture 값을 1로 업데이트하는 API 호출
-                if (widget.lecturefileId != null) {
-                  print("existLecture update");
-                  print(widget.lecturefileId);
-                  try {
-                    final response = await http.post(
-                      Uri.parse('${API.baseUrl}/api/update-existLecture'),
-                      headers: {'Content-Type': 'application/json'},
-                      body: jsonEncode({
-                        'lecturefileId': widget.lecturefileId
-                      }),
-                    );
+                onPressed: () async {
+                  // lecturefileId에 existLecture 값을 1로 업데이트하는 API 호출
+                  if (widget.lecturefileId != null) {
+                    print("existLecture update");
+                    print(widget.lecturefileId);
+                    try {
+                      final response = await http.post(
+                        Uri.parse('${API.baseUrl}/api/update-existLecture'),
+                        headers: {'Content-Type': 'application/json'},
+                        body:
+                            jsonEncode({'lecturefileId': widget.lecturefileId}),
+                      );
 
-                    if (response.statusCode == 200) {
-                      
-                      print('existLecture 업데이트 성공');
-                    } else {
-                      print('existLecture 업데이트 실패');
-                      print('Response status: ${response.statusCode}');
-                      print('Response body: ${response.body}');
+                      if (response.statusCode == 200) {
+                        print('existLecture 업데이트 성공');
+                      } else {
+                        print('existLecture 업데이트 실패');
+                        print('Response status: ${response.statusCode}');
+                        print('Response body: ${response.body}');
+                      }
+                    } catch (e) {
+                      // 에러 발생 시 예외 메시지 출력
+                      print('Error occurred during existLecture update: $e');
                     }
-                  } catch (e) {
-                    // 에러 발생 시 예외 메시지 출력
-                    print('Error occurred during existLecture update: $e');
                   }
-                }
 
                   Navigator.push(
                     context,

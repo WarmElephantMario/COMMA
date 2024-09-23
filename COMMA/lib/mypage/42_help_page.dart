@@ -25,16 +25,17 @@ class _HelpPageState extends State<HelpPage> {
     final fontSizeProvider = Provider.of<FontSizeProvider>(context);
     // 디스플레이 비율을 가져옴
     final scaleFactor = fontSizeProvider.scaleFactor;
-    
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        iconTheme: const IconThemeData(color: Color.fromARGB(255, 48, 48, 48)),
-        title: const Text(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        iconTheme: IconThemeData(color: theme.colorScheme.onTertiary),
+        title: Text(
           '도움말',
           style: TextStyle(
-              color: Color.fromARGB(255, 48, 48, 48),
+              color: theme.colorScheme.onTertiary,
               fontFamily: 'DM Sans',
               fontWeight: FontWeight.w600),
         ),
@@ -42,10 +43,11 @@ class _HelpPageState extends State<HelpPage> {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          const Text(
+          Text(
             '앱 사용 방법',
             style: TextStyle(
-              fontSize: 22.0,
+              color: theme.colorScheme.onTertiary,
+              fontSize: 22.0 * scaleFactor,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -71,18 +73,21 @@ class _HelpPageState extends State<HelpPage> {
                 '어플 내의 모든 버튼과 텍스트 설명은 스크린 리더와 높은 수준으로 호환됩니다. 또한, 설정에서 글자 크기 조정, 밝기 조절 및 고대비 모드 등을 설정할 수 있습니다. ',
           ),
           const SizedBox(height: 20.0),
-          const Text(
+          Text(
             '데이터 수집 및 사용',
             style: TextStyle(
-              fontSize: 18.0,
+              color: theme.primaryColor,
+              fontSize: 18.0 * scaleFactor,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 10.0),
-          const Text(
+          Text(
             '어플 사용 중 생성한 녹음 파일은 서버에 저장되지 않으며, 음성으로부터 텍스트를 추출한 직후 폐기됩니다.',
+            style: TextStyle(
+                color: theme.colorScheme.onTertiary,
+                fontSize: 15 * scaleFactor),
           ),
-
         ],
       ),
       bottomNavigationBar:
@@ -91,6 +96,11 @@ class _HelpPageState extends State<HelpPage> {
   }
 
   Widget _buildHelpSection({required String title, required String content}) {
+    final theme = Theme.of(context);
+
+    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
+    final scaleFactor = fontSizeProvider.scaleFactor;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: Column(
@@ -98,17 +108,18 @@ class _HelpPageState extends State<HelpPage> {
         children: [
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 18.0,
+            style: TextStyle(
+              color: theme.primaryColor,
+              fontSize: 18.0 * scaleFactor,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 5.0),
           Text(
             content,
-            style: const TextStyle(
-              fontSize: 16.0,
-              color: Colors.black54,
+            style: TextStyle(
+              fontSize: 16.0 * scaleFactor,
+              color: theme.colorScheme.onTertiary,
             ),
           ),
         ],

@@ -1,3 +1,14 @@
+## 다크 모드 추가
+
+**수정 사항**
+- 모든 파일의 color 부분 → theme으로 변경함
+- 사용 안하는 컴포넌트 삭제함<br>
+- 파일에 아이콘 추가<br>
+
+**main.dart 에서**
+- themeMode: ThemeMode.system / ThemeMode.light / ThemeMode.dark 중 선택<br>
+- 아직 설정에서 라이트/다크 모드 변경하는 부분 없음<br>
+
 
 ## 강의실 입장하기 변경 사항
 
