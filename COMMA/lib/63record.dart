@@ -1087,6 +1087,7 @@ class _RecordPageState extends State<RecordPage> {
             }
           );
         }
+
       },
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
@@ -1448,7 +1449,7 @@ class _RecordPageState extends State<RecordPage> {
         bottomNavigationBar:
             buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
       ),
-      
+
     );
 
 
