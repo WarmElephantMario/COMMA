@@ -14,22 +14,22 @@ import 'package:http/http.dart' as http;
 import 'dart:convert'; // jsonEncode를 사용하기 위한 라이브러리 임포트
 import '10_typeselect.dart';
 
-void main() {
-  runApp(FigmaToCodeApp());
-}
+// void main() {
+//   runApp(FigmaToCodeApp());
+// }
 
-class FigmaToCodeApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: const Color.fromRGBO(54, 174, 146, 1.0),
-      ),
-      home: OnboardingScreen(),
-    );
-  }
-}
+// class FigmaToCodeApp extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       debugShowCheckedModeBanner: false,
+//       theme: ThemeData.dark().copyWith(
+//         scaffoldBackgroundColor: const Color.fromRGBO(54, 174, 146, 1.0),
+//       ),
+//       home: OnboardingScreen(),
+//     );
+//   }
+// }
 
 class OnboardingScreen extends StatefulWidget {
   @override
@@ -76,6 +76,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final theme = Theme.of(context);
+
     return WillPopScope(
       onWillPop: () async {
         return false; // 뒤로 가기 버튼을 눌렀을 때 아무 반응도 하지 않도록 설정
@@ -122,7 +124,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: _currentPage > 0
-                                ? Color.fromRGBO(54, 174, 146, 1.0)
+                                ? theme.primaryColor
                                 : Colors.grey, // 비활성화된 버튼 배경색
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
@@ -143,7 +145,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: _currentPage > 0
-                                  ? Colors.white
+                                  ? theme.colorScheme.surface
                                   : Colors.grey, // 텍스트 색상도 조정
                               fontSize: 14,
                               fontFamily: 'DM Sans',
@@ -158,7 +160,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: _currentPage < 2
-                                ? Color.fromRGBO(54, 174, 146, 1.0)
+                                ? theme.primaryColor
                                 : Colors.grey, // 비활성화된 버튼 배경색
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
@@ -179,7 +181,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: _currentPage < 2
-                                  ? Colors.white
+                                  ? theme.colorScheme.surface
                                   : Colors.grey, // 텍스트 색상도 조정
                               fontSize: 14,
                               fontFamily: 'DM Sans',
@@ -195,8 +197,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     sortKey: const OrdinalSortKey(3),
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color.fromRGBO(
-                            54, 174, 146, 1.0), // Background color
+                        backgroundColor: theme.primaryColor, // Background color
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -205,8 +206,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ),
                       onPressed: () async {
                         print('버튼 누름');
-                        SharedPreferences prefs = await SharedPreferences.getInstance();
-                        String? userId = prefs.getString('user_id'); // UUID를 user_id로 사용
+                        SharedPreferences prefs =
+                            await SharedPreferences.getInstance();
+                        String? userId =
+                            prefs.getString('user_id'); // UUID를 user_id로 사용
 
                         if (userId == null) {
                           print('유저아이디 없음');
@@ -224,24 +227,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           print('Generated user_nickname : $userNickname');
 
                           // DB에 새로운 사용자 정보 저장 후 userKey 받아옴
-                          int userKey = await createUserInDB(userId, userNickname);
-
+                          int userKey =
+                              await createUserInDB(userId, userNickname);
 
                           // userKey를 로컬 저장소에 저장
                           await prefs.setInt('userKey', userKey);
-                        } else { //userId는 있는데 userKey 생성 안된 경우
-                            String userNickname = 'New User';
-                            await prefs.setString('user_nickname', userNickname);
+                        } else {
+                          //userId는 있는데 userKey 생성 안된 경우
+                          String userNickname = 'New User';
+                          await prefs.setString('user_nickname', userNickname);
 
-                            print('current user_id : $userId');
-                            print('Generated user_nickname : $userNickname');
+                          print('current user_id : $userId');
+                          print('Generated user_nickname : $userNickname');
 
                           // DB에 새로운 사용자 정보 저장 후 userKey 받아옴
-                          int userKey = await createUserInDB(userId, userNickname);
+                          int userKey =
+                              await createUserInDB(userId, userNickname);
 
                           // userKey를 로컬 저장소에 저장
                           await prefs.setInt('userKey', userKey);
-
                         }
 
                         // 로컬 저장소에서 userKey와 user_nickname 불러오기
@@ -261,11 +265,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               builder: (context) => DisabilitySelectionPage()),
                         );
                       },
-                      child: const Text(
+                      child: Text(
                         '바로 시작하기',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: Colors.white,
+                          color: theme.colorScheme.surface,
                           fontSize: 14,
                           fontFamily: 'DM Sans',
                           fontWeight: FontWeight.w700,
@@ -287,32 +291,33 @@ class Onboarding1 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final theme = Theme.of(context);
 
     return Container(
       width: size.width,
       height: size.height,
-      color: Colors.white,
+      color: theme.scaffoldBackgroundColor,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(height: size.height * 0.20), // 위쪽 여백 추가
-          const Text(
+          Text(
             '더 정확한 자막을 실시간으로 제공해요.',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.black,
+              color: theme.colorScheme.onTertiary,
               fontSize: 20,
               fontFamily: 'DM Sans',
               fontWeight: FontWeight.w700,
             ),
           ),
           SizedBox(height: size.height * 0.02),
-          const Text(
+          Text(
             'COMMA는 강의 자료를 학습하여\n실시간 수업 중에 더 정확한 자막을 생성해요.',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Color(0xFF245B3A),
+              color: theme.colorScheme.surfaceBright,
               fontSize: 14,
               fontFamily: 'DM Sans',
               fontWeight: FontWeight.w500,
@@ -340,12 +345,14 @@ class Indicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
       width: 12,
       height: 12,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: active ? Color.fromRGBO(54, 174, 146, 1.0) : Colors.grey,
+        color: active ? theme.primaryColor : Colors.grey,
       ),
     );
   }

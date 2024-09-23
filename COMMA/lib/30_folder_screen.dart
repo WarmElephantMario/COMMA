@@ -11,7 +11,6 @@ import 'package:provider/provider.dart';
 import 'api/api.dart';
 import '../model/44_font_size_provider.dart';
 
-
 class FolderScreen extends StatefulWidget {
   const FolderScreen({super.key});
 
@@ -131,7 +130,6 @@ class _FolderScreenState extends State<FolderScreen> {
     }
   }
 
-
   Future<void> _deleteFolder(String folderType, int id) async {
     final url = Uri.parse(
         '${API.baseUrl}/api/${folderType == 'lecture' ? 'lecture' : 'colon'}-folders/$id');
@@ -151,8 +149,10 @@ class _FolderScreenState extends State<FolderScreen> {
     final fontSizeProvider = Provider.of<FontSizeProvider>(context);
     // 디스플레이 비율을 가져옴
     final scaleFactor = fontSizeProvider.scaleFactor;
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: Colors.white, // 배경 색상을 흰색으로 설정
+      backgroundColor: theme.scaffoldBackgroundColor, // 배경 색상을 흰색으로 설정
       appBar: AppBar(toolbarHeight: 0),
       body: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
@@ -260,7 +260,7 @@ class _FolderScreenState extends State<FolderScreen> {
                         ),
                     onDelete: (index) => showConfirmationDialog(
                       context,
-                      "정말로 폴더 '${colonFolders[index]['folder_name']}'을(를) 삭제하시겠습니까?", // 다이얼로그 제목
+                      "정말로 폴더 '${colonFolders[index]['folder_name']}'을(를) \n 삭제하시겠습니까?", // 다이얼로그 제목
                       "폴더를 삭제하면 다시 복구할 수 없습니다.", // 다이얼로그 내용
                       () async {
                         await _deleteFolder('colon', colonFolders[index]['id']);
