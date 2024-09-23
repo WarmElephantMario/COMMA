@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:http/http.dart' as http;
 import '60prepare.dart';
+import '63record.dart';
 import 'components.dart';
 import 'api/api.dart';
 import 'dart:typed_data';

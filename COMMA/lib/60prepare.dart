@@ -21,6 +21,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import './api/api.dart';
 import 'package:image/image.dart' as img;
+import '../model/44_font_size_provider.dart';
+
 
 bool isAlternativeTextEnabled = true;
 bool isRealTimeSttEnabled = false;
@@ -54,6 +56,8 @@ class _LearningPreparationState extends State<LearningPreparation> {
   int _selectedIndex = 2;
   int? lecturefileId;
   int? lectureFolderId;
+  bool isBasicSelected = true; // "기본 설명"이 선택된 상태를 관리
+  bool isDetailSelected = false; // "자세한 설명"이 선택된 상태를 관리
 
   final FocusNode _focusNode = FocusNode(); // 추가된 부분
 
@@ -893,9 +897,13 @@ Future<void> insertKeywordsIntoDB(int lecturefileId, String keywordsFileUrl) asy
 
   @override
   Widget build(BuildContext context) {
+    // 폰트 크기 비율을 Provider에서 가져옴
+    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
+    // 디스플레이 비율을 가져옴
+    final scaleFactor = fontSizeProvider.scaleFactor;
     // 학습 유형에 따라 제목 설정
     String titleText =
-        isAlternativeTextEnabled ? '대체텍스트 생성 학습 준비하기' : '실시간 자막 생성 학습 준비하기';
+        '학습 준비하기';
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(toolbarHeight: 0),
@@ -909,9 +917,9 @@ Future<void> insertKeywordsIntoDB(int lecturefileId, String keywordsFileUrl) asy
               focusable: true,
               child: Text(
                 titleText,
-                style: const TextStyle(
+                style:  TextStyle(
                   color: Color(0xFF414141),
-                  fontSize: 24,
+                  fontSize: 24*scaleFactor,
                   fontFamily: 'DM Sans',
                   fontWeight: FontWeight.bold,
                 ),
@@ -919,11 +927,11 @@ Future<void> insertKeywordsIntoDB(int lecturefileId, String keywordsFileUrl) asy
             ),
           ),
           const SizedBox(height: 50),
-          const Text(
+           Text(
             '강의폴더와 파일 이름을 설정해주세요.',
             style: TextStyle(
                 color: Color(0xFF575757),
-                fontSize: 16,
+                fontSize: 16*scaleFactor,
                 fontFamily: 'DM Sans',
                 fontWeight: FontWeight.bold),
           ),
@@ -954,8 +962,8 @@ Future<void> insertKeywordsIntoDB(int lecturefileId, String keywordsFileUrl) asy
                         Expanded(
                           child: Text(
                             '폴더 분류 > $_selectedFolder',
-                            style: const TextStyle(
-                              fontSize: 15.5,
+                            style:  TextStyle(
+                              fontSize: 15.5*scaleFactor,
                               fontFamily: 'DM Sans',
                               color: Color.fromARGB(255, 70, 70, 70),
                               fontWeight: FontWeight.w200,
@@ -963,7 +971,7 @@ Future<void> insertKeywordsIntoDB(int lecturefileId, String keywordsFileUrl) asy
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                      ],
+                    ],    
                     ),
                   ),
                 ),
@@ -989,8 +997,8 @@ Future<void> insertKeywordsIntoDB(int lecturefileId, String keywordsFileUrl) asy
                         Expanded(
                           child: Text(
                             _noteName,
-                            style: const TextStyle(
-                              fontSize: 15.5,
+                            style:  TextStyle(
+                              fontSize: 15.5*scaleFactor,
                               fontFamily: 'DM Sans',
                               color: Color.fromARGB(255, 70, 70, 70),
                               fontWeight: FontWeight.w200,
@@ -998,6 +1006,40 @@ Future<void> insertKeywordsIntoDB(int lecturefileId, String keywordsFileUrl) asy
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
+                        const SizedBox(width: 50),
+                        Expanded(
+                          child: Text(
+                            '대체텍스트 설명',
+                            style:  TextStyle(
+                              fontSize: 15.5*scaleFactor,
+                              fontFamily: 'DM Sans',
+                              color: Color.fromARGB(255, 70, 70, 70),
+                              fontWeight: FontWeight.w200,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      //   CustomRadioButton3(
+                      //   label: '기본 설명',
+                      //   isSelected: isBasicSelected,
+                      //   onChanged: (bool value) {
+                      //     setState(() {
+                      //       isBasicSelected = value;
+                      //       isDetailSelected = !value; // "기본 설명"이 선택되면 "자세한 설명"은 선택 해제
+                      //     });
+                      //   },
+                      // ),
+                      // const SizedBox(height: 16),
+                      // CustomRadioButton3(
+                      //   label: '자세한 설명',
+                      //   isSelected: isDetailSelected,
+                      //   onChanged: (bool value) {
+                      //     setState(() {
+                      //       isDetailSelected = value;
+                      //       isBasicSelected = !value; // "자세한 설명"이 선택되면 "기본 설명"은 선택 해제
+                      //     });
+                      //   },
+                      // ),
                       ],
                     ),
                   ),
@@ -1105,9 +1147,9 @@ Future<void> insertKeywordsIntoDB(int lecturefileId, String keywordsFileUrl) asy
                         children: [
                           Text(
                             _selectedFileName!,
-                            style: const TextStyle(
+                            style:  TextStyle(
                               color: Color(0xFF575757),
-                              fontSize: 15,
+                              fontSize: 15*scaleFactor,
                               fontFamily: 'DM Sans',
                               fontWeight: FontWeight.w500,
                               height: 1.2,
@@ -1138,12 +1180,12 @@ Future<void> insertKeywordsIntoDB(int lecturefileId, String keywordsFileUrl) asy
                         print('Stack trace: $stackTrace');
                         print('Image URL: $_downloadURL');
 
-                        return const Center(
+                        return  Center(
                           child: Text(
                             '이미지를 불러올 수 없습니다.',
                             style: TextStyle(
                               color: Colors.red,
-                              fontSize: 16,
+                              fontSize: 16*scaleFactor,
                             ),
                           ),
                         );

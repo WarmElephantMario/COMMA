@@ -6,6 +6,8 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart'; // 날짜 포맷을 위해 추가
 import '63record.dart';
 import '66colon.dart';
+import '../model/44_font_size_provider.dart';
+import 'package:provider/provider.dart';
 
 class MainToSearchPage extends StatefulWidget {
   const MainToSearchPage({super.key});
@@ -104,6 +106,10 @@ class _MainToSearchPageState extends State<MainToSearchPage> {
 
   @override
   Widget build(BuildContext context) {
+    // 폰트 크기 비율을 Provider에서 가져옴
+    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
+    // 디스플레이 비율을 가져옴
+    final scaleFactor = fontSizeProvider.scaleFactor;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
