@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_plugin/16_homepage_move.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -47,6 +48,7 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
   Future<void> fetchFiles() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userKey = userProvider.user?.userKey;
+    final disType = userProvider.user?.dis_type; // dis_type 값 가져오기
 
     if (userKey != null) {
       final response = await http.get(Uri.parse(
@@ -253,8 +255,21 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
     final fontSizeProvider = Provider.of<FontSizeProvider>(context);
     final scaleFactor = fontSizeProvider.scaleFactor;
     final theme = Theme.of(context);
+    
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => MainPage()),
+            );
+          });
+        }
+      },
+        child : Scaffold(
 
-    return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
           backgroundColor: theme.scaffoldBackgroundColor,
@@ -307,6 +322,7 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
       ),
       bottomNavigationBar:
           buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
+    ),
     );
   }
 }
