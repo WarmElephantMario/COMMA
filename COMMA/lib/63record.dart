@@ -28,8 +28,6 @@ import 'env/env.dart';
 import 'folder/37_folder_files_screen.dart';
 import '../model/44_font_size_provider.dart';
 
-
-
 enum RecordingState { initial, recording, recorded }
 
 const serverUrl =
@@ -719,19 +717,20 @@ class _RecordPageState extends State<RecordPage> {
       int colonFileId) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userKey = userProvider.user?.userKey;
+    final theme = Theme.of(context);
 
     if (userKey != null) {
       showDialog(
         context: context,
         builder: (BuildContext dialogContext) {
           return AlertDialog(
-            backgroundColor: Colors.white,
+            backgroundColor: theme.scaffoldBackgroundColor,
             title: Column(
               children: [
-                const Text(
+                Text(
                   '콜론이 생성되었습니다.',
                   style: TextStyle(
-                    color: Color(0xFF545454),
+                    color: theme.colorScheme.onSecondary,
                     fontSize: 14,
                     fontFamily: 'DM Sans',
                     fontWeight: FontWeight.bold,
@@ -741,8 +740,8 @@ class _RecordPageState extends State<RecordPage> {
                 const SizedBox(height: 4),
                 Text(
                   '폴더 이름: $folderName (:)', // 기본폴더 대신 folderName 사용
-                  style: const TextStyle(
-                    color: Color(0xFF245B3A),
+                  style: TextStyle(
+                    color: theme.colorScheme.surfaceBright,
                     fontSize: 14,
                     fontFamily: 'DM Sans',
                     fontWeight: FontWeight.bold,
@@ -750,10 +749,10 @@ class _RecordPageState extends State<RecordPage> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 4),
-                const Text(
+                Text(
                   '으로 이동하시겠습니까?',
                   style: TextStyle(
-                    color: Color(0xFF545454),
+                    color: theme.colorScheme.onSecondary,
                     fontSize: 14,
                     fontFamily: 'DM Sans',
                     fontWeight: FontWeight.bold,
@@ -771,10 +770,10 @@ class _RecordPageState extends State<RecordPage> {
                       onPressed: () {
                         Navigator.of(dialogContext).pop();
                       },
-                      child: const Text(
+                      child: Text(
                         '취소',
                         style: TextStyle(
-                          color: Color(0xFFFFA17A),
+                          color: theme.colorScheme.tertiary,
                           fontSize: 14,
                           fontFamily: 'DM Sans',
                           fontWeight: FontWeight.bold,
@@ -809,10 +808,10 @@ class _RecordPageState extends State<RecordPage> {
                               colonFileId);
                         });
                       },
-                      child: const Text(
+                      child: Text(
                         '확인',
                         style: TextStyle(
-                          color: Color(0xFF545454),
+                          color: theme.colorScheme.onSecondary,
                           fontSize: 14,
                           fontFamily: 'DM Sans',
                           fontWeight: FontWeight.bold,
@@ -1068,363 +1067,372 @@ class _RecordPageState extends State<RecordPage> {
     final scaleFactor = fontSizeProvider.scaleFactor;
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userKey = userProvider.user?.userKey;
+    final theme = Theme.of(context);
+
     return WillPopScope(
-    onWillPop: () async {
-      return false; // 뒤로 가기 버튼을 눌렀을 때 아무 반응도 하지 않도록 설정
-    },
-    child:  Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(toolbarHeight: 0),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      if (_recordingState == RecordingState.recording) {
-                        showConfirmationDialog(
-                          context,
-                          "정말 녹음을 종료하시겠습니까?",
-                          "녹음을 종료하면 다시 시작할 수 없습니다.",
-                          () {
-                            _stopRecording();
-                          },
-                        );
-                      } else {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => FolderFilesScreen(
-                              folderName: widget.folderName,
-                              folderId: widget.lectureFolderId!,
-                              folderType: 'lecture',  // 예시 폴더 유형
+      onWillPop: () async {
+        return false; // 뒤로 가기 버튼을 눌렀을 때 아무 반응도 하지 않도록 설정
+      },
+      child: Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        appBar: AppBar(toolbarHeight: 0),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        if (_recordingState == RecordingState.recording) {
+                          showConfirmationDialog(
+                            context,
+                            "정말 녹음을 종료하시겠습니까?",
+                            "녹음을 종료하면 다시 시작할 수 없습니다.",
+                            () {
+                              _stopRecording();
+                            },
+                          );
+                        } else {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => FolderFilesScreen(
+                                folderName: widget.folderName,
+                                folderId: widget.lectureFolderId!,
+                                folderType: 'lecture', // 예시 폴더 유형
+                              ),
                             ),
-                          ),
-                        );
-                      }
-                    },
-                    child: Text(
-                      _recordingState == RecordingState.initial ? '취소' : '종료',
-                      style:  TextStyle(
-                        color: Color(0xFFFFA17A),
-                        fontSize: 16*scaleFactor,
+                          );
+                        }
+                      },
+                      child: Text(
+                        _recordingState == RecordingState.initial ? '취소' : '종료',
+                        style: TextStyle(
+                          color: theme.colorScheme.tertiary,
+                          fontSize: 16 * scaleFactor,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  Image.asset('assets/folder_search.png'),
-                  const SizedBox(width: 8),
-                  Text(
-                    '폴더 분류 > ${widget.folderName}',
-                    style:  TextStyle(
-                      color: Color(0xFF575757),
-                      fontSize: 12*scaleFactor,
-                      fontFamily: 'DM Sans',
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 5),
-              Text(
-                widget.noteName,
-                style:  TextStyle(
-                  color: Color(0xFF414141),
-                  fontSize: 20*scaleFactor,
-                  fontFamily: 'DM Sans',
-                  fontWeight: FontWeight.bold,
+                  ],
                 ),
-              ),
-              const SizedBox(height: 5),
-              Text(
-                '강의 자료: ${widget.lectureName}',
-                style: const TextStyle(
-                  color: Color(0xFF575757),
-                  fontSize: 12,
-                  fontFamily: 'DM Sans',
-                ),
-              ),
-              if (_recordingState == RecordingState.recorded &&
-                  _createdAt != null)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Row(
                   children: [
-                    const SizedBox(height: 5),
+                    Icon(
+                      Icons.folder_open,
+                      color: theme.colorScheme.onSecondary,
+                    ),
+                    const SizedBox(width: 8),
                     Text(
-                      _formatDate(_createdAt!),
-                      style:  TextStyle(
-                        color: Color(0xFF575757),
-                        fontSize: 12*scaleFactor,
+                      '폴더 분류 > ${widget.folderName}',
+                      style: TextStyle(
+                        color: theme.colorScheme.onSecondary,
+                        fontSize: 12 * scaleFactor,
                         fontFamily: 'DM Sans',
                       ),
                     ),
                   ],
                 ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  if (_recordingState == RecordingState.initial)
-                    ClickButton(
-                      text: '녹음',
-                      onPressed: () {
-                        _startRecording();
-                      },
-                      width: MediaQuery.of(context).size.width * 0.25,
-                      height: 40.0,
-                      iconData: Icons.mic,
-                    ),
-                  if (_recordingState == RecordingState.recording)
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ClickButton(
-                          text: '녹음종료',
-                          onPressed: () {
-                            showConfirmationDialog(
-                              context,
-                              "정말 녹음을 종료하시겠습니까?",
-                              "녹음을 종료하면 다시 시작할 수 없습니다.",
-                              () {
-                                _stopRecording();
-                              },
-                            );
-                          },
-                          width: MediaQuery.of(context).size.width * 0.3,
-                          height: 40.0,
-                          iconData: Icons.mic,
+                const SizedBox(height: 5),
+                Text(
+                  widget.noteName,
+                  style: TextStyle(
+                    color: theme.colorScheme.onSecondary,
+                    fontSize: 20 * scaleFactor,
+                    fontFamily: 'DM Sans',
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  '강의 자료: ${widget.lectureName}',
+                  style: TextStyle(
+                    color: theme.colorScheme.onSecondary,
+                    fontSize: 12,
+                    fontFamily: 'DM Sans',
+                  ),
+                ),
+                if (_recordingState == RecordingState.recorded &&
+                    _createdAt != null)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 5),
+                      Text(
+                        _formatDate(_createdAt!),
+                        style: TextStyle(
+                          color: theme.colorScheme.onSecondary,
+                          fontSize: 12 * scaleFactor,
+                          fontFamily: 'DM Sans',
                         ),
-                        const SizedBox(width: 10),
-                        Column(
-                          children: [
-                            SizedBox(height: 10),
-                            Row(
-                              children: [
-                                Icon(Icons.fiber_manual_record,
-                                    color: Color(0xFFFFA17A)),
-                                SizedBox(width: 4),
-                                Text(
-                                  '녹음 중',
-                                  style: TextStyle(
-                                    color: Color(0xFFFFA17A),
-                                    fontSize: 14 *scaleFactor,
-                                    fontFamily: 'DM Sans',
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
-                  if (_recordingState == RecordingState.recorded)
-                    Row(
-                      children: [
-                        ClickButton(
-                          text: '녹음 종료됨',
-                          onPressed: () {},
-                          width: MediaQuery.of(context).size.width * 0.3,
-                          height: 40.0,
-                          iconData: Icons.mic_off,
-                          iconColor: Colors.white,
-                          backgroundColor: Colors.grey,
-                        ),
-                        const SizedBox(width: 2),
-                        ClickButton(
-                          text: _isColonCreated ? '콜론(:) 이동' : '콜론 생성(:)',
-                          backgroundColor: _isColonCreated ? Colors.grey : null,
-                          onPressed: () async {
-                            if (_isColonCreated) {
-                              //이미 콜론 있는 경우
-                              print('existcolon 값: ${_existColon}');
-
-                              if (_existColon != null) {
-                                var colonDetails =
-                                    await _fetchColonDetails(_existColon);
-                                var colonFolderName =
-                                    await _fetchColonFolderName(
-                                        colonDetails['folder_id']);
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ColonPage(
-                                      folderName: colonFolderName,
-                                      noteName: colonDetails['file_name'],
-                                      lectureName: colonDetails['lecture_name'],
-                                      createdAt: colonDetails['created_at'],
-                                      fileUrl: colonDetails['file_url'],
+                      ),
+                    ],
+                  ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    if (_recordingState == RecordingState.initial)
+                      ClickButton(
+                        text: '녹음',
+                        onPressed: () {
+                          _startRecording();
+                        },
+                        width: MediaQuery.of(context).size.width * 0.25,
+                        height: 40.0,
+                        iconData: Icons.mic,
+                      ),
+                    if (_recordingState == RecordingState.recording)
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ClickButton(
+                            text: '녹음종료',
+                            onPressed: () {
+                              showConfirmationDialog(
+                                context,
+                                "정말 녹음을 종료하시겠습니까?",
+                                "녹음을 종료하면 다시 시작할 수 없습니다.",
+                                () {
+                                  _stopRecording();
+                                },
+                              );
+                            },
+                            width: MediaQuery.of(context).size.width * 0.3,
+                            height: 40.0,
+                            iconData: Icons.mic,
+                          ),
+                          const SizedBox(width: 10),
+                          Column(
+                            children: [
+                              SizedBox(height: 10),
+                              Row(
+                                children: [
+                                  Icon(Icons.fiber_manual_record,
+                                      color: theme.colorScheme.tertiary),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '녹음 중',
+                                    style: TextStyle(
+                                      color: theme.colorScheme.tertiary,
+                                      fontSize: 14 * scaleFactor,
+                                      fontFamily: 'DM Sans',
                                     ),
                                   ),
-                                );
-                              }
-                            } else {
-                              print('콜론 생성 버튼 클릭됨');
-                              var url =
-                                  '${API.baseUrl}/api/check-exist-colon?lecturefileId=${widget.lecturefileId}';
-                              var response = await http.get(Uri.parse(url));
+                                ],
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    if (_recordingState == RecordingState.recorded)
+                      Row(
+                        children: [
+                          ClickButton(
+                            text: '녹음 종료됨',
+                            onPressed: () {},
+                            width: MediaQuery.of(context).size.width * 0.3,
+                            height: 40.0,
+                            iconData: Icons.mic_off,
+                            iconColor: Colors.white,
+                            backgroundColor: Colors.grey,
+                          ),
+                          const SizedBox(width: 2),
+                          ClickButton(
+                            text: _isColonCreated ? '콜론(:) 이동' : '콜론 생성(:)',
+                            backgroundColor:
+                                _isColonCreated ? Colors.grey : null,
+                            onPressed: () async {
+                              if (_isColonCreated) {
+                                //이미 콜론 있는 경우
+                                print('existcolon 값: ${_existColon}');
 
-                              if (response.statusCode == 200) {
-                                var jsonResponse = jsonDecode(response.body);
-                                var existColon = jsonResponse['existColon'];
+                                if (_existColon != null) {
+                                  var colonDetails =
+                                      await _fetchColonDetails(_existColon);
+                                  var colonFolderName =
+                                      await _fetchColonFolderName(
+                                          colonDetails['folder_id']);
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ColonPage(
+                                        folderName: colonFolderName,
+                                        noteName: colonDetails['file_name'],
+                                        lectureName:
+                                            colonDetails['lecture_name'],
+                                        createdAt: colonDetails['created_at'],
+                                        fileUrl: colonDetails['file_url'],
+                                      ),
+                                    ),
+                                  );
+                                }
+                              } else {
+                                print('콜론 생성 버튼 클릭됨');
+                                var url =
+                                    '${API.baseUrl}/api/check-exist-colon?lecturefileId=${widget.lecturefileId}';
+                                var response = await http.get(Uri.parse(url));
 
-                                if (existColon == null) {
-                                  int colonFileId = await createColonFolder(
-                                      "${widget.folderName} (:)",
-                                      "${widget.noteName} (:)",
-                                      widget.fileUrl,
-                                      widget.lectureName,
-                                      widget.type,
-                                      userKey);
+                                if (response.statusCode == 200) {
+                                  var jsonResponse = jsonDecode(response.body);
+                                  var existColon = jsonResponse['existColon'];
 
-                                  if (colonFileId != -1) {
-                                    await updateLectureFileWithColonId(
-                                        widget.lecturefileId, colonFileId);
-                                    await _updateRecordTableWithColonId(
-                                        widget.lecturefileId, colonFileId);
-                                    var colonDetails =
-                                        await _fetchColonDetails(colonFileId);
-                                    var colonFolderName =
-                                        await _fetchColonFolderName(
-                                            colonDetails['folder_id']);
-
-                                    showColonCreatingDialog(
-                                        context,
-                                        colonDetails['file_name'],
-                                        colonDetails['file_url'],
-                                        progressNotifier);
-
-                                    // 강의자료 대체텍스트, 스크립트 덩어리들 load
-                                    // gpt에게 대체텍스트 & 스크립트 보내서 스크립트를 페이지별로 분할
-                                    // 분할한 값 따라 Record_table에 page 값 수정
-                                    await loadAndProcessLectureData(
-                                        widget.lecturefileId);
-
-                                    // (5)-1 CreatingDialog pop 하기
-                                    Navigator.of(context, rootNavigator: true)
-                                        .pop();
-
-                                    // (5)-2 CreatedDialog 호출하기
-                                    //     이 안에서 생성된 콜론 화면으로 navigate
-                                    showColonCreatedDialog(
-                                        context,
-                                        widget.folderName,
-                                        widget.noteName,
-                                        widget.lectureName,
+                                  if (existColon == null) {
+                                    int colonFileId = await createColonFolder(
+                                        "${widget.folderName} (:)",
+                                        "${widget.noteName} (:)",
                                         widget.fileUrl,
-                                        widget.lecturefileId ?? -1,
-                                        colonFileId);
+                                        widget.lectureName,
+                                        widget.type,
+                                        userKey);
+
+                                    if (colonFileId != -1) {
+                                      await updateLectureFileWithColonId(
+                                          widget.lecturefileId, colonFileId);
+                                      await _updateRecordTableWithColonId(
+                                          widget.lecturefileId, colonFileId);
+                                      var colonDetails =
+                                          await _fetchColonDetails(colonFileId);
+                                      var colonFolderName =
+                                          await _fetchColonFolderName(
+                                              colonDetails['folder_id']);
+
+                                      showColonCreatingDialog(
+                                          context,
+                                          colonDetails['file_name'],
+                                          colonDetails['file_url'],
+                                          progressNotifier);
+
+                                      // 강의자료 대체텍스트, 스크립트 덩어리들 load
+                                      // gpt에게 대체텍스트 & 스크립트 보내서 스크립트를 페이지별로 분할
+                                      // 분할한 값 따라 Record_table에 page 값 수정
+                                      await loadAndProcessLectureData(
+                                          widget.lecturefileId);
+
+                                      // (5)-1 CreatingDialog pop 하기
+                                      Navigator.of(context, rootNavigator: true)
+                                          .pop();
+
+                                      // (5)-2 CreatedDialog 호출하기
+                                      //     이 안에서 생성된 콜론 화면으로 navigate
+                                      showColonCreatedDialog(
+                                          context,
+                                          widget.folderName,
+                                          widget.noteName,
+                                          widget.lectureName,
+                                          widget.fileUrl,
+                                          widget.lecturefileId ?? -1,
+                                          colonFileId);
+                                    } else {
+                                      print('콜론 파일이랑 폴더 생성 실패한듯요 ...');
+                                    }
                                   } else {
-                                    print('콜론 파일이랑 폴더 생성 실패한듯요 ...');
+                                    print(
+                                        '이미 생성된 콜론이 존재합니다. 콜론 생성 다이얼로그를 실행하지 않습니다.');
                                   }
                                 } else {
                                   print(
-                                      '이미 생성된 콜론이 존재합니다. 콜론 생성 다이얼로그를 실행하지 않습니다.');
+                                      'Failed to check existColon: ${response.statusCode}');
+                                  print(response.body);
                                 }
-                              } else {
-                                print(
-                                    'Failed to check existColon: ${response.statusCode}');
-                                print(response.body);
                               }
-                            }
-                          },
-                          width: MediaQuery.of(context).size.width * 0.3,
-                          height: 40.0,
-                        ),
-                      ],
-                    ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              if (isAlternativeTextEnabled)
-                GestureDetector(
-                  onTap: () {
-                    _toggleBlur(_currentPage);
-                  },
-                  child: Stack(
-                    children: [
-                      if (_isPDF && _pdfController != null && widget.type != 1)
-                        SizedBox(
-                          height: 600,
-                          child: PdfView(
-                            controller: _pdfController!,
-                            onPageChanged: (page) {
-                              setState(() {
-                                _currentPage = page;
-                              });
                             },
+                            width: MediaQuery.of(context).size.width * 0.3,
+                            height: 40.0,
                           ),
-                        ),
-                      if (!_isPDF && _fileBytes != null)
-                        Image.memory(_fileBytes!),
-                      if (_blurredPages.contains(_currentPage))
-                        Container(
-                          height: 600,
-                          color: Colors.black.withOpacity(0.5),
-                          child: Center(
-                            child: Text(
-                              pageTexts.isNotEmpty
-                                  ? pageTexts[_currentPage] ??
-                                      '페이지 $_currentPage의 텍스트가 없습니다.'
-                                  : '텍스트가 없습니다.',
-                              style:  TextStyle(
-                                color: Colors.white,
-                                fontSize: 12*scaleFactor,
-                                fontWeight: FontWeight.normal,
+                        ],
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                if (isAlternativeTextEnabled)
+                  GestureDetector(
+                    onTap: () {
+                      _toggleBlur(_currentPage);
+                    },
+                    child: Stack(
+                      children: [
+                        if (_isPDF &&
+                            _pdfController != null &&
+                            widget.type != 1)
+                          SizedBox(
+                            height: 600,
+                            child: PdfView(
+                              controller: _pdfController!,
+                              onPageChanged: (page) {
+                                setState(() {
+                                  _currentPage = page;
+                                });
+                              },
+                            ),
+                          ),
+                        if (!_isPDF && _fileBytes != null)
+                          Image.memory(_fileBytes!),
+                        if (_blurredPages.contains(_currentPage))
+                          Container(
+                            height: 600,
+                            color: Colors.black.withOpacity(0.5),
+                            child: Center(
+                              child: Text(
+                                pageTexts.isNotEmpty
+                                    ? pageTexts[_currentPage] ??
+                                        '페이지 $_currentPage의 텍스트가 없습니다.'
+                                    : '텍스트가 없습니다.',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 13 * scaleFactor,
+                                  fontWeight: FontWeight.normal,
+                                ),
                               ),
                             ),
                           ),
+                      ],
+                    ),
+                  ),
+                const SizedBox(height: 20),
+                if (_recordingState == RecordingState.recording)
+                  Column(
+                    children: [
+                      const SizedBox(height: 10),
+                      Text(
+                        _recognizedText + ' ' + _interimText,
+                        style: TextStyle(
+                          color: theme.colorScheme.onTertiary,
+                          fontSize: 17 * scaleFactor,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: GoogleFonts.ibmPlexSansKr().fontFamily,
+                          height: 1.8,
                         ),
+                      ),
+                      const SizedBox(height: 20),
                     ],
                   ),
-                ),
-              const SizedBox(height: 20),
-              if (_recordingState == RecordingState.recording)
-                Column(
-                  children: [
-                    const SizedBox(height: 10),
-                    Text(
-                      _recognizedText + ' ' + _interimText,
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 17*scaleFactor,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: GoogleFonts.ibmPlexSansKr().fontFamily,
-                        height: 1.8,
+                if (_recordingState == RecordingState.recorded)
+                  Column(
+                    children: [
+                      const SizedBox(height: 10),
+                      Text(
+                        _recognizedText,
+                        style: TextStyle(
+                          color: theme.colorScheme.onTertiary,
+                          fontSize: 17 * scaleFactor,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: GoogleFonts.ibmPlexSansKr().fontFamily,
+                          height: 1.8,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-                ),
-              if (_recordingState == RecordingState.recorded)
-                Column(
-                  children: [
-                    const SizedBox(height: 10),
-                    Text(
-                      _recognizedText,
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 17*scaleFactor,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: GoogleFonts.ibmPlexSansKr().fontFamily,
-                        height: 1.8,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-                ),
-            ],
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+              ],
+            ),
           ),
         ),
+        bottomNavigationBar:
+            buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
       ),
-      bottomNavigationBar:
-          buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
-    ),
     );
   }
 }

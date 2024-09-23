@@ -23,7 +23,6 @@ import './api/api.dart';
 import 'package:image/image.dart' as img;
 import '../model/44_font_size_provider.dart';
 
-
 bool isAlternativeTextEnabled = true;
 bool isRealTimeSttEnabled = false;
 
@@ -215,6 +214,8 @@ class _LearningPreparationState extends State<LearningPreparation> {
 
     print('Updated folders: $updatedFolders');
 
+    final theme = Theme.of(context);
+
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -222,7 +223,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
           top: Radius.circular(20),
         ),
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: theme.colorScheme.surfaceContainer,
       isScrollControlled: true, // 전체 화면에서 모달을 사용할 수 있게 함
       builder: (BuildContext context) {
         return StatefulBuilder(
@@ -245,19 +246,19 @@ class _LearningPreparationState extends State<LearningPreparation> {
                         onPressed: () {
                           Navigator.pop(context);
                         },
-                        child: const Text(
+                        child: Text(
                           '취소',
                           style: TextStyle(
-                            color: Color.fromRGBO(84, 84, 84, 1),
+                            color: theme.colorScheme.onSecondary,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
-                      const Text(
+                      Text(
                         '다음으로 이동',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: theme.colorScheme.onTertiary,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -276,10 +277,10 @@ class _LearningPreparationState extends State<LearningPreparation> {
                           }
                           Navigator.pop(context);
                         },
-                        child: const Text(
+                        child: Text(
                           '이동',
                           style: TextStyle(
-                            color: Color.fromRGBO(255, 161, 122, 1),
+                            color: theme.colorScheme.tertiary,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
@@ -288,11 +289,11 @@ class _LearningPreparationState extends State<LearningPreparation> {
                     ],
                   ),
                   const SizedBox(height: 2),
-                  const Center(
+                  Center(
                     child: Text(
                       '다른 폴더로 이동할 수 있어요.',
                       style: TextStyle(
-                        color: Color(0xFF575757),
+                        color: theme.colorScheme.onSecondary,
                         fontSize: 13,
                         fontFamily: 'Raleway',
                         fontWeight: FontWeight.w500,
@@ -347,15 +348,17 @@ class _LearningPreparationState extends State<LearningPreparation> {
     final TextEditingController textController = TextEditingController();
     textController.text = currentName;
 
+    final theme = Theme.of(context);
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: Colors.white,
+          backgroundColor: theme.colorScheme.surfaceContainer,
           title: Text(
             title,
-            style: const TextStyle(
-              color: Color(0xFF545454),
+            style: TextStyle(
+              color: theme.colorScheme.onSecondary,
               fontSize: 14,
               fontFamily: 'DM Sans',
               fontWeight: FontWeight.bold,
@@ -365,9 +368,10 @@ class _LearningPreparationState extends State<LearningPreparation> {
             controller: textController,
             decoration: InputDecoration(
               hintText: "새로운 노트",
-              hintStyle: TextStyle(color: Colors.grey),
+              hintStyle: TextStyle(color: theme.colorScheme.onSecondary),
             ),
-            style: TextStyle(color: Color(0xFF545454)), // 입력할 때 글자 색상 지정
+            style: TextStyle(
+                color: theme.colorScheme.onSecondary), // 입력할 때 글자 색상 지정
             onTap: () {
               if (textController.text == currentName) {
                 textController.clear();
@@ -376,15 +380,15 @@ class _LearningPreparationState extends State<LearningPreparation> {
           ),
           actions: <Widget>[
             TextButton(
-              child:
-                  const Text('취소', style: TextStyle(color: Color(0xFFFFA17A))),
+              child: Text('취소',
+                  style: TextStyle(color: theme.colorScheme.tertiary)),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child:
-                  const Text('저장', style: TextStyle(color: Color(0xFF545454))),
+              child: Text('저장',
+                  style: TextStyle(color: theme.colorScheme.onTertiary)),
               onPressed: () async {
                 String newName = textController.text;
                 await renameItem(newName);
@@ -741,30 +745,30 @@ class _LearningPreparationState extends State<LearningPreparation> {
       }
 
       // ,기준으로 분리? => 로직 수정 필요
-    String keywordContent = uniqueKeywords.join(',');
+      String keywordContent = uniqueKeywords.join(',');
 
-    // 키워드 파이어베이스에 저장하기 
-    final directory = await getTemporaryDirectory();
-    final filePath =
-        path.join(directory.path, '${DateTime.now().millisecondsSinceEpoch}_keywords.txt');
+      // 키워드 파이어베이스에 저장하기
+      final directory = await getTemporaryDirectory();
+      final filePath = path.join(directory.path,
+          '${DateTime.now().millisecondsSinceEpoch}_keywords.txt');
 
-    final file = File(filePath);
-    await file.writeAsString(keywordContent);
+      final file = File(filePath);
+      await file.writeAsString(keywordContent);
 
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final storageRef = FirebaseStorage.instance.ref().child(
-        'keywords/${userProvider.user!.userKey}/${getFolderIdByName(_selectedFolder)}/$lecturefileId/${path.basename(filePath)}');
-    UploadTask uploadTask = storageRef.putFile(file);
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final storageRef = FirebaseStorage.instance.ref().child(
+          'keywords/${userProvider.user!.userKey}/${getFolderIdByName(_selectedFolder)}/$lecturefileId/${path.basename(filePath)}');
+      UploadTask uploadTask = storageRef.putFile(file);
 
-    TaskSnapshot taskSnapshot = await uploadTask;
-    String keywordsFileUrl = await taskSnapshot.ref.getDownloadURL();
-    print('Keywords file stored at URL: $keywordsFileUrl');
+      TaskSnapshot taskSnapshot = await uploadTask;
+      String keywordsFileUrl = await taskSnapshot.ref.getDownloadURL();
+      print('Keywords file stored at URL: $keywordsFileUrl');
 
-    // Delete the temporary file
-    await file.delete();
+      // Delete the temporary file
+      await file.delete();
 
-    // DB에 lecturefile_id와 keywords_url 저장
-    await insertKeywordsIntoDB(lecturefileId!, keywordsFileUrl);
+      // DB에 lecturefile_id와 keywords_url 저장
+      await insertKeywordsIntoDB(lecturefileId!, keywordsFileUrl);
 
       return uniqueKeywords;
     } catch (e) {
@@ -774,28 +778,29 @@ class _LearningPreparationState extends State<LearningPreparation> {
   }
 
 // Keywords_table에 lecturefile_id와 keywords_url 삽입
-Future<void> insertKeywordsIntoDB(int lecturefileId, String keywordsFileUrl) async {
-  try {
-    final response = await http.post(
-      Uri.parse('${API.baseUrl}/api/insert-keywords'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode({
-        'lecturefileId': lecturefileId,
-        'keywordsFileUrl': keywordsFileUrl,
-      }),
-    );
+  Future<void> insertKeywordsIntoDB(
+      int lecturefileId, String keywordsFileUrl) async {
+    try {
+      final response = await http.post(
+        Uri.parse('${API.baseUrl}/api/insert-keywords'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode({
+          'lecturefileId': lecturefileId,
+          'keywordsFileUrl': keywordsFileUrl,
+        }),
+      );
 
-    if (response.statusCode == 200) {
-      print('Keywords successfully inserted into DB.');
-    } else {
-      print('Failed to insert keywords into DB.');
+      if (response.statusCode == 200) {
+        print('Keywords successfully inserted into DB.');
+      } else {
+        print('Failed to insert keywords into DB.');
+      }
+    } catch (e) {
+      print('Error inserting keywords into DB: $e');
     }
-  } catch (e) {
-    print('Error inserting keywords into DB: $e');
   }
-}
 
   Future<List<String>> handlePdfUpload(Uint8List pdfBytes, int userKey) async {
     try {
@@ -901,11 +906,12 @@ Future<void> insertKeywordsIntoDB(int lecturefileId, String keywordsFileUrl) asy
     final fontSizeProvider = Provider.of<FontSizeProvider>(context);
     // 디스플레이 비율을 가져옴
     final scaleFactor = fontSizeProvider.scaleFactor;
+    final theme = Theme.of(context);
+
     // 학습 유형에 따라 제목 설정
-    String titleText =
-        '학습 준비하기';
+    String titleText = ' 학습 준비하기';
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(toolbarHeight: 0),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
@@ -917,9 +923,9 @@ Future<void> insertKeywordsIntoDB(int lecturefileId, String keywordsFileUrl) asy
               focusable: true,
               child: Text(
                 titleText,
-                style:  TextStyle(
-                  color: Color(0xFF414141),
-                  fontSize: 24*scaleFactor,
+                style: TextStyle(
+                  color: theme.colorScheme.onSecondary,
+                  fontSize: 24 * scaleFactor,
                   fontFamily: 'DM Sans',
                   fontWeight: FontWeight.bold,
                 ),
@@ -927,11 +933,11 @@ Future<void> insertKeywordsIntoDB(int lecturefileId, String keywordsFileUrl) asy
             ),
           ),
           const SizedBox(height: 50),
-           Text(
+          Text(
             '강의폴더와 파일 이름을 설정해주세요.',
             style: TextStyle(
-                color: Color(0xFF575757),
-                fontSize: 16*scaleFactor,
+                color: theme.colorScheme.onSecondary,
+                fontSize: 16 * scaleFactor,
                 fontFamily: 'DM Sans',
                 fontWeight: FontWeight.bold),
           ),
@@ -957,21 +963,24 @@ Future<void> insertKeywordsIntoDB(int lecturefileId, String keywordsFileUrl) asy
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Image.asset('assets/folder_search.png'),
+                        Icon(
+                          Icons.folder_open,
+                          color: theme.colorScheme.onSecondary,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             '폴더 분류 > $_selectedFolder',
-                            style:  TextStyle(
-                              fontSize: 15.5*scaleFactor,
+                            style: TextStyle(
+                              fontSize: 15.5 * scaleFactor,
                               fontFamily: 'DM Sans',
-                              color: Color.fromARGB(255, 70, 70, 70),
-                              fontWeight: FontWeight.w200,
+                              color: theme.colorScheme.onSecondary,
+                              fontWeight: FontWeight.w400,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                    ],    
+                      ],
                     ),
                   ),
                 ),
@@ -992,16 +1001,19 @@ Future<void> insertKeywordsIntoDB(int lecturefileId, String keywordsFileUrl) asy
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Image.asset('assets/text.png'),
+                        Icon(
+                          Icons.book_outlined,
+                          color: theme.colorScheme.onSecondary,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             _noteName,
-                            style:  TextStyle(
-                              fontSize: 15.5*scaleFactor,
+                            style: TextStyle(
+                              fontSize: 15.5 * scaleFactor,
                               fontFamily: 'DM Sans',
-                              color: Color.fromARGB(255, 70, 70, 70),
-                              fontWeight: FontWeight.w200,
+                              color: theme.colorScheme.onSecondary,
+                              fontWeight: FontWeight.w400,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -1010,36 +1022,36 @@ Future<void> insertKeywordsIntoDB(int lecturefileId, String keywordsFileUrl) asy
                         Expanded(
                           child: Text(
                             '대체텍스트 설명',
-                            style:  TextStyle(
-                              fontSize: 15.5*scaleFactor,
+                            style: TextStyle(
+                              fontSize: 15.5 * scaleFactor,
                               fontFamily: 'DM Sans',
-                              color: Color.fromARGB(255, 70, 70, 70),
+                              color: theme.colorScheme.onSecondary,
                               fontWeight: FontWeight.w200,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                      //   CustomRadioButton3(
-                      //   label: '기본 설명',
-                      //   isSelected: isBasicSelected,
-                      //   onChanged: (bool value) {
-                      //     setState(() {
-                      //       isBasicSelected = value;
-                      //       isDetailSelected = !value; // "기본 설명"이 선택되면 "자세한 설명"은 선택 해제
-                      //     });
-                      //   },
-                      // ),
-                      // const SizedBox(height: 16),
-                      // CustomRadioButton3(
-                      //   label: '자세한 설명',
-                      //   isSelected: isDetailSelected,
-                      //   onChanged: (bool value) {
-                      //     setState(() {
-                      //       isDetailSelected = value;
-                      //       isBasicSelected = !value; // "자세한 설명"이 선택되면 "기본 설명"은 선택 해제
-                      //     });
-                      //   },
-                      // ),
+                        //   CustomRadioButton3(
+                        //   label: '기본 설명',
+                        //   isSelected: isBasicSelected,
+                        //   onChanged: (bool value) {
+                        //     setState(() {
+                        //       isBasicSelected = value;
+                        //       isDetailSelected = !value; // "기본 설명"이 선택되면 "자세한 설명"은 선택 해제
+                        //     });
+                        //   },
+                        // ),
+                        // const SizedBox(height: 16),
+                        // CustomRadioButton3(
+                        //   label: '자세한 설명',
+                        //   isSelected: isDetailSelected,
+                        //   onChanged: (bool value) {
+                        //     setState(() {
+                        //       isDetailSelected = value;
+                        //       isBasicSelected = !value; // "자세한 설명"이 선택되면 "기본 설명"은 선택 해제
+                        //     });
+                        //   },
+                        // ),
                       ],
                     ),
                   ),
@@ -1133,7 +1145,7 @@ Future<void> insertKeywordsIntoDB(int lecturefileId, String keywordsFileUrl) asy
                 const SizedBox(height: 20),
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.teal.shade50,
+                    color: theme.colorScheme.tertiaryContainer,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   padding: const EdgeInsets.all(8),
@@ -1147,9 +1159,9 @@ Future<void> insertKeywordsIntoDB(int lecturefileId, String keywordsFileUrl) asy
                         children: [
                           Text(
                             _selectedFileName!,
-                            style:  TextStyle(
-                              color: Color(0xFF575757),
-                              fontSize: 15*scaleFactor,
+                            style: TextStyle(
+                              color: theme.colorScheme.onSecondary,
+                              fontSize: 15 * scaleFactor,
                               fontFamily: 'DM Sans',
                               fontWeight: FontWeight.w500,
                               height: 1.2,
@@ -1180,12 +1192,12 @@ Future<void> insertKeywordsIntoDB(int lecturefileId, String keywordsFileUrl) asy
                         print('Stack trace: $stackTrace');
                         print('Image URL: $_downloadURL');
 
-                        return  Center(
+                        return Center(
                           child: Text(
                             '이미지를 불러올 수 없습니다.',
                             style: TextStyle(
-                              color: Colors.red,
-                              fontSize: 16*scaleFactor,
+                              color: theme.colorScheme.tertiary,
+                              fontSize: 16 * scaleFactor,
                             ),
                           ),
                         );

@@ -187,8 +187,8 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
                 lectureFolderId: file['folder_id'],
                 lecturefileId: file['id'],
                 lectureName: file['lecture_name'] ?? 'Unknown Lecture',
-                fileURL:
-                    file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
+                fileURL: file['file_url'] ??
+                    'https://defaulturl.com/defaultfile.txt',
                 type: userDisType!,
                 selectedFolder: widget.folderName,
                 noteName: file['file_name'] ?? 'Unknown Note',
@@ -203,8 +203,8 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
               '${API.baseUrl}/api/getFolderName/$fileType/$folderId'));
           if (response.statusCode == 200) {
             var data = jsonDecode(response.body);
-            navigateToPage(
-                context, data['folder_name'] ?? 'Unknown Folder', file, fileType);
+            navigateToPage(context, data['folder_name'] ?? 'Unknown Folder',
+                file, fileType);
           } else {
             print('Failed to load folder name: ${response.statusCode}');
             navigateToPage(context, 'Unknown Folder', file, fileType);
@@ -252,18 +252,19 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
   Widget build(BuildContext context) {
     final fontSizeProvider = Provider.of<FontSizeProvider>(context);
     final scaleFactor = fontSizeProvider.scaleFactor;
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: theme.scaffoldBackgroundColor,
           title: Text(
             widget.folderName,
             style: TextStyle(
-                color: Color.fromARGB(255, 48, 48, 48),
+                color: theme.colorScheme.onTertiary,
                 fontWeight: FontWeight.w600),
           ),
-          iconTheme:
-              const IconThemeData(color: Color.fromARGB(255, 48, 48, 48))),
+          iconTheme: IconThemeData(color: theme.colorScheme.onTertiary)),
       body: LayoutBuilder(
         builder: (context, constraints) {
           return SingleChildScrollView(
@@ -333,16 +334,18 @@ class FileListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final fontSizeProvider = Provider.of<FontSizeProvider>(context);
     final scaleFactor = fontSizeProvider.scaleFactor;
+    final theme = Theme.of(context);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
       padding: const EdgeInsets.all(12),
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.green.withOpacity(0.05),
+        color: theme.colorScheme.tertiaryFixed,
         borderRadius: BorderRadius.circular(10),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Colors.black12,
+            color: theme.colorScheme.onSecondary,
             spreadRadius: 2.0,
             offset: Offset(0, 2),
           ),
@@ -354,7 +357,7 @@ class FileListItem extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: const Color(0xFF0D5836),
+              color: theme.colorScheme.surfaceBright,
               borderRadius: BorderRadius.circular(10.0),
             ),
           ),
@@ -368,7 +371,7 @@ class FileListItem extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 16 * scaleFactor,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    color: theme.colorScheme.onTertiary,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -377,7 +380,7 @@ class FileListItem extends StatelessWidget {
                   formatDateTimeToKorean(file['created_at'] ?? ''),
                   style: TextStyle(
                     fontSize: 12 * scaleFactor,
-                    color: Color(0xFF6C7A89),
+                    color: theme.colorScheme.onSecondary,
                   ),
                 ),
               ],
@@ -386,7 +389,7 @@ class FileListItem extends StatelessWidget {
           GestureDetector(
             child: ImageIcon(
               AssetImage('assets/folder_menu.png'),
-              color: Color.fromRGBO(255, 161, 122, 1),
+              color: Color(0xFFFFA17A),
             ),
             onTap: () {
               showCustomMenu2(context, onRename, onDelete);

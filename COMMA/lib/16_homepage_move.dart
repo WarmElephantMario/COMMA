@@ -49,47 +49,47 @@ class _MainPageState extends State<MainPage> {
     super.dispose();
   }
 
-Future<void> fetchLectureFiles() async {
-  final userProvider = Provider.of<UserProvider>(context, listen: false);
-  final userKey = userProvider.user?.userKey;
-  final disType = userProvider.user?.dis_type; // dis_type 값 가져오기
+  Future<void> fetchLectureFiles() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userKey = userProvider.user?.userKey;
+    final disType = userProvider.user?.dis_type; // dis_type 값 가져오기
 
-  if (userKey != null && disType != null) {
-    try {
-      print('Fetching lecture files for userKey: $userKey and disType: $disType');
-      
-      final response = await http.get(Uri.parse(
-        '${API.baseUrl}/api/getLectureFiles/$userKey?disType=$disType', // dis_type 파라미터 추가
-      ));
+    if (userKey != null && disType != null) {
+      try {
+        print(
+            'Fetching lecture files for userKey: $userKey and disType: $disType');
 
-      print('Response status code: ${response.statusCode}'); // 상태 코드 로그
+        final response = await http.get(Uri.parse(
+          '${API.baseUrl}/api/getLectureFiles/$userKey?disType=$disType', // dis_type 파라미터 추가
+        ));
 
-      if (response.statusCode == 200) {
-        print('Lecture files fetched successfully'); // 성공 로그
-        final List<Map<String, dynamic>> fileData = List<Map<String, dynamic>>.from(
-          jsonDecode(response.body)['files']
-        );
-        setState(() {
-          lectureFiles = fileData;
-        });
-      } else {
-        print('Failed to load lecture files. Status code: ${response.statusCode}');
-        print('Response body: ${response.body}'); // 응답 본문 로그
-        throw Exception('Failed to load lecture files');
+        print('Response status code: ${response.statusCode}'); // 상태 코드 로그
+
+        if (response.statusCode == 200) {
+          print('Lecture files fetched successfully'); // 성공 로그
+          final List<Map<String, dynamic>> fileData =
+              List<Map<String, dynamic>>.from(
+                  jsonDecode(response.body)['files']);
+          setState(() {
+            lectureFiles = fileData;
+          });
+        } else {
+          print(
+              'Failed to load lecture files. Status code: ${response.statusCode}');
+          print('Response body: ${response.body}'); // 응답 본문 로그
+          throw Exception('Failed to load lecture files');
+        }
+      } catch (e, stacktrace) {
+        print('Error occurred while fetching lecture files: $e');
+        print('Stacktrace: $stacktrace'); // 스택 트레이스 로그
+        throw Exception('Failed to fetch lecture files: $e');
       }
-    } catch (e, stacktrace) {
-      print('Error occurred while fetching lecture files: $e');
-      print('Stacktrace: $stacktrace'); // 스택 트레이스 로그
-      throw Exception('Failed to fetch lecture files: $e');
+    } else {
+      print('UserKey or disType is null');
     }
-  } else {
-    print('UserKey or disType is null');
   }
-}
 
-
-
-Future<void> fetchColonFiles() async {
+  Future<void> fetchColonFiles() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userKey = userProvider.user?.userKey;
     final disType = userProvider.user?.dis_type; // dis_type 값 가져오기
@@ -101,15 +101,14 @@ Future<void> fetchColonFiles() async {
 
       if (response.statusCode == 200) {
         setState(() {
-          colonFiles =
-              List<Map<String, dynamic>>.from(jsonDecode(response.body)['files']);
+          colonFiles = List<Map<String, dynamic>>.from(
+              jsonDecode(response.body)['files']);
         });
       } else {
         throw Exception('Failed to load colon files');
       }
     }
   }
-
 
   Future<void> fetchOtherFolders(String fileType, int currentFolderId) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
@@ -175,6 +174,8 @@ Future<void> fetchColonFiles() async {
 
     print('Updated folders: $updatedFolders');
 
+    final theme = Theme.of(context);
+
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -182,7 +183,7 @@ Future<void> fetchColonFiles() async {
           top: Radius.circular(20),
         ),
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: theme.colorScheme.surfaceContainer,
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
@@ -199,19 +200,19 @@ Future<void> fetchColonFiles() async {
                         onPressed: () {
                           Navigator.pop(context);
                         },
-                        child: const Text(
+                        child: Text(
                           '취소',
                           style: TextStyle(
-                            color: Color.fromRGBO(84, 84, 84, 1),
+                            color: theme.colorScheme.onTertiary,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
-                      const Text(
+                      Text(
                         '다음으로 이동',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: theme.colorScheme.onTertiary,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -226,10 +227,10 @@ Future<void> fetchColonFiles() async {
                           await moveItem(fileId, selectedFolderId, fileType);
                           Navigator.pop(context);
                         },
-                        child: const Text(
+                        child: Text(
                           '이동',
                           style: TextStyle(
-                            color: Color.fromRGBO(255, 161, 122, 1),
+                            color: theme.colorScheme.tertiary,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
@@ -238,11 +239,11 @@ Future<void> fetchColonFiles() async {
                     ],
                   ),
                   const SizedBox(height: 2),
-                  const Center(
+                  Center(
                     child: Text(
                       '현재 위치 외 다른 폴더로 이동할 수 있어요.',
                       style: TextStyle(
-                        color: Color(0xFF575757),
+                        color: theme.colorScheme.onSecondary,
                         fontSize: 13,
                         fontFamily: 'Raleway',
                         fontWeight: FontWeight.w500,
@@ -390,118 +391,121 @@ Future<void> fetchColonFiles() async {
       rethrow;
     }
   }
+
   // 데베에서 keywords 가져오기
-Future<List<String>> fetchKeywords(int lecturefileId) async {
-  try {
-    final response = await http.get(Uri.parse('${API.baseUrl}/api/getKeywords/$lecturefileId'));
+  Future<List<String>> fetchKeywords(int lecturefileId) async {
+    try {
+      final response = await http
+          .get(Uri.parse('${API.baseUrl}/api/getKeywords/$lecturefileId'));
 
-    if (response.statusCode == 200) {
-      final responseData = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
 
-      if (responseData['success'] == true) {
-        final String keywordsUrl = responseData['keywordsUrl'];
+        if (responseData['success'] == true) {
+          final String keywordsUrl = responseData['keywordsUrl'];
 
-        // keywords_url에서 키워드 리스트를 가져옴
-        return await fetchKeywordsFromUrl(keywordsUrl);
+          // keywords_url에서 키워드 리스트를 가져옴
+          return await fetchKeywordsFromUrl(keywordsUrl);
+        } else {
+          print('Error fetching keywords: ${responseData['error']}');
+          return [];
+        }
       } else {
-        print('Error fetching keywords: ${responseData['error']}');
+        print('Failed to fetch keywords with status: ${response.statusCode}');
         return [];
       }
-    } else {
-      print('Failed to fetch keywords with status: ${response.statusCode}');
+    } catch (e) {
+      print('Error: $e');
       return [];
     }
-  } catch (e) {
-    print('Error: $e');
-    return [];
   }
-}
 
 // keywords_url에서 키워드 리스트를 가져오는 함수
-Future<List<String>> fetchKeywordsFromUrl(String keywordsUrl) async {
-  try {
-    final response = await http.get(Uri.parse(keywordsUrl));
+  Future<List<String>> fetchKeywordsFromUrl(String keywordsUrl) async {
+    try {
+      final response = await http.get(Uri.parse(keywordsUrl));
 
-    if (response.statusCode == 200) {
-      // UTF-8로 디코딩 처리
-      final String content = utf8.decode(response.bodyBytes);
-      return content.split(','); // ,로 분리하여 키워드 리스트 반환
-    } else {
-      print('Failed to fetch keywords from URL');
+      if (response.statusCode == 200) {
+        // UTF-8로 디코딩 처리
+        final String content = utf8.decode(response.bodyBytes);
+        return content.split(','); // ,로 분리하여 키워드 리스트 반환
+      } else {
+        print('Failed to fetch keywords from URL');
+        return [];
+      }
+    } catch (e) {
+      print('Error fetching keywords from URL: $e');
       return [];
     }
-  } catch (e) {
-    print('Error fetching keywords from URL: $e');
-    return [];
   }
-}
 
+  // 강의 파일 클릭 이벤트에서 폴더 이름 조회 및 existLecture 확인
+  void fetchFolderAndNavigate(BuildContext context, int folderId,
+      String fileType, Map<String, dynamic> file) async {
+    try {
+      final lectureFileId = file['id']; // lectureFileId 가져오기
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final userDisType = userProvider.user?.dis_type; // 유저의 dis_type 가져오기
 
- // 강의 파일 클릭 이벤트에서 폴더 이름 조회 및 existLecture 확인
-void fetchFolderAndNavigate(BuildContext context, int folderId,
-    String fileType, Map<String, dynamic> file) async {
-  try {
-    final lectureFileId = file['id']; // lectureFileId 가져오기
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userDisType = userProvider.user?.dis_type; // 유저의 dis_type 가져오기
+      // 1. 먼저 lecturefileId로 existLecture 값을 확인하는 API 요청
+      final existLectureResponse = await http.get(
+          Uri.parse('${API.baseUrl}/api/checkExistLecture/$lectureFileId'));
 
-    // 1. 먼저 lecturefileId로 existLecture 값을 확인하는 API 요청
-    final existLectureResponse = await http.get(
-        Uri.parse('${API.baseUrl}/api/checkExistLecture/$lectureFileId'));
+      if (existLectureResponse.statusCode == 200) {
+        var existLectureData = jsonDecode(existLectureResponse.body);
 
-    if (existLectureResponse.statusCode == 200) {
-      var existLectureData = jsonDecode(existLectureResponse.body);
+        // 2. existLecture가 0이면 LectureStartPage로 이동
+        if (existLectureData['existLecture'] == 0) {
+          // 키워드 fetch 후 LectureStartPage로 이동
+          List<String> keywords = await fetchKeywords(lectureFileId);
 
-      // 2. existLecture가 0이면 LectureStartPage로 이동
-      if (existLectureData['existLecture'] == 0) {
-        // 키워드 fetch 후 LectureStartPage로 이동
-        List<String> keywords = await fetchKeywords(lectureFileId);
+          // 폴더 이름 가져오기
+          final response = await http.get(Uri.parse(
+              '${API.baseUrl}/api/getFolderName/$fileType/$folderId'));
+          if (response.statusCode == 200) {
+            var data = jsonDecode(response.body);
 
-        // 폴더 이름 가져오기
-        final response = await http.get(
-            Uri.parse('${API.baseUrl}/api/getFolderName/$fileType/$folderId'));
-        if (response.statusCode == 200) {
-          var data = jsonDecode(response.body);
-
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => LectureStartPage(
-                lectureFolderId: file['folder_id'],
-                lecturefileId: file['id'],
-                lectureName: file['lecture_name'] ?? 'Unknown Lecture',
-                fileURL: file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
-                type: userDisType!, // 수정
-                selectedFolder: data['folder_name'], // 폴더 이름
-                noteName: file['file_name'] ?? 'Unknown Note',
-                responseUrl: file['alternative_text_url'] ?? 'https://defaulturl.com/defaultfile.txt', // null 또는 실제 값
-                keywords: keywords, // 키워드 목록
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => LectureStartPage(
+                  lectureFolderId: file['folder_id'],
+                  lecturefileId: file['id'],
+                  lectureName: file['lecture_name'] ?? 'Unknown Lecture',
+                  fileURL: file['file_url'] ??
+                      'https://defaulturl.com/defaultfile.txt',
+                  type: userDisType!, // 수정
+                  selectedFolder: data['folder_name'], // 폴더 이름
+                  noteName: file['file_name'] ?? 'Unknown Note',
+                  responseUrl: file['alternative_text_url'] ??
+                      'https://defaulturl.com/defaultfile.txt', // null 또는 실제 값
+                  keywords: keywords, // 키워드 목록
+                ),
               ),
-            ),
-          );
+            );
+          }
+        } else if (existLectureData['existLecture'] == 1) {
+          // existLecture가 1이면 기존 페이지로 이동
+          final response = await http.get(Uri.parse(
+              '${API.baseUrl}/api/getFolderName/$fileType/$folderId'));
+          if (response.statusCode == 200) {
+            var data = jsonDecode(response.body);
+            navigateToPage(context, data['folder_name'] ?? 'Unknown Folder',
+                file, fileType);
+          } else {
+            print('Failed to load folder name: ${response.statusCode}');
+            navigateToPage(context, 'Unknown Folder', file, fileType);
+          }
         }
-      } else if (existLectureData['existLecture'] == 1) {
-        // existLecture가 1이면 기존 페이지로 이동
-        final response = await http.get(
-            Uri.parse('${API.baseUrl}/api/getFolderName/$fileType/$folderId'));
-        if (response.statusCode == 200) {
-          var data = jsonDecode(response.body);
-          navigateToPage(
-              context, data['folder_name'] ?? 'Unknown Folder', file, fileType);
-        } else {
-          print('Failed to load folder name: ${response.statusCode}');
-          navigateToPage(context, 'Unknown Folder', file, fileType);
-        }
+      } else {
+        print(
+            'Failed to check existLecture: ${existLectureResponse.statusCode}');
       }
-    } else {
-      print('Failed to check existLecture: ${existLectureResponse.statusCode}');
+    } catch (e) {
+      print('Error fetching folder name or existLecture: $e');
+      navigateToPage(context, 'Unknown Folder', file, fileType);
     }
-  } catch (e) {
-    print('Error fetching folder name or existLecture: $e');
-    navigateToPage(context, 'Unknown Folder', file, fileType);
   }
-}
-
 
   // 강의 파일 또는 콜론 파일 페이지로 네비게이션
   void navigateToPage(BuildContext context, String folderName,
@@ -579,15 +583,17 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
     final scaleFactor = fontSizeProvider.scaleFactor;
     // final size = MediaQuery.of(context).size;
     final userProvider = Provider.of<UserProvider>(context);
+    final theme = Theme.of(context);
+
     return PopScope(
       canPop: false,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          backgroundColor: Colors.white,
-          iconTheme: const IconThemeData(
-            color: Color(0xFF36AE92),
+          backgroundColor: theme.scaffoldBackgroundColor,
+          iconTheme: IconThemeData(
+            color: theme.colorScheme.primary,
           ),
           leading: null,
           actions: [
@@ -611,7 +617,7 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
         ),
         body: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(25.0),
+            padding: const EdgeInsets.all(25),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -624,11 +630,11 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
                       Text.rich(
                         TextSpan(
                           children: [
-                             TextSpan(
+                            TextSpan(
                               text: '안녕하세요, ',
                               style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 24* scaleFactor,
+                                color: theme.colorScheme.onTertiary,
+                                fontSize: 24 * scaleFactor,
                                 fontFamily: 'DM Sans',
                                 fontWeight: FontWeight.w500,
                                 height: 1.5,
@@ -636,19 +642,19 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
                             ),
                             TextSpan(
                               text: userProvider.user?.user_nickname ?? 'Guest',
-                              style:  TextStyle(
-                                color: Color(0xFF36AE92), // 원하는 색상으로 설정
-                                fontSize: 24* scaleFactor,
+                              style: TextStyle(
+                                color: theme.colorScheme.primary, // 원하는 색상으로 설정
+                                fontSize: 24 * scaleFactor,
                                 fontFamily: 'DM Sans',
                                 fontWeight: FontWeight.w700,
                                 height: 1.5,
                               ),
                             ),
-                             TextSpan(
+                            TextSpan(
                               text: ' 님',
                               style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 24* scaleFactor,
+                                color: theme.colorScheme.onTertiary,
+                                fontSize: 24 * scaleFactor,
                                 fontFamily: 'DM Sans',
                                 fontWeight: FontWeight.w500,
                                 height: 1.5,
@@ -657,6 +663,9 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
                           ],
                         ),
                       ),
+                      const SizedBox(
+                        height: 20,
+                      )
                     ],
                   ),
                 ),
@@ -664,11 +673,11 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                     Text(
+                    Text(
                       '최근에 학습한 강의 파일이에요.',
                       style: TextStyle(
-                        color: Color(0xFF575757),
-                        fontSize: 13* scaleFactor,
+                        color: theme.colorScheme.onSecondary,
+                        fontSize: 13 * scaleFactor,
                         fontFamily: 'Raleway',
                         fontWeight: FontWeight.w500,
                         height: 1.5,
@@ -686,20 +695,20 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
                           ),
                         );
                       },
-                      child:  Row(
+                      child: Row(
                         children: [
                           Text(
                             '전체 보기',
                             style: TextStyle(
                               color: Color(0xFF36AE92),
-                              fontSize: 12* scaleFactor,
+                              fontSize: 12 * scaleFactor,
                               fontFamily: 'Mulish',
                               fontWeight: FontWeight.w800,
                               height: 1.5,
                             ),
                           ),
                           SizedBox(width: 2),
-                          Icon(
+                          const Icon(
                             Icons.arrow_forward_ios_rounded,
                             size: 12,
                             color: Color(0xFF36AE92),
@@ -712,11 +721,11 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
                 const SizedBox(height: 8),
                 ...(lectureFiles.isEmpty
                     ? [
-                         Text(
+                        Text(
                           '최근에 학습한 강의 자료가 없어요.',
                           style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 13* scaleFactor,
+                            color: theme.colorScheme.onTertiary,
+                            fontSize: 13 * scaleFactor,
                             fontFamily: 'Raleway',
                             fontWeight: FontWeight.w700,
                             height: 1.5,
@@ -779,11 +788,11 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                     Text(
+                    Text(
                       '최근에 학습한 콜론 파일이에요.',
                       style: TextStyle(
-                        color: Color(0xFF575757),
-                        fontSize: 13* scaleFactor,
+                        color: theme.colorScheme.onSecondary,
+                        fontSize: 13 * scaleFactor,
                         fontFamily: 'Raleway',
                         fontWeight: FontWeight.w500,
                         height: 1.5,
@@ -801,20 +810,20 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
                           ),
                         );
                       },
-                      child:  Row(
+                      child: Row(
                         children: [
                           Text(
                             '전체 보기',
                             style: TextStyle(
                               color: Color(0xFF36AE92),
-                              fontSize: 12* scaleFactor,
+                              fontSize: 12 * scaleFactor,
                               fontFamily: 'Mulish',
                               fontWeight: FontWeight.w800,
                               height: 1.5,
                             ),
                           ),
                           SizedBox(width: 2),
-                          Icon(
+                          const Icon(
                             Icons.arrow_forward_ios_rounded,
                             size: 12,
                             color: Color(0xFF36AE92),
@@ -827,11 +836,11 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
                 const SizedBox(height: 8),
                 ...(colonFiles.isEmpty
                     ? [
-                         Text(
+                        Text(
                           '최근에 학습한 콜론 자료가 없어요.',
                           style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 13* scaleFactor,
+                            color: theme.colorScheme.onTertiary,
+                            fontSize: 13 * scaleFactor,
                             fontFamily: 'Raleway',
                             fontWeight: FontWeight.w700,
                             height: 1.5,

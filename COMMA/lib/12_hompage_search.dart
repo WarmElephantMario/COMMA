@@ -110,10 +110,12 @@ class _MainToSearchPageState extends State<MainToSearchPage> {
     final fontSizeProvider = Provider.of<FontSizeProvider>(context);
     // 디스플레이 비율을 가져옴
     final scaleFactor = fontSizeProvider.scaleFactor;
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: theme.scaffoldBackgroundColor,
           elevation: 0,
           title: Row(
             children: [
@@ -121,11 +123,11 @@ class _MainToSearchPageState extends State<MainToSearchPage> {
                 child: SizedBox(
                   height: 45,
                   child: TextField(
-                    style: TextStyle(color: Colors.grey[800]),
+                    style: TextStyle(color: theme.colorScheme.onSecondary),
                     controller: _searchController,
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: const Color.fromRGBO(228, 240, 231, 100),
+                      fillColor: theme.colorScheme.primaryFixed,
                       hintText: '검색할 파일명을 입력하세요.',
                       hintStyle: const TextStyle(
                         color: Color(0xFF36AE92),
@@ -168,10 +170,9 @@ class _MainToSearchPageState extends State<MainToSearchPage> {
               ),
             ],
           ),
-          iconTheme:
-              const IconThemeData(color: Color.fromARGB(255, 48, 48, 48))),
+          iconTheme: IconThemeData(color: theme.colorScheme.onSecondary)),
       body: searchResults.isEmpty
-          ? const SingleChildScrollView(
+          ? SingleChildScrollView(
               child: Padding(
                 padding: EdgeInsets.all(50.0),
                 child: Column(
@@ -181,7 +182,7 @@ class _MainToSearchPageState extends State<MainToSearchPage> {
                       child: Text(
                         '최근 검색 내역이 없어요.',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: theme.colorScheme.onSecondary,
                           fontSize: 13,
                           fontFamily: 'Raleway',
                           fontWeight: FontWeight.w700,
@@ -209,11 +210,11 @@ class _MainToSearchPageState extends State<MainToSearchPage> {
                 return ListTile(
                   title: Text(
                     fileName,
-                    style: TextStyle(color: Colors.grey[800]),
+                    style: TextStyle(color: theme.colorScheme.onSecondary),
                   ),
                   subtitle: Text(
                     formatDateTimeToKorean(createdAt),
-                    style: TextStyle(color: Colors.grey[700]),
+                    style: TextStyle(color: theme.colorScheme.onSecondary),
                   ),
                   onTap: () {
                     print('File $fileName is clicked');

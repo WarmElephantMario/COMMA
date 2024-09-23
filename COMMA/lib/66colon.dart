@@ -22,16 +22,16 @@ class ColonPage extends StatefulWidget {
   final int? colonFileId;
   final int? folderId;
 
-  const ColonPage({
-    Key? key,
-    required this.folderName,
-    required this.noteName,
-    required this.lectureName,
-    required this.createdAt,
-    this.fileUrl,
-    this.colonFileId,
-    this.folderId
-  }) : super(key: key);
+  const ColonPage(
+      {Key? key,
+      required this.folderName,
+      required this.noteName,
+      required this.lectureName,
+      required this.createdAt,
+      this.fileUrl,
+      this.colonFileId,
+      this.folderId})
+      : super(key: key);
 
   @override
   _ColonPageState createState() => _ColonPageState();
@@ -213,27 +213,28 @@ class _ColonPageState extends State<ColonPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return PopScope(
       canPop: true,
       onPopInvokedWithResult: (didPop, result) {
-      if (didPop) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => FolderFilesScreen(
-                folderName: widget.folderName, 
-                folderId: widget.folderId!, 
-                folderType: 'Colon',
+        if (didPop) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => FolderFilesScreen(
+                  folderName: widget.folderName,
+                  folderId: widget.folderId!,
+                  folderType: 'Colon',
+                ),
               ),
-            ),
-          );
-        });
-      }
-
-    },
+            );
+          });
+        }
+      },
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
           toolbarHeight: 0,
         ),
@@ -264,17 +265,20 @@ class _ColonPageState extends State<ColonPage> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => FolderFilesScreen(
-                                        folderName: widget.folderName, // 현재 콜론 파일의 폴더 이름
-                                        folderId: widget.folderId!, // 현재 콜론 파일의 폴더 ID
-                                        folderType: 'Colon', // 폴더 타입은 'colon'으로 지정
+                                        folderName: widget
+                                            .folderName, // 현재 콜론 파일의 폴더 이름
+                                        folderId:
+                                            widget.folderId!, // 현재 콜론 파일의 폴더 ID
+                                        folderType:
+                                            'Colon', // 폴더 타입은 'colon'으로 지정
                                       ),
                                     ),
                                   );
                                 },
-                                child: const Text(
+                                child: Text(
                                   '종료',
                                   style: TextStyle(
-                                    color: Color(0xFFFFA17A),
+                                    color: theme.colorScheme.tertiary,
                                     fontSize: 16,
                                   ),
                                 ),
@@ -283,12 +287,15 @@ class _ColonPageState extends State<ColonPage> {
                           ),
                           Row(
                             children: [
-                              Image.asset('assets/folder_search.png'),
+                              Icon(
+                                Icons.folder_open,
+                                color: theme.colorScheme.onSecondary,
+                              ),
                               const SizedBox(width: 8),
                               Text(
                                 '폴더 분류 > ${widget.folderName}', // 폴더 이름 사용
-                                style: const TextStyle(
-                                  color: Color(0xFF575757),
+                                style: TextStyle(
+                                  color: theme.colorScheme.onSecondary,
                                   fontSize: 12,
                                   fontFamily: 'DM Sans',
                                 ),
@@ -298,8 +305,8 @@ class _ColonPageState extends State<ColonPage> {
                           const SizedBox(height: 5),
                           Text(
                             widget.noteName, // 노트 이름 사용
-                            style: const TextStyle(
-                              color: Color(0xFF414141),
+                            style: TextStyle(
+                              color: theme.colorScheme.onSecondary,
                               fontSize: 20,
                               fontFamily: 'DM Sans',
                               fontWeight: FontWeight.bold,
@@ -308,8 +315,8 @@ class _ColonPageState extends State<ColonPage> {
                           const SizedBox(height: 5),
                           Text(
                             '강의 자료 : ${widget.lectureName}',
-                            style: const TextStyle(
-                              color: Color(0xFF575757),
+                            style: TextStyle(
+                              color: theme.colorScheme.onSecondary,
                               fontSize: 12,
                               fontFamily: 'DM Sans',
                             ),
@@ -318,8 +325,8 @@ class _ColonPageState extends State<ColonPage> {
                           Text(
                             _formatDate(
                                 widget.createdAt), // 데이터베이스에서 가져온 생성 날짜 및 시간 사용
-                            style: const TextStyle(
-                              color: Color(0xFF575757),
+                            style: TextStyle(
+                              color: theme.colorScheme.onSecondary,
                               fontSize: 12,
                               fontFamily: 'DM Sans',
                             ),
@@ -415,7 +422,8 @@ class _ColonPageState extends State<ColonPage> {
                                           child: Text(
                                             text,
                                             style: TextStyle(
-                                                color: Color(0xFF414141),
+                                                color: theme
+                                                    .colorScheme.onSecondary,
                                                 fontSize: 17,
                                                 fontWeight: FontWeight.w500,
                                                 height: 1.8,
@@ -493,8 +501,9 @@ class _ColonPageState extends State<ColonPage> {
                                             const EdgeInsets.only(bottom: 8.0),
                                         child: Text(
                                           text,
-                                          style: const TextStyle(
-                                            color: Color(0xFF414141),
+                                          style: TextStyle(
+                                            color:
+                                                theme.colorScheme.onSecondary,
                                             fontSize: 16,
                                             fontFamily: 'DM Sans',
                                           ),

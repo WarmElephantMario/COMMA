@@ -85,5 +85,4 @@ class DefaultFirebaseOptions {
     storageBucket: 'comma-9018a.appspot.com',
     measurementId: 'G-V1TB27TRYM',
   );
-
 }
