@@ -1069,9 +1069,25 @@ class _RecordPageState extends State<RecordPage> {
     final userKey = userProvider.user?.userKey;
     final theme = Theme.of(context);
 
-    return WillPopScope(
-      onWillPop: () async {
-        return false; // 뒤로 가기 버튼을 눌렀을 때 아무 반응도 하지 않도록 설정
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => FolderFilesScreen(
+                    folderName: widget.folderName,
+                    folderId: widget.lectureFolderId!,
+                    folderType: 'lecture',
+                  ),
+                ),
+              );
+            }
+          );
+        }
+
       },
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
@@ -1433,6 +1449,15 @@ class _RecordPageState extends State<RecordPage> {
         bottomNavigationBar:
             buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
       ),
+
     );
+
+
+    // return WillPopScope(
+    //   onWillPop: () async {
+    //     return false; // 뒤로 가기 버튼을 눌렀을 때 아무 반응도 하지 않도록 설정
+    //   },
+
+    // );
   }
 }
