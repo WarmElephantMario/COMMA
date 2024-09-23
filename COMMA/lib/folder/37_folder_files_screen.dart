@@ -50,9 +50,9 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
     final userKey = userProvider.user?.userKey;
     final disType = userProvider.user?.dis_type; // dis_type 값 가져오기
 
-    if (userKey != null && disType != null) {
+    if (userKey != null) {
       final response = await http.get(Uri.parse(
-        '${API.baseUrl}/api/${widget.folderType}-files/${widget.folderId}?userKey=$userKey&disType=$disType', // dis_type 추가
+        '${API.baseUrl}/api/${widget.folderType}-files/${widget.folderId}?userKey=$userKey',
       ));
 
       if (response.statusCode == 200) {
@@ -255,7 +255,7 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
     final fontSizeProvider = Provider.of<FontSizeProvider>(context);
     final scaleFactor = fontSizeProvider.scaleFactor;
     final theme = Theme.of(context);
-
+    
     return PopScope(
       canPop: true,
       onPopInvokedWithResult: (didPop, result) {
@@ -269,6 +269,7 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
         }
       },
         child : Scaffold(
+
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
           backgroundColor: theme.scaffoldBackgroundColor,
