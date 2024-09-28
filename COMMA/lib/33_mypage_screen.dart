@@ -301,13 +301,9 @@ class _MyPageScreenState extends State<MyPageScreen> {
           _buildCard(context, '닉네임 변경하기', () {
             _showEditNameDialog();
           }),
-          _buildCard(context, '접근성 설정', () {
-            /* 43_accessibility_settings로 이동하는 코드 추가하기
-            
+           _buildCard(context, '글씨 크기 조정', () {
             Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const Access_Page()));
-            
-             */
+                MaterialPageRoute(builder: (context) => const FontSizePage()));
           }),
           _buildCard(context, '도움말', () {
             Navigator.push(context,
@@ -322,10 +318,6 @@ class _MyPageScreenState extends State<MyPageScreen> {
                 await deleteUser(context);
               },
             );
-          }),
-          _buildCard(context, '글씨 크기 조정', () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const FontSizePage()));
           }),
           SizedBox(height: 50),
 

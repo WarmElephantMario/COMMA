@@ -1,16 +1,44 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../model/44_font_size_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class FontSizePage extends StatelessWidget {
+class FontSizePage extends StatefulWidget {
   const FontSizePage({Key? key}) : super(key: key);
 
   @override
+  _FontSizePageState createState() => _FontSizePageState();
+}
+
+class _FontSizePageState extends State<FontSizePage> {
+  double scaleFactor = 1.0;
+  final FontSizeManager _fontSizeManager = FontSizeManager();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFontSize();
+  }
+
+  Future<void> _loadFontSize() async {
+    double fontSize = await _fontSizeManager.getFontSize();
+    setState(() {
+      scaleFactor = fontSize;
+    });
+  }
+
+  void _setFontSize(double value) {
+    setState(() {
+      scaleFactor = value;
+      _fontSizeManager.setFontSize(value);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
-    // 디스플레이 비율을 가져옴
-    final scaleFactor = fontSizeProvider.scaleFactor;
     final theme = Theme.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // 텍스트 크기를 화면 너비와 사용자가 설정한 비율에 맞추어 조정
+    final textFontSize = screenWidth * 0.05 * scaleFactor;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -20,9 +48,11 @@ class FontSizePage extends StatelessWidget {
         title: Text(
           '글씨 크기 조정',
           style: TextStyle(
-              color: theme.colorScheme.onTertiary,
-              fontFamily: 'DM Sans',
-              fontWeight: FontWeight.w600),
+            color: theme.colorScheme.onTertiary,
+            fontFamily: 'DM Sans',
+            fontWeight: FontWeight.w600,
+            fontSize: textFontSize, // 반응형으로 설정된 텍스트 크기
+          ),
         ),
       ),
       body: Column(
@@ -34,63 +64,76 @@ class FontSizePage extends StatelessWidget {
             child: Text(
               '원하는 글씨 크기를 선택하세요:',
               style: TextStyle(
-                  color: theme.colorScheme.onTertiary,
-                  fontSize: 20 * scaleFactor),
+                color: theme.colorScheme.onTertiary,
+                fontSize: textFontSize, // 반응형으로 설정된 텍스트 크기
+              ),
             ),
           ),
           const SizedBox(height: 100),
           ListTile(
             title: Text(
               '보통',
-              style: TextStyle(color: theme.colorScheme.onTertiary),
+              style: TextStyle(
+                color: theme.colorScheme.onTertiary,
+                fontSize: textFontSize * 0.8, // 보통 텍스트 크기
+              ),
             ),
             leading: Radio<double>(
-              value: 1.0, // 보통 크기 비율 (100%)
-              groupValue: fontSizeProvider.scaleFactor,
-              fillColor: WidgetStateProperty.resolveWith<Color>(
-                (Set<WidgetState> states) {
-                  if (states.contains(WidgetState.selected)) {
-                    return theme.primaryColor; // 선택된 상태의 색상
-                  }
-                  return theme.colorScheme.onSecondary; // 선택되지 않은 상태의 색상
-                },
-              ),
-              // activeColor: theme.primaryColor, // 버튼 색상을 teal로 설정
+              value: 1.0,
+              groupValue: scaleFactor,
               onChanged: (double? value) {
-                fontSizeProvider.setFontSize(value!);
+                if (value != null) _setFontSize(value);
               },
             ),
           ),
           ListTile(
             title: Text(
               '크게',
-              style: TextStyle(color: theme.colorScheme.onTertiary),
+              style: TextStyle(
+                color: theme.colorScheme.onTertiary,
+                fontSize: textFontSize * 1.0, // 크게 텍스트 크기
+              ),
             ),
             leading: Radio<double>(
-              value: 1.2, // 크게 비율 (120%)
-              groupValue: fontSizeProvider.scaleFactor,
-              activeColor: theme.primaryColor, // 버튼 색상을 teal로 설정
+              value: 1.3,
+              groupValue: scaleFactor,
               onChanged: (double? value) {
-                fontSizeProvider.setFontSize(value!);
+                if (value != null) _setFontSize(value);
               },
             ),
           ),
           ListTile(
             title: Text(
               '엄청 크게',
-              style: TextStyle(color: theme.colorScheme.onTertiary),
+              style: TextStyle(
+                color: theme.colorScheme.onTertiary,
+                fontSize: textFontSize * 1.2, // 엄청 크게 텍스트 크기
+              ),
             ),
             leading: Radio<double>(
-              value: 1.3, // 엄청 크게 비율 (130%)
-              groupValue: fontSizeProvider.scaleFactor,
-              activeColor: theme.primaryColor, // 버튼 색상을 teal로 설정
+              value: 1.5,
+              groupValue: scaleFactor,
               onChanged: (double? value) {
-                fontSizeProvider.setFontSize(value!);
+                if (value != null) _setFontSize(value);
               },
             ),
           ),
         ],
       ),
     );
+  }
+}
+
+class FontSizeManager {
+  static const String _fontSizeKey = 'fontSize';
+
+  Future<void> setFontSize(double fontSize) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble(_fontSizeKey, fontSize);
+  }
+
+  Future<double> getFontSize() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getDouble(_fontSizeKey) ?? 1.0; // 기본값 1.0
   }
 }
