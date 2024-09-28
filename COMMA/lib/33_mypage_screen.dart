@@ -11,7 +11,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'api/api.dart';
 import '1_Splash_green.dart';
 import 'mypage/43_font_size_page.dart';
-import '../model/44_font_size_provider.dart';
+import '../mypage/43_font_size_page.dart';
 
 // MyPageScreen 클래스 정의
 class MyPageScreen extends StatefulWidget {
@@ -24,6 +24,7 @@ class MyPageScreen extends StatefulWidget {
 class _MyPageScreenState extends State<MyPageScreen> {
   int _selectedIndex = 3;
   final FocusNode _appBarFocusNode = FocusNode();
+  double scaleFactor = 1.0;  // 폰트 크기 비율 저장
 
   String nickname = "-";
 
@@ -38,7 +39,6 @@ class _MyPageScreenState extends State<MyPageScreen> {
     super.initState();
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     nickname = userProvider.user?.user_nickname ?? "-";
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _appBarFocusNode.requestFocus();
     });
@@ -51,10 +51,6 @@ class _MyPageScreenState extends State<MyPageScreen> {
   }
 
   Widget _buildCard(BuildContext context, String title, VoidCallback onTap) {
-    // 폰트 크기 비율을 Provider에서 가져옴
-    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
-    // 디스플레이 비율을 가져옴
-    final scaleFactor = fontSizeProvider.scaleFactor;
     final theme = Theme.of(context);
 
     return Padding(
@@ -270,14 +266,15 @@ class _MyPageScreenState extends State<MyPageScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 폰트 크기 비율을 Provider에서 가져옴
-    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
-    // 디스플레이 비율을 가져옴
-    final scaleFactor = fontSizeProvider.scaleFactor;
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     int disType = userProvider.user?.dis_type ?? 0;
 
+    // MediaQuery로 화면 너비에 따른 텍스트 크기 조정
+    final screenWidth = MediaQuery.of(context).size.width;
+    final textFontSize = screenWidth * 0.05; // 텍스트 크기를 화면 너비에 맞추어 조정
+
     final theme = Theme.of(context);
+    print("Current screen width: $screenWidth");
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -288,6 +285,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
           child: Text(
             '마이페이지',
             style: TextStyle(
+                fontSize: textFontSize, // 화면 너비에 따라 텍스트 크기 조정
                 color: theme.colorScheme.onSecondary,
                 fontFamily: 'DM Sans',
                 fontWeight: FontWeight.w700),
@@ -303,7 +301,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
           }),
            _buildCard(context, '글씨 크기 조정', () {
             Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const FontSizePage()));
+                MaterialPageRoute(builder: (context) =>  FontSizePage()));
           }),
           _buildCard(context, '도움말', () {
             Navigator.push(context,
@@ -328,8 +326,8 @@ class _MyPageScreenState extends State<MyPageScreen> {
                 '학습 모드를 변경하시려면 스위치를 당겨 재부팅하세요',
                 textAlign: TextAlign.center, // 중앙 정렬
                 style: TextStyle(
-                    fontSize: 16.0 * scaleFactor,
-                    color: theme.colorScheme.onSecondary), // 글씨 크기 수정
+                    fontSize: textFontSize, // 화면 너비에 따라 텍스트 크기 조정
+                    color: theme.colorScheme.onSecondary),
               ),
             ),
           ),
@@ -339,19 +337,19 @@ class _MyPageScreenState extends State<MyPageScreen> {
             mainAxisAlignment: MainAxisAlignment.center, // 중앙에 위치하도록 설정
             children: [
               // 스위치 왼쪽 설명: 시각장애인 모드
-              SizedBox(width: 30 * scaleFactor),
+              SizedBox(width: screenWidth * 0.075), // 너비의 7.5% 크기
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.only(right: 8.0), // 간격 추가
                   child: Text(
                     '시각장애인 모드', // 스위치 왼쪽 텍스트
                     style: TextStyle(
-                        fontSize: 16.0 * scaleFactor,
-                        color: theme.colorScheme.onTertiary), // 글씨 크기 키움
+                        fontSize: textFontSize, // 화면 너비에 따라 텍스트 크기 조정
+                        color: theme.colorScheme.onTertiary),
                   ),
                 ),
               ),
-              SizedBox(width: 15 * scaleFactor),
+              SizedBox(width: screenWidth * 0.0375), // 너비의 3.75% 크기
 
               // 스위치 위젯
               Transform.scale(
@@ -380,7 +378,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                 ),
               ),
 
-              SizedBox(width: 15 * scaleFactor),
+              SizedBox(width: screenWidth * 0.0375), // 너비의 3.75% 크기
               // 스위치 오른쪽 설명: 청각장애인 모드
               Expanded(
                 child: Padding(
@@ -388,7 +386,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                   child: Text(
                     '청각장애인 모드', // 스위치 오른쪽 텍스트
                     style: TextStyle(
-                        fontSize: 16.0 * scaleFactor,
+                        fontSize: textFontSize, // 화면 너비에 따라 텍스트 크기 조정
                         color: theme.colorScheme.onTertiary),
                   ),
                 ),

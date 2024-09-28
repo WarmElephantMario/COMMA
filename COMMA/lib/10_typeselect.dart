@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'api/api.dart';
 import 'dart:convert';
 import 'package:provider/provider.dart';
-import '../model/44_font_size_provider.dart';
+import '../mypage/43_font_size_page.dart';
 
 class DisabilitySelectionPage extends StatelessWidget {
   const DisabilitySelectionPage({Key? key}) : super(key: key);
@@ -51,10 +51,6 @@ class DisabilitySelectionPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 폰트 크기 비율을 Provider에서 가져옴
-    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
-    // 디스플레이 비율을 가져옴
-    final scaleFactor = fontSizeProvider.scaleFactor;
     final size = MediaQuery.of(context).size;
     final theme = Theme.of(context);
 
@@ -68,7 +64,7 @@ class DisabilitySelectionPage extends StatelessWidget {
             Text(
               '사용자 학습 유형을 선택해주세요',
               style: TextStyle(
-                fontSize: 20 * scaleFactor,
+                fontSize: 20 ,
                 fontWeight: FontWeight.bold,
                 color: theme.colorScheme.onTertiary,
               ),
@@ -80,7 +76,7 @@ class DisabilitySelectionPage extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: theme.colorScheme.surfaceBright,
-                fontSize: 14 * scaleFactor,
+                fontSize: 14,
                 fontFamily: 'DM Sans',
                 fontWeight: FontWeight.w500,
               ),
@@ -121,7 +117,7 @@ class DisabilitySelectionPage extends StatelessWidget {
                     '시각 장애인용 모드 (대체 텍스트)',
                     style: TextStyle(
                       color: theme.colorScheme.surface,
-                      fontSize: 14 * scaleFactor,
+                      fontSize: 14 ,
                       fontFamily: 'DM Sans',
                       fontWeight: FontWeight.w700,
                     ),
@@ -165,7 +161,7 @@ class DisabilitySelectionPage extends StatelessWidget {
                     '청각 장애인용 모드 (실시간 자막)',
                     style: TextStyle(
                       color: theme.colorScheme.surface,
-                      fontSize: 14 * scaleFactor,
+                      fontSize: 14 ,
                       fontFamily: 'DM Sans',
                       fontWeight: FontWeight.w700,
                     ),

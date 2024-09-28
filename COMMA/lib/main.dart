@@ -12,6 +12,7 @@ import 'model/user_provider.dart'; // UserProvider import
 import 'package:shared_preferences/shared_preferences.dart'; // SharedPreferences for userKey
 import 'model/44_font_size_provider.dart';
 
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -22,6 +23,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => FontSizeProvider()),
+        
       ],
       child: const MyApp(),
     ),
@@ -87,7 +89,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
+  return Consumer<FontSizeProvider>(
+      builder: (context, fontSizeProvider, child) {
+        final screenWidth = MediaQuery.of(context).size.width;
 
     return MaterialApp(
       navigatorObservers: [MyNavigatorObserver()],
@@ -96,13 +100,13 @@ class MyApp extends StatelessWidget {
       theme: lightTheme.copyWith(
         // 라이트 테마에 사용자 지정 폰트 크기 비율 적용
         textTheme: lightTheme.textTheme.apply(
-          fontSizeFactor: fontSizeProvider.scaleFactor,
+          fontSizeFactor: fontSizeProvider.scaleFactor * (screenWidth / 400), // 화면 크기에 따른 조정
         ),
       ),
       darkTheme: darkTheme.copyWith(
         // 다크 테마에 사용자 지정 폰트 크기 비율 적용
         textTheme: darkTheme.textTheme.apply(
-          fontSizeFactor: fontSizeProvider.scaleFactor,
+          fontSizeFactor: fontSizeProvider.scaleFactor * (screenWidth / 400), // 화면 크기에 따른 조정
         ),
       ),
 
@@ -110,6 +114,8 @@ class MyApp extends StatelessWidget {
 
       home: const SplashScreen(), // 앱 시작 시 SplashScreen으로 이동
     );
+      },
+  );
   }
 }
 

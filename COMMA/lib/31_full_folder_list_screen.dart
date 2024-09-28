@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import '../model/user_provider.dart';
 import 'folder/37_folder_files_screen.dart'; // FolderFilesScreen이 정의된 파일 임포트
 import 'api/api.dart';
-import '../model/44_font_size_provider.dart';
+import '../mypage/43_font_size_page.dart';
 
 class FullFolderListScreen extends StatefulWidget {
   final String title;
@@ -140,10 +140,6 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 폰트 크기 비율을 Provider에서 가져옴
-    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
-    // 디스플레이 비율을 가져옴
-    final scaleFactor = fontSizeProvider.scaleFactor;
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -169,7 +165,7 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
                       '추가하기',
                       style: TextStyle(
                         color: Color(0xFF36AE92),
-                        fontSize: 15 * scaleFactor,
+                        fontSize: 15 ,
                       ),
                     ),
                     const SizedBox(width: 5),

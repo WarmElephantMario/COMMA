@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_plugin/components.dart';
 import '../model/44_font_size_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../mypage/43_font_size_page.dart';
 
 class ChangePasswordPage extends StatefulWidget {
   const ChangePasswordPage({super.key});
@@ -14,18 +16,17 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   final TextEditingController _newPasswordController = TextEditingController();
   int _selectedIndex = 3;
 
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
-    // 폰트 크기 비율을 Provider에서 가져옴
-    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
-    // 디스플레이 비율을 가져옴
-    final scaleFactor = fontSizeProvider.scaleFactor;
+
 
     return WillPopScope(
       onWillPop: () async {
@@ -53,7 +54,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 '새로운 비밀번호를 입력해주세요.',
                 textAlign: TextAlign.center,
                 style:
-                    TextStyle(fontSize: 16 * scaleFactor, color: Colors.grey),
+                    TextStyle(fontSize: 16, color: Colors.grey),
               ),
               const SizedBox(height: 20),
               TextField(

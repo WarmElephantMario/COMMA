@@ -21,7 +21,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import './api/api.dart';
 import 'package:image/image.dart' as img;
-import '../model/44_font_size_provider.dart';
+import '../mypage/43_font_size_page.dart';
+
 
 bool isAlternativeTextEnabled = true;
 bool isRealTimeSttEnabled = false;
@@ -960,10 +961,6 @@ class _LearningPreparationState extends State<LearningPreparation> {
 
   @override
 Widget build(BuildContext context) {
-  // 폰트 크기 비율을 Provider에서 가져옴
-  final fontSizeProvider = Provider.of<FontSizeProvider>(context);
-  // 디스플레이 비율을 가져옴
-  final scaleFactor = fontSizeProvider.scaleFactor;
   final theme = Theme.of(context);
 
     // 유저의 dis_type 가져오기
@@ -987,7 +984,7 @@ Widget build(BuildContext context) {
               titleText,
               style: TextStyle(
                 color: theme.colorScheme.onSecondary,
-                fontSize: 24 * scaleFactor,
+                fontSize: 24 ,
                 fontFamily: 'DM Sans',
                 fontWeight: FontWeight.bold,
               ),
@@ -999,7 +996,7 @@ Widget build(BuildContext context) {
           '강의폴더와 파일 이름을 설정해주세요.',
           style: TextStyle(
             color: theme.colorScheme.onSecondary,
-            fontSize: 16 * scaleFactor,
+            fontSize: 16,
             fontFamily: 'DM Sans',
             fontWeight: FontWeight.bold,
           ),
@@ -1035,7 +1032,7 @@ Widget build(BuildContext context) {
                         child: Text(
                           '폴더 분류 > $_selectedFolder',
                           style: TextStyle(
-                            fontSize: 15.5 * scaleFactor,
+                            fontSize: 15.5 ,
                             fontFamily: 'DM Sans',
                             color: theme.colorScheme.onSecondary,
                             fontWeight: FontWeight.w400,
@@ -1073,7 +1070,7 @@ Widget build(BuildContext context) {
                         child: Text(
                           _noteName,
                           style: TextStyle(
-                            fontSize: 15.5 * scaleFactor,
+                            fontSize: 15.5 ,
                             fontFamily: 'DM Sans',
                             color: theme.colorScheme.onSecondary,
                             fontWeight: FontWeight.w400,
@@ -1091,7 +1088,7 @@ Widget build(BuildContext context) {
               Text(
                 '대체텍스트 설명',
                 style: TextStyle(
-                  fontSize: 15.5 * scaleFactor,
+                  fontSize: 15.5,
                   fontFamily: 'DM Sans',
                   color: Color.fromARGB(255, 70, 70, 70),
                   fontWeight: FontWeight.w200,
@@ -1224,7 +1221,7 @@ Widget build(BuildContext context) {
                           _selectedFileName!,
                           style: TextStyle(
                             color: theme.colorScheme.onSecondary,
-                            fontSize: 15 * scaleFactor,
+                            fontSize: 15 ,
                             fontFamily: 'DM Sans',
                             fontWeight: FontWeight.w500,
                             height: 1.2,
@@ -1260,7 +1257,7 @@ Widget build(BuildContext context) {
                     '이미지를 불러올 수 없습니다.',
                     style: TextStyle(
                       color: theme.colorScheme.tertiary,
-                      fontSize: 16 * scaleFactor,
+                      fontSize: 16,
                     ),
                   ),
                 );

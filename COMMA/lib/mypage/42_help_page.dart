@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_plugin/components.dart';
 import '../model/44_font_size_provider.dart';
 import 'package:provider/provider.dart';
+import '../mypage/43_font_size_page.dart';
 
 class HelpPage extends StatefulWidget {
   const HelpPage({super.key});
@@ -21,10 +22,6 @@ class _HelpPageState extends State<HelpPage> {
 
   @override
   Widget build(BuildContext context) {
-    // 폰트 크기 비율을 Provider에서 가져옴
-    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
-    // 디스플레이 비율을 가져옴
-    final scaleFactor = fontSizeProvider.scaleFactor;
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -47,7 +44,7 @@ class _HelpPageState extends State<HelpPage> {
             '앱 사용 방법',
             style: TextStyle(
               color: theme.colorScheme.onTertiary,
-              fontSize: 22.0 * scaleFactor,
+              fontSize: 22.0 ,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -77,7 +74,7 @@ class _HelpPageState extends State<HelpPage> {
             '데이터 수집 및 사용',
             style: TextStyle(
               color: theme.primaryColor,
-              fontSize: 18.0 * scaleFactor,
+              fontSize: 18.0 ,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -86,7 +83,7 @@ class _HelpPageState extends State<HelpPage> {
             '어플 사용 중 생성한 녹음 파일은 서버에 저장되지 않으며, 음성으로부터 텍스트를 추출한 직후 폐기됩니다.',
             style: TextStyle(
                 color: theme.colorScheme.onTertiary,
-                fontSize: 15 * scaleFactor),
+                fontSize: 15 ),
           ),
         ],
       ),
@@ -98,9 +95,6 @@ class _HelpPageState extends State<HelpPage> {
   Widget _buildHelpSection({required String title, required String content}) {
     final theme = Theme.of(context);
 
-    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
-    final scaleFactor = fontSizeProvider.scaleFactor;
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: Column(
@@ -110,7 +104,7 @@ class _HelpPageState extends State<HelpPage> {
             title,
             style: TextStyle(
               color: theme.primaryColor,
-              fontSize: 18.0 * scaleFactor,
+              fontSize: 18.0,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -118,7 +112,7 @@ class _HelpPageState extends State<HelpPage> {
           Text(
             content,
             style: TextStyle(
-              fontSize: 16.0 * scaleFactor,
+              fontSize: 16.0 ,
               color: theme.colorScheme.onTertiary,
             ),
           ),

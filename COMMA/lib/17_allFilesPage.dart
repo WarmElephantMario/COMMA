@@ -9,7 +9,7 @@ import '62lecture_start.dart';
 import '63record.dart';
 import '66colon.dart';
 import 'components.dart'; // showCustomMenu 함수가 있는 파일을 import
-import '../model/44_font_size_provider.dart';
+import '../mypage/43_font_size_page.dart';
 
 class AllFilesPage extends StatefulWidget {
   final int userKey;
@@ -514,10 +514,6 @@ class _AllFilesPageState extends State<AllFilesPage> {
 
   @override
   Widget build(BuildContext context) {
-    // 폰트 크기 비율을 Provider에서 가져옴
-    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
-    // 디스플레이 비율을 가져옴
-    final scaleFactor = fontSizeProvider.scaleFactor;
     final theme = Theme.of(context);
 
     return Scaffold(

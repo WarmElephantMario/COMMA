@@ -1,12 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FontSizeProvider with ChangeNotifier {
-  double _scaleFactor = 1.0; // 기본 비율 (1.0 = 보통 크기)
+  double _scaleFactor = 1.0;
 
   double get scaleFactor => _scaleFactor;
 
-  void setFontSize(double scaleFactor) {
-    _scaleFactor = scaleFactor; // 사용자가 선택한 비율을 설정
-    notifyListeners(); // 변경 사항 알리기
+  FontSizeProvider() {
+    _loadFontSize();
+  }
+
+  Future<void> _loadFontSize() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    _scaleFactor = prefs.getDouble('fontSize') ?? 1.0;
+    notifyListeners();
+  }
+
+  Future<void> setScaleFactor(double value) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    _scaleFactor = value;
+    await prefs.setDouble('fontSize', value);
+    notifyListeners();
   }
 }

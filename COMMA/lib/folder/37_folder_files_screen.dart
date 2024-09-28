@@ -10,8 +10,9 @@ import 'package:provider/provider.dart';
 import '../model/user_provider.dart';
 import '../api/api.dart';
 import 'package:flutter_plugin/62lecture_start.dart';
-import '../model/44_font_size_provider.dart';
 import 'package:flutter_plugin/63record.dart';
+import '../mypage/43_font_size_page.dart';
+
 
 class FolderFilesScreen extends StatefulWidget {
   final String folderName;
@@ -252,8 +253,6 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
-    final scaleFactor = fontSizeProvider.scaleFactor;
     final theme = Theme.of(context);
     
     return PopScope(
@@ -332,6 +331,7 @@ class FileListItem extends StatelessWidget {
   final VoidCallback onRename;
   final VoidCallback onDelete;
 
+
   const FileListItem({
     super.key,
     required this.file,
@@ -348,8 +348,6 @@ class FileListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
-    final scaleFactor = fontSizeProvider.scaleFactor;
     final theme = Theme.of(context);
 
     return Container(
@@ -385,7 +383,7 @@ class FileListItem extends StatelessWidget {
                 Text(
                   file['file_name'] ?? 'Unknown',
                   style: TextStyle(
-                    fontSize: 16 * scaleFactor,
+                    fontSize: 16 ,
                     fontWeight: FontWeight.bold,
                     color: theme.colorScheme.onTertiary,
                   ),
@@ -395,7 +393,7 @@ class FileListItem extends StatelessWidget {
                 Text(
                   formatDateTimeToKorean(file['created_at'] ?? ''),
                   style: TextStyle(
-                    fontSize: 12 * scaleFactor,
+                    fontSize: 12 ,
                     color: theme.colorScheme.onSecondary,
                   ),
                 ),

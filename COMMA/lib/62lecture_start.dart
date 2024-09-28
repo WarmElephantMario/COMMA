@@ -7,7 +7,7 @@ import '63record.dart';
 import 'package:provider/provider.dart';
 import 'model/user_provider.dart';
 import 'api/api.dart';
-import '../model/44_font_size_provider.dart';
+import '../mypage/43_font_size_page.dart';
 
 class LectureStartPage extends StatefulWidget {
   final int? lectureFolderId;
@@ -54,10 +54,6 @@ class _LectureStartPageState extends State<LectureStartPage> {
 
   @override
   Widget build(BuildContext context) {
-    // 폰트 크기 비율을 Provider에서 가져옴
-    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
-    // 디스플레이 비율을 가져옴
-    final scaleFactor = fontSizeProvider.scaleFactor;
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -75,7 +71,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
               '오늘의 학습 시작하기',
               style: TextStyle(
                 color: theme.colorScheme.onTertiary,
-                fontSize: 24 * scaleFactor,
+                fontSize: 24,
                 fontFamily: 'DM Sans',
                 fontWeight: FontWeight.w700,
                 height: 1.2,
@@ -86,7 +82,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
               '업로드 한 강의 자료의 AI 학습이 완료되었어요!\n학습을 시작하려면 강의실에 입장하세요.',
               style: TextStyle(
                 color: theme.colorScheme.onSecondary,
-                fontSize: 14 * scaleFactor,
+                fontSize: 14 ,
                 fontFamily: 'DM Sans',
                 fontWeight: FontWeight.w500,
                 height: 1.2,
@@ -111,7 +107,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
                           widget.lectureName,
                           style: TextStyle(
                             color: theme.colorScheme.onSecondary,
-                            fontSize: 15 * scaleFactor,
+                            fontSize: 15 ,
                             fontFamily: 'DM Sans',
                             fontWeight: FontWeight.w500,
                             height: 1.2,
@@ -139,7 +135,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
                       '폴더 분류 > ${widget.selectedFolder}',
                       style: TextStyle(
                         color: theme.colorScheme.onSecondary,
-                        fontSize: 12 * scaleFactor,
+                        fontSize: 12 ,
                         fontFamily: 'DM Sans',
                         fontWeight: FontWeight.w500,
                         height: 1.2,
@@ -164,7 +160,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
                       widget.noteName!,
                       style: TextStyle(
                         color: theme.colorScheme.onSecondary,
-                        fontSize: 12 * scaleFactor,
+                        fontSize: 12 ,
                         fontFamily: 'DM Sans',
                         fontWeight: FontWeight.w500,
                         height: 1.2,

@@ -26,7 +26,7 @@ import '62lecture_start.dart';
 import '66colon.dart';
 import 'env/env.dart';
 import 'folder/37_folder_files_screen.dart';
-import '../model/44_font_size_provider.dart';
+import '../mypage/43_font_size_page.dart';
 
 enum RecordingState { initial, recording, recorded }
 
@@ -84,6 +84,7 @@ class _RecordPageState extends State<RecordPage> {
   int _currentLength = 0; // 자막 길이
   String combineText = ''; // 문단 구분 위한 변수
   int _recordCount = 0; // 자막 개수
+  double scaleFactor = 1.0;
 
   final RecorderStream _recorder = RecorderStream();
   late StreamSubscription _recorderStatus;
@@ -1061,10 +1062,6 @@ class _RecordPageState extends State<RecordPage> {
 
   @override
   Widget build(BuildContext context) {
-    // 폰트 크기 비율을 Provider에서 가져옴
-    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
-    // 디스플레이 비율을 가져옴
-    final scaleFactor = fontSizeProvider.scaleFactor;
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userKey = userProvider.user?.userKey;
     final theme = Theme.of(context);

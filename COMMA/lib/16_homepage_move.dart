@@ -12,7 +12,7 @@ import '66colon.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import '12_hompage_search.dart';
-import '../model/44_font_size_provider.dart';
+import '../mypage/43_font_size_page.dart';
 
 // import 'popscope.dart';
 
@@ -577,10 +577,6 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
-    // 폰트 크기 비율을 Provider에서 가져옴
-    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
-    // 디스플레이 비율을 가져옴
-    final scaleFactor = fontSizeProvider.scaleFactor;
     // final size = MediaQuery.of(context).size;
     final userProvider = Provider.of<UserProvider>(context);
     final theme = Theme.of(context);
@@ -634,7 +630,7 @@ class _MainPageState extends State<MainPage> {
                               text: '안녕하세요, ',
                               style: TextStyle(
                                 color: theme.colorScheme.onTertiary,
-                                fontSize: 24 * scaleFactor,
+                                fontSize: 24 ,
                                 fontFamily: 'DM Sans',
                                 fontWeight: FontWeight.w500,
                                 height: 1.5,
@@ -644,7 +640,7 @@ class _MainPageState extends State<MainPage> {
                               text: userProvider.user?.user_nickname ?? 'Guest',
                               style: TextStyle(
                                 color: theme.colorScheme.primary, // 원하는 색상으로 설정
-                                fontSize: 24 * scaleFactor,
+                                fontSize: 24,
                                 fontFamily: 'DM Sans',
                                 fontWeight: FontWeight.w700,
                                 height: 1.5,
@@ -654,7 +650,7 @@ class _MainPageState extends State<MainPage> {
                               text: ' 님',
                               style: TextStyle(
                                 color: theme.colorScheme.onTertiary,
-                                fontSize: 24 * scaleFactor,
+                                fontSize: 24 ,
                                 fontFamily: 'DM Sans',
                                 fontWeight: FontWeight.w500,
                                 height: 1.5,
@@ -677,7 +673,7 @@ class _MainPageState extends State<MainPage> {
                       '최근에 학습한 강의 파일이에요.',
                       style: TextStyle(
                         color: theme.colorScheme.onSecondary,
-                        fontSize: 13 * scaleFactor,
+                        fontSize: 13 ,
                         fontFamily: 'Raleway',
                         fontWeight: FontWeight.w500,
                         height: 1.5,
@@ -701,7 +697,7 @@ class _MainPageState extends State<MainPage> {
                             '전체 보기',
                             style: TextStyle(
                               color: Color(0xFF36AE92),
-                              fontSize: 12 * scaleFactor,
+                              fontSize: 12 ,
                               fontFamily: 'Mulish',
                               fontWeight: FontWeight.w800,
                               height: 1.5,
@@ -725,7 +721,7 @@ class _MainPageState extends State<MainPage> {
                           '최근에 학습한 강의 자료가 없어요.',
                           style: TextStyle(
                             color: theme.colorScheme.onTertiary,
-                            fontSize: 13 * scaleFactor,
+                            fontSize: 13 ,
                             fontFamily: 'Raleway',
                             fontWeight: FontWeight.w700,
                             height: 1.5,
@@ -792,7 +788,7 @@ class _MainPageState extends State<MainPage> {
                       '최근에 학습한 콜론 파일이에요.',
                       style: TextStyle(
                         color: theme.colorScheme.onSecondary,
-                        fontSize: 13 * scaleFactor,
+                        fontSize: 13 ,
                         fontFamily: 'Raleway',
                         fontWeight: FontWeight.w500,
                         height: 1.5,
@@ -816,7 +812,7 @@ class _MainPageState extends State<MainPage> {
                             '전체 보기',
                             style: TextStyle(
                               color: Color(0xFF36AE92),
-                              fontSize: 12 * scaleFactor,
+                              fontSize: 12,
                               fontFamily: 'Mulish',
                               fontWeight: FontWeight.w800,
                               height: 1.5,
@@ -840,7 +836,7 @@ class _MainPageState extends State<MainPage> {
                           '최근에 학습한 콜론 자료가 없어요.',
                           style: TextStyle(
                             color: theme.colorScheme.onTertiary,
-                            fontSize: 13 * scaleFactor,
+                            fontSize: 13 ,
                             fontFamily: 'Raleway',
                             fontWeight: FontWeight.w700,
                             height: 1.5,

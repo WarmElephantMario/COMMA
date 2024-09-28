@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import '../model/44_font_size_provider.dart';
 import 'package:provider/provider.dart';
+import '../mypage/43_font_size_page.dart';
 
 class FolderSection extends StatelessWidget {
   final String sectionTitle;
   final VoidCallback onAddPressed;
   final VoidCallback onViewAllPressed;
+
 
   const FolderSection({
     super.key,
@@ -16,10 +18,6 @@ class FolderSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 폰트 크기 비율을 Provider에서 가져옴
-    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
-    // 디스플레이 비율을 가져옴
-    final scaleFactor = fontSizeProvider.scaleFactor;
     final theme = Theme.of(context);
 
     return Padding(
@@ -31,7 +29,7 @@ class FolderSection extends StatelessWidget {
             sectionTitle,
             style: TextStyle(
               color: theme.colorScheme.onTertiary,
-              fontSize: 26 * scaleFactor,
+              fontSize: 26 ,
               fontFamily: 'DM Sans',
               fontWeight: FontWeight.bold,
             ),
@@ -46,10 +44,10 @@ class FolderSection extends StatelessWidget {
                       '추가하기',
                       style: TextStyle(
                         color: Color(0xFF36AE92),
-                        fontSize: 15 * scaleFactor,
+                        fontSize: 15 ,
                       ),
                     ),
-                    SizedBox(width: 5 * scaleFactor),
+                    SizedBox(width: 5),
                     Image.asset('assets/add2.png'),
                   ],
                 ),
@@ -62,10 +60,10 @@ class FolderSection extends StatelessWidget {
                       '전체 보기',
                       style: TextStyle(
                         color: Color(0xFF36AE92),
-                        fontSize: 15 * scaleFactor,
+                        fontSize: 15 ,
                       ),
                     ),
-                    SizedBox(width: 5.5 * scaleFactor),
+                    SizedBox(width: 5.5 ),
                     Image.asset('assets/navigate.png'),
                   ],
                 ),
