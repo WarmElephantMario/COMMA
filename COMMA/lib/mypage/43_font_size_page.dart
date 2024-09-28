@@ -50,12 +50,11 @@ class FontSizePage extends StatelessWidget {
               fillColor: WidgetStateProperty.resolveWith<Color>(
                 (Set<WidgetState> states) {
                   if (states.contains(WidgetState.selected)) {
-                    return theme.primaryColor; // 선택된 상태의 색상
+                    return theme.colorScheme.primary; // 선택된 상태의 색상
                   }
                   return theme.colorScheme.onSecondary; // 선택되지 않은 상태의 색상
                 },
               ),
-              // activeColor: theme.primaryColor, // 버튼 색상을 teal로 설정
               onChanged: (double? value) {
                 fontSizeProvider.setFontSize(value!);
               },
@@ -69,7 +68,14 @@ class FontSizePage extends StatelessWidget {
             leading: Radio<double>(
               value: 1.2, // 크게 비율 (120%)
               groupValue: fontSizeProvider.scaleFactor,
-              activeColor: theme.primaryColor, // 버튼 색상을 teal로 설정
+              fillColor: WidgetStateProperty.resolveWith<Color>(
+                (Set<WidgetState> states) {
+                  if (states.contains(WidgetState.selected)) {
+                    return theme.colorScheme.primary; // 선택된 상태의 색상
+                  }
+                  return theme.colorScheme.onSecondary; // 선택되지 않은 상태의 색상
+                },
+              ),
               onChanged: (double? value) {
                 fontSizeProvider.setFontSize(value!);
               },
@@ -83,7 +89,14 @@ class FontSizePage extends StatelessWidget {
             leading: Radio<double>(
               value: 1.3, // 엄청 크게 비율 (130%)
               groupValue: fontSizeProvider.scaleFactor,
-              activeColor: theme.primaryColor, // 버튼 색상을 teal로 설정
+              fillColor: WidgetStateProperty.resolveWith<Color>(
+                (Set<WidgetState> states) {
+                  if (states.contains(WidgetState.selected)) {
+                    return theme.colorScheme.primary; // 선택된 상태의 색상
+                  }
+                  return theme.colorScheme.onSecondary; // 선택되지 않은 상태의 색상
+                },
+              ),
               onChanged: (double? value) {
                 fontSizeProvider.setFontSize(value!);
               },

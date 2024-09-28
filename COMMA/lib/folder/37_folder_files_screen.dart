@@ -52,7 +52,7 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
 
     if (userKey != null) {
       final response = await http.get(Uri.parse(
-        '${API.baseUrl}/api/${widget.folderType}-files/${widget.folderId}?userKey=$userKey',
+        '${API.baseUrl}/api/${widget.folderType}-files/${widget.folderId}?userKey=$userKey&disType=$disType',
       ));
 
       if (response.statusCode == 200) {
@@ -255,7 +255,7 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
     final fontSizeProvider = Provider.of<FontSizeProvider>(context);
     final scaleFactor = fontSizeProvider.scaleFactor;
     final theme = Theme.of(context);
-    
+
     return PopScope(
       canPop: true,
       onPopInvokedWithResult: (didPop, result) {
@@ -268,61 +268,60 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
           });
         }
       },
-        child : Scaffold(
-
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-          backgroundColor: theme.scaffoldBackgroundColor,
-          title: Text(
-            widget.folderName,
-            style: TextStyle(
-                color: theme.colorScheme.onTertiary,
-                fontWeight: FontWeight.w600),
-          ),
-          iconTheme: IconThemeData(color: theme.colorScheme.onTertiary)),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: files.asMap().entries.map((entry) {
-                  int index = entry.key;
-                  Map<String, dynamic> file = entry.value;
-                  return GestureDetector(
-                    onTap: () => fetchFolderAndNavigate(
-                        context, file['folder_id'], widget.folderType, file),
-                    child: FileListItem(
-                      file: file,
-                      onRename: () => showRenameDialog(
-                          context,
-                          index,
-                          files,
-                          (id, newName) => _renameFile(id, newName),
-                          setState,
-                          "파일 이름 바꾸기",
-                          "file_name"),
-                      onDelete: () => showConfirmationDialog(
-                          context,
-                          "정말 파일을 삭제하시겠습니까?",
-                          "파일을 삭제하면 다시 복구할 수 없습니다.", () async {
-                        await _deleteFile(file['id']);
-                        setState(() {
-                          files.removeAt(index);
-                        });
-                      }),
-                    ),
-                  );
-                }).toList(),
-              ),
+      child: Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        appBar: AppBar(
+            backgroundColor: theme.scaffoldBackgroundColor,
+            title: Text(
+              widget.folderName,
+              style: TextStyle(
+                  color: theme.colorScheme.onTertiary,
+                  fontWeight: FontWeight.w600),
             ),
-          );
-        },
+            iconTheme: IconThemeData(color: theme.colorScheme.onTertiary)),
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: files.asMap().entries.map((entry) {
+                    int index = entry.key;
+                    Map<String, dynamic> file = entry.value;
+                    return GestureDetector(
+                      onTap: () => fetchFolderAndNavigate(
+                          context, file['folder_id'], widget.folderType, file),
+                      child: FileListItem(
+                        file: file,
+                        onRename: () => showRenameDialog(
+                            context,
+                            index,
+                            files,
+                            (id, newName) => _renameFile(id, newName),
+                            setState,
+                            "파일 이름 바꾸기",
+                            "file_name"),
+                        onDelete: () => showConfirmationDialog(
+                            context,
+                            "정말 파일을 삭제하시겠습니까?",
+                            "파일을 삭제하면 다시 복구할 수 없습니다.", () async {
+                          await _deleteFile(file['id']);
+                          setState(() {
+                            files.removeAt(index);
+                          });
+                        }),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            );
+          },
+        ),
+        bottomNavigationBar:
+            buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
       ),
-      bottomNavigationBar:
-          buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
-    ),
     );
   }
 }
@@ -361,7 +360,7 @@ class FileListItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.onSecondary,
+            color: theme.colorScheme.tertiaryFixed,
             spreadRadius: 2.0,
             offset: Offset(0, 2),
           ),
