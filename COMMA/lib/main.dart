@@ -11,6 +11,7 @@ import '1_Splash_green.dart'; // SplashScreen import
 import 'model/user_provider.dart'; // UserProvider import
 import 'package:shared_preferences/shared_preferences.dart'; // SharedPreferences for userKey
 import 'model/44_font_size_provider.dart';
+import 'model/45_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,6 +23,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => FontSizeProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeNotifier()), // 추가
       ],
       child: const MyApp(),
     ),
@@ -88,6 +90,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fontSizeProvider = Provider.of<FontSizeProvider>(context);
+    final themeNotifier = Provider.of<ThemeNotifier>(context);
 
     return MaterialApp(
       navigatorObservers: [MyNavigatorObserver()],
@@ -106,7 +109,7 @@ class MyApp extends StatelessWidget {
         ),
       ),
 
-      themeMode: ThemeMode.dark, // 시스템 설정에 따라 라이트 또는 다크 테마 자동 적용
+      themeMode: themeNotifier.themeMode, // 선택된 테마 모드 적용
 
       home: const SplashScreen(), // 앱 시작 시 SplashScreen으로 이동
     );

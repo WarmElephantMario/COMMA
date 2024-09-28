@@ -11,6 +11,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'api/api.dart';
 import '1_Splash_green.dart';
 import 'mypage/43_font_size_page.dart';
+import 'mypage/43_accessibility_settings.dart';
 import '../model/44_font_size_provider.dart';
 
 // MyPageScreen 클래스 정의
@@ -58,12 +59,22 @@ class _MyPageScreenState extends State<MyPageScreen> {
     final theme = Theme.of(context);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4),
       child: Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surfaceContainer,
-          border: Border.all(color: Colors.grey[600]!, width: 2),
+          // border: Border.all(color: Colors.grey[600]!, width: 2),
           borderRadius: BorderRadius.circular(10),
+          boxShadow: theme.brightness == Brightness.light
+              ? [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.4), // Shadow color
+                    spreadRadius: 2,
+                    blurRadius: 5,
+                    offset: Offset(0, 3), // Shadow position
+                  ),
+                ]
+              : [], // No shadow in dark mode
         ),
         child: ListTile(
           title: Text(title),
@@ -200,62 +211,64 @@ class _MyPageScreenState extends State<MyPageScreen> {
       builder: (context) {
         return AlertDialog(
           title: Semantics(
-            sortKey: OrdinalSortKey(1.0),
-            child: Focus(
-              focusNode: titleFocusNode,
-              child: Text(
-                '닉네임 변경하기',
-                style: TextStyle(color: theme.colorScheme.onTertiary),
-              ),
+            sortKey: const OrdinalSortKey(1.0),
+            child: Text(
+              '닉네임 변경하기',
+              style: TextStyle(color: theme.colorScheme.onTertiary),
             ),
           ),
           content: Semantics(
-            sortKey: OrdinalSortKey(2.0),
-            child: Focus(
+            sortKey: const OrdinalSortKey(2.0),
+            child: TextField(
               focusNode: contentFocusNode,
-              child: TextField(
-                style: TextStyle(color: theme.colorScheme.onSecondary),
-                controller: nicknameController,
-                decoration: InputDecoration(
-                    hintText: '새 닉네임을 입력하세요',
-                    hintStyle: TextStyle(color: theme.colorScheme.onSecondary)),
+              style: TextStyle(color: theme.colorScheme.onSecondary),
+              controller: nicknameController,
+              decoration: InputDecoration(
+                hintText: '새 닉네임을 입력하세요',
+                hintStyle: TextStyle(color: theme.colorScheme.onSecondary),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    color: theme.colorScheme.onSecondary, // 포커스 상태의 밑줄 색상
+                  ),
+                ),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    color: theme.colorScheme.onSecondary, // 포커스가 없을 때의 밑줄 색상
+                  ),
+                ),
               ),
             ),
           ),
           actions: <Widget>[
             Semantics(
-              sortKey: OrdinalSortKey(3.0),
-              child: Focus(
+              sortKey: const OrdinalSortKey(3.0),
+              child: TextButton(
                 focusNode: cancelFocusNode,
-                child: TextButton(
-                  child: Text('취소',
-                      style: TextStyle(
-                          color: theme.colorScheme.tertiary, fontSize: 15)),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
+                child: Text('취소',
+                    style: TextStyle(
+                        color: theme.colorScheme.tertiary, fontSize: 15)),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
               ),
             ),
             Semantics(
-              sortKey: OrdinalSortKey(4.0),
-              child: Focus(
+              sortKey: const OrdinalSortKey(4.0),
+              child: TextButton(
                 focusNode: saveFocusNode,
-                child: TextButton(
-                  child: Text(
-                    '저장',
-                    style: TextStyle(
-                        color: theme.colorScheme.primary, fontSize: 15),
-                  ),
-                  onPressed: () async {
-                    String newNickname = nicknameController.text;
-                    await _updateNickname(newNickname);
-                    setState(() {
-                      nickname = newNickname;
-                    });
-                    Navigator.of(context).pop();
-                  },
+                child: Text(
+                  '저장',
+                  style:
+                      TextStyle(color: theme.colorScheme.primary, fontSize: 15),
                 ),
+                onPressed: () async {
+                  String newNickname = nicknameController.text;
+                  await _updateNickname(newNickname);
+                  setState(() {
+                    nickname = newNickname;
+                  });
+                  Navigator.of(context).pop();
+                },
               ),
             ),
           ],
@@ -302,12 +315,12 @@ class _MyPageScreenState extends State<MyPageScreen> {
             _showEditNameDialog();
           }),
           _buildCard(context, '접근성 설정', () {
-            /* 43_accessibility_settings로 이동하는 코드 추가하기
-            
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const Access_Page()));
-            
-             */
+            // 43_accessibility_settings로 이동하는 코드 추가하기
+
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => AccessibilitySettings()));
           }),
           _buildCard(context, '도움말', () {
             Navigator.push(context,

@@ -1019,18 +1019,18 @@ class _LearningPreparationState extends State<LearningPreparation> {
                           ),
                         ),
                         const SizedBox(width: 50),
-                        Expanded(
-                          child: Text(
-                            '대체텍스트 설명',
-                            style: TextStyle(
-                              fontSize: 15.5 * scaleFactor,
-                              fontFamily: 'DM Sans',
-                              color: theme.colorScheme.onSecondary,
-                              fontWeight: FontWeight.w200,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
+                        // Expanded(
+                        //   child: Text(
+                        //     '대체텍스트 설명',
+                        //     style: TextStyle(
+                        //       fontSize: 15.5 * scaleFactor,
+                        //       fontFamily: 'DM Sans',
+                        //       color: theme.colorScheme.onSecondary,
+                        //       fontWeight: FontWeight.w200,
+                        //     ),
+                        //     overflow: TextOverflow.ellipsis,
+                        //   ),
+                        // ),
                         //   CustomRadioButton3(
                         //   label: '기본 설명',
                         //   isSelected: isBasicSelected,
