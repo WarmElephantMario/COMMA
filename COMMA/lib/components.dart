@@ -1161,6 +1161,16 @@ class LectureExample extends StatelessWidget {
         decoration: BoxDecoration(
           color: theme.colorScheme.surface, // Background color
           borderRadius: BorderRadius.circular(10), // Rounded corners
+          boxShadow: theme.brightness == Brightness.light
+              ? [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.4), // Shadow color
+                    spreadRadius: 2,
+                    blurRadius: 5,
+                    offset: Offset(0, 3), // Shadow position
+                  ),
+                ]
+              : [], // No shadow in dark mode
         ),
         child: Row(
           children: [
@@ -1225,7 +1235,7 @@ class LectureExample extends StatelessWidget {
                   child: GestureDetector(
                     child: Semantics(
                       label: '파일 메뉴 버튼',
-                      child: ImageIcon(
+                      child: const ImageIcon(
                         AssetImage('assets/folder_menu.png'),
                         color: Color.fromRGBO(255, 161, 122, 1),
                       ),
