@@ -407,4 +407,3 @@ class FileListItem extends StatelessWidget {
     );
   }
 }
-
