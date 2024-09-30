@@ -107,6 +107,7 @@ class _RecordPageState extends State<RecordPage> {
     if (widget.type == 0) {
       // 대체 텍스트인 경우에만 호출
       _loadPageTexts();
+
     }
     WidgetsBinding.instance?.addPostFrameCallback((_) {
       _requestPermissions();
@@ -332,40 +333,53 @@ class _RecordPageState extends State<RecordPage> {
   }
 
   Future<void> _loadPageTexts() async {
-    try {
-      final response = await http.get(Uri.parse(
-          '${API.baseUrl}/api/get-alternative-text-url?lecturefileId=${widget.lecturefileId}'));
+  try {
+    // API 호출하여 alternative text URL 리스트 가져오기
+    final response = await http.get(Uri.parse(
+        '${API.baseUrl}/api/get-alternative-text-urls?lecturefileId=${widget.lecturefileId}'));
 
-      if (response.statusCode == 200) {
-        print('Response body: ${response.body}');
+    if (response.statusCode == 200) {
+      print('Response body: ${response.body}');
 
-        final fileData = jsonDecode(response.body);
-        final alternativeTextUrl = fileData['alternative_text_url'];
+      // JSON 응답을 디코딩하여 alternative_text_urls 리스트 추출
+      final fileData = jsonDecode(response.body);
+      final List<dynamic> alternativeTextUrls = fileData['alternative_text_urls'];
 
-        if (alternativeTextUrl != null) {
-          final textResponse = await http.get(Uri.parse(alternativeTextUrl));
+      if (alternativeTextUrls != null && alternativeTextUrls.isNotEmpty) {
+        // 텍스트 데이터를 여러 URL에서 순차적으로 가져오기
+        Map<int, String> allTexts = {};
+
+        for (int urlIndex = 0; urlIndex < alternativeTextUrls.length; urlIndex++) {
+          final textResponse = await http.get(Uri.parse(alternativeTextUrls[urlIndex]));
+
           if (textResponse.statusCode == 200) {
+            // 텍스트 데이터를 불러와서 UTF-8로 디코딩하고 줄로 분리
             final textLines = utf8.decode(textResponse.bodyBytes).split('//');
-            setState(() {
-              pageTexts = {
-                for (int i = 0; i < textLines.length; i++) i + 1: textLines[i]
-              };
-            });
+
+            // 페이지 텍스트를 allTexts에 저장 (페이지 번호는 계속 증가)
+            for (int i = 0; i < textLines.length; i++) {
+              allTexts[allTexts.length + 1] = textLines[i];
+            }
           } else {
             print('Failed to fetch text file: ${textResponse.statusCode}');
           }
-        } else {
-          print('Alternative text URL is null');
         }
-      } else {
-        print('Failed to fetch alternative text URL: ${response.statusCode}');
-        print('Response body: ${response.body}');
-      }
-    } catch (e) {
-      print('Error occurred: $e');
-    }
-  }
 
+        // 모든 텍스트 데이터를 setState로 업데이트
+        setState(() {
+          pageTexts = allTexts;
+        });
+      } else {
+        print('Alternative text URLs list is null or empty');
+      }
+    } else {
+      print('Failed to fetch alternative text URLs: ${response.statusCode}');
+      print('Response body: ${response.body}');
+    }
+  } catch (e) {
+    print('Error occurred: $e');
+  }
+}
   // Future<String> fetchRecordUrl(int colonFileId) async {
   //   try {
   //     final response = await http.get(Uri.parse(
@@ -1058,6 +1072,8 @@ void showColonCreatedDialog(
 
   @override
   Widget build(BuildContext context) {
+    // print("-----------------------------");
+    // fetchAlternativeTextUrls(widget.lectureFolderId);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userKey = userProvider.user?.userKey;
     final theme = Theme.of(context);

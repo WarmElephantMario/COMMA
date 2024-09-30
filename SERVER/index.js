@@ -792,30 +792,30 @@ app.get('/api/get-folder-name', (req, res) => {
 
 
 // 대체 텍스트 URL 가져오기
-app.get('/api/get-alternative-text-url', (req, res) => {
-    const { lecturefileId } = req.query;
-    console.log(`Received lecturefileId: ${lecturefileId}`);
+// app.get('/api/get-alternative-text-url', (req, res) => {
+//     const { lecturefileId } = req.query;
+//     console.log(`Received lecturefileId: ${lecturefileId}`);
 
-    const sql = `
-        SELECT alternative_text_url
-        FROM Alt_table2
-        WHERE lecturefile_id = ?
-    `;
+//     const sql = `
+//         SELECT alternative_text_url
+//         FROM Alt_table2
+//         WHERE lecturefile_id = ?
+//     `;
 
-    db.query(sql, [lecturefileId], (err, results) => {
-        if (err) {
-            return res.status(500).json({ success: false, error: err.message });
-        }
+//     db.query(sql, [lecturefileId], (err, results) => {
+//         if (err) {
+//             return res.status(500).json({ success: false, error: err.message });
+//         }
 
-        console.log(`Query results: ${JSON.stringify(results)}`);
+//         console.log(`Query results: ${JSON.stringify(results)}`);
 
-        if (results.length > 0) {
-            res.status(200).json({ alternative_text_url: results[0].alternative_text_url });
-        } else {
-            res.status(404).json({ success: false, message: 'No matching record found' });
-        }
-    });
-});
+//         if (results.length > 0) {
+//             res.status(200).json({ alternative_text_url: results[0].alternative_text_url });
+//         } else {
+//             res.status(404).json({ success: false, message: 'No matching record found' });
+//         }
+//     });
+// });
 
 // 분리된 대체텍스트 URL을 가져오기
 app.get('/api/get-alternative-text-urls', (req, res) => {
@@ -834,6 +834,7 @@ app.get('/api/get-alternative-text-urls', (req, res) => {
         }
 
         const alternativeTextUrls = results.map(record => record.alternative_text_url);
+        console.log('Returning alternative text URLs:', alternativeTextUrls);
         res.status(200).json({ alternative_text_urls: alternativeTextUrls });
     });
 });
