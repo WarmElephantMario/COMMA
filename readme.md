@@ -1,14 +1,14 @@
 <table>
-  <thead>
+ <thead>
     <tr>
-      <th>요구사항 ID</th>
-      <th>요구사항명</th>
-      <th>기능 ID</th>
-      <th>기능명</th>
-      <th>상세설명</th>
-      <th>필수 데이터</th>
-      <th>선택 데이터</th>
-      <th>데이터베이스(테이블명:필드명)</th>
+      <th style="width:10%;">요구사항 ID</th>
+      <th style="width:15%;">요구사항명</th>
+      <th style="width:10%;">기능 ID</th>
+      <th style="width:15%;">기능명</th>
+      <th style="width:30%;">상세설명</th>
+      <th style="width:10%;">필수 데이터</th>
+      <th style="width:10%;">선택 데이터</th>
+      <th style="width:30%;">데이터베이스(테이블명:필드명)</th>
     </tr>
   </thead>
   <tbody>
