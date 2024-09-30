@@ -7,7 +7,7 @@ import '63record.dart';
 import 'package:provider/provider.dart';
 import 'model/user_provider.dart';
 import 'api/api.dart';
-import '../model/44_font_size_provider.dart';
+import 'mypage/44_font_size_page.dart';
 
 class LectureStartPage extends StatefulWidget {
   final int? lectureFolderId;
@@ -20,17 +20,18 @@ class LectureStartPage extends StatefulWidget {
   final String? noteName;
   final List<String>? keywords;
 
-  const LectureStartPage(
-      {super.key,
-      this.lectureFolderId,
-      this.lecturefileId,
-      required this.lectureName,
-      required this.fileURL,
-      this.responseUrl,
-      required this.type,
-      this.selectedFolder,
-      this.noteName,
-      this.keywords});
+  const LectureStartPage({
+    super.key,
+    this.lectureFolderId,
+    this.lecturefileId,
+    required this.lectureName,
+    required this.fileURL,
+    this.responseUrl,
+    required this.type,
+    this.selectedFolder,
+    this.noteName,
+    this.keywords,
+  });
 
   @override
   _LectureStartPageState createState() => _LectureStartPageState();
@@ -42,7 +43,6 @@ class _LectureStartPageState extends State<LectureStartPage> {
   @override
   void initState() {
     super.initState();
-    // 키워드가 잘 넘어왔는지 확인하기 위해 콘솔에 출력
     print("LectureStartPage Keywords: ${widget.keywords}");
   }
 
@@ -54,10 +54,6 @@ class _LectureStartPageState extends State<LectureStartPage> {
 
   @override
   Widget build(BuildContext context) {
-    // 폰트 크기 비율을 Provider에서 가져옴
-    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
-    // 디스플레이 비율을 가져옴
-    final scaleFactor = fontSizeProvider.scaleFactor;
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -70,29 +66,25 @@ class _LectureStartPageState extends State<LectureStartPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 15),
+            ResponsiveSizedBox(height: 15),
             Text(
               '오늘의 학습 시작하기',
-              style: TextStyle(
+              style: theme.textTheme.titleLarge?.copyWith(
                 color: theme.colorScheme.onTertiary,
-                fontSize: 24 * scaleFactor,
-                fontFamily: 'DM Sans',
                 fontWeight: FontWeight.w700,
                 height: 1.2,
               ),
             ),
-            const SizedBox(height: 30),
+            ResponsiveSizedBox(height: 30),
             Text(
               '업로드 한 강의 자료의 AI 학습이 완료되었어요!\n학습을 시작하려면 강의실에 입장하세요.',
-              style: TextStyle(
+              style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSecondary,
-                fontSize: 14 * scaleFactor,
-                fontFamily: 'DM Sans',
                 fontWeight: FontWeight.w500,
                 height: 1.2,
               ),
             ),
-            const SizedBox(height: 30),
+            ResponsiveSizedBox(height: 30),
             Container(
               decoration: BoxDecoration(
                 color: theme.colorScheme.tertiaryContainer,
@@ -102,17 +94,15 @@ class _LectureStartPageState extends State<LectureStartPage> {
               child: Row(
                 children: [
                   const Icon(Icons.picture_as_pdf, color: Colors.red, size: 40),
-                  const SizedBox(width: 15),
+                  SizedBox(width: 15),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           widget.lectureName,
-                          style: TextStyle(
+                          style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.onSecondary,
-                            fontSize: 15 * scaleFactor,
-                            fontFamily: 'DM Sans',
                             fontWeight: FontWeight.w500,
                             height: 1.2,
                           ),
@@ -124,7 +114,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
                 ],
               ),
             ),
-            const SizedBox(height: 15),
+            ResponsiveSizedBox(height: 15),
             GestureDetector(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -133,14 +123,12 @@ class _LectureStartPageState extends State<LectureStartPage> {
                     Icons.folder_open,
                     color: theme.colorScheme.onSecondary,
                   ),
-                  const SizedBox(width: 8),
+                SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       '폴더 분류 > ${widget.selectedFolder}',
-                      style: TextStyle(
+                      style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSecondary,
-                        fontSize: 12 * scaleFactor,
-                        fontFamily: 'DM Sans',
                         fontWeight: FontWeight.w500,
                         height: 1.2,
                       ),
@@ -150,7 +138,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
                 ],
               ),
             ),
-            const SizedBox(height: 10),
+            ResponsiveSizedBox(height: 10),
             GestureDetector(
               child: Row(
                 children: [
@@ -158,14 +146,12 @@ class _LectureStartPageState extends State<LectureStartPage> {
                     Icons.book_outlined,
                     color: theme.colorScheme.onSecondary,
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       widget.noteName!,
-                      style: TextStyle(
+                      style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSecondary,
-                        fontSize: 12 * scaleFactor,
-                        fontFamily: 'DM Sans',
                         fontWeight: FontWeight.w500,
                         height: 1.2,
                       ),
@@ -175,12 +161,11 @@ class _LectureStartPageState extends State<LectureStartPage> {
                 ],
               ),
             ),
-            const SizedBox(height: 100),
+            ResponsiveSizedBox(height: 100),
             Center(
               child: ClickButton(
                 text: '강의실 입장하기',
                 onPressed: () async {
-                  // lecturefileId에 existLecture 값을 1로 업데이트하는 API 호출
                   if (widget.lecturefileId != null) {
                     print("existLecture update");
                     print(widget.lecturefileId);
@@ -200,7 +185,6 @@ class _LectureStartPageState extends State<LectureStartPage> {
                         print('Response body: ${response.body}');
                       }
                     } catch (e) {
-                      // 에러 발생 시 예외 메시지 출력
                       print('Error occurred during existLecture update: $e');
                     }
                   }
@@ -225,11 +209,11 @@ class _LectureStartPageState extends State<LectureStartPage> {
                     ),
                   );
                 },
-                width: MediaQuery.of(context).size.width * 0.5,
-                height: 50.0,
+                // width: MediaQuery.of(context).size.width * 0.5,
+                // height: 50.0,
               ),
             ),
-            const SizedBox(height: 16),
+            ResponsiveSizedBox(height: 16),
           ],
         ),
       ),

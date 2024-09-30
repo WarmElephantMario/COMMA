@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_plugin/folder/37_folder_files_screen.dart';
+import 'package:flutter_plugin/mypage/44_font_size_page.dart';
+import 'package:get/get_state_manager/src/simple/get_responsive.dart';
 import 'package:intl/intl.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:http/http.dart' as http;
@@ -277,10 +279,9 @@ class _ColonPageState extends State<ColonPage> {
                                 },
                                 child: Text(
                                   '종료',
-                                  style: TextStyle(
-                                    color: theme.colorScheme.tertiary,
-                                    fontSize: 16,
-                                  ),
+                                 style: theme.textTheme.bodyLarge?.copyWith(
+                                  color: theme.colorScheme.tertiary,
+                                ),
                                 ),
                               ),
                             ],
@@ -294,41 +295,33 @@ class _ColonPageState extends State<ColonPage> {
                               const SizedBox(width: 8),
                               Text(
                                 '폴더 분류 > ${widget.folderName}', // 폴더 이름 사용
-                                style: TextStyle(
-                                  color: theme.colorScheme.onSecondary,
-                                  fontSize: 12,
-                                  fontFamily: 'DM Sans',
-                                ),
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSecondary,
+                              ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 5),
+                          const ResponsiveSizedBox(height: 5),
                           Text(
                             widget.noteName, // 노트 이름 사용
-                            style: TextStyle(
+                            style: theme.textTheme.headlineSmall?.copyWith(
                               color: theme.colorScheme.onSecondary,
-                              fontSize: 20,
-                              fontFamily: 'DM Sans',
                               fontWeight: FontWeight.bold,
                             ),
-                          ),
-                          const SizedBox(height: 5),
+                            ),
+                          const ResponsiveSizedBox(height: 5),
                           Text(
                             '강의 자료 : ${widget.lectureName}',
-                            style: TextStyle(
+                            style: theme.textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.onSecondary,
-                              fontSize: 12,
-                              fontFamily: 'DM Sans',
                             ),
                           ),
-                          const SizedBox(height: 5), // 추가된 날짜와 시간을 위한 공간
+                          const ResponsiveSizedBox(height: 5), // 추가된 날짜와 시간을 위한 공간
                           Text(
                             _formatDate(
                                 widget.createdAt), // 데이터베이스에서 가져온 생성 날짜 및 시간 사용
-                            style: TextStyle(
+                           style: theme.textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.onSecondary,
-                              fontSize: 12,
-                              fontFamily: 'DM Sans',
                             ),
                           ),
                           const SizedBox(height: 20), // 강의 자료 밑에 여유 공간 추가
@@ -337,8 +330,8 @@ class _ColonPageState extends State<ColonPage> {
                               ClickButton(
                                 text: '콜론(:) 다운하기',
                                 onPressed: () {},
-                                width: MediaQuery.of(context).size.width * 0.3,
-                                height: 40.0,
+                                // width: MediaQuery.of(context).size.width * 0.3,
+                                // height: 40.0,
                               ),
                             ],
                           ),
@@ -386,11 +379,9 @@ class _ColonPageState extends State<ColonPage> {
                                         child: Text(
                                           pageTexts[pageIndex + 1] ??
                                               '텍스트가 없습니다.',
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 16,
-                                            fontFamily: 'DM Sans',
-                                          ),
+                                           style: theme.textTheme.bodyMedium?.copyWith(
+                                              color: Colors.white,
+                                            ),
                                         ),
                                       ),
                                     ),
@@ -469,10 +460,8 @@ class _ColonPageState extends State<ColonPage> {
                                     child: Center(
                                       child: Text(
                                         pageTexts[1] ?? '이미지의 텍스트가 없습니다.',
-                                        style: const TextStyle(
+                                         style: theme.textTheme.bodyMedium?.copyWith(
                                           color: Colors.white,
-                                          fontSize: 16,
-                                          fontFamily: 'DM Sans',
                                         ),
                                       ),
                                     ),
@@ -501,12 +490,9 @@ class _ColonPageState extends State<ColonPage> {
                                             const EdgeInsets.only(bottom: 8.0),
                                         child: Text(
                                           text,
-                                          style: TextStyle(
-                                            color:
-                                                theme.colorScheme.onSecondary,
-                                            fontSize: 16,
-                                            fontFamily: 'DM Sans',
-                                          ),
+                                           style: theme.textTheme.bodyMedium?.copyWith(
+                                              color: theme.colorScheme.onSecondary,
+                                            ),
                                         ),
                                       );
                                     }).toList(),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../model/45_theme.dart';
+import '../mypage/44_font_size_page.dart';
 
 class AccessibilitySettings extends StatelessWidget {
   @override
@@ -10,20 +11,23 @@ class AccessibilitySettings extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-          title: Text(
-            '접근성 설정',
-            style: TextStyle(color: theme.colorScheme.onSecondary),
+        title: Text(
+          '접근성 설정',
+          style: theme.textTheme.headlineSmall?.copyWith(
+            color: theme.colorScheme.onSecondary,
           ),
-          backgroundColor: theme.scaffoldBackgroundColor,
-          iconTheme: IconThemeData(color: theme.colorScheme.onTertiary)),
+        ),
+        backgroundColor: theme.scaffoldBackgroundColor,
+        iconTheme: IconThemeData(color: theme.colorScheme.onTertiary),
+      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ListTile(
             title: Text(
               '라이트 모드',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSecondary, // 텍스트 색상 지정
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: theme.colorScheme.onSecondary,
               ),
             ),
             leading: Radio(
@@ -34,23 +38,23 @@ class AccessibilitySettings extends StatelessWidget {
                   themeNotifier.toggleTheme(value);
                 }
               },
-              activeColor:
-                  Theme.of(context).colorScheme.onSecondary, // 라디오 버튼 색상 지정
-              fillColor: WidgetStateProperty.resolveWith<Color?>(
+              activeColor: theme.colorScheme.primary,
+              fillColor: MaterialStateProperty.resolveWith<Color?>(
                 (states) {
-                  if (states.contains(WidgetState.selected)) {
-                    return Theme.of(context).colorScheme.primary; // 선택된 상태의 색상
+                  if (states.contains(MaterialState.selected)) {
+                    return theme.colorScheme.primary;
                   }
-                  return Theme.of(context).colorScheme.onSecondary; // 기본 상태의 색상
+                  return theme.colorScheme.onSecondary;
                 },
               ),
             ),
           ),
+          ResponsiveSizedBox(height: 16), // 적절한 간격 추가
           ListTile(
             title: Text(
               '다크 모드',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSecondary, // 텍스트 색상 지정
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: theme.colorScheme.onSecondary,
               ),
             ),
             leading: Radio(
@@ -61,22 +65,26 @@ class AccessibilitySettings extends StatelessWidget {
                   themeNotifier.toggleTheme(value);
                 }
               },
-              activeColor:
-                  Theme.of(context).colorScheme.primary, // 라디오 버튼 선택된 상태의 색상 지정
-              fillColor: WidgetStateProperty.resolveWith<Color?>(
+              activeColor: theme.colorScheme.primary,
+              fillColor: MaterialStateProperty.resolveWith<Color?>(
                 (states) {
-                  if (states.contains(WidgetState.selected)) {
-                    return Theme.of(context)
-                        .colorScheme
-                        .primary; // 선택된 상태에서의 색상
+                  if (states.contains(MaterialState.selected)) {
+                    return theme.colorScheme.primary;
                   }
-                  return Theme.of(context).colorScheme.onSurface; // 기본 상태의 색상
+                  return theme.colorScheme.onSecondary;
                 },
               ),
             ),
           ),
+          ResponsiveSizedBox(height: 16), // 적절한 간격 추가
+          // 아래 코드가 활성화될 경우 적용
           // ListTile(
-          //   title: Text('시스템 모드'),
+          //   title: Text(
+          //     '시스템 모드',
+          //     style: theme.textTheme.bodyLarge?.copyWith(
+          //       color: theme.colorScheme.onSecondary,
+          //     ),
+          //   ),
           //   leading: Radio(
           //     value: ThemeMode.system,
           //     groupValue: themeNotifier.themeMode,

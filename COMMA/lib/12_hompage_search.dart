@@ -6,8 +6,8 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart'; // 날짜 포맷을 위해 추가
 import '63record.dart';
 import '66colon.dart';
-import '../model/44_font_size_provider.dart';
 import 'package:provider/provider.dart';
+import 'mypage/44_font_size_page.dart';
 
 class MainToSearchPage extends StatefulWidget {
   const MainToSearchPage({super.key});
@@ -106,10 +106,6 @@ class _MainToSearchPageState extends State<MainToSearchPage> {
 
   @override
   Widget build(BuildContext context) {
-    // 폰트 크기 비율을 Provider에서 가져옴
-    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
-    // 디스플레이 비율을 가져옴
-    final scaleFactor = fontSizeProvider.scaleFactor;
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -123,15 +119,14 @@ class _MainToSearchPageState extends State<MainToSearchPage> {
                 child: SizedBox(
                   height: 45,
                   child: TextField(
-                    style: TextStyle(color: theme.colorScheme.onSecondary),
+                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSecondary),
                     controller: _searchController,
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: theme.colorScheme.primaryFixed,
                       hintText: '검색할 파일명을 입력하세요.',
-                      hintStyle: const TextStyle(
+                      hintStyle: theme.textTheme.bodyMedium?.copyWith(
                         color: Color(0xFF36AE92),
-                        fontSize: 15,
                       ),
                       prefixIcon: const Icon(
                         Icons.search,
@@ -157,14 +152,13 @@ class _MainToSearchPageState extends State<MainToSearchPage> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF36AE92),
-                    // iconColor: const Color(0xFF36AE92), // 검색 버튼 색상
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     '검색',
-                    style: TextStyle(color: Colors.white, fontSize: 14.5),
+                    style: theme.textTheme.bodySmall?.copyWith(color: Colors.white),
                   ),
                 ),
               ),
@@ -174,19 +168,15 @@ class _MainToSearchPageState extends State<MainToSearchPage> {
       body: searchResults.isEmpty
           ? SingleChildScrollView(
               child: Padding(
-                padding: EdgeInsets.all(50.0),
+                padding: const EdgeInsets.all(50.0),
                 child: Column(
                   children: [
                     Align(
                       alignment: Alignment.center,
                       child: Text(
                         '최근 검색 내역이 없어요.',
-                        style: TextStyle(
+                        style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSecondary,
-                          fontSize: 13,
-                          fontFamily: 'Raleway',
-                          fontWeight: FontWeight.w700,
-                          height: 1.5,
                         ),
                       ),
                     ),
@@ -210,11 +200,15 @@ class _MainToSearchPageState extends State<MainToSearchPage> {
                 return ListTile(
                   title: Text(
                     fileName,
-                    style: TextStyle(color: theme.colorScheme.onSecondary),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSecondary,
+                    ),
                   ),
                   subtitle: Text(
                     formatDateTimeToKorean(createdAt),
-                    style: TextStyle(color: theme.colorScheme.onSecondary),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSecondary,
+                    ),
                   ),
                   onTap: () {
                     print('File $fileName is clicked');

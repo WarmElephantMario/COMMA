@@ -55,7 +55,27 @@ ThemeData lightTheme = ThemeData(
         backgroundColor:
             Colors.white, // Background color for BottomNavigationBar
         selectedItemColor: Colors.teal,
-        unselectedItemColor: Colors.black));
+        unselectedItemColor: Colors.black),
+        
+      textTheme: TextTheme(
+        displayLarge: TextStyle(fontSize: 57.0), // headline1
+        displayMedium: TextStyle(fontSize: 45.0), // headline2
+        displaySmall: TextStyle(fontSize: 36.0), // headline3
+        headlineLarge: TextStyle(fontSize: 32.0), // headline4
+        headlineMedium: TextStyle(fontSize: 28.0), // headline5
+        headlineSmall: TextStyle(fontSize: 24.0), // headline6
+        titleLarge: TextStyle(fontSize: 22.0), // subtitle1
+        titleMedium: TextStyle(fontSize: 16.0), // subtitle2
+        titleSmall: TextStyle(fontSize: 14.0),
+        bodyLarge: TextStyle(fontSize: 16.0), // bodyText1
+        bodyMedium: TextStyle(fontSize: 14.0), // bodyText2
+        bodySmall: TextStyle(fontSize: 12.0),
+        labelLarge: TextStyle(fontSize: 14.0), // button
+        labelMedium: TextStyle(fontSize: 12.0), // caption
+        labelSmall: TextStyle(fontSize: 11.0), // overline
+  ),
+
+        );
 
 // ThemeData for Dark Theme
 ThemeData darkTheme = ThemeData(
@@ -82,7 +102,27 @@ ThemeData darkTheme = ThemeData(
         backgroundColor:
             Color(0xFF121212), // Background color for BottomNavigationBar
         selectedItemColor: Colors.teal,
-        unselectedItemColor: Colors.grey));
+        unselectedItemColor: Colors.grey),
+    textTheme: TextTheme(
+      displayLarge: TextStyle(fontSize: 57.0), // headline1
+      displayMedium: TextStyle(fontSize: 45.0), // headline2
+      displaySmall: TextStyle(fontSize: 36.0), // headline3
+      headlineLarge: TextStyle(fontSize: 32.0), // headline4
+      headlineMedium: TextStyle(fontSize: 28.0), // headline5
+      headlineSmall: TextStyle(fontSize: 24.0), // headline6
+      titleLarge: TextStyle(fontSize: 22.0), // subtitle1
+      titleMedium: TextStyle(fontSize: 16.0), // subtitle2
+      titleSmall: TextStyle(fontSize: 14.0),
+      bodyLarge: TextStyle(fontSize: 16.0), // bodyText1
+      bodyMedium: TextStyle(fontSize: 14.0), // bodyText2
+      bodySmall: TextStyle(fontSize: 12.0),
+      labelLarge: TextStyle(fontSize: 14.0), // button
+      labelMedium: TextStyle(fontSize: 12.0), // caption
+      labelSmall: TextStyle(fontSize: 11.0), // overline
+  ),
+        );
+
+    
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -92,6 +132,8 @@ class MyApp extends StatelessWidget {
     final fontSizeProvider = Provider.of<FontSizeProvider>(context);
     final themeNotifier = Provider.of<ThemeNotifier>(context);
 
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return MaterialApp(
       navigatorObservers: [MyNavigatorObserver()],
       debugShowCheckedModeBanner: false,
@@ -99,13 +141,15 @@ class MyApp extends StatelessWidget {
       theme: lightTheme.copyWith(
         // 라이트 테마에 사용자 지정 폰트 크기 비율 적용
         textTheme: lightTheme.textTheme.apply(
-          fontSizeFactor: fontSizeProvider.scaleFactor,
+          fontSizeFactor: fontSizeProvider.scaleFactor * (screenWidth / 400), // 화면 크기에 따른 조정
+          fontSizeDelta: 0.0,
         ),
       ),
       darkTheme: darkTheme.copyWith(
         // 다크 테마에 사용자 지정 폰트 크기 비율 적용
         textTheme: darkTheme.textTheme.apply(
-          fontSizeFactor: fontSizeProvider.scaleFactor,
+          fontSizeFactor: fontSizeProvider.scaleFactor * (screenWidth / 400), // 화면 크기에 따른 조정
+          fontSizeDelta: 0.0,
         ),
       ),
 
@@ -113,7 +157,8 @@ class MyApp extends StatelessWidget {
 
       home: const SplashScreen(), // 앱 시작 시 SplashScreen으로 이동
     );
-  }
+      }
+
 }
 
 class MyNavigatorObserver extends NavigatorObserver {
