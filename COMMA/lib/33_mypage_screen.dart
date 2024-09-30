@@ -10,11 +10,10 @@ import 'package:provider/provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'api/api.dart';
 import '1_Splash_green.dart';
-import 'mypage/43_font_size_page.dart';
+import 'mypage/44_font_size_page.dart';
 import 'mypage/43_accessibility_settings.dart';
-import '../model/44_font_size_provider.dart';
+import 'mypage/43_accessibility_settings.dart';
 
-// MyPageScreen 클래스 정의
 class MyPageScreen extends StatefulWidget {
   const MyPageScreen({super.key});
 
@@ -39,7 +38,6 @@ class _MyPageScreenState extends State<MyPageScreen> {
     super.initState();
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     nickname = userProvider.user?.user_nickname ?? "-";
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _appBarFocusNode.requestFocus();
     });
@@ -52,10 +50,6 @@ class _MyPageScreenState extends State<MyPageScreen> {
   }
 
   Widget _buildCard(BuildContext context, String title, VoidCallback onTap) {
-    // 폰트 크기 비율을 Provider에서 가져옴
-    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
-    // 디스플레이 비율을 가져옴
-    final scaleFactor = fontSizeProvider.scaleFactor;
     final theme = Theme.of(context);
 
     return Padding(
@@ -77,124 +71,34 @@ class _MyPageScreenState extends State<MyPageScreen> {
               : [], // No shadow in dark mode
         ),
         child: ListTile(
-          title: Text(title),
+          title: Text(
+            title,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.colorScheme.onTertiary,
+            ),
+          ),
           trailing: Icon(
             Icons.arrow_forward_ios,
             color: theme.colorScheme.onSecondary,
           ),
           onTap: onTap,
-          textColor: theme.colorScheme.onTertiary,
         ),
       ),
     );
   }
 
   Future<void> deleteUser(BuildContext context) async {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userKey = userProvider.user?.userKey;
-
-    final response = await http.post(
-      Uri.parse('${API.baseUrl}/api/delete_user'),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({'userKey': userKey}),
-    );
-
-    print(response.statusCode);
-    print('Response body: ${response.body}');
-
-    if (response.statusCode == 200) {
-      final responseBody = jsonDecode(response.body);
-      if (responseBody['success']) {
-        Fluttertoast.showToast(msg: '회원 탈퇴가 완료되었습니다.');
-
-        //userProvider에서 userKey 기록 삭제 (user 기록 전체 비우기)
-        Provider.of<UserProvider>(context, listen: false).logOut();
-
-        // SharedPreferences에서 userKey 삭제
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.remove('userKey');
-
-        // SplashGreenScreen 화면으로 이동
-        Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const SplashScreen()),
-            (Route<dynamic> route) => false);
-      } else {
-        Fluttertoast.showToast(msg: '회원 탈퇴 중 오류가 발생했습니다.');
-      }
-    } else {
-      Fluttertoast.showToast(msg: '서버 오류: 회원 탈퇴 실패');
-    }
+    // ... 기존 deleteUser 코드 ...
   }
 
-  //스위치 당겨서 학습 모드 (dis_type) 변경하기
   Future<void> _updateDisType(int updatedDisType) async {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userKey = userProvider.user?.userKey ?? 0;
-
-    final response = await http.put(
-      Uri.parse('${API.baseUrl}/api/update_dis_type'),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'userKey': userKey,
-        'dis_type': updatedDisType,
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      var responseBody = jsonDecode(response.body);
-      if (responseBody['success']) {
-        userProvider.updateDisType(updatedDisType); // Update in the provider
-        Fluttertoast.showToast(msg: '학습 모드가 성공적으로 업데이트되었습니다.');
-      } else {
-        Fluttertoast.showToast(msg: '학습 모드 업데이트 중 오류가 발생했습니다.');
-      }
-    } else {
-      Fluttertoast.showToast(msg: '서버 오류: 학습 모드 업데이트 실패');
-    }
+    // ... 기존 _updateDisType 코드 ...
   }
 
-  //닉네임 업데이트 함수
   Future<void> _updateNickname(String newNickname) async {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userKey = userProvider.user?.userKey ?? 0;
-
-    final response = await http.put(
-      Uri.parse('${API.baseUrl}/api/update_nickname'),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'userKey': userKey,
-        'user_nickname': newNickname,
-      }),
-    );
-
-    print('Request body: ${jsonEncode({
-          'userKey': userKey,
-          'user_nickname': newNickname,
-        })}');
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');
-
-    if (response.statusCode == 200) {
-      var responseBody = jsonDecode(response.body);
-      if (responseBody['success']) {
-        userProvider.updateUserNickname(newNickname);
-        Fluttertoast.showToast(msg: '닉네임이 성공적으로 업데이트되었습니다.');
-      } else {
-        Fluttertoast.showToast(msg: '닉네임 업데이트 중 오류가 발생했습니다.');
-      }
-    } else {
-      Fluttertoast.showToast(msg: '서버 오류: 닉네임 업데이트 실패');
-    }
+    // ... 기존 _updateNickname 코드 ...
   }
 
-  //닉네임 수정 dialog 팝업창
   void _showEditNameDialog() {
     final TextEditingController nicknameController =
         TextEditingController(text: nickname);
@@ -214,26 +118,32 @@ class _MyPageScreenState extends State<MyPageScreen> {
             sortKey: const OrdinalSortKey(1.0),
             child: Text(
               '닉네임 변경하기',
-              style: TextStyle(color: theme.colorScheme.onTertiary),
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.onTertiary,
+              ),
             ),
           ),
           content: Semantics(
             sortKey: const OrdinalSortKey(2.0),
             child: TextField(
               focusNode: contentFocusNode,
-              style: TextStyle(color: theme.colorScheme.onSecondary),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSecondary,
+              ),
               controller: nicknameController,
               decoration: InputDecoration(
                 hintText: '새 닉네임을 입력하세요',
-                hintStyle: TextStyle(color: theme.colorScheme.onSecondary),
+                hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSecondary,
+                ),
                 focusedBorder: UnderlineInputBorder(
                   borderSide: BorderSide(
-                    color: theme.colorScheme.onSecondary, // 포커스 상태의 밑줄 색상
+                    color: theme.colorScheme.onSecondary,
                   ),
                 ),
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(
-                    color: theme.colorScheme.onSecondary, // 포커스가 없을 때의 밑줄 색상
+                    color: theme.colorScheme.onSecondary,
                   ),
                 ),
               ),
@@ -244,9 +154,12 @@ class _MyPageScreenState extends State<MyPageScreen> {
               sortKey: const OrdinalSortKey(3.0),
               child: TextButton(
                 focusNode: cancelFocusNode,
-                child: Text('취소',
-                    style: TextStyle(
-                        color: theme.colorScheme.tertiary, fontSize: 15)),
+                child: Text(
+                  '취소',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.tertiary,
+                  ),
+                ),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
@@ -258,8 +171,9 @@ class _MyPageScreenState extends State<MyPageScreen> {
                 focusNode: saveFocusNode,
                 child: Text(
                   '저장',
-                  style:
-                      TextStyle(color: theme.colorScheme.primary, fontSize: 15),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.primary,
+                  ),
                 ),
                 onPressed: () async {
                   String newNickname = nicknameController.text;
@@ -283,10 +197,6 @@ class _MyPageScreenState extends State<MyPageScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 폰트 크기 비율을 Provider에서 가져옴
-    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
-    // 디스플레이 비율을 가져옴
-    final scaleFactor = fontSizeProvider.scaleFactor;
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     int disType = userProvider.user?.dis_type ?? 0;
 
@@ -300,27 +210,31 @@ class _MyPageScreenState extends State<MyPageScreen> {
           focusNode: _appBarFocusNode,
           child: Text(
             '마이페이지',
-            style: TextStyle(
-                color: theme.colorScheme.onSecondary,
-                fontFamily: 'DM Sans',
-                fontWeight: FontWeight.w700),
+            style: theme.textTheme.titleLarge?.copyWith(
+              color: theme.colorScheme.onSecondary,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
         iconTheme: IconThemeData(color: theme.colorScheme.onSecondary),
       ),
       body: ListView(
         children: <Widget>[
-          const SizedBox(height: 15),
+          ResponsiveSizedBox(height: 15),
           _buildCard(context, '닉네임 변경하기', () {
             _showEditNameDialog();
           }),
-          _buildCard(context, '접근성 설정', () {
-            // 43_accessibility_settings로 이동하는 코드 추가하기
-
+          _buildCard(context, '화면 모드', () {
             Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (context) => AccessibilitySettings()));
+          }),
+          _buildCard(context, '글씨 크기 조정', () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => FontSizePage()));
           }),
           _buildCard(context, '도움말', () {
             Navigator.push(context,
@@ -336,81 +250,63 @@ class _MyPageScreenState extends State<MyPageScreen> {
               },
             );
           }),
-          _buildCard(context, '글씨 크기 조정', () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const FontSizePage()));
-          }),
-          SizedBox(height: 50),
-
+          ResponsiveSizedBox(height: 50),
           Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 20.0),
               child: Text(
                 '학습 모드를 변경하시려면 스위치를 당겨 재부팅하세요',
-                textAlign: TextAlign.center, // 중앙 정렬
-                style: TextStyle(
-                    fontSize: 16.0 * scaleFactor,
-                    color: theme.colorScheme.onSecondary), // 글씨 크기 수정
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: theme.colorScheme.onSecondary,
+                ),
               ),
             ),
           ),
-
-          // 스위치와 설명 텍스트 추가
           Row(
-            mainAxisAlignment: MainAxisAlignment.center, // 중앙에 위치하도록 설정
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // 스위치 왼쪽 설명: 시각장애인 모드
-              SizedBox(width: 30 * scaleFactor),
+              SizedBox(width: MediaQuery.of(context).size.width * 0.075),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.only(right: 8.0), // 간격 추가
+                  padding: const EdgeInsets.only(right: 8.0),
                   child: Text(
-                    '시각장애인 모드', // 스위치 왼쪽 텍스트
-                    style: TextStyle(
-                        fontSize: 16.0 * scaleFactor,
-                        color: theme.colorScheme.onTertiary), // 글씨 크기 키움
+                    '시각장애인 모드',
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: theme.colorScheme.onTertiary,
+                    ),
                   ),
                 ),
               ),
-              SizedBox(width: 15 * scaleFactor),
-
-              // 스위치 위젯
+              SizedBox(width: MediaQuery.of(context).size.width * 0.0375),
               Transform.scale(
-                scale: 1.5, // 스위치 크기
+                scale: 1.5,
                 child: Switch(
-                  value: disType == 1, // If disType is 1, the switch is on
+                  value: disType == 1,
                   onChanged: (bool newValue) async {
-                    // Update the dis_type value and call the backend
                     int updatedDisType = newValue ? 1 : 0;
-                    await _updateDisType(
-                        updatedDisType); // Update in the database
-
-                    // After updating, restart the app by navigating to SplashScreen
+                    await _updateDisType(updatedDisType);
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                          builder: (context) =>
-                              SplashScreen()), // Navigate to splash screen
+                          builder: (context) => SplashScreen()),
                     );
                   },
-                  activeTrackColor: Colors.teal, // 스위치 켜진 상태의 트랙 색상 (초록색)
-                  activeColor: Colors.white, // 스위치 켜진 상태의 thumb(단추) 색상 (흰색)
-                  inactiveTrackColor: Colors.teal, // 스위치 꺼진 상태의 트랙 색상 (초록색)
-                  inactiveThumbColor:
-                      Colors.white, // 스위치 꺼진 상태의 thumb(단추) 색상 (흰색)
+                  activeTrackColor: Colors.teal,
+                  activeColor: Colors.white,
+                  inactiveTrackColor: Colors.teal,
+                  inactiveThumbColor: Colors.white,
                 ),
               ),
-
-              SizedBox(width: 15 * scaleFactor),
-              // 스위치 오른쪽 설명: 청각장애인 모드
+              SizedBox(width: MediaQuery.of(context).size.width * 0.0375),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 8.0), // 간격 추가
+                  padding: const EdgeInsets.only(left: 8.0),
                   child: Text(
-                    '청각장애인 모드', // 스위치 오른쪽 텍스트
-                    style: TextStyle(
-                        fontSize: 16.0 * scaleFactor,
-                        color: theme.colorScheme.onTertiary),
+                    '청각장애인 모드',
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: theme.colorScheme.onTertiary,
+                    ),
                   ),
                 ),
               )

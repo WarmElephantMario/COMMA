@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_plugin/16_homepage_move.dart';
+import 'package:flutter_plugin/mypage/44_font_size_page.dart';
 import '66colon.dart';
 import '62lecture_start.dart';
 import '63record.dart';
@@ -14,7 +15,6 @@ import 'package:provider/provider.dart';
 import 'api/api.dart';
 import 'package:intl/intl.dart';
 
-import 'package:flutter/material.dart';
 
 BottomNavigationBar buildBottomNavigationBar(
     BuildContext context, int currentIndex, Function(int) onItemTapped) {
@@ -80,16 +80,12 @@ BottomNavigationBar buildBottomNavigationBar(
     unselectedItemColor: theme.unselectedWidgetColor,
     selectedIconTheme: IconThemeData(color: theme.colorScheme.primary),
     unselectedIconTheme: IconThemeData(color: theme.unselectedWidgetColor),
-    selectedLabelStyle: TextStyle(
-      color: theme.colorScheme.primary,
-      fontSize: 9,
-      fontFamily: 'DM Sans',
-      fontWeight: FontWeight.bold,
-    ),
-    unselectedLabelStyle: TextStyle(
+   selectedLabelStyle: theme.textTheme.bodySmall?.copyWith(
+    color: theme.colorScheme.primary,
+    fontWeight: FontWeight.bold,
+  ),
+    unselectedLabelStyle: theme.textTheme.bodySmall?.copyWith(
       color: theme.unselectedWidgetColor,
-      fontSize: 9,
-      fontFamily: 'DM Sans',
       fontWeight: FontWeight.bold,
     ),
   );
@@ -113,14 +109,12 @@ BottomNavigationBarItem buildBottomNavigationBarItem(BuildContext context,
         const SizedBox(height: 4), // 아이콘과 라벨 사이의 간격 조정
         Text(
           label,
-          style: TextStyle(
-            color: isSelected
-                ? theme.colorScheme.primary
-                : theme.unselectedWidgetColor,
-            fontSize: 9,
-            fontFamily: 'DM Sans',
-            fontWeight: FontWeight.bold,
-          ),
+          style: theme.textTheme.bodySmall?.copyWith(
+          color: isSelected
+              ? theme.colorScheme.primary
+              : theme.unselectedWidgetColor,
+          fontWeight: FontWeight.bold,
+        ),
         ),
         if (isSelected)
           Container(
@@ -177,10 +171,8 @@ void showConfirmationDialog(
               focusNode: titleFocusNode,
               child: Text(
                 title,
-                style: TextStyle(
+                style: theme.textTheme.bodyLarge?.copyWith(
                   color: theme.colorScheme.onSecondary,
-                  fontSize: 18,
-                  fontFamily: 'DM Sans',
                   fontWeight: FontWeight.bold,
                 ),
                 textAlign: TextAlign.center,
@@ -193,12 +185,11 @@ void showConfirmationDialog(
               focusNode: contentFocusNode,
               child: Text(
                 content,
-                style: TextStyle(
+                style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.surfaceBright,
-                  fontSize: 14,
-                  fontFamily: 'DM Sans',
                   fontWeight: FontWeight.w300,
                 ),
+
                 textAlign: TextAlign.center,
               ),
             ),
@@ -218,12 +209,10 @@ void showConfirmationDialog(
                         },
                         child: Text(
                           '취소',
-                          style: TextStyle(
-                            color: theme.colorScheme.tertiary,
-                            fontSize: 16,
-                            fontFamily: 'DM Sans',
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                          color: theme.colorScheme.tertiary,
+                          fontWeight: FontWeight.bold,
+                        ),
                         ),
                       ),
                     ),
@@ -239,10 +228,8 @@ void showConfirmationDialog(
                         },
                         child: Text(
                           '확인',
-                          style: TextStyle(
+                          style: theme.textTheme.bodyLarge?.copyWith(
                             color: theme.colorScheme.onSecondary,
-                            fontSize: 16,
-                            fontFamily: 'DM Sans',
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -292,11 +279,10 @@ void showColonCreatingDialog(
               },
               child: Text(
                 '취소',
-                style: TextStyle(
-                  color: theme.colorScheme.tertiary,
-                  fontSize: 16,
-                  fontFamily: 'DM Sans',
-                ),
+               style: theme.textTheme.bodyLarge?.copyWith(
+                color: theme.colorScheme.tertiary,
+                fontWeight: FontWeight.bold,
+              ),
               ),
             ),
           ],
@@ -306,12 +292,11 @@ void showColonCreatingDialog(
           children: [
             Text(
               '콜론 파일을 생성 중입니다',
-              style: TextStyle(
-                color: theme.colorScheme.onTertiary,
-                fontSize: 16,
-                fontFamily: 'DM Sans',
-                fontWeight: FontWeight.bold,
-              ),
+             style: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.colorScheme.onTertiary,
+              fontWeight: FontWeight.bold,
+            ),
+
             ),
             const SizedBox(height: 16),
             CircularProgressIndicator(
@@ -325,10 +310,8 @@ void showColonCreatingDialog(
               builder: (context, value, child) {
                 return Text(
                   '${(value * 100).toStringAsFixed(0)}%', // 진행률을 퍼센트로 표시
-                  style: TextStyle(
+                  style: theme.textTheme.bodyLarge?.copyWith(
                     color: theme.colorScheme.onSecondary,
-                    fontSize: 16,
-                    fontFamily: 'DM Sans',
                     fontWeight: FontWeight.bold,
                   ),
                 );
@@ -359,34 +342,28 @@ void showColonCreatedDialog(BuildContext context, String folderName,
             children: [
               Text(
                 '콜론이 생성되었습니다.',
-                style: TextStyle(
+                style: theme.textTheme.bodyLarge?.copyWith(
                   color: theme.colorScheme.onTertiary,
-                  fontSize: 17,
-                  fontFamily: 'DM Sans',
                   fontWeight: FontWeight.bold,
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 4),
+              const ResponsiveSizedBox(height: 4),
               Text(
                 '폴더 이름: $folderName (:)', // 기본폴더 대신 folderName 사용
-                style: TextStyle(
+                style: theme.textTheme.bodyLarge?.copyWith(
                   color: theme.colorScheme.surfaceBright,
-                  fontSize: 17,
-                  fontFamily: 'DM Sans',
                   fontWeight: FontWeight.bold,
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 4),
+              const ResponsiveSizedBox(height: 4),
               Text(
                 '으로 이동하시겠습니까?',
-                style: TextStyle(
-                  color: theme.colorScheme.onSecondary,
-                  fontSize: 17,
-                  fontFamily: 'DM Sans',
-                  fontWeight: FontWeight.bold,
-                ),
+                style: theme.textTheme.bodyLarge?.copyWith(
+                color: theme.colorScheme.onSecondary,
+                fontWeight: FontWeight.bold,
+              ),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -402,10 +379,8 @@ void showColonCreatedDialog(BuildContext context, String folderName,
                     },
                     child: Text(
                       '취소',
-                      style: TextStyle(
+                      style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.tertiary,
-                        fontSize: 14,
-                        fontFamily: 'DM Sans',
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -417,10 +392,8 @@ void showColonCreatedDialog(BuildContext context, String folderName,
                     },
                     child: Text(
                       '확인',
-                      style: TextStyle(
+                      style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSecondary,
-                        fontSize: 14,
-                        fontFamily: 'DM Sans',
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -463,10 +436,8 @@ void showLearningDialog(BuildContext context, String fileName, String fileURL,
               },
               child: Text(
                 '취소',
-                style: TextStyle(
+                style: theme.textTheme.bodyLarge?.copyWith(
                   color: theme.colorScheme.tertiary,
-                  fontSize: 16,
-                  fontFamily: 'DM Sans',
                 ),
               ),
             ),
@@ -482,12 +453,11 @@ void showLearningDialog(BuildContext context, String fileName, String fileURL,
                   children: [
                     Text(
                       progressNotifier.message, // 메시지 표시
-                      style: TextStyle(
+                      style: theme.textTheme.bodyLarge?.copyWith(
                         color: theme.colorScheme.onSecondary,
-                        fontSize: 16,
-                        fontFamily: 'DM Sans',
                         fontWeight: FontWeight.bold,
                       ),
+
                     ),
                     const SizedBox(height: 16),
                     const CircularProgressIndicator(
@@ -498,12 +468,10 @@ void showLearningDialog(BuildContext context, String fileName, String fileURL,
                     const SizedBox(height: 16),
                     Text(
                       '${(value * 100).toStringAsFixed(0)}%', // 진행률을 퍼센트로 표시
-                      style: TextStyle(
-                        color: theme.colorScheme.onSecondary,
-                        fontSize: 16,
-                        fontFamily: 'DM Sans',
-                        fontWeight: FontWeight.bold,
-                      ),
+                     style: theme.textTheme.bodyLarge?.copyWith(
+                      color: theme.colorScheme.onSecondary,
+                      fontWeight: FontWeight.bold,
+                  ),
                     ),
                   ],
                 );
@@ -672,13 +640,12 @@ Future<void> showCustomMenu(BuildContext context, VoidCallback onRename,
         child: Center(
           child: Text(
             '삭제하기',
-            style: TextStyle(
-              color: theme.colorScheme.tertiary,
-              fontSize: 14,
-              fontFamily: 'Poppins',
-              fontWeight: FontWeight.w700,
-              height: 1.2,
-            ),
+            style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.tertiary,
+            fontWeight: FontWeight.w700,
+            height: 1.2,
+            fontFamily: 'Poppins', // 폰트는 그대로 유지
+          ),
           ),
         ),
       ),
@@ -687,13 +654,13 @@ Future<void> showCustomMenu(BuildContext context, VoidCallback onRename,
         child: Center(
           child: Text(
             '이동하기',
-            style: TextStyle(
+            style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSecondary,
-              fontSize: 14,
-              fontFamily: 'Poppins',
               fontWeight: FontWeight.w700,
               height: 1.2,
+              fontFamily: 'Poppins', 
             ),
+
           ),
         ),
       ),
@@ -702,12 +669,11 @@ Future<void> showCustomMenu(BuildContext context, VoidCallback onRename,
         child: Center(
           child: Text(
             '이름 바꾸기',
-            style: TextStyle(
+             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSecondary,
-              fontSize: 14,
-              fontFamily: 'Poppins',
               fontWeight: FontWeight.w700,
               height: 1.2,
+              fontFamily: 'Poppins', 
             ),
           ),
         ),
@@ -749,13 +715,12 @@ Future<void> showCustomMenu2(
         child: Center(
           child: Text(
             '이름 바꾸기',
-            style: TextStyle(
-              color: theme.colorScheme.onSecondary,
-              fontSize: 14,
-              fontFamily: 'Poppins',
-              fontWeight: FontWeight.w700,
-              height: 1.2,
-            ),
+           style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSecondary,
+            fontWeight: FontWeight.w700,
+            height: 1.2,
+            fontFamily: 'Poppins', 
+          ),
           ),
         ),
       ),
@@ -764,13 +729,12 @@ Future<void> showCustomMenu2(
         child: Center(
           child: Text(
             '삭제하기',
-            style: TextStyle(
-              color: theme.colorScheme.tertiary,
-              fontSize: 14,
-              fontFamily: 'Poppins',
-              fontWeight: FontWeight.w700,
-              height: 1.2,
-            ),
+           style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.tertiary,
+            fontWeight: FontWeight.w700,
+            height: 1.2,
+            fontFamily: 'Poppins', // 폰트는 유지
+          ),
           ),
         ),
       ),
@@ -853,12 +817,12 @@ Future<void> showRenameDialog(
         backgroundColor: theme.colorScheme.surfaceContainer,
         title: Text(
           title,
-          style: TextStyle(
-            color: theme.colorScheme.onTertiary,
-            fontSize: 14,
-            fontFamily: 'DM Sans',
-            fontWeight: FontWeight.bold,
-          ),
+          style: theme.textTheme.bodySmall?.copyWith(
+          color: theme.colorScheme.onTertiary,
+          fontWeight: FontWeight.bold,
+          fontFamily: 'DM Sans',
+        ),
+
         ),
         content: TextField(
           controller: nameController,
@@ -914,12 +878,11 @@ Future<void> showRenameDialogVer2(
         backgroundColor: theme.colorScheme.surfaceContainer,
         title: Text(
           title,
-          style: TextStyle(
-            color: theme.colorScheme.onTertiary,
-            fontSize: 14,
-            fontFamily: 'DM Sans',
-            fontWeight: FontWeight.bold,
-          ),
+          style: theme.textTheme.bodySmall?.copyWith(
+          color: theme.colorScheme.onTertiary,
+          fontWeight: FontWeight.bold,
+        ),
+
         ),
         content: TextField(
           style: TextStyle(color: theme.colorScheme.onSecondary),
@@ -931,14 +894,15 @@ Future<void> showRenameDialogVer2(
         actions: <Widget>[
           TextButton(
             child:
-                Text('취소', style: TextStyle(color: theme.colorScheme.tertiary)),
+                Text('취소', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.tertiary)),
+
             onPressed: () {
               Navigator.of(context).pop();
             },
           ),
           TextButton(
-            child: Text('저장',
-                style: TextStyle(color: theme.colorScheme.onSecondary)),
+            child: Text('저장', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSecondary)),
+
             onPressed: () async {
               await renameItem(
                   folderType, items[index]['id'], nameController.text);
@@ -967,28 +931,31 @@ Future<void> showAddFolderDialog(
         backgroundColor: theme.colorScheme.surfaceContainer,
         title: Text(
           '새 폴더 만들기',
-          style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-              color: theme.colorScheme.onTertiary),
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.onTertiary,
+          ),
         ),
         content: TextField(
           controller: folderNameController,
           decoration: InputDecoration(
             hintText: '폴더 이름',
-            hintStyle: TextStyle(color: theme.colorScheme.onSecondary),
+            hintStyle: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSecondary,
+            ),
           ),
-          style: TextStyle(
+          style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSecondary,
           ),
         ),
         actions: <Widget>[
           TextButton(
             child: Text('취소',
-                style: TextStyle(
-                    color: theme.colorScheme.tertiary,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16)),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.tertiary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
             onPressed: () {
               Navigator.of(context).pop();
             },
@@ -996,10 +963,10 @@ Future<void> showAddFolderDialog(
           TextButton(
             child: Text(
               '만들기',
-              style: TextStyle(
-                  color: theme.colorScheme.onSecondary,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSecondary,
+                fontWeight: FontWeight.w700,
+              ),
             ),
             onPressed: () async {
               await addFolder(folderNameController.text);
@@ -1057,12 +1024,11 @@ class CustomRadioButton2 extends StatelessWidget {
           Flexible(
             child: Text(
               label,
-              style: TextStyle(
-                fontSize: 16,
-                fontFamily: 'DM Sans',
-                color: theme.colorScheme.onSecondary,
+              style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w500,
+                color: theme.colorScheme.onSecondary,
               ),
+
               overflow: TextOverflow.ellipsis, // 텍스트 오버플로우 처리
             ),
           ),
@@ -1117,12 +1083,10 @@ class CustomRadioButton3 extends StatelessWidget {
           Flexible(
             child: Text(
               label,
-              style: TextStyle(
-                fontSize: 16,
-                fontFamily: 'DM Sans',
-                color: theme.colorScheme.onSecondary,
-                fontWeight: FontWeight.w500,
-              ),
+             style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w500,
+            color: theme.colorScheme.onSecondary,
+          ),
               overflow: TextOverflow.ellipsis, // 텍스트 오버플로우 처리
             ),
           ),
@@ -1203,25 +1167,23 @@ class LectureExample extends StatelessWidget {
                     Expanded(
                       child: Text(
                         lectureName,
-                        style: TextStyle(
-                          color: theme.colorScheme.onTertiary,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w700,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onTertiary, 
+                          fontWeight: FontWeight.w700, 
                           height: 1.2,
+                          fontFamily: 'Poppins', // 폰트 유지
                         ),
+
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     const SizedBox(width: 10),
                     Text(
                       date,
-                      style: TextStyle(
+                      style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.surfaceBright,
-                        fontSize: 12,
-                        fontFamily: 'DM Sans',
                         fontWeight: FontWeight.w500,
-                        height: 1.2,
+                        fontFamily: 'DM Sans', // 폰트 유지
                       ),
                     ),
                   ],
@@ -1293,28 +1255,27 @@ class RenameDeletePopup extends StatelessWidget {
   }
 }
 
-//ClickButton
+
+
 class ClickButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
-  final double width;
-  final double height;
   final String? iconPath;
   final IconData? iconData;
   final Color? iconColor;
   final Color? backgroundColor;
   final bool isDisabled;
+  final double height; // 높이를 고정할 수 있는 속성 추가
 
   const ClickButton({
     super.key,
     required this.text,
     this.onPressed,
-    this.width = double.infinity,
-    this.height = 50.0,
     this.iconPath,
     this.iconData,
     this.iconColor,
     this.backgroundColor,
+    this.height = 50.0, // 기본 높이 설정
     this.isDisabled = false,
   });
 
@@ -1322,22 +1283,27 @@ class ClickButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    // Define text style
+    final TextStyle textStyle = theme.textTheme.bodySmall?.copyWith(
+      color: theme.colorScheme.surface,
+      fontWeight: FontWeight.w700,
+    ) ?? const TextStyle();
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: GestureDetector(
         onTap: isDisabled ? null : onPressed,
         child: Container(
-          width: width,
-          height: height,
-          decoration: ShapeDecoration(
+          height: height, // 높이 설정
+          padding: const EdgeInsets.symmetric(horizontal: 20.0), // 패딩에서 수직 방향 패딩 제거
+          decoration: BoxDecoration(
             color: isDisabled
                 ? Colors.grey
                 : (backgroundColor ?? const Color.fromRGBO(54, 174, 146, 1.0)),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
+            borderRadius: BorderRadius.circular(10),
           ),
           child: Row(
+            mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (iconPath != null)
@@ -1356,14 +1322,12 @@ class ClickButton extends StatelessWidget {
                     color: iconColor ?? theme.colorScheme.surface,
                   ),
                 ),
-              Text(
-                text,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: theme.colorScheme.surface,
-                  fontSize: 14,
-                  fontFamily: 'DM Sans',
-                  fontWeight: FontWeight.w700,
+              Flexible(
+                child: Text(
+                  text,
+                  textAlign: TextAlign.center,
+                  style: textStyle,
+                  overflow: TextOverflow.ellipsis, // 긴 텍스트는 잘리도록 처리
                 ),
               ),
             ],
@@ -1373,6 +1337,12 @@ class ClickButton extends StatelessWidget {
     );
   }
 }
+
+
+
+
+
+
 
 // 폴더 리스트
 class FolderListItem extends StatelessWidget {
@@ -1422,11 +1392,10 @@ class FolderListItem extends StatelessWidget {
           Expanded(
             child: Text(
               folder['folder_name'],
-              style: TextStyle(
-                color: theme.colorScheme.onTertiary,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              style: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.colorScheme.onTertiary,
+              fontWeight: FontWeight.w600,
+            ),
               overflow: TextOverflow.ellipsis, // 텍스트 오버플로우 처리
             ),
           ),
@@ -1434,13 +1403,12 @@ class FolderListItem extends StatelessWidget {
             children: [
               Text(
                 '$fileCount files',
-                style: TextStyle(
+                style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.surfaceBright,
-                  fontSize: 12,
-                  fontFamily: 'DM Sans',
                   fontWeight: FontWeight.w500,
                   height: 1.5,
                 ),
+
               ),
               const SizedBox(width: 10),
               GestureDetector(

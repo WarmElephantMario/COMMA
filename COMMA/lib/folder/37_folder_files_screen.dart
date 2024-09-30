@@ -10,8 +10,8 @@ import 'package:provider/provider.dart';
 import '../model/user_provider.dart';
 import '../api/api.dart';
 import 'package:flutter_plugin/62lecture_start.dart';
-import '../model/44_font_size_provider.dart';
 import 'package:flutter_plugin/63record.dart';
+import '../mypage/44_font_size_page.dart';
 
 class FolderFilesScreen extends StatefulWidget {
   final String folderName;
@@ -21,8 +21,8 @@ class FolderFilesScreen extends StatefulWidget {
   const FolderFilesScreen({
     super.key,
     required this.folderName,
-    required this.folderId, // 폴더 ID
-    required this.folderType, // 폴더 타입
+    required this.folderId,
+    required this.folderType,
   });
 
   @override
@@ -48,7 +48,7 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
   Future<void> fetchFiles() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userKey = userProvider.user?.userKey;
-    final disType = userProvider.user?.dis_type; // dis_type 값 가져오기
+    final disType = userProvider.user?.dis_type; 
 
     if (userKey != null) {
       final response = await http.get(Uri.parse(
@@ -63,11 +63,9 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
               'file_name': file['file_name'] ?? 'Unknown',
               'file_url': file['file_url'] ?? '',
               'created_at': file['created_at'] ?? '',
-              'id': file['id'], // 파일 ID 추가
-              'folder_id': file['folder_id'] ?? 0, // 폴더 ID 추가
-              'lecture_name':
-                  file['lecture_name'] ?? 'Unknown Lecture', // 강의 이름 추가
-              // 'alternative_text_url':file['alternative_text_url']?? ''
+              'id': file['id'], 
+              'folder_id': file['folder_id'] ?? 0,
+              'lecture_name': file['lecture_name'] ?? 'Unknown Lecture',
             };
           }).toList();
         });
@@ -252,10 +250,8 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
-    final scaleFactor = fontSizeProvider.scaleFactor;
     final theme = Theme.of(context);
-
+    
     return PopScope(
       canPop: true,
       onPopInvokedWithResult: (didPop, result) {
@@ -274,7 +270,7 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
             backgroundColor: theme.scaffoldBackgroundColor,
             title: Text(
               widget.folderName,
-              style: TextStyle(
+              style: theme.textTheme.titleLarge?.copyWith(
                   color: theme.colorScheme.onTertiary,
                   fontWeight: FontWeight.w600),
             ),
@@ -347,8 +343,6 @@ class FileListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
-    final scaleFactor = fontSizeProvider.scaleFactor;
     final theme = Theme.of(context);
 
     return Container(
@@ -383,18 +377,16 @@ class FileListItem extends StatelessWidget {
               children: [
                 Text(
                   file['file_name'] ?? 'Unknown',
-                  style: TextStyle(
-                    fontSize: 16 * scaleFactor,
+                  style: theme.textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: theme.colorScheme.onTertiary,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
-                SizedBox(height: 5),
+                const ResponsiveSizedBox(height: 5),
                 Text(
                   formatDateTimeToKorean(file['created_at'] ?? ''),
-                  style: TextStyle(
-                    fontSize: 12 * scaleFactor,
+                  style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSecondary,
                   ),
                 ),
@@ -404,7 +396,7 @@ class FileListItem extends StatelessWidget {
           GestureDetector(
             child: ImageIcon(
               AssetImage('assets/folder_menu.png'),
-              color: Color(0xFFFFA17A),
+              color: const Color(0xFFFFA17A),
             ),
             onTap: () {
               showCustomMenu2(context, onRename, onDelete);

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_plugin/components.dart';
 import '40_change_password_page.dart';
-import '../model/44_font_size_provider.dart';
 import 'package:provider/provider.dart';
+import '44_font_size_page.dart';
 
 class ConfirmPasswordPage extends StatefulWidget {
   const ConfirmPasswordPage({super.key});
@@ -23,10 +23,6 @@ class _ConfirmPasswordPageState extends State<ConfirmPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
-    // 폰트 크기 비율을 Provider에서 가져옴
-    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
-    // 디스플레이 비율을 가져옴
-    final scaleFactor = fontSizeProvider.scaleFactor;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -49,7 +45,7 @@ class _ConfirmPasswordPageState extends State<ConfirmPasswordPage> {
                 '개인정보를 안전하게 보호하기 위해서\n비밀번호를 다시 한번 확인합니다.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                    fontSize: 16 * scaleFactor, color: Color(0xFF585858)),
+                    fontSize: 16, color: Color(0xFF585858)),
               ),
               const SizedBox(height: 40),
               TextField(
@@ -78,8 +74,8 @@ class _ConfirmPasswordPageState extends State<ConfirmPasswordPage> {
                         builder: (context) => const ChangePasswordPage()),
                   );
                 },
-                width: MediaQuery.of(context).size.width * 0.5, // 원하는 너비 설정
-                height: 50.0, // 원하는 높이 설정
+                // width: MediaQuery.of(context).size.width * 0.5, // 원하는 너비 설정
+                // height: 50.0, // 원하는 높이 설정
               ),
             ],
           ),
