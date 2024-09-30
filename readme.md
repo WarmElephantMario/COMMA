@@ -45,7 +45,7 @@
   <thead>
     <tr>
       <th class="col1">요구사항 ID</th>
-      <th class="col2">요구사항명</th>
+      <th class="col2">요구사항명    </th>
       <th class="col3">기능 ID</th>
       <th class="col4">기능명</th>
       <th class="col5">상세설명</th>
