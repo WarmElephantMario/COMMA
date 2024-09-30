@@ -87,16 +87,109 @@ class _MyPageScreenState extends State<MyPageScreen> {
     );
   }
 
-  Future<void> deleteUser(BuildContext context) async {
-    // ... 기존 deleteUser 코드 ...
+   Future<void> deleteUser(BuildContext context) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userKey = userProvider.user?.userKey;
+
+    final response = await http.post(
+      Uri.parse('${API.baseUrl}/api/delete_user'),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({'userKey': userKey}),
+    );
+
+    print(response.statusCode);
+    print('Response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final responseBody = jsonDecode(response.body);
+      if (responseBody['success']) {
+        Fluttertoast.showToast(msg: '회원 탈퇴가 완료되었습니다.');
+
+        //userProvider에서 userKey 기록 삭제 (user 기록 전체 비우기)
+        Provider.of<UserProvider>(context, listen: false).logOut();
+
+        // SharedPreferences에서 userKey 삭제
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.remove('userKey');
+
+        // SplashGreenScreen 화면으로 이동
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const SplashScreen()),
+            (Route<dynamic> route) => false);
+      } else {
+        Fluttertoast.showToast(msg: '회원 탈퇴 중 오류가 발생했습니다.');
+      }
+    } else {
+      Fluttertoast.showToast(msg: '서버 오류: 회원 탈퇴 실패');
+    }
   }
 
+  //스위치 당겨서 학습 모드 (dis_type) 변경하기
   Future<void> _updateDisType(int updatedDisType) async {
-    // ... 기존 _updateDisType 코드 ...
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userKey = userProvider.user?.userKey ?? 0;
+
+    final response = await http.put(
+      Uri.parse('${API.baseUrl}/api/update_dis_type'),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'userKey': userKey,
+        'dis_type': updatedDisType,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      var responseBody = jsonDecode(response.body);
+      if (responseBody['success']) {
+        userProvider.updateDisType(updatedDisType); // Update in the provider
+        Fluttertoast.showToast(msg: '학습 모드가 성공적으로 업데이트되었습니다.');
+      } else {
+        Fluttertoast.showToast(msg: '학습 모드 업데이트 중 오류가 발생했습니다.');
+      }
+    } else {
+      Fluttertoast.showToast(msg: '서버 오류: 학습 모드 업데이트 실패');
+    }
   }
 
+  //닉네임 업데이트 함수
   Future<void> _updateNickname(String newNickname) async {
-    // ... 기존 _updateNickname 코드 ...
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userKey = userProvider.user?.userKey ?? 0;
+
+    final response = await http.put(
+      Uri.parse('${API.baseUrl}/api/update_nickname'),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'userKey': userKey,
+        'user_nickname': newNickname,
+      }),
+    );
+
+    print('Request body: ${jsonEncode({
+          'userKey': userKey,
+          'user_nickname': newNickname,
+        })}');
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      var responseBody = jsonDecode(response.body);
+      if (responseBody['success']) {
+        userProvider.updateUserNickname(newNickname);
+        Fluttertoast.showToast(msg: '닉네임이 성공적으로 업데이트되었습니다.');
+      } else {
+        Fluttertoast.showToast(msg: '닉네임 업데이트 중 오류가 발생했습니다.');
+      }
+    } else {
+      Fluttertoast.showToast(msg: '서버 오류: 닉네임 업데이트 실패');
+    }
   }
 
   void _showEditNameDialog() {
