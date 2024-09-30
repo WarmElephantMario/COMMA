@@ -442,17 +442,35 @@ app.put('/api/:fileType-files/:id', (req, res) => {
     });
 });
 
-// 파일 삭제하기
 app.delete('/api/:fileType-files/:id', (req, res) => {
     const fileType = req.params.fileType;
     const id = req.params.id;
-    const table = fileType === 'lecture' ? 'LectureFiles' : 'ColonFiles';
-    const sql = `DELETE FROM ${table} WHERE id = ?`;
-    db.query(sql, [id], (err, result) => {
-        if (err) throw err;
-        res.status(200).send('File deleted');
-    });
+    
+    if (fileType === 'colon') {
+        // LectureFiles 테이블에서 existColon 값 NULL로 업데이트
+        const updateSql = `UPDATE LectureFiles SET existColon = NULL WHERE existColon = ?`;
+        db.query(updateSql, [id], (updateErr, updateResult) => {
+            if (updateErr) throw updateErr;
+
+            // ColonFiles 테이블에서 파일 삭제
+            const deleteSql = `DELETE FROM ColonFiles WHERE id = ?`;
+            db.query(deleteSql, [id], (deleteErr, deleteResult) => {
+                if (deleteErr) throw deleteErr;
+                res.status(200).send('Colon file deleted and LectureFiles updated');
+            });
+        });
+    } else if (fileType === 'lecture') {
+        // Lecture 파일 삭제
+        const sql = `DELETE FROM LectureFiles WHERE id = ?`;
+        db.query(sql, [id], (err, result) => {
+            if (err) throw err;
+            res.status(200).send('Lecture file deleted');
+        });
+    } else {
+        res.status(400).send('Invalid file type');
+    }
 });
+
 
 // 파일 이동하기
 app.put('/api/:fileType-files/move/:id', (req, res) => {
