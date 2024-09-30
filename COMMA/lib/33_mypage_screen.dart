@@ -12,6 +12,7 @@ import 'api/api.dart';
 import '1_Splash_green.dart';
 import 'mypage/44_font_size_page.dart';
 import 'mypage/43_accessibility_settings.dart';
+import 'mypage/43_accessibility_settings.dart';
 
 class MyPageScreen extends StatefulWidget {
   const MyPageScreen({super.key});
@@ -56,17 +57,18 @@ class _MyPageScreenState extends State<MyPageScreen> {
       child: Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surfaceContainer,
+          // border: Border.all(color: Colors.grey[600]!, width: 2),
           borderRadius: BorderRadius.circular(10),
           boxShadow: theme.brightness == Brightness.light
               ? [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.4),
+                    color: Colors.grey.withOpacity(0.4), // Shadow color
                     spreadRadius: 2,
                     blurRadius: 5,
-                    offset: Offset(0, 3),
+                    offset: Offset(0, 3), // Shadow position
                   ),
                 ]
-              : [],
+              : [], // No shadow in dark mode
         ),
         child: ListTile(
           title: Text(
