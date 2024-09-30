@@ -41,39 +41,6 @@
 
 # 요구사항 명세서
 
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>테이블 스타일링</title>
-  <style>
-    table {
-      table-layout: fixed;
-      width: 100%;
-      border-collapse: collapse;
-    }
-    th, td {
-      border: 1px solid black;
-      padding: 8px;
-      text-align: left;
-    }
-    th {
-      background-color: #f2f2f2;
-    }
-    /* 열 별로 너비를 조정할 수 있습니다. */
-    .col1 { width: 10%; }
-    .col2 { width: 15%; }
-    .col3 { width: 10%; }
-    .col4 { width: 15%; }
-    .col5 { width: 30%; }
-    .col6 { width: 10%; }
-    .col7 { width: 10%; }
-    .col8 { width: 30%; }
-  </style>
-</head>
-<body>
-
 <table>
   <thead>
     <tr>
@@ -96,7 +63,7 @@
       <td class="col5">사용자가 시각장애인, 청각장애인 모드를 선택할 수 있는 기능</td>
       <td class="col6">1. 시각장애인 & 청각장애인 유형 선택</td>
       <td class="col7"></td>
-      <td class="col8">user_table : dis_type(INT)</td>
+      <td class="col8">1. user_table : dis_type</td>
     </tr>
     <tr>
       <td class="col1"></td>
@@ -106,7 +73,7 @@
       <td class="col5">사용자가 시각장애인, 청각장애인 모드를 변경할 수 있는 기능</td>
       <td class="col6">1. 시각장애인 & 청각장애인 유형 선택</td>
       <td class="col7"></td>
-      <td class="col8">user_table : dis_type(INT)</td>
+      <td class="col8">1. user_table : dis_type</td>
     </tr>
     <tr>
       <td class="col1"></td>
@@ -116,7 +83,7 @@
       <td class="col5">기본 이름에서 사용자가 원하는 이름으로 변경하는 기능</td>
       <td class="col6"></td>
       <td class="col7">1. 닉네임</td>
-      <td class="col8">user_table : user_nickname(VARCHAR)</td>
+      <td class="col8">1. user_table : user_nickname</td>
     </tr>
     <tr>
       <td class="col1"></td>
@@ -126,7 +93,7 @@
       <td class="col5">사용자가 회원 계정을 삭제할 수 있는 기능</td>
       <td class="col6"></td>
       <td class="col7"></td>
-      <td class="col8">user_table : userKey(BIGINT)</td>
+      <td class="col8">1. user_table : userKey</td>
     </tr>
     <tr>
       <td class="col1">FOLDER</td>
@@ -136,7 +103,7 @@
       <td class="col5">새로운 강의폴더를 생성하는 기능</td>
       <td class="col6"></td>
       <td class="col7">1. 강의폴더 이름</td>
-      <td class="col8">LectureFolders : folder_name(VARCHAR)</td>
+      <td class="col8">1. LectureFolders : folder_name</td>
     </tr>
     <tr>
       <td class="col1"></td>
@@ -146,7 +113,7 @@
       <td class="col5">선택한 강의폴더를 삭제하는 기능</td>
       <td class="col6"></td>
       <td class="col7"></td>
-      <td class="col8">LectureFolders : id (INT)</td>
+      <td class="col8">1. LectureFolders : id</td>
     </tr>
     <tr>
       <td class="col1"></td>
@@ -156,7 +123,7 @@
       <td class="col5">선택한 강의폴더의 이름을 사용자가 원하는 이름으로 변경하는 기능</td>
       <td class="col6">1. 새 강의폴더 이름</td>
       <td class="col7"></td>
-      <td class="col8">LectureFolders : folder_name(VARCHAR)</td>
+      <td class="col8">1. LectureFolders : folder_name</td>
     </tr>
     <tr>
       <td class="col1"></td>
@@ -166,7 +133,7 @@
       <td class="col5">새로운 콜론폴더를 생성하는 기능</td>
       <td class="col6"></td>
       <td class="col7">1. 강의폴더 이름</td>
-      <td class="col8">ColonFolders : folder_name (VARCHAR)</td>
+      <td class="col8">1. ColonFolders : folder_name</td>
     </tr>
     <tr>
       <td class="col1"></td>
@@ -176,7 +143,7 @@
       <td class="col5">선택한 콜론폴더를 삭제하는 기능</td>
       <td class="col6"></td>
       <td class="col7"></td>
-      <td class="col8">ColonFolders : id (INT)</td>
+      <td class="col8">1. ColonFolders : id</td>
     </tr>
     <tr>
       <td class="col1"></td>
@@ -186,7 +153,7 @@
       <td class="col5">선택한 콜론폴더의 이름을 사용자가 원하는 이름으로 변경하는 기능</td>
       <td class="col6">1. 새 강의폴더 이름</td>
       <td class="col7"></td>
-      <td class="col8">LectureFiles : lecture_name (VARCHAR)</td>
+      <td class="col8">1. LectureFiles : lecture_name</td>
     </tr>
     <tr>
       <td class="col1">FILE</td>
@@ -196,7 +163,7 @@
       <td class="col5">선택한 강의파일을 삭제하는 기능</td>
       <td class="col6"></td>
       <td class="col7"></td>
-      <td class="col8">LectureFiles : id (INT)</td>
+      <td class="col8">1. LectureFiles : id</td>
     </tr>
     <tr>
       <td class="col1"></td>
@@ -206,7 +173,7 @@
       <td class="col5">선택한 강의파일을 다른 폴더로 이동하는 기능</td>
       <td class="col6">1. 이동 강의폴더 선택</td>
       <td class="col7"></td>
-      <td class="col8">LectureFiles : folder_id (INT)</td>
+      <td class="col8">1. LectureFiles : folder_id</td>
     </tr>
     <tr>
       <td class="col1"></td>
@@ -216,7 +183,7 @@
       <td class="col5">선택한 강의파일의 이름을 사용자가 원하는 이름으로 변경하는 기능</td>
       <td class="col6">1. 새 강의파일 이름</td>
       <td class="col7"></td>
-      <td class="col8">LectureFiles : lecture_name (VARCHAR)</td>
+      <td class="col8">1. LectureFiles : lecture_name</td>
     </tr>
     <tr>
       <td class="col1"></td>
@@ -226,7 +193,7 @@
       <td class="col5">선택한 콜론파일을 삭제하는 기능</td>
       <td class="col6"></td>
       <td class="col7"></td>
-      <td class="col8">ColonFiles : id (INT)</td>
+      <td class="col8">1. ColonFiles : id</td>
     </tr>
     <tr>
       <td class="col1"></td>
@@ -236,7 +203,7 @@
       <td class="col5">선택한 콜론파일을 다른 폴더로 이동하는 기능</td>
       <td class="col6">1. 이동 콜론폴더 선택</td>
       <td class="col7"></td>
-      <td class="col8">ColonFiles : folder_id (INT)</td>
+      <td class="col8">1. ColonFiles : folder_id</td>
     </tr>
     <tr>
       <td class="col1"></td>
@@ -246,7 +213,7 @@
       <td class="col5">선택한 콜론파일의 이름을 사용자가 원하는 이름으로 변경하는 기능</td>
       <td class="col6">1. 새 콜론파일 이름</td>
       <td class="col7"></td>
-      <td class="col8">ColonFiles : file_name (VARCHAR)</td>
+      <td class="col8">1. ColonFiles : file_name</td>
     </tr>
     <tr>
       <td class="col1">BLIND</td>
@@ -256,7 +223,7 @@
       <td class="col5">강의자료학습하기 버튼 클릭 시 OPEN AI를 통해 대체텍스트를 생성하는 기능</td>
       <td class="col6">1. 강의자료</td>
       <td class="col7">2. 강의폴더 이름</td>
-      <td class="col8">LectureFiles : file_url (VARCHAR),<br>LectureFolders : folder_name (VARCHAR),<br>LectureFiles : lecture_name (VARCHAR)</td>
+      <td class="col8">1. LectureFiles : file_url<br>2. LectureFolders : folder_name<br>3. LectureFiles : lecture_name</td>
     </tr>
     <tr>
       <td class="col1"></td>
@@ -266,7 +233,7 @@
       <td class="col5">DB에 저장된 대체텍스트를 로드하는 기능</td>
       <td class="col6">1. 강의자료</td>
       <td class="col7">2. 강의폴더 이름</td>
-      <td class="col8">LectureFiles : file_url (VARCHAR),<br>Alt_table : alternative_text_url (VARCHAR),<br>LectureFolders : folder_name (VARCHAR),<br>LectureFiles : lecture_name (VARCHAR)</td>
+      <td class="col8">1. LectureFiles : file_url<br>2. Alt_table : alternative_text_url<br>3. LectureFolders : folder_name<br>4. LectureFiles : lecture_name</td>
     </tr>
     <tr>
       <td class="col1">DEAF</td>
@@ -276,7 +243,7 @@
       <td class="col5">강의자료학습하기 버튼 클릭 시 OPEN AI를 통해 키워드를 추출하는 기능</td>
       <td class="col6">1. 강의자료</td>
       <td class="col7"></td>
-      <td class="col8">LectureFiles : file_url (VARCHAR),<br>Keywords_table : keywords_url (VARCHAR)</td>
+      <td class="col8">1. LectureFiles : file_url<br>2. Keywords_table : keywords_url</td>
     </tr>
     <tr>
       <td class="col1"></td>
@@ -286,7 +253,7 @@
       <td class="col5">녹음 버튼 클릭 시 deepgram api를 통해 자막을 출력하는 기능</td>
       <td class="col6">1. 강의자료</td>
       <td class="col7">3. 폴더 이름</td>
-      <td class="col8">LectureFiles : file_url (VARCHAR),<br>Keywords_table : keywords_url (VARCHAR),<br>LectureFolders : folder_name (VARCHAR),<br>LectureFiles : lecture_name (VARCHAR)</td>
+      <td class="col8">1. LectureFiles : file_url<br>2. Keywords_table : keywords_url<br>3. LectureFolders : folder_name<br>4. LectureFiles : lecture_name</td>
     </tr>
     <tr>
       <td class="col1">ACC</td>
@@ -311,8 +278,6 @@
   </tbody>
 </table>
 
-</body>
-</html>
 
 
 [돌아가기](#Project-Design)
