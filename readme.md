@@ -60,7 +60,7 @@
       <td class="col2">사용자 정보</td>
       <td class="col3">USER01-MODE01</td>
       <td class="col4">사용자 모드 선택</td>
-      <td class="col5">사용자가 시각장애인, 청각장애인 모드를 선택할 수 있는 기능</td>
+      <td class="col5">사용자가 시각장애인,<br>청각장애인 모드를 선택할 수 있는 기능</td>
       <td class="col6">1. 시각장애인 & 청각장애인 유형 선택</td>
       <td class="col7"></td>
       <td class="col8">1. user_table : dis_type</td>
