@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_plugin/components.dart';
 import '40_change_password_page.dart';
 import 'package:provider/provider.dart';
-import '../mypage/43_font_size_page.dart';
+import '44_font_size_page.dart';
 
 class ConfirmPasswordPage extends StatefulWidget {
   const ConfirmPasswordPage({super.key});
@@ -74,8 +74,8 @@ class _ConfirmPasswordPageState extends State<ConfirmPasswordPage> {
                         builder: (context) => const ChangePasswordPage()),
                   );
                 },
-                width: MediaQuery.of(context).size.width * 0.5, // 원하는 너비 설정
-                height: 50.0, // 원하는 높이 설정
+                // width: MediaQuery.of(context).size.width * 0.5, // 원하는 너비 설정
+                // height: 50.0, // 원하는 높이 설정
               ),
             ],
           ),

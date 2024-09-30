@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import '../model/44_font_size_provider.dart';
 import 'package:provider/provider.dart';
-import '../mypage/43_font_size_page.dart';
+import '../mypage/44_font_size_page.dart';
 
 class FolderSection extends StatelessWidget {
   final String sectionTitle;
   final VoidCallback onAddPressed;
   final VoidCallback onViewAllPressed;
-
 
   const FolderSection({
     super.key,
@@ -27,10 +26,8 @@ class FolderSection extends StatelessWidget {
         children: [
           Text(
             sectionTitle,
-            style: TextStyle(
+            style: theme.textTheme.headlineSmall?.copyWith(
               color: theme.colorScheme.onTertiary,
-              fontSize: 26 ,
-              fontFamily: 'DM Sans',
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -42,12 +39,11 @@ class FolderSection extends StatelessWidget {
                   children: [
                     Text(
                       '추가하기',
-                      style: TextStyle(
-                        color: Color(0xFF36AE92),
-                        fontSize: 15 ,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: const Color(0xFF36AE92),
                       ),
                     ),
-                    SizedBox(width: 5),
+                    const SizedBox(width: 5),
                     Image.asset('assets/add2.png'),
                   ],
                 ),
@@ -58,12 +54,11 @@ class FolderSection extends StatelessWidget {
                   children: [
                     Text(
                       '전체 보기',
-                      style: TextStyle(
-                        color: Color(0xFF36AE92),
-                        fontSize: 15 ,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: const Color(0xFF36AE92),
                       ),
                     ),
-                    SizedBox(width: 5.5 ),
+                    const SizedBox(width: 5.5),
                     Image.asset('assets/navigate.png'),
                   ],
                 ),

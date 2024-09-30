@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'api/api.dart';
 import 'dart:convert';
 import 'package:provider/provider.dart';
-import '../mypage/43_font_size_page.dart';
+import 'mypage/44_font_size_page.dart';
 
 class DisabilitySelectionPage extends StatelessWidget {
   const DisabilitySelectionPage({Key? key}) : super(key: key);

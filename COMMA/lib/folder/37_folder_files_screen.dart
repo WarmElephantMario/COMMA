@@ -11,8 +11,7 @@ import '../model/user_provider.dart';
 import '../api/api.dart';
 import 'package:flutter_plugin/62lecture_start.dart';
 import 'package:flutter_plugin/63record.dart';
-import '../mypage/43_font_size_page.dart';
-
+import '../mypage/44_font_size_page.dart';
 
 class FolderFilesScreen extends StatefulWidget {
   final String folderName;
@@ -22,8 +21,8 @@ class FolderFilesScreen extends StatefulWidget {
   const FolderFilesScreen({
     super.key,
     required this.folderName,
-    required this.folderId, // 폴더 ID
-    required this.folderType, // 폴더 타입
+    required this.folderId,
+    required this.folderType,
   });
 
   @override
@@ -49,11 +48,11 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
   Future<void> fetchFiles() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userKey = userProvider.user?.userKey;
-    final disType = userProvider.user?.dis_type; // dis_type 값 가져오기
+    final disType = userProvider.user?.dis_type; 
 
     if (userKey != null) {
       final response = await http.get(Uri.parse(
-        '${API.baseUrl}/api/${widget.folderType}-files/${widget.folderId}?userKey=$userKey',
+        '${API.baseUrl}/api/${widget.folderType}-files/${widget.folderId}?userKey=$userKey&disType=$disType',
       ));
 
       if (response.statusCode == 200) {
@@ -64,11 +63,9 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
               'file_name': file['file_name'] ?? 'Unknown',
               'file_url': file['file_url'] ?? '',
               'created_at': file['created_at'] ?? '',
-              'id': file['id'], // 파일 ID 추가
-              'folder_id': file['folder_id'] ?? 0, // 폴더 ID 추가
-              'lecture_name':
-                  file['lecture_name'] ?? 'Unknown Lecture', // 강의 이름 추가
-              // 'alternative_text_url':file['alternative_text_url']?? ''
+              'id': file['id'], 
+              'folder_id': file['folder_id'] ?? 0,
+              'lecture_name': file['lecture_name'] ?? 'Unknown Lecture',
             };
           }).toList();
         });
@@ -267,61 +264,60 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
           });
         }
       },
-        child : Scaffold(
-
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-          backgroundColor: theme.scaffoldBackgroundColor,
-          title: Text(
-            widget.folderName,
-            style: TextStyle(
-                color: theme.colorScheme.onTertiary,
-                fontWeight: FontWeight.w600),
-          ),
-          iconTheme: IconThemeData(color: theme.colorScheme.onTertiary)),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: files.asMap().entries.map((entry) {
-                  int index = entry.key;
-                  Map<String, dynamic> file = entry.value;
-                  return GestureDetector(
-                    onTap: () => fetchFolderAndNavigate(
-                        context, file['folder_id'], widget.folderType, file),
-                    child: FileListItem(
-                      file: file,
-                      onRename: () => showRenameDialog(
-                          context,
-                          index,
-                          files,
-                          (id, newName) => _renameFile(id, newName),
-                          setState,
-                          "파일 이름 바꾸기",
-                          "file_name"),
-                      onDelete: () => showConfirmationDialog(
-                          context,
-                          "정말 파일을 삭제하시겠습니까?",
-                          "파일을 삭제하면 다시 복구할 수 없습니다.", () async {
-                        await _deleteFile(file['id']);
-                        setState(() {
-                          files.removeAt(index);
-                        });
-                      }),
-                    ),
-                  );
-                }).toList(),
-              ),
+      child: Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        appBar: AppBar(
+            backgroundColor: theme.scaffoldBackgroundColor,
+            title: Text(
+              widget.folderName,
+              style: theme.textTheme.titleLarge?.copyWith(
+                  color: theme.colorScheme.onTertiary,
+                  fontWeight: FontWeight.w600),
             ),
-          );
-        },
+            iconTheme: IconThemeData(color: theme.colorScheme.onTertiary)),
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: files.asMap().entries.map((entry) {
+                    int index = entry.key;
+                    Map<String, dynamic> file = entry.value;
+                    return GestureDetector(
+                      onTap: () => fetchFolderAndNavigate(
+                          context, file['folder_id'], widget.folderType, file),
+                      child: FileListItem(
+                        file: file,
+                        onRename: () => showRenameDialog(
+                            context,
+                            index,
+                            files,
+                            (id, newName) => _renameFile(id, newName),
+                            setState,
+                            "파일 이름 바꾸기",
+                            "file_name"),
+                        onDelete: () => showConfirmationDialog(
+                            context,
+                            "정말 파일을 삭제하시겠습니까?",
+                            "파일을 삭제하면 다시 복구할 수 없습니다.", () async {
+                          await _deleteFile(file['id']);
+                          setState(() {
+                            files.removeAt(index);
+                          });
+                        }),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            );
+          },
+        ),
+        bottomNavigationBar:
+            buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
       ),
-      bottomNavigationBar:
-          buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
-    ),
     );
   }
 }
@@ -330,7 +326,6 @@ class FileListItem extends StatelessWidget {
   final Map<String, dynamic> file;
   final VoidCallback onRename;
   final VoidCallback onDelete;
-
 
   const FileListItem({
     super.key,
@@ -359,7 +354,7 @@ class FileListItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.onSecondary,
+            color: theme.colorScheme.tertiaryFixed,
             spreadRadius: 2.0,
             offset: Offset(0, 2),
           ),
@@ -382,18 +377,16 @@ class FileListItem extends StatelessWidget {
               children: [
                 Text(
                   file['file_name'] ?? 'Unknown',
-                  style: TextStyle(
-                    fontSize: 16 ,
+                  style: theme.textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: theme.colorScheme.onTertiary,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
-                SizedBox(height: 5),
+                const ResponsiveSizedBox(height: 5),
                 Text(
                   formatDateTimeToKorean(file['created_at'] ?? ''),
-                  style: TextStyle(
-                    fontSize: 12 ,
+                  style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSecondary,
                   ),
                 ),
@@ -403,7 +396,7 @@ class FileListItem extends StatelessWidget {
           GestureDetector(
             child: ImageIcon(
               AssetImage('assets/folder_menu.png'),
-              color: Color(0xFFFFA17A),
+              color: const Color(0xFFFFA17A),
             ),
             onTap: () {
               showCustomMenu2(context, onRename, onDelete);
@@ -414,3 +407,4 @@ class FileListItem extends StatelessWidget {
     );
   }
 }
+

@@ -9,7 +9,7 @@ import '62lecture_start.dart';
 import '63record.dart';
 import '66colon.dart';
 import 'components.dart'; // showCustomMenu 함수가 있는 파일을 import
-import '../mypage/43_font_size_page.dart';
+import 'mypage/44_font_size_page.dart';
 
 class AllFilesPage extends StatefulWidget {
   final int userKey;
@@ -65,7 +65,6 @@ class _AllFilesPageState extends State<AllFilesPage> {
     return DateFormat('yyyy/MM/dd HH:mm').format(koreanDateTime);
   }
 
-  // 데베에서 keywords 가져오기
   Future<List<String>> fetchKeywords(int lecturefileId) async {
     try {
       final response = await http
@@ -76,8 +75,6 @@ class _AllFilesPageState extends State<AllFilesPage> {
 
         if (responseData['success'] == true) {
           final String keywordsUrl = responseData['keywordsUrl'];
-
-          // keywords_url에서 키워드 리스트를 가져옴
           return await fetchKeywordsFromUrl(keywordsUrl);
         } else {
           print('Error fetching keywords: ${responseData['error']}');
@@ -93,15 +90,13 @@ class _AllFilesPageState extends State<AllFilesPage> {
     }
   }
 
-// keywords_url에서 키워드 리스트를 가져오는 함수
   Future<List<String>> fetchKeywordsFromUrl(String keywordsUrl) async {
     try {
       final response = await http.get(Uri.parse(keywordsUrl));
 
       if (response.statusCode == 200) {
-        // UTF-8로 디코딩 처리
         final String content = utf8.decode(response.bodyBytes);
-        return content.split(','); // ,로 분리하여 키워드 리스트 반환
+        return content.split(','); 
       } else {
         print('Failed to fetch keywords from URL');
         return [];
@@ -112,27 +107,22 @@ class _AllFilesPageState extends State<AllFilesPage> {
     }
   }
 
-// 강의 파일 클릭 이벤트에서 폴더 이름 조회 및 existLecture 확인
   void fetchFolderAndNavigate(BuildContext context, int folderId,
       String fileType, Map<String, dynamic> file) async {
     try {
-      final lectureFileId = file['id']; // lectureFileId 가져오기
+      final lectureFileId = file['id']; 
       final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final userDisType = userProvider.user?.dis_type; // 유저의 dis_type 가져오기
+      final userDisType = userProvider.user?.dis_type; 
 
-      // 1. 먼저 lecturefileId로 existLecture 값을 확인하는 API 요청
       final existLectureResponse = await http.get(
           Uri.parse('${API.baseUrl}/api/checkExistLecture/$lectureFileId'));
 
       if (existLectureResponse.statusCode == 200) {
         var existLectureData = jsonDecode(existLectureResponse.body);
 
-        // 2. existLecture가 0이면 LectureStartPage로 이동
         if (existLectureData['existLecture'] == 0) {
-          // 키워드 fetch 후 LectureStartPage로 이동
           List<String> keywords = await fetchKeywords(lectureFileId);
 
-          // 폴더 이름 가져오기
           final response = await http.get(Uri.parse(
               '${API.baseUrl}/api/getFolderName/$fileType/$folderId'));
           if (response.statusCode == 200) {
@@ -147,18 +137,17 @@ class _AllFilesPageState extends State<AllFilesPage> {
                   lectureName: file['lecture_name'] ?? 'Unknown Lecture',
                   fileURL: file['file_url'] ??
                       'https://defaulturl.com/defaultfile.txt',
-                  type: userDisType!, // 수정
-                  selectedFolder: data['folder_name'], // 폴더 이름
+                  type: userDisType!,
+                  selectedFolder: data['folder_name'], 
                   noteName: file['file_name'] ?? 'Unknown Note',
                   responseUrl: file['alternative_text_url'] ??
-                      'https://defaulturl.com/defaultfile.txt', // null 또는 실제 값
-                  keywords: keywords, // 키워드 목록
+                      'https://defaulturl.com/defaultfile.txt', 
+                  keywords: keywords, 
                 ),
               ),
             );
           }
         } else if (existLectureData['existLecture'] == 1) {
-          // existLecture가 1이면 기존 페이지로 이동
           final response = await http.get(Uri.parse(
               '${API.baseUrl}/api/getFolderName/$fileType/$folderId'));
           if (response.statusCode == 200) {
@@ -180,7 +169,6 @@ class _AllFilesPageState extends State<AllFilesPage> {
     }
   }
 
-  // 강의 파일 또는 콜론 파일 페이지로 네비게이션
   void navigateToPage(BuildContext context, String folderName,
       Map<String, dynamic> file, String fileType) {
     try {
@@ -189,19 +177,11 @@ class _AllFilesPageState extends State<AllFilesPage> {
       int lectureFolderId;
       int colonFileId;
 
-      // folder_id가 문자열일 경우 int로 변환
-
       lectureFolderId = file['folder_id'];
-
-      // id가 문자열일 경우 int로 변환
-
       colonFileId = file['id'];
-
-      //print('Navigating to page with folderName: $folderName, lectureFolderId: $lectureFolderId, colonFileId: $colonFileId');
 
       if (fileType == 'lecture') {
         if (file['type'] == 0) {
-          // 강의 파일 + 대체텍스트인 경우
           page = RecordPage(
             lecturefileId: file['id'] ?? 'Unknown id',
             lectureFolderId: lectureFolderId,
@@ -216,7 +196,6 @@ class _AllFilesPageState extends State<AllFilesPage> {
             type: file['type'] ?? 'Unknown Type',
           );
         } else {
-          // 강의 파일 + 실시간 자막인 경우
           page = RecordPage(
             lecturefileId: file['id'] ?? 'Unknown id',
             lectureFolderId: lectureFolderId,
@@ -230,7 +209,6 @@ class _AllFilesPageState extends State<AllFilesPage> {
           );
         }
       } else {
-        // 콜론 파일인 경우
         page = ColonPage(
           folderName: folderName,
           noteName: file['file_name'] ?? 'Unknown Note',
@@ -432,18 +410,16 @@ class _AllFilesPageState extends State<AllFilesPage> {
                         },
                         child: Text(
                           '취소',
-                          style: TextStyle(
+                          style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.onSecondary,
-                            fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                       Text(
                         '다음으로 이동',
-                        style: TextStyle(
+                        style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onTertiary,
-                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -459,29 +435,25 @@ class _AllFilesPageState extends State<AllFilesPage> {
                         },
                         child: Text(
                           '이동',
-                          style: TextStyle(
+                          style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.tertiary,
-                            fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 2),
+                  ResponsiveSizedBox(height: 10), // 여기에 적용
                   Center(
                     child: Text(
                       '현재 위치 외 다른 폴더로 이동할 수 있어요.',
-                      style: TextStyle(
+                      style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSecondary,
-                        fontSize: 13,
                         fontFamily: 'Raleway',
-                        fontWeight: FontWeight.w500,
-                        height: 1.5,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  ResponsiveSizedBox(height: 16), // 여기에 적용
                   Expanded(
                     child: ListView(
                       children: updatedFolders.map((folder) {
@@ -522,9 +494,8 @@ class _AllFilesPageState extends State<AllFilesPage> {
         iconTheme: IconThemeData(color: theme.colorScheme.onTertiary),
         title: Text(
           widget.fileType == 'lecture' ? '전체 강의 파일' : '전체 콜론 파일',
-          style: TextStyle(
+          style: theme.textTheme.titleLarge?.copyWith(
               color: theme.colorScheme.onTertiary,
-              fontFamily: 'DM Sans',
               fontWeight: FontWeight.w600),
         ),
         backgroundColor: theme.scaffoldBackgroundColor,
@@ -533,14 +504,15 @@ class _AllFilesPageState extends State<AllFilesPage> {
           ? Center(
               child: Text(
               '파일이 없습니다.',
-              style: TextStyle(color: theme.colorScheme.onSecondary),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSecondary,
+              ),
             ))
           : ListView.builder(
               itemCount: files.length,
               itemBuilder: (context, index) {
                 final file = files[index];
 
-                // null 값을 처리하여 기본값을 설정
                 final fileName = file['file_name'] ?? 'Unknown Note';
                 final fileUrl = file['file_url'] ??
                     'https://defaulturl.com/defaultfile.txt';
@@ -553,7 +525,7 @@ class _AllFilesPageState extends State<AllFilesPage> {
                   onTap: () {
                     print('File $fileName is clicked');
                     fetchFolderAndNavigate(context, file['folder_id'],
-                        'lecture', file); // 파일을 탭하면 열기
+                        'lecture', file);
                   },
                   child: LectureExample(
                     lectureName: file['file_name'] ?? 'Unknown',

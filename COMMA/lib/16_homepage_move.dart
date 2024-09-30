@@ -12,7 +12,7 @@ import '66colon.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import '12_hompage_search.dart';
-import '../mypage/43_font_size_page.dart';
+import 'mypage/44_font_size_page.dart';
 
 // import 'popscope.dart';
 
@@ -202,18 +202,16 @@ class _MainPageState extends State<MainPage> {
                         },
                         child: Text(
                           '취소',
-                          style: TextStyle(
+                          style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.onTertiary,
-                            fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                       Text(
                         '다음으로 이동',
-                        style: TextStyle(
+                        style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onTertiary,
-                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -229,9 +227,8 @@ class _MainPageState extends State<MainPage> {
                         },
                         child: Text(
                           '이동',
-                          style: TextStyle(
+                          style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.tertiary,
-                            fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -242,12 +239,9 @@ class _MainPageState extends State<MainPage> {
                   Center(
                     child: Text(
                       '현재 위치 외 다른 폴더로 이동할 수 있어요.',
-                      style: TextStyle(
+                      style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSecondary,
-                        fontSize: 13,
                         fontFamily: 'Raleway',
-                        fontWeight: FontWeight.w500,
-                        height: 1.5,
                       ),
                     ),
                   ),
@@ -628,32 +622,23 @@ class _MainPageState extends State<MainPage> {
                           children: [
                             TextSpan(
                               text: '안녕하세요, ',
-                              style: TextStyle(
+                              style: theme.textTheme.titleLarge?.copyWith(
                                 color: theme.colorScheme.onTertiary,
-                                fontSize: 24 ,
-                                fontFamily: 'DM Sans',
                                 fontWeight: FontWeight.w500,
-                                height: 1.5,
                               ),
                             ),
                             TextSpan(
                               text: userProvider.user?.user_nickname ?? 'Guest',
-                              style: TextStyle(
-                                color: theme.colorScheme.primary, // 원하는 색상으로 설정
-                                fontSize: 24,
-                                fontFamily: 'DM Sans',
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                color: theme.colorScheme.primary,
                                 fontWeight: FontWeight.w700,
-                                height: 1.5,
                               ),
                             ),
                             TextSpan(
                               text: ' 님',
-                              style: TextStyle(
+                              style: theme.textTheme.titleLarge?.copyWith(
                                 color: theme.colorScheme.onTertiary,
-                                fontSize: 24 ,
-                                fontFamily: 'DM Sans',
                                 fontWeight: FontWeight.w500,
-                                height: 1.5,
                               ),
                             ),
                           ],
@@ -671,12 +656,10 @@ class _MainPageState extends State<MainPage> {
                   children: [
                     Text(
                       '최근에 학습한 강의 파일이에요.',
-                      style: TextStyle(
+                      style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSecondary,
-                        fontSize: 13 ,
                         fontFamily: 'Raleway',
                         fontWeight: FontWeight.w500,
-                        height: 1.5,
                       ),
                     ),
                     GestureDetector(
@@ -695,15 +678,13 @@ class _MainPageState extends State<MainPage> {
                         children: [
                           Text(
                             '전체 보기',
-                            style: TextStyle(
+                            style: theme.textTheme.labelSmall?.copyWith(
                               color: Color(0xFF36AE92),
-                              fontSize: 12 ,
-                              fontFamily: 'Mulish',
                               fontWeight: FontWeight.w800,
-                              height: 1.5,
+                              fontFamily: 'Mulish',
                             ),
                           ),
-                          SizedBox(width: 2),
+                          const SizedBox(width: 2),
                           const Icon(
                             Icons.arrow_forward_ios_rounded,
                             size: 12,
@@ -719,12 +700,10 @@ class _MainPageState extends State<MainPage> {
                     ? [
                         Text(
                           '최근에 학습한 강의 자료가 없어요.',
-                          style: TextStyle(
+                          style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.onTertiary,
-                            fontSize: 13 ,
                             fontFamily: 'Raleway',
                             fontWeight: FontWeight.w700,
-                            height: 1.5,
                           ),
                         )
                       ]
@@ -786,12 +765,10 @@ class _MainPageState extends State<MainPage> {
                   children: [
                     Text(
                       '최근에 학습한 콜론 파일이에요.',
-                      style: TextStyle(
+                      style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSecondary,
-                        fontSize: 13 ,
                         fontFamily: 'Raleway',
                         fontWeight: FontWeight.w500,
-                        height: 1.5,
                       ),
                     ),
                     GestureDetector(
@@ -810,15 +787,13 @@ class _MainPageState extends State<MainPage> {
                         children: [
                           Text(
                             '전체 보기',
-                            style: TextStyle(
+                            style: theme.textTheme.labelSmall?.copyWith(
                               color: Color(0xFF36AE92),
-                              fontSize: 12,
-                              fontFamily: 'Mulish',
                               fontWeight: FontWeight.w800,
-                              height: 1.5,
+                              fontFamily: 'Mulish',
                             ),
                           ),
-                          SizedBox(width: 2),
+                          const SizedBox(width: 2),
                           const Icon(
                             Icons.arrow_forward_ios_rounded,
                             size: 12,
@@ -834,12 +809,10 @@ class _MainPageState extends State<MainPage> {
                     ? [
                         Text(
                           '최근에 학습한 콜론 자료가 없어요.',
-                          style: TextStyle(
+                          style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.onTertiary,
-                            fontSize: 13 ,
                             fontFamily: 'Raleway',
                             fontWeight: FontWeight.w700,
-                            height: 1.5,
                           ),
                         )
                       ]

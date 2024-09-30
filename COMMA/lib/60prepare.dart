@@ -21,7 +21,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import './api/api.dart';
 import 'package:image/image.dart' as img;
-import '../mypage/43_font_size_page.dart';
+import 'mypage/44_font_size_page.dart';
 
 
 bool isAlternativeTextEnabled = true;
@@ -252,20 +252,19 @@ class _LearningPreparationState extends State<LearningPreparation> {
                         },
                         child: Text(
                           '취소',
-                          style: TextStyle(
+                          style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.onSecondary,
-                            fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                       Text(
                         '다음으로 이동',
-                        style: TextStyle(
+                        style: theme.textTheme.bodyLarge?.copyWith(
                           color: theme.colorScheme.onTertiary,
-                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
+
                       ),
                       TextButton(
                         onPressed: () async {
@@ -283,26 +282,26 @@ class _LearningPreparationState extends State<LearningPreparation> {
                         },
                         child: Text(
                           '이동',
-                          style: TextStyle(
-                            color: theme.colorScheme.tertiary,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                          color: theme.colorScheme.tertiary,
+                          fontWeight: FontWeight.bold,
+                        ),
+
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 2),
+                  const ResponsiveSizedBox(height: 2),
                   Center(
                     child: Text(
                       '다른 폴더로 이동할 수 있어요.',
-                      style: TextStyle(
-                        color: theme.colorScheme.onSecondary,
-                        fontSize: 13,
-                        fontFamily: 'Raleway',
-                        fontWeight: FontWeight.w500,
-                        height: 1.5,
-                      ),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSecondary,
+                      fontFamily: 'Raleway', // 폰트 유지
+                      fontWeight: FontWeight.w500, // 폰트 두께 설정
+                      height: 1.5, // 줄 높이 설정
+                    ),
+
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -361,12 +360,10 @@ class _LearningPreparationState extends State<LearningPreparation> {
           backgroundColor: theme.colorScheme.surfaceContainer,
           title: Text(
             title,
-            style: TextStyle(
-              color: theme.colorScheme.onSecondary,
-              fontSize: 14,
-              fontFamily: 'DM Sans',
-              fontWeight: FontWeight.bold,
-            ),
+            style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSecondary,
+            fontWeight: FontWeight.bold, // 폰트 두께 유지
+          ),
           ),
           content: TextField(
             controller: textController,
@@ -385,14 +382,20 @@ class _LearningPreparationState extends State<LearningPreparation> {
           actions: <Widget>[
             TextButton(
               child: Text('취소',
-                  style: TextStyle(color: theme.colorScheme.tertiary)),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.tertiary,
+                ),
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
               child: Text('저장',
-                  style: TextStyle(color: theme.colorScheme.onTertiary)),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onTertiary,
+                ),
+              ),
               onPressed: () async {
                 String newName = textController.text;
                 await renameItem(newName);
@@ -975,33 +978,29 @@ Widget build(BuildContext context) {
     body: ListView(
       padding: const EdgeInsets.all(16.0),
       children: [
-        const SizedBox(height: 15),
+        const ResponsiveSizedBox(height: 15),
         Focus(
           focusNode: _focusNode, // 추가된 부분
           child: Semantics(
             focusable: true,
             child: Text(
               titleText,
-              style: TextStyle(
-                color: theme.colorScheme.onSecondary,
-                fontSize: 24 ,
-                fontFamily: 'DM Sans',
-                fontWeight: FontWeight.bold,
-              ),
+               style: theme.textTheme.headlineSmall?.copyWith(
+                  color: theme.colorScheme.onSecondary,
+                  fontWeight: FontWeight.bold,
+                ),
             ),
           ),
         ),
-        const SizedBox(height: 50),
+        const ResponsiveSizedBox(height: 50),
         Text(
           '강의폴더와 파일 이름을 설정해주세요.',
-          style: TextStyle(
-            color: theme.colorScheme.onSecondary,
-            fontSize: 16,
-            fontFamily: 'DM Sans',
-            fontWeight: FontWeight.bold,
-          ),
+          style: theme.textTheme.bodyLarge?.copyWith(
+          color: theme.colorScheme.onSecondary,
+          fontWeight: FontWeight.bold,
+      ),
         ),
-        const SizedBox(height: 15),
+        const ResponsiveSizedBox(height: 15),
         Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -1031,12 +1030,10 @@ Widget build(BuildContext context) {
                       Expanded(
                         child: Text(
                           '폴더 분류 > $_selectedFolder',
-                          style: TextStyle(
-                            fontSize: 15.5 ,
-                            fontFamily: 'DM Sans',
-                            color: theme.colorScheme.onSecondary,
-                            fontWeight: FontWeight.w400,
-                          ),
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSecondary,
+                          fontWeight: FontWeight.w400,
+                        ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -1044,7 +1041,7 @@ Widget build(BuildContext context) {
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
+              const ResponsiveSizedBox(height: 10),
               Semantics(
                 label: '파일 이름을 설정하세요',
                 child: GestureDetector(
@@ -1069,12 +1066,10 @@ Widget build(BuildContext context) {
                       Expanded(
                         child: Text(
                           _noteName,
-                          style: TextStyle(
-                            fontSize: 15.5 ,
-                            fontFamily: 'DM Sans',
-                            color: theme.colorScheme.onSecondary,
-                            fontWeight: FontWeight.w400,
-                          ),
+                         style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSecondary,
+                          fontWeight: FontWeight.w400,
+                        ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -1083,16 +1078,14 @@ Widget build(BuildContext context) {
                   ),
                 ),
               ),
-              const SizedBox(height: 15),
+              const ResponsiveSizedBox(height: 15),
             if (userDisType == 0) ...[
               Text(
                 '대체텍스트 설명',
-                style: TextStyle(
-                  fontSize: 15.5,
-                  fontFamily: 'DM Sans',
-                  color: Color.fromARGB(255, 70, 70, 70),
-                  fontWeight: FontWeight.w200,
-                ),
+                     style: theme.textTheme.bodyMedium?.copyWith(
+                      color: const Color.fromARGB(255, 70, 70, 70),
+                      fontWeight: FontWeight.w200,
+              ),
               ),
               CustomRadioButton3(
                 label: '기본 설명',
@@ -1104,7 +1097,7 @@ Widget build(BuildContext context) {
                   });
                 },
               ),
-              const SizedBox(height: 16),
+              const ResponsiveSizedBox(height: 16),
               CustomRadioButton3(
                 label: '자세한 설명',
                 isSelected: isDetailSelected,
@@ -1119,7 +1112,7 @@ Widget build(BuildContext context) {
             ],
           ),
         ),
-        const SizedBox(height: 50),
+        const ResponsiveSizedBox(height: 50),
         Center(
           child: ClickButton(
             text: _isMaterialEmbedded ? '강의 자료 학습 시작하기' : '강의 자료를 임베드하세요',
@@ -1194,8 +1187,8 @@ Widget build(BuildContext context) {
                 }
               }
             },
-            width: MediaQuery.of(context).size.width * 0.7,
-            height: 50.0,
+            // width: MediaQuery.of(context).size.width * 0.7,
+            // height: 50.0,
             iconPath: _isIconVisible ? 'assets/Vector.png' : null,
           ),
         ),
@@ -1219,13 +1212,11 @@ Widget build(BuildContext context) {
                       children: [
                         Text(
                           _selectedFileName!,
-                          style: TextStyle(
-                            color: theme.colorScheme.onSecondary,
-                            fontSize: 15 ,
-                            fontFamily: 'DM Sans',
-                            fontWeight: FontWeight.w500,
-                            height: 1.2,
-                          ),
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSecondary,
+                          fontWeight: FontWeight.w500,
+                          height: 1.2,
+                        ),
                         ),
                       ],
                     ),
@@ -1255,10 +1246,9 @@ Widget build(BuildContext context) {
                 return Center(
                   child: Text(
                     '이미지를 불러올 수 없습니다.',
-                    style: TextStyle(
+                      style: theme.textTheme.bodyLarge?.copyWith(
                       color: theme.colorScheme.tertiary,
-                      fontSize: 16,
-                    ),
+                      ),
                   ),
                 );
               },

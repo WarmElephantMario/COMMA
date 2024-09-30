@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import '../model/user_provider.dart';
 import 'folder/37_folder_files_screen.dart'; // FolderFilesScreen이 정의된 파일 임포트
 import 'api/api.dart';
-import '../mypage/43_font_size_page.dart';
+import 'mypage/44_font_size_page.dart';
 
 class FullFolderListScreen extends StatefulWidget {
   final String title;
@@ -163,9 +163,8 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
                   children: [
                     Text(
                       '추가하기',
-                      style: TextStyle(
-                        color: Color(0xFF36AE92),
-                        fontSize: 15 ,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: const Color(0xFF36AE92),
                       ),
                     ),
                     const SizedBox(width: 5),

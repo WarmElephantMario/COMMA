@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_plugin/components.dart';
 import '../model/44_font_size_provider.dart';
 import 'package:provider/provider.dart';
-import '../mypage/43_font_size_page.dart';
+import '44_font_size_page.dart';
 
 class HelpPage extends StatefulWidget {
   const HelpPage({super.key});
@@ -31,10 +31,10 @@ class _HelpPageState extends State<HelpPage> {
         iconTheme: IconThemeData(color: theme.colorScheme.onTertiary),
         title: Text(
           '도움말',
-          style: TextStyle(
-              color: theme.colorScheme.onTertiary,
-              fontFamily: 'DM Sans',
-              fontWeight: FontWeight.w600),
+          style: theme.textTheme.titleMedium?.copyWith( // 한 단계 작은 사이즈
+            color: theme.colorScheme.onTertiary,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
       body: ListView(
@@ -42,13 +42,12 @@ class _HelpPageState extends State<HelpPage> {
         children: [
           Text(
             '앱 사용 방법',
-            style: TextStyle(
+            style: theme.textTheme.headlineSmall?.copyWith( // 한 단계 작은 사이즈
               color: theme.colorScheme.onTertiary,
-              fontSize: 22.0 ,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 20.0),
+          ResponsiveSizedBox(height: 16.0), // 조금 더 작은 간격
           _buildHelpSection(
             title: 'COMMA란?',
             content:
@@ -69,21 +68,20 @@ class _HelpPageState extends State<HelpPage> {
             content:
                 '어플 내의 모든 버튼과 텍스트 설명은 스크린 리더와 높은 수준으로 호환됩니다. 또한, 설정에서 글자 크기 조정, 밝기 조절 및 고대비 모드 등을 설정할 수 있습니다. ',
           ),
-          const SizedBox(height: 20.0),
+          ResponsiveSizedBox(height: 16.0), // 조금 더 작은 간격
           Text(
             '데이터 수집 및 사용',
-            style: TextStyle(
+            style: theme.textTheme.titleMedium?.copyWith( // 한 단계 작은 사이즈
               color: theme.primaryColor,
-              fontSize: 18.0 ,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 10.0),
+          ResponsiveSizedBox(height: 8.0), // 조금 더 작은 간격
           Text(
             '어플 사용 중 생성한 녹음 파일은 서버에 저장되지 않으며, 음성으로부터 텍스트를 추출한 직후 폐기됩니다.',
-            style: TextStyle(
-                color: theme.colorScheme.onTertiary,
-                fontSize: 15 ),
+            style: theme.textTheme.bodyMedium?.copyWith( // 한 단계 작은 사이즈
+              color: theme.colorScheme.onTertiary,
+            ),
           ),
         ],
       ),
@@ -96,23 +94,21 @@ class _HelpPageState extends State<HelpPage> {
     final theme = Theme.of(context);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      padding: const EdgeInsets.symmetric(vertical: 8.0), // 조금 더 작은 간격
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: TextStyle(
+            style: theme.textTheme.titleMedium?.copyWith( // 한 단계 작은 사이즈
               color: theme.primaryColor,
-              fontSize: 18.0,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 5.0),
+          ResponsiveSizedBox(height: 4.0), // 조금 더 작은 간격
           Text(
             content,
-            style: TextStyle(
-              fontSize: 16.0 ,
+            style: theme.textTheme.bodyMedium?.copyWith( // 한 단계 작은 사이즈
               color: theme.colorScheme.onTertiary,
             ),
           ),

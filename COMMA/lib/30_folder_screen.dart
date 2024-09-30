@@ -9,7 +9,8 @@ import 'dart:convert';
 import 'model/user_provider.dart';
 import 'package:provider/provider.dart';
 import 'api/api.dart';
-import '../mypage/43_font_size_page.dart';
+import 'mypage/44_font_size_page.dart';
+import '../model/44_font_size_provider.dart';
 
 class FolderScreen extends StatefulWidget {
   const FolderScreen({super.key});
@@ -146,9 +147,10 @@ class _FolderScreenState extends State<FolderScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final fontSizeProvider = Provider.of<FontSizeProvider>(context);
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor, // 배경 색상을 흰색으로 설정
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(toolbarHeight: 0),
       body: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
@@ -175,6 +177,7 @@ class _FolderScreenState extends State<FolderScreen> {
                       );
                     },
                   ),
+                  ResponsiveSizedBox(height: 16),
                   FolderList(
                     folders: lectureFolders.take(3).toList(),
                     onFolderTap: (folder) {
@@ -212,7 +215,7 @@ class _FolderScreenState extends State<FolderScreen> {
                       },
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  ResponsiveSizedBox(height: 16), // 간격 조절
                   FolderSection(
                     sectionTitle: '콜론폴더',
                     onAddPressed: () async {
@@ -230,6 +233,7 @@ class _FolderScreenState extends State<FolderScreen> {
                       );
                     },
                   ),
+                  ResponsiveSizedBox(height: 16), // 간격 조절
                   FolderList(
                     folders: colonFolders.take(3).toList(),
                     onFolderTap: (folder) {
@@ -277,3 +281,4 @@ class _FolderScreenState extends State<FolderScreen> {
     );
   }
 }
+

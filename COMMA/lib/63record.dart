@@ -26,7 +26,7 @@ import '62lecture_start.dart';
 import '66colon.dart';
 import 'env/env.dart';
 import 'folder/37_folder_files_screen.dart';
-import '../mypage/43_font_size_page.dart';
+import 'mypage/44_font_size_page.dart';
 
 enum RecordingState { initial, recording, recorded }
 
@@ -708,87 +708,81 @@ class _RecordPageState extends State<RecordPage> {
   }
 
   // 콜론 생성 다이얼로그 함수
-  void showColonCreatedDialog(
-      BuildContext context,
-      String folderName,
-      String noteName,
-      String lectureName,
-      String fileUrl,
-      int? lectureFileId,
-      int colonFileId) {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userKey = userProvider.user?.userKey;
-    final theme = Theme.of(context);
+void showColonCreatedDialog(
+  BuildContext context,
+  String folderName,
+  String noteName,
+  String lectureName,
+  String fileUrl,
+  int? lectureFileId,
+  int colonFileId) {
+  final userProvider = Provider.of<UserProvider>(context, listen: false);
+  final userKey = userProvider.user?.userKey;
+  final theme = Theme.of(context);
 
-    if (userKey != null) {
-      showDialog(
-        context: context,
-        builder: (BuildContext dialogContext) {
-          return AlertDialog(
-            backgroundColor: theme.scaffoldBackgroundColor,
-            title: Column(
-              children: [
-                Text(
-                  '콜론이 생성되었습니다.',
-                  style: TextStyle(
-                    color: theme.colorScheme.onSecondary,
-                    fontSize: 14,
-                    fontFamily: 'DM Sans',
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
+  if (userKey != null) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          backgroundColor: theme.scaffoldBackgroundColor,
+          title: Column(
+            children: [
+              Text(
+                '콜론이 생성되었습니다.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSecondary,
+                  fontWeight: FontWeight.bold,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  '폴더 이름: $folderName (:)', // 기본폴더 대신 folderName 사용
-                  style: TextStyle(
-                    color: theme.colorScheme.surfaceBright,
-                    fontSize: 14,
-                    fontFamily: 'DM Sans',
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '폴더 이름: $folderName (:)', // 기본폴더 대신 folderName 사용
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.surfaceBright,
+                  fontWeight: FontWeight.bold,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  '으로 이동하시겠습니까?',
-                  style: TextStyle(
-                    color: theme.colorScheme.onSecondary,
-                    fontSize: 14,
-                    fontFamily: 'DM Sans',
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '으로 이동하시겠습니까?',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSecondary,
+                  fontWeight: FontWeight.bold,
                 ),
-              ],
-            ),
-            actions: <Widget>[
-              Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    TextButton(
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(  // Expanded로 감싸서 오버플로우 방지
+                    child: TextButton(
                       onPressed: () {
                         Navigator.of(dialogContext).pop();
                       },
                       child: Text(
                         '취소',
-                        style: TextStyle(
+                        style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.tertiary,
-                          fontSize: 14,
-                          fontFamily: 'DM Sans',
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    TextButton(
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(  // Expanded로 감싸서 오버플로우 방지
+                    child: TextButton(
                       onPressed: () async {
                         Navigator.of(dialogContext).pop();
 
                         // `ColonPage`로 이동전 콜론 정보 가져오기
-                        var colonDetails =
-                            await _fetchColonDetails(colonFileId);
+                        var colonDetails = await _fetchColonDetails(colonFileId);
 
                         await _insertColonFileIdToAltTable(
                             widget.lecturefileId ?? -1, colonFileId);
@@ -798,38 +792,40 @@ class _RecordPageState extends State<RecordPage> {
                             colonDetails['folder_id']);
 
                         // 다이얼로그가 닫힌 후에 네비게이션을 실행
-                        Future.delayed(Duration(milliseconds: 200), () {
+                        Future.delayed(const Duration(milliseconds: 200), () {
                           _navigateToColonPage(
-                              context,
-                              colonFolderName,
-                              colonDetails['file_name'],
-                              colonDetails['lecture_name'],
-                              colonDetails['created_at'],
-                              colonDetails['file_url'],
-                              colonFileId);
+                            context,
+                            colonFolderName,
+                            colonDetails['file_name'],
+                            colonDetails['lecture_name'],
+                            colonDetails['created_at'],
+                            colonDetails['file_url'],
+                            colonFileId,
+                          );
                         });
                       },
                       child: Text(
                         '확인',
-                        style: TextStyle(
+                        style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSecondary,
-                          fontSize: 14,
-                          fontFamily: 'DM Sans',
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          );
-        },
-      );
-    } else {
-      print('User Key is null, cannot create colon folder.');
-    }
+            ),
+          ],
+        );
+      },
+    );
+  } else {
+    print('User Key is null, cannot create colon folder.');
   }
+}
+
+
 
   Future<void> _insertColonFileIdToAltTable(
       int lecturefileId, int colonFileId) async {
@@ -1124,11 +1120,10 @@ class _RecordPageState extends State<RecordPage> {
                       },
                       child: Text(
                         _recordingState == RecordingState.initial ? '취소' : '종료',
-                        style: TextStyle(
-                          color: theme.colorScheme.tertiary,
-                          fontSize: 16 * scaleFactor,
-                        ),
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                        color: theme.colorScheme.tertiary,
                       ),
+                                        ),
                     ),
                   ],
                 ),
@@ -1141,50 +1136,42 @@ class _RecordPageState extends State<RecordPage> {
                     const SizedBox(width: 8),
                     Text(
                       '폴더 분류 > ${widget.folderName}',
-                      style: TextStyle(
-                        color: theme.colorScheme.onSecondary,
-                        fontSize: 12 * scaleFactor,
-                        fontFamily: 'DM Sans',
-                      ),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSecondary,
                     ),
+                  ),
                   ],
                 ),
-                const SizedBox(height: 5),
+                const ResponsiveSizedBox(height: 5),
                 Text(
                   widget.noteName,
-                  style: TextStyle(
-                    color: theme.colorScheme.onSecondary,
-                    fontSize: 20 * scaleFactor,
-                    fontFamily: 'DM Sans',
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                  color: theme.colorScheme.onSecondary,
+                  fontWeight: FontWeight.bold,
                 ),
-                const SizedBox(height: 5),
+                ),
+                const ResponsiveSizedBox(height: 5),
                 Text(
                   '강의 자료: ${widget.lectureName}',
-                  style: TextStyle(
-                    color: theme.colorScheme.onSecondary,
-                    fontSize: 12,
-                    fontFamily: 'DM Sans',
-                  ),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSecondary,
+                ),
                 ),
                 if (_recordingState == RecordingState.recorded &&
                     _createdAt != null)
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 5),
+                      const ResponsiveSizedBox(height: 5),
                       Text(
                         _formatDate(_createdAt!),
-                        style: TextStyle(
-                          color: theme.colorScheme.onSecondary,
-                          fontSize: 12 * scaleFactor,
-                          fontFamily: 'DM Sans',
-                        ),
+                         style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSecondary,
+                          ),
                       ),
                     ],
                   ),
-                const SizedBox(height: 20),
+                const ResponsiveSizedBox(height: 20),
                 Row(
                   children: [
                     if (_recordingState == RecordingState.initial)
@@ -1193,8 +1180,8 @@ class _RecordPageState extends State<RecordPage> {
                         onPressed: () {
                           _startRecording();
                         },
-                        width: MediaQuery.of(context).size.width * 0.25,
-                        height: 40.0,
+                        // width: MediaQuery.of(context).size.width * 0.25,
+                        // height: 40.0,
                         iconData: Icons.mic,
                       ),
                     if (_recordingState == RecordingState.recording)
@@ -1213,14 +1200,14 @@ class _RecordPageState extends State<RecordPage> {
                                 },
                               );
                             },
-                            width: MediaQuery.of(context).size.width * 0.3,
-                            height: 40.0,
+                            // width: MediaQuery.of(context).size.width * 0.3,
+                            // height: 40.0,
                             iconData: Icons.mic,
                           ),
                           const SizedBox(width: 10),
                           Column(
                             children: [
-                              SizedBox(height: 10),
+                              const ResponsiveSizedBox(height: 10),
                               Row(
                                 children: [
                                   Icon(Icons.fiber_manual_record,
@@ -1246,13 +1233,14 @@ class _RecordPageState extends State<RecordPage> {
                           ClickButton(
                             text: '녹음 종료됨',
                             onPressed: () {},
-                            width: MediaQuery.of(context).size.width * 0.3,
-                            height: 40.0,
+                            // width: MediaQuery.of(context).size.width * 0.3,
+                            // height: 40.0,
                             iconData: Icons.mic_off,
                             iconColor: Colors.white,
                             backgroundColor: Colors.grey,
                           ),
                           const SizedBox(width: 2),
+                          
                           ClickButton(
                             text: _isColonCreated ? '콜론(:) 이동' : '콜론 생성(:)',
                             backgroundColor:
@@ -1352,14 +1340,14 @@ class _RecordPageState extends State<RecordPage> {
                                 }
                               }
                             },
-                            width: MediaQuery.of(context).size.width * 0.3,
-                            height: 40.0,
+                            // width: MediaQuery.of(context).size.width * 0.3,
+                            // height: 40.0,
                           ),
                         ],
                       ),
                   ],
                 ),
-                const SizedBox(height: 20),
+                const ResponsiveSizedBox(height: 20),
                 if (isAlternativeTextEnabled)
                   GestureDetector(
                     onTap: () {
@@ -1393,50 +1381,45 @@ class _RecordPageState extends State<RecordPage> {
                                     ? pageTexts[_currentPage] ??
                                         '페이지 $_currentPage의 텍스트가 없습니다.'
                                     : '텍스트가 없습니다.',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 13 * scaleFactor,
-                                  fontWeight: FontWeight.normal,
-                                ),
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.normal,
+                              ),
                               ),
                             ),
                           ),
                       ],
                     ),
                   ),
-                const SizedBox(height: 20),
+                const ResponsiveSizedBox(height: 20),
                 if (_recordingState == RecordingState.recording)
                   Column(
                     children: [
                       const SizedBox(height: 10),
                       Text(
                         _recognizedText + ' ' + _interimText,
-                        style: TextStyle(
-                          color: theme.colorScheme.onTertiary,
-                          fontSize: 17 * scaleFactor,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: GoogleFonts.ibmPlexSansKr().fontFamily,
-                          height: 1.8,
-                        ),
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                        color: theme.colorScheme.onTertiary,
+                        fontWeight: FontWeight.w500,
+                        height: 1.8,
                       ),
-                      const SizedBox(height: 20),
+                      ),
+                      const ResponsiveSizedBox(height: 20),
                     ],
                   ),
                 if (_recordingState == RecordingState.recorded)
                   Column(
                     children: [
-                      const SizedBox(height: 10),
+                      const ResponsiveSizedBox(height: 10),
                       Text(
                         _recognizedText,
-                        style: TextStyle(
-                          color: theme.colorScheme.onTertiary,
-                          fontSize: 17 * scaleFactor,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: GoogleFonts.ibmPlexSansKr().fontFamily,
-                          height: 1.8,
-                        ),
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                        color: theme.colorScheme.onTertiary,
+                        fontWeight: FontWeight.w500,
+                        height: 1.8,
                       ),
-                      const SizedBox(height: 20),
+                      ),
+                      const ResponsiveSizedBox(height: 20),
                     ],
                   ),
               ],
