@@ -23,7 +23,6 @@ import './api/api.dart';
 import 'package:image/image.dart' as img;
 import 'mypage/44_font_size_page.dart';
 
-
 bool isAlternativeTextEnabled = true;
 bool isRealTimeSttEnabled = false;
 
@@ -67,6 +66,10 @@ class _LearningPreparationState extends State<LearningPreparation> {
   @override
   void initState() {
     super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNode.requestFocus(); // 화면이 빌드된 후에 포커스를 요청
+    });
 
     // 유저의 타입에 따라 학습 유형 자동 설정
     final userProvider = Provider.of<UserProvider>(context, listen: false);
@@ -264,7 +267,6 @@ class _LearningPreparationState extends State<LearningPreparation> {
                           color: theme.colorScheme.onTertiary,
                           fontWeight: FontWeight.bold,
                         ),
-
                       ),
                       TextButton(
                         onPressed: () async {
@@ -283,10 +285,9 @@ class _LearningPreparationState extends State<LearningPreparation> {
                         child: Text(
                           '이동',
                           style: theme.textTheme.bodyLarge?.copyWith(
-                          color: theme.colorScheme.tertiary,
-                          fontWeight: FontWeight.bold,
-                        ),
-
+                            color: theme.colorScheme.tertiary,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ],
@@ -296,12 +297,11 @@ class _LearningPreparationState extends State<LearningPreparation> {
                     child: Text(
                       '다른 폴더로 이동할 수 있어요.',
                       style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSecondary,
-                      fontFamily: 'Raleway', // 폰트 유지
-                      fontWeight: FontWeight.w500, // 폰트 두께 설정
-                      height: 1.5, // 줄 높이 설정
-                    ),
-
+                        color: theme.colorScheme.onSecondary,
+                        fontFamily: 'Raleway', // 폰트 유지
+                        fontWeight: FontWeight.w500, // 폰트 두께 설정
+                        height: 1.5, // 줄 높이 설정
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -361,12 +361,13 @@ class _LearningPreparationState extends State<LearningPreparation> {
           title: Text(
             title,
             style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSecondary,
-            fontWeight: FontWeight.bold, // 폰트 두께 유지
-          ),
+              color: theme.colorScheme.onSecondary,
+              fontWeight: FontWeight.bold, // 폰트 두께 유지
+            ),
           ),
           content: TextField(
             controller: textController,
+            focusNode: _focusNode,
             decoration: InputDecoration(
               hintText: "새로운 노트",
               hintStyle: TextStyle(color: theme.colorScheme.onSecondary),
@@ -381,8 +382,9 @@ class _LearningPreparationState extends State<LearningPreparation> {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('취소',
-                  style: theme.textTheme.bodyMedium?.copyWith(
+              child: Text(
+                '취소',
+                style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.tertiary,
                 ),
               ),
@@ -391,8 +393,9 @@ class _LearningPreparationState extends State<LearningPreparation> {
               },
             ),
             TextButton(
-              child: Text('저장',
-                  style: theme.textTheme.bodyMedium?.copyWith(
+              child: Text(
+                '저장',
+                style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onTertiary,
                 ),
               ),
@@ -527,7 +530,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
     const String apiKey = Env.apiKey;
     final Uri apiUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
 
-    const String basicPrompt= '''
+    const String basicPrompt = '''
     Please convert the content of the following lecture materials into text so that visually impaired individuals can recognize it using a screen reader. 
     Write all the text that is in the lecture materials as IT IS, with any additional description or modification.
     If there is a picture in the lecture material, please generate a alternative text which describes about the picture.
@@ -545,7 +548,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
     8. For mathematical formulas and symbols, write them out in text form so that they can be read aloud properly by a screen reader. This includes symbols like sigma, square root, alpha, beta, etc.
     9.If mathematical symbols appear, convert them into text form based on your judgment, ensuring that the symbols are not written as they are but transformed into readable text.
 ''';
-     const String detailedPrompt = '''
+    const String detailedPrompt = '''
   Please convert the content of the following lecture materials into text so that visually impaired individuals can recognize it using a screen reader. 
     Write all the text that is in the lecture materials as IT IS, with any additional description or modification.
     If there is a picture in the lecture material, please generate a alternative text which describes about the picture.
@@ -565,7 +568,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
 
   ''';
 
-  /*
+    /*
     final String promptForAlternativeText = '''
     Please convert the content of the following lecture materials into text so that visually impaired individuals can recognize it using a screen reader. 
     Write all the text that is in the lecture materials as IT IS, with any additional description or modification.
@@ -586,19 +589,19 @@ class _LearningPreparationState extends State<LearningPreparation> {
     ''';
   */
 
-  // 기본 설명 또는 자세한 설명 프롬프트 및 토큰 수 선택
-  String promptForAlternativeText;
-  int maxTokens;
+    // 기본 설명 또는 자세한 설명 프롬프트 및 토큰 수 선택
+    String promptForAlternativeText;
+    int maxTokens;
 
-  if (isBasicSelected) {
-    promptForAlternativeText = basicPrompt;
-    maxTokens = 500;  // 기본 설명에 대한 최대 토큰 수
-  } else if (isDetailSelected) {
-    promptForAlternativeText = detailedPrompt;
-    maxTokens = 1000;  // 자세한 설명에 대한 최대 토큰 수
-  } else {
-    throw Exception('Neither Basic nor Detailed option is selected.');
-  }
+    if (isBasicSelected) {
+      promptForAlternativeText = basicPrompt;
+      maxTokens = 500; // 기본 설명에 대한 최대 토큰 수
+    } else if (isDetailSelected) {
+      promptForAlternativeText = detailedPrompt;
+      maxTokens = 1000; // 자세한 설명에 대한 최대 토큰 수
+    } else {
+      throw Exception('Neither Basic nor Detailed option is selected.');
+    }
 
     try {
       List<String> allResponses = [];
@@ -622,7 +625,11 @@ class _LearningPreparationState extends State<LearningPreparation> {
           }
         ];
 
-        var data = {"model": "gpt-4o", "messages": messages, "max_tokens": maxTokens};
+        var data = {
+          "model": "gpt-4o",
+          "messages": messages,
+          "max_tokens": maxTokens
+        };
 
         var apiResponse = await http.post(
           apiUrl,
@@ -963,301 +970,304 @@ class _LearningPreparationState extends State<LearningPreparation> {
   }
 
   @override
-Widget build(BuildContext context) {
-  final theme = Theme.of(context);
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
 
     // 유저의 dis_type 가져오기
-  final userProvider = Provider.of<UserProvider>(context);
-  final userDisType = userProvider.user?.dis_type;
+    final userProvider = Provider.of<UserProvider>(context);
+    final userDisType = userProvider.user?.dis_type;
 
-  // 학습 유형에 따라 제목 설정
-  String titleText = ' 학습 준비하기';
-  return Scaffold(
-    backgroundColor: theme.scaffoldBackgroundColor,
-    appBar: AppBar(toolbarHeight: 0),
-    body: ListView(
-      padding: const EdgeInsets.all(16.0),
-      children: [
-        const ResponsiveSizedBox(height: 15),
-        Focus(
-          focusNode: _focusNode, // 추가된 부분
-          child: Semantics(
-            focusable: true,
-            child: Text(
-              titleText,
-               style: theme.textTheme.headlineSmall?.copyWith(
+    // 학습 유형에 따라 제목 설정
+    String titleText = ' 학습 준비하기';
+    return Scaffold(
+      resizeToAvoidBottomInset: true,
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(toolbarHeight: 0),
+      body: ListView(
+        padding: const EdgeInsets.all(16.0),
+        children: [
+          const ResponsiveSizedBox(height: 15),
+          Focus(
+            focusNode: _focusNode, // 추가된 부분
+            child: Semantics(
+              focusable: true,
+              child: Text(
+                titleText,
+                style: theme.textTheme.headlineSmall?.copyWith(
                   color: theme.colorScheme.onSecondary,
                   fontWeight: FontWeight.bold,
                 ),
+              ),
             ),
           ),
-        ),
-        const ResponsiveSizedBox(height: 50),
-        Text(
-          '강의폴더와 파일 이름을 설정해주세요.',
-          style: theme.textTheme.bodyLarge?.copyWith(
-          color: theme.colorScheme.onSecondary,
-          fontWeight: FontWeight.bold,
-      ),
-        ),
-        const ResponsiveSizedBox(height: 15),
-        Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Semantics(
-                label: '저장할 폴더를 선택하세요',
-                child: GestureDetector(
-                  onTap: () {
-                    int currentFolderId =
-                        folderList.isNotEmpty ? folderList.first['id'] : 0;
-                    // showQuickMenu 호출
-                    showQuickMenu2(
-                      context,
-                      () => fetchOtherFolders('lecture', currentFolderId),
-                      folderList,
-                      _selectFolder,
-                    );
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.folder_open,
-                        color: theme.colorScheme.onSecondary,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          '폴더 분류 > $_selectedFolder',
-                          style: theme.textTheme.bodyMedium?.copyWith(
+          const ResponsiveSizedBox(height: 50),
+          Text(
+            '강의폴더와 파일 이름을 설정해주세요.',
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.colorScheme.onSecondary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const ResponsiveSizedBox(height: 15),
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Semantics(
+                  label: '저장할 폴더를 선택하세요',
+                  child: GestureDetector(
+                    onTap: () {
+                      int currentFolderId =
+                          folderList.isNotEmpty ? folderList.first['id'] : 0;
+                      // showQuickMenu 호출
+                      showQuickMenu2(
+                        context,
+                        () => fetchOtherFolders('lecture', currentFolderId),
+                        folderList,
+                        _selectFolder,
+                      );
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.folder_open,
                           color: theme.colorScheme.onSecondary,
-                          fontWeight: FontWeight.w400,
                         ),
-                          overflow: TextOverflow.ellipsis,
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            '폴더 분류 > $_selectedFolder',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSecondary,
+                              fontWeight: FontWeight.w400,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              const ResponsiveSizedBox(height: 10),
-              Semantics(
-                label: '파일 이름을 설정하세요',
-                child: GestureDetector(
-                  onTap: () {
-                    showRenameDialog2(
-                      context,
-                      _noteName,
-                      renameItem,
-                      setState,
-                      "파일 이름 바꾸기", // 다이얼로그 제목
-                      "file_name", // 변경할 항목 타입
-                    );
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.book_outlined,
-                        color: theme.colorScheme.onSecondary,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          _noteName,
-                         style: theme.textTheme.bodyMedium?.copyWith(
+                const ResponsiveSizedBox(height: 10),
+                Semantics(
+                  label: '파일 이름을 설정하세요',
+                  child: GestureDetector(
+                    onTap: () {
+                      showRenameDialog2(
+                        context,
+                        _noteName,
+                        renameItem,
+                        setState,
+                        "파일 이름 바꾸기", // 다이얼로그 제목
+                        "file_name", // 변경할 항목 타입
+                      );
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.book_outlined,
                           color: theme.colorScheme.onSecondary,
-                          fontWeight: FontWeight.w400,
                         ),
-                          overflow: TextOverflow.ellipsis,
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _noteName,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSecondary,
+                              fontWeight: FontWeight.w400,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 50),
-                    ],
+                        const SizedBox(width: 50),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              const ResponsiveSizedBox(height: 15),
-            if (userDisType == 0) ...[
-              Text(
-                '대체텍스트 설명',
-                     style: theme.textTheme.bodyMedium?.copyWith(
+                const ResponsiveSizedBox(height: 15),
+                if (userDisType == 0) ...[
+                  Text(
+                    '대체텍스트 설명',
+                    style: theme.textTheme.bodyMedium?.copyWith(
                       color: const Color.fromARGB(255, 70, 70, 70),
                       fontWeight: FontWeight.w200,
-              ),
-              ),
-              CustomRadioButton3(
-                label: '기본 설명',
-                isSelected: isBasicSelected,
-                onChanged: (bool value) {
-                  setState(() {
-                    isBasicSelected = value;
-                    isDetailSelected = !value; // "기본 설명"이 선택되면 "자세한 설명"은 선택 해제
-                  });
-                },
-              ),
-              const ResponsiveSizedBox(height: 16),
-              CustomRadioButton3(
-                label: '자세한 설명',
-                isSelected: isDetailSelected,
-                onChanged: (bool value) {
-                  setState(() {
-                    isDetailSelected = value;
-                    isBasicSelected = !value; // "자세한 설명"이 선택되면 "기본 설명"은 선택 해제
-                  });
-                },
-              ),
-            ],
-            ],
+                    ),
+                  ),
+                  CustomRadioButton3(
+                    label: '기본 설명',
+                    isSelected: isBasicSelected,
+                    onChanged: (bool value) {
+                      setState(() {
+                        isBasicSelected = value;
+                        isDetailSelected =
+                            !value; // "기본 설명"이 선택되면 "자세한 설명"은 선택 해제
+                      });
+                    },
+                  ),
+                  const ResponsiveSizedBox(height: 16),
+                  CustomRadioButton3(
+                    label: '자세한 설명',
+                    isSelected: isDetailSelected,
+                    onChanged: (bool value) {
+                      setState(() {
+                        isDetailSelected = value;
+                        isBasicSelected =
+                            !value; // "자세한 설명"이 선택되면 "기본 설명"은 선택 해제
+                      });
+                    },
+                  ),
+                ],
+              ],
+            ),
           ),
-        ),
-        const ResponsiveSizedBox(height: 50),
-        Center(
-          child: ClickButton(
-            text: _isMaterialEmbedded ? '강의 자료 학습 시작하기' : '강의 자료를 임베드하세요',
-            onPressed: () async {
-              if (!_isMaterialEmbedded) {
-                print("Starting file upload");
-                // `lectureFolderId` 설정
-                lectureFolderId = getFolderIdByName(_selectedFolder);
-                print('${lectureFolderId}');
-
-                try {
-                  final userProvider =
-                      Provider.of<UserProvider>(context, listen: false);
-                  // API 호출
-                  lecturefileId = await saveLectureFile(
-                    folderId: lectureFolderId!,
-                    noteName: _noteName, //노트이름
-                  );
-                  print("Lecture file saved with ID: $lecturefileId");
-                  await _pickFile(); // 파일 선택 후 업로드
-
-                  setState(() {
-                    _isMaterialEmbedded = true;
-                  });
-                } catch (e) {
-                  print('Error: $e');
-                }
-              } else {
-                print("Starting learning with file: $_selectedFileName");
-                print("대체텍스트 선택 여부: $isAlternativeTextEnabled");
-                print("실시간자막 선택 여부: $isRealTimeSttEnabled");
-
-                if (_selectedFileName != null &&
-                    _downloadURL != null &&
-                    _isMaterialEmbedded) {
-                  showLearningDialog(context, _selectedFileName!,
-                      _downloadURL!, _progressNotifier);
+          const ResponsiveSizedBox(height: 50),
+          Center(
+            child: ClickButton(
+              text: _isMaterialEmbedded ? '강의 자료 학습 시작하기' : '강의 자료를 임베드하세요',
+              onPressed: () async {
+                if (!_isMaterialEmbedded) {
+                  print("Starting file upload");
+                  // `lectureFolderId` 설정
+                  lectureFolderId = getFolderIdByName(_selectedFolder);
+                  print('${lectureFolderId}');
 
                   try {
                     final userProvider =
                         Provider.of<UserProvider>(context, listen: false);
-                    int type =
-                        isAlternativeTextEnabled ? 0 : 1; // 대체면 0, 실시간이면 1
-                    //데베에 fileUrl, lecturename, type
-                    print(lecturefileId!);
-                    print(type);
-                    await updateLectureDetails(lecturefileId!, _downloadURL!,
-                        _selectedFileName!, type);
+                    // API 호출
+                    lecturefileId = await saveLectureFile(
+                      folderId: lectureFolderId!,
+                      noteName: _noteName, //노트이름
+                    );
+                    print("Lecture file saved with ID: $lecturefileId");
+                    await _pickFile(); // 파일 선택 후 업로드
 
-                    if (_fileBytes != null) {
-                      if (_isPDF) {
-                        handlePdfUpload(
-                            _fileBytes!, userProvider.user!.userKey)
-                            .then((imageUrls) async {
-                          await processFileWithGpt(imageUrls, type);
-                        });
-                      } else {
-                        // PDF가 아닌 경우 직접 파일 URL을 사용하여 GPT-4 API 호출
-                        List<String> fileUrls = [_downloadURL!];
-                        await processFileWithGpt(fileUrls, type);
-                      }
-                    }
+                    setState(() {
+                      _isMaterialEmbedded = true;
+                    });
                   } catch (e) {
-                    if (Navigator.canPop(context)) {
-                      Navigator.of(context, rootNavigator: true).pop();
-                    }
                     print('Error: $e');
                   }
                 } else {
-                  print(
-                      'Error: File name, URL, or embedded material is missing.');
-                }
-              }
-            },
-            // width: MediaQuery.of(context).size.width * 0.7,
-            // height: 50.0,
-            iconPath: _isIconVisible ? 'assets/Vector.png' : null,
-          ),
-        ),
-        if (_isMaterialEmbedded)
-          Column(
-            children: [
-              const SizedBox(height: 20),
-              Container(
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.tertiaryContainer,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.all(8),
-                child: Row(
-                  children: [
-                    Icon(_isPDF ? Icons.picture_as_pdf : Icons.image,
-                        color: _isPDF ? Colors.red : Colors.blue, size: 40),
-                    const SizedBox(width: 15),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _selectedFileName!,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSecondary,
-                          fontWeight: FontWeight.w500,
-                          height: 1.2,
-                        ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        if (_downloadURL != null)
-          _isPDF
-              ? SizedBox(
-            height: 600,
-            child: pdfx.PdfView(
-              controller: _pdfController,
-            ),
-          )
-              : Padding(
-            padding: const EdgeInsets.only(top: 20),
-            child: Image.network(
-              _downloadURL!,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                print('Error loading image: $error');
-                print('Stack trace: $stackTrace');
-                print('Image URL: $_downloadURL');
+                  print("Starting learning with file: $_selectedFileName");
+                  print("대체텍스트 선택 여부: $isAlternativeTextEnabled");
+                  print("실시간자막 선택 여부: $isRealTimeSttEnabled");
 
-                return Center(
-                  child: Text(
-                    '이미지를 불러올 수 없습니다.',
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                      color: theme.colorScheme.tertiary,
-                      ),
-                  ),
-                );
+                  if (_selectedFileName != null &&
+                      _downloadURL != null &&
+                      _isMaterialEmbedded) {
+                    showLearningDialog(context, _selectedFileName!,
+                        _downloadURL!, _progressNotifier);
+
+                    try {
+                      final userProvider =
+                          Provider.of<UserProvider>(context, listen: false);
+                      int type =
+                          isAlternativeTextEnabled ? 0 : 1; // 대체면 0, 실시간이면 1
+                      //데베에 fileUrl, lecturename, type
+                      print(lecturefileId!);
+                      print(type);
+                      await updateLectureDetails(lecturefileId!, _downloadURL!,
+                          _selectedFileName!, type);
+
+                      if (_fileBytes != null) {
+                        if (_isPDF) {
+                          handlePdfUpload(
+                                  _fileBytes!, userProvider.user!.userKey)
+                              .then((imageUrls) async {
+                            await processFileWithGpt(imageUrls, type);
+                          });
+                        } else {
+                          // PDF가 아닌 경우 직접 파일 URL을 사용하여 GPT-4 API 호출
+                          List<String> fileUrls = [_downloadURL!];
+                          await processFileWithGpt(fileUrls, type);
+                        }
+                      }
+                    } catch (e) {
+                      if (Navigator.canPop(context)) {
+                        Navigator.of(context, rootNavigator: true).pop();
+                      }
+                      print('Error: $e');
+                    }
+                  } else {
+                    print(
+                        'Error: File name, URL, or embedded material is missing.');
+                  }
+                }
               },
+              // width: MediaQuery.of(context).size.width * 0.7,
+              // height: 50.0,
+              iconPath: _isIconVisible ? 'assets/Vector.png' : null,
             ),
           ),
-      ],
-    ),
-    bottomNavigationBar:
-    buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
-  );
-}
+          if (_isMaterialEmbedded)
+            Column(
+              children: [
+                const SizedBox(height: 20),
+                Container(
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.tertiaryContainer,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.all(8),
+                  child: Row(
+                    children: [
+                      Icon(_isPDF ? Icons.picture_as_pdf : Icons.image,
+                          color: _isPDF ? Colors.red : Colors.blue, size: 40),
+                      const SizedBox(width: 15),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _selectedFileName!,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSecondary,
+                              fontWeight: FontWeight.w500,
+                              height: 1.2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          if (_downloadURL != null)
+            _isPDF
+                ? SizedBox(
+                    height: 600,
+                    child: pdfx.PdfView(
+                      controller: _pdfController,
+                    ),
+                  )
+                : Padding(
+                    padding: const EdgeInsets.only(top: 20),
+                    child: Image.network(
+                      _downloadURL!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        print('Error loading image: $error');
+                        print('Stack trace: $stackTrace');
+                        print('Image URL: $_downloadURL');
+
+                        return Center(
+                          child: Text(
+                            '이미지를 불러올 수 없습니다.',
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              color: theme.colorScheme.tertiary,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+        ],
+      ),
+      bottomNavigationBar:
+          buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
+    );
+  }
 }

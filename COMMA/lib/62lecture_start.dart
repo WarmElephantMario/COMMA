@@ -57,6 +57,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         toolbarHeight: 0,
@@ -123,7 +124,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
                     Icons.folder_open,
                     color: theme.colorScheme.onSecondary,
                   ),
-                SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       '폴더 분류 > ${widget.selectedFolder}',

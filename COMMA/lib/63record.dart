@@ -84,6 +84,7 @@ class _RecordPageState extends State<RecordPage> {
   int _currentLength = 0; // 자막 길이
   String combineText = ''; // 문단 구분 위한 변수
   int _recordCount = 0; // 자막 개수
+  int _upgradeRecordCount = 0; // 업그레이드 자막 개수
   double scaleFactor = 1.0;
 
   final RecorderStream _recorder = RecorderStream();
@@ -106,10 +107,9 @@ class _RecordPageState extends State<RecordPage> {
     _checkFileType();
     if (widget.type == 0) {
       // 대체 텍스트인 경우에만 호출
-    WidgetsBinding.instance?.addPostFrameCallback((_) async {
-      await loadPageTexts(lectureFileId: widget.lecturefileId); // 비동기 함수 호출
-    });
-
+      WidgetsBinding.instance?.addPostFrameCallback((_) async {
+        await loadPageTexts(lectureFileId: widget.lecturefileId); // 비동기 함수 호출
+      });
     }
     WidgetsBinding.instance?.addPostFrameCallback((_) {
       _requestPermissions();
@@ -254,6 +254,173 @@ class _RecordPageState extends State<RecordPage> {
     }
   }
 
+  // 자막 업그레이드 관련 메서드 시작
+
+  Future<void> processTranscripts(
+      int lecturefileId, List<String> keywords) async {
+    // 1. 데이터베이스에서 자막 URL 가져오기
+    List<String> transcriptUrls = await fetchTranscriptUrls(lecturefileId);
+
+    for (String url in transcriptUrls) {
+      // 2. URL로 파이어베이스에서 자막 파일 불러오기
+      String transcriptText = await fetchTranscriptText(url);
+
+      // 3. GPT로 자막 수정 (keywords는 이미 정해져 있다고 가정)
+      String upgradedText =
+          await callGptRecordUpgrade(keywords, transcriptText);
+
+      // 4. 수정된 자막을 다시 파이어베이스에 업로드하고 새로운 URL 받기, 데베에 저장
+      await saveUpgradeTranscriptPart(upgradedText, lecturefileId);
+    }
+  }
+
+  Future<List<String>> fetchTranscriptUrls(int? lecturefileId) async {
+    final url =
+        '${API.baseUrl}/api/get-transcript-urls?lecturefile_id=$lecturefileId';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonResponse = jsonDecode(response.body);
+        return List<String>.from(jsonResponse.map((item) => item['url']));
+      } else {
+        throw Exception(
+            'Failed to fetch transcript URLs: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching transcript URLs: $e');
+      return [];
+    }
+  }
+
+  Future<String> fetchTranscriptText(String url) async {
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        return utf8.decode(response.bodyBytes); // 파이어베이스에서 텍스트 가져오기
+      } else {
+        throw Exception(
+            'Failed to load transcript text: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching transcript text: $e');
+      return '';
+    }
+  }
+
+  // GPT API 호출을 통한 자막 수정
+  Future<String> callGptRecordUpgrade(
+      List<String> keywords, String transcriptText) async {
+    const String apiKey = Env.apiKey;
+    final Uri apiUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
+
+    Map<String, String> headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $apiKey'
+    };
+
+    String prompt = '''
+  You are an expert in Korean speech-to-text correction. 
+  I will provide you with a transcript and a list of keywords. 
+  Please correct any errors in the transcript while ensuring the keywords are accurately reflected.
+  Please change the words in the keyword exactly and do not change anything else. Please keep the original subtitles as much as possible, but correct strange words, spaces, and incorrect punctuation marks.
+  Please do not answer anything other than the revised subtitles. 
+  Please tell me only the revised subtitles for the answers.
+
+  Keywords: ${keywords.join(', ')}
+  Transcript: $transcriptText
+  ''';
+
+    String body = jsonEncode({
+      'model': 'gpt-4o', // GPT 모델 선택
+      'messages': [
+        {
+          'role': 'system',
+          'content': 'You are an expert in Korean speech-to-text correction.'
+        },
+        {'role': 'user', 'content': prompt}
+      ],
+      'max_tokens': 1000
+    });
+
+    final response = await http.post(apiUrl, headers: headers, body: body);
+    if (response.statusCode == 200) {
+      // UTF-8로 디코딩
+      var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes));
+
+      // GPT API 응답에서 필요한 내용 추출
+      var upgradedText =
+          decodedResponse['choices'][0]['message']['content'].trim();
+
+      return upgradedText; // 수정된 자막 반환
+    } else {
+      throw Exception('Failed to call GPT API: ${response.statusCode}');
+    }
+  }
+
+  Future<void> saveUpgradeTranscriptPart(
+      String text, int? lecturefileId) async {
+    try {
+      // 텍스트를 바이트로 변환
+      Uint8List fileBytes = Uint8List.fromList(utf8.encode(text));
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final userKey = userProvider.user?.userKey;
+
+      if (userKey != null) {
+        // Firebase 스토리지 경로 설정 (업그레이드된 자막 저장)
+        final storageRef = FirebaseStorage.instance.ref().child(
+            'record_upgrade/$userKey/${widget.lectureFolderId}/${widget.lecturefileId}/record_upgrade-$_upgradeRecordCount.txt');
+
+        _upgradeRecordCount++; // 파일 번호 증가
+
+        // Firebase에 업로드
+        UploadTask uploadTask = storageRef.putData(fileBytes,
+            SettableMetadata(contentType: 'text/plain; charset=utf-8'));
+
+        TaskSnapshot taskSnapshot = await uploadTask;
+        String downloadURL = await taskSnapshot.ref.getDownloadURL();
+        print('Upgraded transcript part uploaded: $downloadURL');
+
+        // 업로드된 URL을 데이터베이스에 저장
+        await _insertUpgradeRecordData(lecturefileId, null, downloadURL);
+      } else {
+        print('User ID is null, cannot save upgraded transcript.');
+      }
+    } catch (e) {
+      print('Error saving upgraded transcript: $e');
+    }
+  }
+
+// Record_table2에 업그레이드된 자막 데이터 저장
+  Future<void> _insertUpgradeRecordData(
+      int? lecturefileId, int? colonfileId, String downloadURL) async {
+    final url = '${API.baseUrl}/api/insertUpgradeRecordData';
+    final body = {
+      'lecturefile_id': lecturefileId,
+      'colonfile_id': colonfileId,
+      'record_url': downloadURL,
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(body),
+      );
+
+      if (response.statusCode == 200) {
+        print('Upgraded record added successfully to Record_table2');
+      } else {
+        print('Failed to add upgraded record: ${response.statusCode}');
+        print(response.body);
+      }
+    } catch (e) {
+      print('Error adding upgraded record to Record_table2: $e');
+    }
+  }
+
+  // 자막 업그레이드 관련 메서드 끝
+
   Future<void> _checkExistColon() async {
     var url =
         '${API.baseUrl}/api/check-exist-colon?lecturefileId=${widget.lecturefileId}';
@@ -336,97 +503,104 @@ class _RecordPageState extends State<RecordPage> {
 
   // 페이지 텍스트를 로드하는 함수
 // lecturefileId와 colonFileId를 구분하여 처리
-Future<void> loadPageTexts({int? lectureFileId, int? colonFileId}) async {
-  try {
-    // 1. lectureFileId가 있는 경우 먼저 처리
-    if (lectureFileId != null) {
-      print('Using lectureFileId to fetch alternative text URLs');
-      
-      // lectureFileId로 대체 텍스트 URL 리스트 가져오기
-      final response = await http.get(Uri.parse(
-          '${API.baseUrl}/api/get-alternative-text-urls?lecturefileId=$lectureFileId'));
+  Future<void> loadPageTexts({int? lectureFileId, int? colonFileId}) async {
+    try {
+      // 1. lectureFileId가 있는 경우 먼저 처리
+      if (lectureFileId != null) {
+        print('Using lectureFileId to fetch alternative text URLs');
 
-      if (response.statusCode == 200) {
-        // JSON 응답을 디코딩하여 alternative_text_urls 리스트 추출
-        final fileData = jsonDecode(response.body);
-        final List<dynamic> alternativeTextUrls = fileData['alternative_text_urls'];
+        // lectureFileId로 대체 텍스트 URL 리스트 가져오기
+        final response = await http.get(Uri.parse(
+            '${API.baseUrl}/api/get-alternative-text-urls?lecturefileId=$lectureFileId'));
 
-        if (alternativeTextUrls.isNotEmpty) {
-          Map<int, String> allTexts = {};
-          
-          // 각 URL에서 텍스트 데이터를 가져와 페이지별로 저장
-          for (int urlIndex = 0; urlIndex < alternativeTextUrls.length; urlIndex++) {
-            final textResponse = await http.get(Uri.parse(alternativeTextUrls[urlIndex]));
+        if (response.statusCode == 200) {
+          // JSON 응답을 디코딩하여 alternative_text_urls 리스트 추출
+          final fileData = jsonDecode(response.body);
+          final List<dynamic> alternativeTextUrls =
+              fileData['alternative_text_urls'];
 
-            if (textResponse.statusCode == 200) {
-              // URL에서 받은 텍스트를 페이지에 대응하여 저장
-              final text = utf8.decode(textResponse.bodyBytes);
-              allTexts[urlIndex + 1] = text;
-            } else {
-              print('Failed to fetch text file from URL $urlIndex');
+          if (alternativeTextUrls.isNotEmpty) {
+            Map<int, String> allTexts = {};
+
+            // 각 URL에서 텍스트 데이터를 가져와 페이지별로 저장
+            for (int urlIndex = 0;
+                urlIndex < alternativeTextUrls.length;
+                urlIndex++) {
+              final textResponse =
+                  await http.get(Uri.parse(alternativeTextUrls[urlIndex]));
+
+              if (textResponse.statusCode == 200) {
+                // URL에서 받은 텍스트를 페이지에 대응하여 저장
+                final text = utf8.decode(textResponse.bodyBytes);
+                allTexts[urlIndex + 1] = text;
+              } else {
+                print('Failed to fetch text file from URL $urlIndex');
+              }
             }
-          }
 
-          // 모든 텍스트 데이터를 setState로 업데이트
-          setState(() {
-            pageTexts = allTexts;
-          });
+            // 모든 텍스트 데이터를 setState로 업데이트
+            setState(() {
+              pageTexts = allTexts;
+            });
+          } else {
+            print('Alternative text URLs list is empty');
+          }
         } else {
-          print('Alternative text URLs list is empty');
+          print(
+              'Failed to fetch alternative text URLs: ${response.statusCode}');
+        }
+      }
+      // 2. lectureFileId가 없고 colonFileId가 제공된 경우 처리
+      else if (colonFileId != null) {
+        print('Using colonFileId to fetch alternative text URLs');
+
+        // colonFileId로 대체 텍스트 URL 리스트 가져오기
+        var url = '${API.baseUrl}/api/get-alt-url/$colonFileId';
+        var response = await http.get(Uri.parse(url));
+
+        if (response.statusCode == 200) {
+          // JSON 응답을 디코딩하여 alternative_text_urls 리스트 추출
+          var jsonResponse = jsonDecode(response.body);
+          final List<dynamic> alternativeTextUrls =
+              jsonResponse['alternative_text_urls'];
+
+          if (alternativeTextUrls.isNotEmpty) {
+            Map<int, String> allTexts = {};
+
+            // 각 URL에서 텍스트 데이터를 가져와 페이지별로 저장
+            for (int urlIndex = 0;
+                urlIndex < alternativeTextUrls.length;
+                urlIndex++) {
+              final textResponse =
+                  await http.get(Uri.parse(alternativeTextUrls[urlIndex]));
+
+              if (textResponse.statusCode == 200) {
+                // URL에서 받은 텍스트를 페이지에 대응하여 저장
+                final text = utf8.decode(textResponse.bodyBytes);
+                allTexts[urlIndex + 1] = text;
+              } else {
+                print('Failed to fetch text file from URL $urlIndex');
+              }
+            }
+
+            // 모든 텍스트 데이터를 setState로 업데이트
+            setState(() {
+              pageTexts = allTexts;
+            });
+          } else {
+            print('Alternative text URLs list is empty');
+          }
+        } else {
+          print('Failed to fetch alternative text URLs using colonFileId');
         }
       } else {
-        print('Failed to fetch alternative text URLs: ${response.statusCode}');
+        // lectureFileId와 colonFileId가 둘 다 제공되지 않은 경우 처리
+        print('Neither lectureFileId nor colonFileId is provided');
       }
-    } 
-    // 2. lectureFileId가 없고 colonFileId가 제공된 경우 처리
-    else if (colonFileId != null) {
-      print('Using colonFileId to fetch alternative text URLs');
-      
-      // colonFileId로 대체 텍스트 URL 리스트 가져오기
-      var url = '${API.baseUrl}/api/get-alt-url/$colonFileId';
-      var response = await http.get(Uri.parse(url));
-
-      if (response.statusCode == 200) {
-        // JSON 응답을 디코딩하여 alternative_text_urls 리스트 추출
-        var jsonResponse = jsonDecode(response.body);
-        final List<dynamic> alternativeTextUrls = jsonResponse['alternative_text_urls'];
-
-        if (alternativeTextUrls.isNotEmpty) {
-          Map<int, String> allTexts = {};
-
-          // 각 URL에서 텍스트 데이터를 가져와 페이지별로 저장
-          for (int urlIndex = 0; urlIndex < alternativeTextUrls.length; urlIndex++) {
-            final textResponse = await http.get(Uri.parse(alternativeTextUrls[urlIndex]));
-
-            if (textResponse.statusCode == 200) {
-              // URL에서 받은 텍스트를 페이지에 대응하여 저장
-              final text = utf8.decode(textResponse.bodyBytes);
-              allTexts[urlIndex + 1] = text;
-            } else {
-              print('Failed to fetch text file from URL $urlIndex');
-            }
-          }
-
-          // 모든 텍스트 데이터를 setState로 업데이트
-          setState(() {
-            pageTexts = allTexts;
-          });
-        } else {
-          print('Alternative text URLs list is empty');
-        }
-      } else {
-        print('Failed to fetch alternative text URLs using colonFileId');
-      }
-    } else {
-      // lectureFileId와 colonFileId가 둘 다 제공되지 않은 경우 처리
-      print('Neither lectureFileId nor colonFileId is provided');
+    } catch (e) {
+      print('Error occurred: $e');
     }
-  } catch (e) {
-    print('Error occurred: $e');
   }
-}
-
-
 
   // Future<String> fetchRecordUrl(int colonFileId) async {
   //   try {
@@ -719,7 +893,13 @@ Future<void> loadPageTexts({int? lectureFileId, int? colonFileId}) async {
 
   Future<void> _updateRecordTableWithColonId(
       int? lecturefileId, int colonfileId) async {
-    final updateUrl = '${API.baseUrl}/api/update-record-table';
+    // lecturefileId가 null이 아닌지 확인
+    if (lecturefileId == null) {
+      print('에러 : lecturefileId가 null임');
+      return; // 업데이트 요청을 진행하지 않음
+    }
+
+    final updateUrl = '${API.baseUrl}/api/update-record-table2';
     final updateBody = {
       'lecturefile_id': lecturefileId,
       'colonfile_id': colonfileId,
@@ -736,7 +916,7 @@ Future<void> loadPageTexts({int? lectureFileId, int? colonFileId}) async {
         print('Record table updated successfully with colon file ID');
       } else {
         print('Failed to update record table: ${updateResponse.statusCode}');
-        print(updateResponse.body);
+        print('Response body: ${updateResponse.body}');
       }
     } catch (e) {
       print('Error updating record table: $e');
@@ -770,124 +950,125 @@ Future<void> loadPageTexts({int? lectureFileId, int? colonFileId}) async {
   }
 
   // 콜론 생성 다이얼로그 함수
-void showColonCreatedDialog(
-  BuildContext context,
-  String folderName,
-  String noteName,
-  String lectureName,
-  String fileUrl,
-  int? lectureFileId,
-  int colonFileId) {
-  final userProvider = Provider.of<UserProvider>(context, listen: false);
-  final userKey = userProvider.user?.userKey;
-  final theme = Theme.of(context);
+  void showColonCreatedDialog(
+      BuildContext context,
+      String folderName,
+      String noteName,
+      String lectureName,
+      String fileUrl,
+      int? lectureFileId,
+      int colonFileId) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userKey = userProvider.user?.userKey;
+    final theme = Theme.of(context);
 
-  if (userKey != null) {
-    showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          backgroundColor: theme.scaffoldBackgroundColor,
-          title: Column(
-            children: [
-              Text(
-                '콜론이 생성되었습니다.',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSecondary,
-                  fontWeight: FontWeight.bold,
+    if (userKey != null) {
+      showDialog(
+        context: context,
+        builder: (BuildContext dialogContext) {
+          return AlertDialog(
+            backgroundColor: theme.scaffoldBackgroundColor,
+            title: Column(
+              children: [
+                Text(
+                  '콜론이 생성되었습니다.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSecondary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '폴더 이름: $folderName (:)', // 기본폴더 대신 folderName 사용
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.surfaceBright,
-                  fontWeight: FontWeight.bold,
+                const SizedBox(height: 4),
+                Text(
+                  '폴더 이름: $folderName (:)', // 기본폴더 대신 folderName 사용
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.surfaceBright,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '으로 이동하시겠습니까?',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSecondary,
-                  fontWeight: FontWeight.bold,
+                const SizedBox(height: 4),
+                Text(
+                  '으로 이동하시겠습니까?',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSecondary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
+              ],
+            ),
+            actions: <Widget>[
+              Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      // Expanded로 감싸서 오버플로우 방지
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.of(dialogContext).pop();
+                        },
+                        child: Text(
+                          '취소',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.tertiary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      // Expanded로 감싸서 오버플로우 방지
+                      child: TextButton(
+                        onPressed: () async {
+                          Navigator.of(dialogContext).pop();
+
+                          // `ColonPage`로 이동전 콜론 정보 가져오기
+                          var colonDetails =
+                              await _fetchColonDetails(colonFileId);
+
+                          await _insertColonFileIdToAltTable(
+                              widget.lecturefileId ?? -1, colonFileId);
+
+                          //ColonFiles에 folder_id로 폴더 이름 가져오기
+                          var colonFolderName = await _fetchColonFolderName(
+                              colonDetails['folder_id']);
+
+                          // 다이얼로그가 닫힌 후에 네비게이션을 실행
+                          Future.delayed(const Duration(milliseconds: 200), () {
+                            _navigateToColonPage(
+                              context,
+                              colonFolderName,
+                              colonDetails['file_name'],
+                              colonDetails['lecture_name'],
+                              colonDetails['created_at'],
+                              colonDetails['file_url'],
+                              colonFileId,
+                            );
+                          });
+                        },
+                        child: Text(
+                          '확인',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSecondary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
-          ),
-          actions: <Widget>[
-            Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Expanded(  // Expanded로 감싸서 오버플로우 방지
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.of(dialogContext).pop();
-                      },
-                      child: Text(
-                        '취소',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.tertiary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(  // Expanded로 감싸서 오버플로우 방지
-                    child: TextButton(
-                      onPressed: () async {
-                        Navigator.of(dialogContext).pop();
-
-                        // `ColonPage`로 이동전 콜론 정보 가져오기
-                        var colonDetails = await _fetchColonDetails(colonFileId);
-
-                        await _insertColonFileIdToAltTable(
-                            widget.lecturefileId ?? -1, colonFileId);
-
-                        //ColonFiles에 folder_id로 폴더 이름 가져오기
-                        var colonFolderName = await _fetchColonFolderName(
-                            colonDetails['folder_id']);
-
-                        // 다이얼로그가 닫힌 후에 네비게이션을 실행
-                        Future.delayed(const Duration(milliseconds: 200), () {
-                          _navigateToColonPage(
-                            context,
-                            colonFolderName,
-                            colonDetails['file_name'],
-                            colonDetails['lecture_name'],
-                            colonDetails['created_at'],
-                            colonDetails['file_url'],
-                            colonFileId,
-                          );
-                        });
-                      },
-                      child: Text(
-                        '확인',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSecondary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  } else {
-    print('User Key is null, cannot create colon folder.');
+          );
+        },
+      );
+    } else {
+      print('User Key is null, cannot create colon folder.');
+    }
   }
-}
-
-
 
   Future<void> _insertColonFileIdToAltTable(
       int lecturefileId, int colonFileId) async {
@@ -917,7 +1098,7 @@ void showColonCreatedDialog(
   //분리된 강의 스크립트를 sql에서 찾아옴
   Future<List<String>> fetchRecordUrls(int? lectureFileId) async {
     final response = await http.get(Uri.parse(
-        '${API.baseUrl}/api/get-record-urls?lecturefileId=$lectureFileId'));
+        '${API.baseUrl}/api/get-upgraderecord-urls?lecturefileId=$lectureFileId'));
 
     if (response.statusCode == 200) {
       final jsonResponse = jsonDecode(response.body);
@@ -1103,7 +1284,7 @@ void showColonCreatedDialog(
         print('Error loading script text: $e');
       }
     }
-    print('Loaded script texts: $scriptTexts');
+    // print('Loaded script texts: $scriptTexts');
 
     // 각 페이지별 스크립트 분할 작업
     Map<String, List<String>> pageScripts =
@@ -1129,22 +1310,21 @@ void showColonCreatedDialog(
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => FolderFilesScreen(
-                    folderName: widget.folderName,
-                    folderId: widget.lectureFolderId!,
-                    folderType: 'lecture',
-                  ),
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => FolderFilesScreen(
+                  folderName: widget.folderName,
+                  folderId: widget.lectureFolderId!,
+                  folderType: 'lecture',
                 ),
-              );
-            }
-          );
+              ),
+            );
+          });
         }
-
       },
       child: Scaffold(
+        resizeToAvoidBottomInset: true,
         backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(toolbarHeight: 0),
         body: SingleChildScrollView(
@@ -1183,9 +1363,9 @@ void showColonCreatedDialog(
                       child: Text(
                         _recordingState == RecordingState.initial ? '취소' : '종료',
                         style: theme.textTheme.bodyLarge?.copyWith(
-                        color: theme.colorScheme.tertiary,
+                          color: theme.colorScheme.tertiary,
+                        ),
                       ),
-                                        ),
                     ),
                   ],
                 ),
@@ -1199,25 +1379,25 @@ void showColonCreatedDialog(
                     Text(
                       '폴더 분류 > ${widget.folderName}',
                       style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSecondary,
+                        color: theme.colorScheme.onSecondary,
+                      ),
                     ),
-                  ),
                   ],
                 ),
                 const ResponsiveSizedBox(height: 5),
                 Text(
                   widget.noteName,
                   style: theme.textTheme.headlineSmall?.copyWith(
-                  color: theme.colorScheme.onSecondary,
-                  fontWeight: FontWeight.bold,
-                ),
+                    color: theme.colorScheme.onSecondary,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const ResponsiveSizedBox(height: 5),
                 Text(
                   '강의 자료: ${widget.lectureName}',
                   style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSecondary,
-                ),
+                    color: theme.colorScheme.onSecondary,
+                  ),
                 ),
                 if (_recordingState == RecordingState.recorded &&
                     _createdAt != null)
@@ -1227,9 +1407,9 @@ void showColonCreatedDialog(
                       const ResponsiveSizedBox(height: 5),
                       Text(
                         _formatDate(_createdAt!),
-                         style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSecondary,
-                          ),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSecondary,
+                        ),
                       ),
                     ],
                   ),
@@ -1302,7 +1482,6 @@ void showColonCreatedDialog(
                             backgroundColor: Colors.grey,
                           ),
                           const SizedBox(width: 2),
-                          
                           ClickButton(
                             text: _isColonCreated ? '콜론(:) 이동' : '콜론 생성(:)',
                             backgroundColor:
@@ -1343,6 +1522,8 @@ void showColonCreatedDialog(
                                   var existColon = jsonResponse['existColon'];
 
                                   if (existColon == null) {
+                                    print("콜론 없음");
+
                                     int colonFileId = await createColonFolder(
                                         "${widget.folderName} (:)",
                                         "${widget.noteName} (:)",
@@ -1353,8 +1534,6 @@ void showColonCreatedDialog(
 
                                     if (colonFileId != -1) {
                                       await updateLectureFileWithColonId(
-                                          widget.lecturefileId, colonFileId);
-                                      await _updateRecordTableWithColonId(
                                           widget.lecturefileId, colonFileId);
                                       var colonDetails =
                                           await _fetchColonDetails(colonFileId);
@@ -1367,6 +1546,24 @@ void showColonCreatedDialog(
                                           colonDetails['file_name'],
                                           colonDetails['file_url'],
                                           progressNotifier);
+
+                                      // 자막 업그레이드 시작
+                                      if (widget.keywords != null &&
+                                          widget.keywords!.isNotEmpty) {
+                                        print("자막 업그레이드 시작");
+
+                                        await processTranscripts(
+                                            widget.lecturefileId!,
+                                            widget.keywords!);
+                                      } else {
+                                        print('오류 : 키워드가 안 들어옴');
+                                      }
+                                      print("자막 업그레이드 끝");
+
+                                      await _updateRecordTableWithColonId(
+                                          widget.lecturefileId, colonFileId);
+
+                                      // 자막 업그레이드 끝
 
                                       // 강의자료 대체텍스트, 스크립트 덩어리들 load
                                       // gpt에게 대체텍스트 & 스크립트 보내서 스크립트를 페이지별로 분할
@@ -1427,7 +1624,8 @@ void showColonCreatedDialog(
                               onPageChanged: (page) {
                                 setState(() {
                                   _currentPage = page;
-                                  print('Current Page: $_currentPage'); // 페이지 전환 시 로그
+                                  print(
+                                      'Current Page: $_currentPage'); // 페이지 전환 시 로그
                                 });
                               },
                             ),
@@ -1445,9 +1643,9 @@ void showColonCreatedDialog(
                                         '페이지 $_currentPage의 텍스트가 없습니다.'
                                     : '텍스트가 없습니다.',
                                 style: theme.textTheme.bodyMedium?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.normal,
-                              ),
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.normal,
+                                ),
                               ),
                             ),
                           ),
@@ -1462,10 +1660,10 @@ void showColonCreatedDialog(
                       Text(
                         _recognizedText + ' ' + _interimText,
                         style: theme.textTheme.bodyLarge?.copyWith(
-                        color: theme.colorScheme.onTertiary,
-                        fontWeight: FontWeight.w500,
-                        height: 1.8,
-                      ),
+                          color: theme.colorScheme.onTertiary,
+                          fontWeight: FontWeight.w500,
+                          height: 1.8,
+                        ),
                       ),
                       const ResponsiveSizedBox(height: 20),
                     ],
@@ -1477,10 +1675,10 @@ void showColonCreatedDialog(
                       Text(
                         _recognizedText,
                         style: theme.textTheme.bodyLarge?.copyWith(
-                        color: theme.colorScheme.onTertiary,
-                        fontWeight: FontWeight.w500,
-                        height: 1.8,
-                      ),
+                          color: theme.colorScheme.onTertiary,
+                          fontWeight: FontWeight.w500,
+                          height: 1.8,
+                        ),
                       ),
                       const ResponsiveSizedBox(height: 20),
                     ],
@@ -1492,9 +1690,7 @@ void showColonCreatedDialog(
         bottomNavigationBar:
             buildBottomNavigationBar(context, _selectedIndex, _onItemTapped),
       ),
-
     );
-
 
     // return WillPopScope(
     //   onWillPop: () async {

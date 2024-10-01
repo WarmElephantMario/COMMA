@@ -48,7 +48,7 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
   Future<void> fetchFiles() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userKey = userProvider.user?.userKey;
-    final disType = userProvider.user?.dis_type; 
+    final disType = userProvider.user?.dis_type;
 
     if (userKey != null) {
       final response = await http.get(Uri.parse(
@@ -63,7 +63,7 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
               'file_name': file['file_name'] ?? 'Unknown',
               'file_url': file['file_url'] ?? '',
               'created_at': file['created_at'] ?? '',
-              'id': file['id'], 
+              'id': file['id'],
               'folder_id': file['folder_id'] ?? 0,
               'lecture_name': file['lecture_name'] ?? 'Unknown Lecture',
             };
@@ -251,7 +251,7 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return PopScope(
       canPop: true,
       onPopInvokedWithResult: (didPop, result) {

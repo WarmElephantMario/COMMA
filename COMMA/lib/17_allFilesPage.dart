@@ -96,7 +96,7 @@ class _AllFilesPageState extends State<AllFilesPage> {
 
       if (response.statusCode == 200) {
         final String content = utf8.decode(response.bodyBytes);
-        return content.split(','); 
+        return content.split(',');
       } else {
         print('Failed to fetch keywords from URL');
         return [];
@@ -110,9 +110,9 @@ class _AllFilesPageState extends State<AllFilesPage> {
   void fetchFolderAndNavigate(BuildContext context, int folderId,
       String fileType, Map<String, dynamic> file) async {
     try {
-      final lectureFileId = file['id']; 
+      final lectureFileId = file['id'];
       final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final userDisType = userProvider.user?.dis_type; 
+      final userDisType = userProvider.user?.dis_type;
 
       final existLectureResponse = await http.get(
           Uri.parse('${API.baseUrl}/api/checkExistLecture/$lectureFileId'));
@@ -138,11 +138,11 @@ class _AllFilesPageState extends State<AllFilesPage> {
                   fileURL: file['file_url'] ??
                       'https://defaulturl.com/defaultfile.txt',
                   type: userDisType!,
-                  selectedFolder: data['folder_name'], 
+                  selectedFolder: data['folder_name'],
                   noteName: file['file_name'] ?? 'Unknown Note',
                   responseUrl: file['alternative_text_url'] ??
-                      'https://defaulturl.com/defaultfile.txt', 
-                  keywords: keywords, 
+                      'https://defaulturl.com/defaultfile.txt',
+                  keywords: keywords,
                 ),
               ),
             );
@@ -489,14 +489,14 @@ class _AllFilesPageState extends State<AllFilesPage> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         iconTheme: IconThemeData(color: theme.colorScheme.onTertiary),
         title: Text(
           widget.fileType == 'lecture' ? '전체 강의 파일' : '전체 콜론 파일',
           style: theme.textTheme.titleLarge?.copyWith(
-              color: theme.colorScheme.onTertiary,
-              fontWeight: FontWeight.w600),
+              color: theme.colorScheme.onTertiary, fontWeight: FontWeight.w600),
         ),
         backgroundColor: theme.scaffoldBackgroundColor,
       ),
@@ -524,8 +524,8 @@ class _AllFilesPageState extends State<AllFilesPage> {
                 return GestureDetector(
                   onTap: () {
                     print('File $fileName is clicked');
-                    fetchFolderAndNavigate(context, file['folder_id'],
-                        'lecture', file);
+                    fetchFolderAndNavigate(
+                        context, file['folder_id'], 'lecture', file);
                   },
                   child: LectureExample(
                     lectureName: file['file_name'] ?? 'Unknown',
