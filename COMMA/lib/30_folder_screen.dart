@@ -281,4 +281,3 @@ class _FolderScreenState extends State<FolderScreen> {
     );
   }
 }
-

@@ -34,7 +34,6 @@ class ColonPage extends StatefulWidget {
       this.colonFileId,
       this.folderId})
       : super(key: key);
-  
 
   @override
   _ColonPageState createState() => _ColonPageState();
@@ -60,9 +59,10 @@ class _ColonPageState extends State<ColonPage> {
       colonFileId = widget.colonFileId!;
       _loadFile();
       _loadPageScripts();
-         WidgetsBinding.instance?.addPostFrameCallback((_) async {
-      await loadPageTexts(colonFileId: widget.colonFileId); // widget.lectureFileId로 수정
-    });
+      WidgetsBinding.instance?.addPostFrameCallback((_) async {
+        await loadPageTexts(
+            colonFileId: widget.colonFileId); // widget.lectureFileId로 수정
+      });
       // _loadAltTableUrl(); // Alt_table URL 로드
       _fetchColonType(); // 콜론 타입 로드
     } else {
@@ -78,115 +78,105 @@ class _ColonPageState extends State<ColonPage> {
       _selectedIndex = index;
     });
   }
+
   Future<void> loadPageTexts({int? lectureFileId, int? colonFileId}) async {
-  try {
-    // 1. lectureFileId가 있는 경우 먼저 처리
-    if (lectureFileId != null) {
-      print('Using lectureFileId to fetch alternative text URLs');
-      
-      // lectureFileId로 대체 텍스트 URL 리스트 가져오기
-      final response = await http.get(Uri.parse(
-          '${API.baseUrl}/api/get-alternative-text-urls?lecturefileId=$lectureFileId'));
+    try {
+      // 1. lectureFileId가 있는 경우 먼저 처리
+      if (lectureFileId != null) {
+        print('Using lectureFileId to fetch alternative text URLs');
 
-      if (response.statusCode == 200) {
-        // JSON 응답을 디코딩하여 alternative_text_urls 리스트 추출
-        final fileData = jsonDecode(response.body);
-        final List<dynamic> alternativeTextUrls = fileData['alternative_text_urls'];
+        // lectureFileId로 대체 텍스트 URL 리스트 가져오기
+        final response = await http.get(Uri.parse(
+            '${API.baseUrl}/api/get-alternative-text-urls?lecturefileId=$lectureFileId'));
 
-        if (alternativeTextUrls.isNotEmpty) {
-          Map<int, String> allTexts = {};
-          
-          // 각 URL에서 텍스트 데이터를 가져와 페이지별로 저장
-          for (int urlIndex = 0; urlIndex < alternativeTextUrls.length; urlIndex++) {
-            final textResponse = await http.get(Uri.parse(alternativeTextUrls[urlIndex]));
+        if (response.statusCode == 200) {
+          // JSON 응답을 디코딩하여 alternative_text_urls 리스트 추출
+          final fileData = jsonDecode(response.body);
+          final List<dynamic> alternativeTextUrls =
+              fileData['alternative_text_urls'];
 
-            if (textResponse.statusCode == 200) {
-              // URL에서 받은 텍스트를 페이지에 대응하여 저장
-              final text = utf8.decode(textResponse.bodyBytes);
-              allTexts[urlIndex + 1] = text;
-            } else {
-              print('Failed to fetch text file from URL $urlIndex');
+          if (alternativeTextUrls.isNotEmpty) {
+            Map<int, String> allTexts = {};
+
+            // 각 URL에서 텍스트 데이터를 가져와 페이지별로 저장
+            for (int urlIndex = 0;
+                urlIndex < alternativeTextUrls.length;
+                urlIndex++) {
+              final textResponse =
+                  await http.get(Uri.parse(alternativeTextUrls[urlIndex]));
+
+              if (textResponse.statusCode == 200) {
+                // URL에서 받은 텍스트를 페이지에 대응하여 저장
+                final text = utf8.decode(textResponse.bodyBytes);
+                allTexts[urlIndex + 1] = text;
+              } else {
+                print('Failed to fetch text file from URL $urlIndex');
+              }
             }
-          }
 
-          // 모든 텍스트 데이터를 setState로 업데이트
-          setState(() {
-            pageTexts = allTexts;
-          });
+            // 모든 텍스트 데이터를 setState로 업데이트
+            setState(() {
+              pageTexts = allTexts;
+            });
+          } else {
+            print('Alternative text URLs list is empty');
+          }
         } else {
-          print('Alternative text URLs list is empty');
+          print(
+              'Failed to fetch alternative text URLs: ${response.statusCode}');
+        }
+      }
+      // 2. lectureFileId가 없고 colonFileId가 제공된 경우 처리
+      else if (colonFileId != null) {
+        print('Using colonFileId to fetch alternative text URLs');
+
+        // colonFileId로 대체 텍스트 URL 리스트 가져오기
+        var url = '${API.baseUrl}/api/get-alt-url/$colonFileId';
+        var response = await http.get(Uri.parse(url));
+
+        if (response.statusCode == 200) {
+          // JSON 응답을 디코딩하여 alternative_text_urls 리스트 추출
+          var jsonResponse = jsonDecode(response.body);
+          final List<dynamic> alternativeTextUrls =
+              jsonResponse['alternative_text_urls'];
+
+          if (alternativeTextUrls.isNotEmpty) {
+            Map<int, String> allTexts = {};
+
+            // 각 URL에서 텍스트 데이터를 가져와 페이지별로 저장
+            for (int urlIndex = 0;
+                urlIndex < alternativeTextUrls.length;
+                urlIndex++) {
+              final textResponse =
+                  await http.get(Uri.parse(alternativeTextUrls[urlIndex]));
+
+              if (textResponse.statusCode == 200) {
+                // URL에서 받은 텍스트를 페이지에 대응하여 저장
+                final text = utf8.decode(textResponse.bodyBytes);
+                allTexts[urlIndex + 1] = text;
+              } else {
+                print('Failed to fetch text file from URL $urlIndex');
+              }
+            }
+
+            // 모든 텍스트 데이터를 setState로 업데이트
+            setState(() {
+              pageTexts = allTexts;
+            });
+          } else {
+            print('Alternative text URLs list is empty');
+          }
+        } else {
+          print('Failed to fetch alternative text URLs using colonFileId');
         }
       } else {
-        print('Failed to fetch alternative text URLs: ${response.statusCode}');
+        // lectureFileId와 colonFileId가 둘 다 제공되지 않은 경우 처리
+        print('Neither lectureFileId nor colonFileId is provided');
       }
-    } 
-    // 2. lectureFileId가 없고 colonFileId가 제공된 경우 처리
-    else if (colonFileId != null) {
-      print('Using colonFileId to fetch alternative text URLs');
-      
-      // colonFileId로 대체 텍스트 URL 리스트 가져오기
-      var url = '${API.baseUrl}/api/get-alt-url/$colonFileId';
-      var response = await http.get(Uri.parse(url));
-
-      if (response.statusCode == 200) {
-        // JSON 응답을 디코딩하여 alternative_text_urls 리스트 추출
-        var jsonResponse = jsonDecode(response.body);
-        final List<dynamic> alternativeTextUrls = jsonResponse['alternative_text_urls'];
-
-        if (alternativeTextUrls.isNotEmpty) {
-          Map<int, String> allTexts = {};
-
-          // 각 URL에서 텍스트 데이터를 가져와 페이지별로 저장
-          for (int urlIndex = 0; urlIndex < alternativeTextUrls.length; urlIndex++) {
-            final textResponse = await http.get(Uri.parse(alternativeTextUrls[urlIndex]));
-
-            if (textResponse.statusCode == 200) {
-              // URL에서 받은 텍스트를 페이지에 대응하여 저장
-              final text = utf8.decode(textResponse.bodyBytes);
-              allTexts[urlIndex + 1] = text;
-            } else {
-              print('Failed to fetch text file from URL $urlIndex');
-            }
-          }
-
-          // 모든 텍스트 데이터를 setState로 업데이트
-          setState(() {
-            pageTexts = allTexts;
-          });
-        } else {
-          print('Alternative text URLs list is empty');
-        }
-      } else {
-        print('Failed to fetch alternative text URLs using colonFileId');
-      }
-    } else {
-      // lectureFileId와 colonFileId가 둘 다 제공되지 않은 경우 처리
-      print('Neither lectureFileId nor colonFileId is provided');
+    } catch (e) {
+      print('Error occurred: $e');
     }
-  } catch (e) {
-    print('Error occurred: $e');
   }
-}
-
-
-  // Future<void> _loadAltTableUrl() async {
-  //   try {
-  //     String url = await _fetchAltTableUrl(colonFileId);
-  //     final response = await http.get(Uri.parse(url));
-  //     if (response.statusCode == 200) {
-  //       final textLines = utf8.decode(response.bodyBytes).split('//');
-  //       setState(() {
-  //         pageTexts = {
-  //           for (int i = 0; i < textLines.length; i++) i + 1: textLines[i]
-  //         };
-  //       });
-  //     } else {
-  //       print('Failed to fetch text file: ${response.statusCode}');
-  //     }
-  //   } catch (e) {
-  //     print('Error loading alternative text URL: $e');
-  //   }
-  // }
 
   Future<void> _fetchColonType() async {
     try {
@@ -199,7 +189,7 @@ class _ColonPageState extends State<ColonPage> {
     }
   }
 
-  Future<Map<int, List<String>>> fetchPageScripts(int colonFileId) async {
+  Future<Map<int, List<String>>> fetchPageScripts(int? colonFileId) async {
     final apiUrl =
         '${API.baseUrl}/api/get-page-scripts?colonfile_id=$colonFileId';
 
@@ -225,7 +215,8 @@ class _ColonPageState extends State<ColonPage> {
 
   Future<void> _loadPageScripts() async {
     try {
-      pageScripts = await fetchPageScripts(colonFileId);
+      pageScripts = await fetchPageScripts(widget.colonFileId);
+      print('Loaded page scripts: $pageScripts'); // 로드된 스크립트 출력
       setState(() {
         isLoading = false;
       });
@@ -294,19 +285,6 @@ class _ColonPageState extends State<ColonPage> {
     });
   }
 
-  // // Alt_table의 특정 colonfile_id 행에서 URL 가져오기
-  // Future<String> _fetchAltTableUrl(int colonFileId) async {
-  //   var url = '${API.baseUrl}/api/get-alt-url/$colonFileId';
-  //   var response = await http.get(Uri.parse(url));
-
-  //   if (response.statusCode == 200) {
-  //     var jsonResponse = jsonDecode(response.body);
-  //     return jsonResponse['alternative_text_url'];
-  //   } else {
-  //     throw Exception('Failed to load alternative text URL');
-  //   }
-  // }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -373,9 +351,9 @@ class _ColonPageState extends State<ColonPage> {
                                 },
                                 child: Text(
                                   '종료',
-                                 style: theme.textTheme.bodyLarge?.copyWith(
-                                  color: theme.colorScheme.tertiary,
-                                ),
+                                  style: theme.textTheme.bodyLarge?.copyWith(
+                                    color: theme.colorScheme.tertiary,
+                                  ),
                                 ),
                               ),
                             ],
@@ -390,8 +368,8 @@ class _ColonPageState extends State<ColonPage> {
                               Text(
                                 '폴더 분류 > ${widget.folderName}', // 폴더 이름 사용
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSecondary,
-                              ),
+                                  color: theme.colorScheme.onSecondary,
+                                ),
                               ),
                             ],
                           ),
@@ -402,7 +380,7 @@ class _ColonPageState extends State<ColonPage> {
                               color: theme.colorScheme.onSecondary,
                               fontWeight: FontWeight.bold,
                             ),
-                            ),
+                          ),
                           const ResponsiveSizedBox(height: 5),
                           Text(
                             '강의 자료 : ${widget.lectureName}',
@@ -410,26 +388,28 @@ class _ColonPageState extends State<ColonPage> {
                               color: theme.colorScheme.onSecondary,
                             ),
                           ),
-                          const ResponsiveSizedBox(height: 5), // 추가된 날짜와 시간을 위한 공간
+                          const ResponsiveSizedBox(
+                              height: 5), // 추가된 날짜와 시간을 위한 공간
                           Text(
                             _formatDate(
                                 widget.createdAt), // 데이터베이스에서 가져온 생성 날짜 및 시간 사용
-                           style: theme.textTheme.bodySmall?.copyWith(
+                            style: theme.textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.onSecondary,
                             ),
                           ),
-                          const SizedBox(height: 20), // 강의 자료 밑에 여유 공간 추가
-                          Row(
-                            children: [
-                              ClickButton(
-                                text: '콜론(:) 다운하기',
-                                onPressed: () {},
-                                // width: MediaQuery.of(context).size.width * 0.3,
-                                // height: 40.0,
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 10), // 강의 자료 밑에 여유 공간 추가
+                          // 콜론(:) 다운하기 버튼 없애 놓음
+                          // Row(
+                          //   children: [
+                          //     ClickButton(
+                          //       text: '콜론(:) 다운하기',
+                          //       onPressed: () {},
+                          //       // width: MediaQuery.of(context).size.width * 0.3,
+                          //       // height: 40.0,
+                          //     ),
+                          //   ],
+                          // ),
+                          const SizedBox(height: 10),
                         ],
                       ),
                     ),
@@ -473,9 +453,10 @@ class _ColonPageState extends State<ColonPage> {
                                         child: Text(
                                           pageTexts[pageIndex + 1] ??
                                               '텍스트가 없습니다.',
-                                           style: theme.textTheme.bodyMedium?.copyWith(
-                                              color: Colors.white,
-                                            ),
+                                          style: theme.textTheme.bodyMedium
+                                              ?.copyWith(
+                                            color: Colors.white,
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -554,7 +535,8 @@ class _ColonPageState extends State<ColonPage> {
                                     child: Center(
                                       child: Text(
                                         pageTexts[1] ?? '이미지의 텍스트가 없습니다.',
-                                         style: theme.textTheme.bodyMedium?.copyWith(
+                                        style: theme.textTheme.bodyMedium
+                                            ?.copyWith(
                                           color: Colors.white,
                                         ),
                                       ),
@@ -584,9 +566,11 @@ class _ColonPageState extends State<ColonPage> {
                                             const EdgeInsets.only(bottom: 8.0),
                                         child: Text(
                                           text,
-                                           style: theme.textTheme.bodyMedium?.copyWith(
-                                              color: theme.colorScheme.onSecondary,
-                                            ),
+                                          style: theme.textTheme.bodyMedium
+                                              ?.copyWith(
+                                            color:
+                                                theme.colorScheme.onSecondary,
+                                          ),
                                         ),
                                       );
                                     }).toList(),

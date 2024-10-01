@@ -855,8 +855,7 @@ app.get('/api/get-alternative-text-urls', (req, res) => {
     });
 });
 
-
-// 분리된 강의 스크립트 URL을 가져오기
+// 강의 파일 스크립트 URL을 가져오기
 app.get('/api/get-record-urls', (req, res) => {
     const { lecturefileId } = req.query;
     console.log(`Received lecturefileId: ${lecturefileId}`);
@@ -877,13 +876,36 @@ app.get('/api/get-record-urls', (req, res) => {
     });
 });
 
+
+
+// 분리된 강의 스크립트 URL을 가져오기
+app.get('/api/get-upgraderecord-urls', (req, res) => {
+    const { lecturefileId } = req.query;
+    console.log(`Received lecturefileId: ${lecturefileId}`);
+
+    const sql = `
+        SELECT record_url
+        FROM Record_table2
+        WHERE lecturefile_id = ?
+    `;
+
+    db.query(sql, [lecturefileId], (err, results) => {
+        if (err) {
+            return res.status(500).json({ success: false, error: err.message });
+        }
+
+        const recordUrls = results.map(record => record.record_url);
+        res.status(200).json({ record_urls: recordUrls });
+    });
+});
+
 // 분리된 강의 스크립트의 page 값 업데이트해주기
 app.post('/api/update-record-page', (req, res) => {
     const { recordUrl, page } = req.body;
     console.log(`Updating record URL: ${recordUrl} with page: ${page}`);
 
     const sql = `
-        UPDATE Record_table
+        UPDATE Record_table2
         SET page = ?
         WHERE record_url = ?
     `;
@@ -962,11 +984,60 @@ app.post('/api/insertRecordData', (req, res) => {
     });
 });
 
+// 자막 업그레이드 시작
 
-// 콜론 생성 후 Record_table 업데이트
-app.post('/api/update-record-table', (req, res) => {
+// 강의 파일의 전사 URL 가져오기 API
+app.get('/api/get-transcript-urls', (req, res) => {
+    const lecturefileId = req.query.lecturefile_id;
+  
+    if (!lecturefileId) {
+      return res.status(400).json({ message: 'lecturefile_id is required' });
+    }
+  
+    const query = `
+      SELECT record_url 
+      FROM Record_table 
+      WHERE lecturefile_id = ? 
+    `;
+  
+    db.query(query, [lecturefileId], (err, results) => {
+      if (err) {
+        console.error('Error fetching transcript URLs:', err);
+        return res.status(500).json({ message: 'Server error' });
+      }
+  
+      if (results.length === 0) {
+        return res.status(404).json({ message: 'No transcript URLs found' });
+      }
+  
+      const urls = results.map(row => ({ url: row.record_url }));
+      res.status(200).json(urls); // 전사 URL 리스트를 반환
+    });
+  });
+
+// 자막 업그레이드 후 데베에 저장
+app.post('/api/insertUpgradeRecordData', (req, res) => {
+    const { lecturefile_id, colonfile_id, record_url } = req.body;
+
+    if (!lecturefile_id || !record_url) {
+        return res.status(400).json({ success: false, error: 'You must provide lecturefile_id and record_url.' });
+    }
+
+    const sql = 'INSERT INTO Record_table2 (lecturefile_id, colonfile_id, record_url) VALUES (?, ?, ?)';
+    db.query(sql, [lecturefile_id, colonfile_id, record_url], (err, result) => {
+        if (err) {
+            return res.status(500).json({ success: false, error: err.message });
+        }
+        res.json({ success: true, id: result.insertId, lecturefile_id, colonfile_id, record_url });
+    });
+});
+
+
+// 콜론 생성 후 Record_table2 업데이트
+app.post('/api/update-record-table2', (req, res) => {
     const { lecturefile_id, colonfile_id } = req.body;
-    const sql = 'UPDATE Record_table SET colonfile_id = ? WHERE lecturefile_id = ?';
+    const sql = 'UPDATE Record_table2 SET colonfile_id = ? WHERE lecturefile_id = ?';
+    console.log(`lecturefile_id: ${lecturefile_id}, colonfile_id: ${colonfile_id}`);
 
     db.query(sql, [colonfile_id, lecturefile_id], (err, result) => {
         if (err) {
@@ -979,20 +1050,23 @@ app.post('/api/update-record-table', (req, res) => {
 });
 
 
-// Record_Table에서 page, record_url(페이지 스크립트) 가져오기
+// Record_Table2에서 page, record_url(페이지 스크립트) 가져오기
 app.get('/api/get-page-scripts', (req, res) => {
     const colonfile_id = req.query.colonfile_id;
-    const sql = 'SELECT page, record_url FROM Record_table WHERE colonfile_id = ?';
+    const sql = 'SELECT page, record_url FROM Record_table2 WHERE colonfile_id = ?';
 
     db.query(sql, [colonfile_id], (err, results) => {
         if (err) {
             console.error('페이지 스크립트 가져오기 실패:', err);
             res.status(500).send('페이지 스크립트 가져오기 실패');
         } else {
+            console.log("페이지 스크립트 가져오기 성공")
             res.send(results);
         }
     });
 });
+
+// 자막 업그레이드 끝
 
 // 특정 lecturefile_id 행에 colonfile_id 업데이트하기
 app.post('/api/update-alt-table', (req, res) => {

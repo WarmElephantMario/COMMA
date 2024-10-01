@@ -374,9 +374,9 @@ class _LearningPreparationState extends State<LearningPreparation> {
             style: TextStyle(
                 color: theme.colorScheme.onSecondary), // 입력할 때 글자 색상 지정
             onTap: () {
-              if (textController.text == currentName) {
-                textController.clear();
-              }
+         if (textController.text == currentName) {
+              textController.clear();
+            } 
             },
           ),
           actions: <Widget>[
@@ -438,8 +438,8 @@ class _LearningPreparationState extends State<LearningPreparation> {
           mimeType = 'image/png';
           _isPDF = false;
         }
-
-        // Define metadata
+        
+   // Define metadata
         final metadata = SettableMetadata(
           contentType: mimeType,
         );
@@ -527,7 +527,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
     const String apiKey = Env.apiKey;
     final Uri apiUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
 
-    const String basicPrompt= '''
+     const String promptForAlternativeText = '''
     Please convert the content of the following lecture materials into text so that visually impaired individuals can recognize it using a screen reader. 
     Write all the text that is in the lecture materials as IT IS, with any additional description or modification.
     If there is a picture in the lecture material, please generate a alternative text which describes about the picture.
@@ -544,61 +544,11 @@ class _LearningPreparationState extends State<LearningPreparation> {
     7. Write numbers in words to ensure smooth reading. For example, "12번" should be written as "열두번" and "23번째" as "스물세 번째".
     8. For mathematical formulas and symbols, write them out in text form so that they can be read aloud properly by a screen reader. This includes symbols like sigma, square root, alpha, beta, etc.
     9.If mathematical symbols appear, convert them into text form based on your judgment, ensuring that the symbols are not written as they are but transformed into readable text.
-''';
-     const String detailedPrompt = '''
-  Please convert the content of the following lecture materials into text so that visually impaired individuals can recognize it using a screen reader. 
-    Write all the text that is in the lecture materials as IT IS, with any additional description or modification.
-    If there is a picture in the lecture material, please generate a alternative text which describes about the picture.
-    Visually impaired individuals should be able to understand where and what letters or pictures are located in the lecture materials through this text.
-    Please write all descriptions in Korean.
-    Conditions: 
-    1. Write the text included in the lecture materials without any modifications. 
-    2. Write as clearly and concisely as possible.
-    3. When creating alternative text for images, do not indicate the position of the image. Instead, describe the image from top to bottom.
-    4. Determine the type of visual content (table, diagram, graph, or other) and specify the format as [표], [그림], [그래프], etc., followed by the descriptive text.
-      After the description, mark the end with "[표 끝]","[그림 끝]", "[그래프 끝]".
-    5. For each slide, format the text as follows: "이 페이지의 주제는 ~~~입니다."
-    6. Write all text in the slides as continuous prose without special characters that are hard to read aloud. This includes excluding emoticons, emojis, and other symbols that are difficult to read aloud.
-    7. Write numbers in words to ensure smooth reading. For example, "12번" should be written as "열두번" and "23번째" as "스물세 번째".
-    8. For mathematical formulas and symbols, write them out in text form so that they can be read aloud properly by a screen reader. This includes symbols like sigma, square root, alpha, beta, etc.
-    9.If mathematical symbols appear, convert them into text form based on your judgment, ensuring that the symbols are not written as they are but transformed into readable text.
-
+    10. When generating alternative text for images, tables, or graphs, ensure that the description provides enough detail for visually impaired individuals to fully understand the content. Include details such as the structure, data values, trends, and key information to help them grasp the meaning of the table or graph as clearly as possible.
+    11. For tables, graphs, or diagrams, specify the format as [표], [그림], [그래프], etc., followed by the descriptive text. Ensure that the description is detailed enough so that the visually impaired can understand the content as if they were seeing the table or graph themselves. Use words to explain key insights, trends, or important data points in graphs or tables.
+   After the description, mark the end with "[표 끝]", "[그림 끝]", "[그래프 끝]".
   ''';
-
-  /*
-    final String promptForAlternativeText = '''
-    Please convert the content of the following lecture materials into text so that visually impaired individuals can recognize it using a screen reader. 
-    Write all the text that is in the lecture materials as IT IS, with any additional description or modification.
-    If there is a picture in the lecture material, please generate a alternative text which describes about the picture.
-    Visually impaired individuals should be able to understand where and what letters or pictures are located in the lecture materials through this text.
-    Please write all descriptions in Korean.
-    Conditions: 
-    1. Write the text included in the lecture materials without any modifications. 
-    2. Write as clearly and concisely as possible.
-    3. When creating alternative text for images, do not indicate the position of the image. Instead, describe the image from top to bottom.
-    4. Determine the type of visual content (table, diagram, graph, or other) and specify the format as [표], [그림], [그래프], etc., followed by the descriptive text.
-      After the description, mark the end with "[표 끝]","[그림 끝]", "[그래프 끝]".
-    5. For each slide, format the text as follows: "이 페이지의 주제는 ~~~입니다."
-    6. Write all text in the slides as continuous prose without special characters that are hard to read aloud. This includes excluding emoticons, emojis, and other symbols that are difficult to read aloud.
-    7. Write numbers in words to ensure smooth reading. For example, "12번" should be written as "열두번" and "23번째" as "스물세 번째".
-    8. For mathematical formulas and symbols, write them out in text form so that they can be read aloud properly by a screen reader. This includes symbols like sigma, square root, alpha, beta, etc.
-    9.If mathematical symbols appear, convert them into text form based on your judgment, ensuring that the symbols are not written as they are but transformed into readable text.
-    ''';
-  */
-
-  // 기본 설명 또는 자세한 설명 프롬프트 및 토큰 수 선택
-  String promptForAlternativeText;
-  int maxTokens;
-
-  if (isBasicSelected) {
-    promptForAlternativeText = basicPrompt;
-    maxTokens = 500;  // 기본 설명에 대한 최대 토큰 수
-  } else if (isDetailSelected) {
-    promptForAlternativeText = detailedPrompt;
-    maxTokens = 1000;  // 자세한 설명에 대한 최대 토큰 수
-  } else {
-    throw Exception('Neither Basic nor Detailed option is selected.');
-  }
+  
 
     try {
       List<String> allResponses = [];
@@ -622,7 +572,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
           }
         ];
 
-        var data = {"model": "gpt-4o", "messages": messages, "max_tokens": maxTokens};
+        var data = {"model": "gpt-4o", "messages": messages, "max_tokens": 1000};
 
         var apiResponse = await http.post(
           apiUrl,
@@ -1078,37 +1028,6 @@ Widget build(BuildContext context) {
                   ),
                 ),
               ),
-              const ResponsiveSizedBox(height: 15),
-            if (userDisType == 0) ...[
-              Text(
-                '대체텍스트 설명',
-                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: const Color.fromARGB(255, 70, 70, 70),
-                      fontWeight: FontWeight.w200,
-              ),
-              ),
-              CustomRadioButton3(
-                label: '기본 설명',
-                isSelected: isBasicSelected,
-                onChanged: (bool value) {
-                  setState(() {
-                    isBasicSelected = value;
-                    isDetailSelected = !value; // "기본 설명"이 선택되면 "자세한 설명"은 선택 해제
-                  });
-                },
-              ),
-              const ResponsiveSizedBox(height: 16),
-              CustomRadioButton3(
-                label: '자세한 설명',
-                isSelected: isDetailSelected,
-                onChanged: (bool value) {
-                  setState(() {
-                    isDetailSelected = value;
-                    isBasicSelected = !value; // "자세한 설명"이 선택되면 "기본 설명"은 선택 해제
-                  });
-                },
-              ),
-            ],
             ],
           ),
         ),
