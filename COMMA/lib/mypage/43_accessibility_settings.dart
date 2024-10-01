@@ -12,7 +12,7 @@ class AccessibilitySettings extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          '접근성 설정',
+          '화면 모드',
           style: theme.textTheme.headlineSmall?.copyWith(
             color: theme.colorScheme.onSecondary,
           ),
@@ -39,9 +39,9 @@ class AccessibilitySettings extends StatelessWidget {
                 }
               },
               activeColor: theme.colorScheme.primary,
-              fillColor: MaterialStateProperty.resolveWith<Color?>(
+              fillColor: WidgetStateProperty.resolveWith<Color?>(
                 (states) {
-                  if (states.contains(MaterialState.selected)) {
+                  if (states.contains(WidgetState.selected)) {
                     return theme.colorScheme.primary;
                   }
                   return theme.colorScheme.onSecondary;
@@ -66,9 +66,9 @@ class AccessibilitySettings extends StatelessWidget {
                 }
               },
               activeColor: theme.colorScheme.primary,
-              fillColor: MaterialStateProperty.resolveWith<Color?>(
+              fillColor: WidgetStateProperty.resolveWith<Color?>(
                 (states) {
-                  if (states.contains(MaterialState.selected)) {
+                  if (states.contains(WidgetState.selected)) {
                     return theme.colorScheme.primary;
                   }
                   return theme.colorScheme.onSecondary;

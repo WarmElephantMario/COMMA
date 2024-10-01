@@ -10,19 +10,31 @@ class FontSizePage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('글씨 크기 조정', style: theme.textTheme.titleLarge),
+        title: Text(
+          '글씨 크기 조정',
+          style: theme.textTheme.titleLarge?.copyWith(
+            color: theme.colorScheme.onSecondary,
+          ),
+        ),
+        backgroundColor: theme.scaffoldBackgroundColor,
+        iconTheme: IconThemeData(color: theme.colorScheme.onTertiary),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           ListTile(
-            title: Text('보통', style: theme.textTheme.bodySmall),
+            title: Text(
+              '보통',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSecondary,
+              ),
+            ),
             leading: Radio<double>(
               value: 1.0,
               groupValue: fontSizeProvider.scaleFactor,
-              fillColor: MaterialStateProperty.resolveWith<Color>(
-                (Set<MaterialState> states) {
-                  if (states.contains(MaterialState.selected)) {
+              fillColor: WidgetStateProperty.resolveWith<Color>(
+                (Set<WidgetState> states) {
+                  if (states.contains(WidgetState.selected)) {
                     return theme.colorScheme.primary; // 선택된 상태의 색상
                   }
                   return theme.colorScheme.onSecondary; // 선택되지 않은 상태의 색상
@@ -36,13 +48,18 @@ class FontSizePage extends StatelessWidget {
             ),
           ),
           ListTile(
-            title: Text('크게', style: theme.textTheme.bodyMedium),
+            title: Text(
+              '크게',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSecondary,
+              ),
+            ),
             leading: Radio<double>(
               value: 1.3,
               groupValue: fontSizeProvider.scaleFactor,
-              fillColor: MaterialStateProperty.resolveWith<Color>(
-                (Set<MaterialState> states) {
-                  if (states.contains(MaterialState.selected)) {
+              fillColor: WidgetStateProperty.resolveWith<Color>(
+                (Set<WidgetState> states) {
+                  if (states.contains(WidgetState.selected)) {
                     return theme.colorScheme.primary; // 선택된 상태의 색상
                   }
                   return theme.colorScheme.onSecondary; // 선택되지 않은 상태의 색상
@@ -56,13 +73,18 @@ class FontSizePage extends StatelessWidget {
             ),
           ),
           ListTile(
-            title: Text('엄청 크게', style: theme.textTheme.bodyLarge),
+            title: Text(
+              '엄청 크게',
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: theme.colorScheme.onSecondary,
+              ),
+            ),
             leading: Radio<double>(
               value: 1.5,
               groupValue: fontSizeProvider.scaleFactor,
-              fillColor: MaterialStateProperty.resolveWith<Color>(
-                (Set<MaterialState> states) {
-                  if (states.contains(MaterialState.selected)) {
+              fillColor: WidgetStateProperty.resolveWith<Color>(
+                (Set<WidgetState> states) {
+                  if (states.contains(WidgetState.selected)) {
                     return theme.colorScheme.primary; // 선택된 상태의 색상
                   }
                   return theme.colorScheme.onSecondary; // 선택되지 않은 상태의 색상
@@ -80,11 +102,13 @@ class FontSizePage extends StatelessWidget {
     );
   }
 }
+
 class ResponsiveSizedBox extends StatelessWidget {
   final double height;
   final double? width;
 
-  const ResponsiveSizedBox({Key? key, required this.height, this.width}) : super(key: key);
+  const ResponsiveSizedBox({Key? key, required this.height, this.width})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -95,4 +119,3 @@ class ResponsiveSizedBox extends StatelessWidget {
     );
   }
 }
-
