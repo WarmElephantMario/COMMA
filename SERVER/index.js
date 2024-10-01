@@ -99,7 +99,6 @@ app.put('/api/update_dis_type', (req, res) => {
 
 
 
-
 // 사용자 ID 기반으로 강의 폴더 목록 가져오기
 app.get('/api/lecture-folders/:userKey', (req, res) => {
     const userKey = req.params.userKey;
@@ -683,10 +682,6 @@ app.get('/api/check-exist-colon', (req, res) => {
 });
 
 
-
-
-
-
 //강의파일 created_at 가져오기
 app.get('/api/get-file-created-at', (req, res) => {
     const { folderId, fileName } = req.query;
@@ -812,10 +807,10 @@ app.get('/api/get-folder-name', (req, res) => {
 });
 
 
-//대체 텍스트 URL 가져오기
-app.get('/api/get-alternative-text-url', (req, res) => {
-    const { lecturefileId } = req.query;
-    console.log(`Received lecturefileId: ${lecturefileId}`);
+// //대체 텍스트 URL 가져오기
+// app.get('/api/get-alternative-text-url', (req, res) => {
+//     const { lecturefileId } = req.query;
+//     console.log(`Received lecturefileId: ${lecturefileId}`);
 
 //     const sql = `
 //         SELECT alternative_text_url
@@ -1194,9 +1189,6 @@ app.get('/api/getKeywords/:lecturefile_id', (req, res) => {
         res.json({ success: true, keywordsUrl });
     });
 });
-
-
-
 
 app.listen(port, () => {
     console.log(`Server started on port ${port}`);
