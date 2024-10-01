@@ -119,7 +119,8 @@ class _MainToSearchPageState extends State<MainToSearchPage> {
                 child: SizedBox(
                   height: 45,
                   child: TextField(
-                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSecondary),
+                    style: theme.textTheme.bodyMedium
+                        ?.copyWith(color: theme.colorScheme.onSecondary),
                     controller: _searchController,
                     decoration: InputDecoration(
                       filled: true,
@@ -158,7 +159,8 @@ class _MainToSearchPageState extends State<MainToSearchPage> {
                   ),
                   child: Text(
                     '검색',
-                    style: theme.textTheme.bodySmall?.copyWith(color: Colors.white),
+                    style: theme.textTheme.bodySmall
+                        ?.copyWith(color: Colors.white),
                   ),
                 ),
               ),

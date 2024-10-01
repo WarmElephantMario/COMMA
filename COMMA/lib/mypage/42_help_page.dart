@@ -31,7 +31,8 @@ class _HelpPageState extends State<HelpPage> {
         iconTheme: IconThemeData(color: theme.colorScheme.onTertiary),
         title: Text(
           '도움말',
-          style: theme.textTheme.titleMedium?.copyWith( // 한 단계 작은 사이즈
+          style: theme.textTheme.titleLarge?.copyWith(
+            // 한 단계 작은 사이즈
             color: theme.colorScheme.onTertiary,
             fontWeight: FontWeight.w600,
           ),
@@ -42,7 +43,8 @@ class _HelpPageState extends State<HelpPage> {
         children: [
           Text(
             '앱 사용 방법',
-            style: theme.textTheme.headlineSmall?.copyWith( // 한 단계 작은 사이즈
+            style: theme.textTheme.headlineSmall?.copyWith(
+              // 한 단계 작은 사이즈
               color: theme.colorScheme.onTertiary,
               fontWeight: FontWeight.bold,
             ),
@@ -71,7 +73,8 @@ class _HelpPageState extends State<HelpPage> {
           ResponsiveSizedBox(height: 16.0), // 조금 더 작은 간격
           Text(
             '데이터 수집 및 사용',
-            style: theme.textTheme.titleMedium?.copyWith( // 한 단계 작은 사이즈
+            style: theme.textTheme.titleMedium?.copyWith(
+              // 한 단계 작은 사이즈
               color: theme.primaryColor,
               fontWeight: FontWeight.bold,
             ),
@@ -79,7 +82,8 @@ class _HelpPageState extends State<HelpPage> {
           ResponsiveSizedBox(height: 8.0), // 조금 더 작은 간격
           Text(
             '어플 사용 중 생성한 녹음 파일은 서버에 저장되지 않으며, 음성으로부터 텍스트를 추출한 직후 폐기됩니다.',
-            style: theme.textTheme.bodyMedium?.copyWith( // 한 단계 작은 사이즈
+            style: theme.textTheme.bodyMedium?.copyWith(
+              // 한 단계 작은 사이즈
               color: theme.colorScheme.onTertiary,
             ),
           ),
@@ -100,7 +104,8 @@ class _HelpPageState extends State<HelpPage> {
         children: [
           Text(
             title,
-            style: theme.textTheme.titleMedium?.copyWith( // 한 단계 작은 사이즈
+            style: theme.textTheme.titleMedium?.copyWith(
+              // 한 단계 작은 사이즈
               color: theme.primaryColor,
               fontWeight: FontWeight.bold,
             ),
@@ -108,7 +113,8 @@ class _HelpPageState extends State<HelpPage> {
           ResponsiveSizedBox(height: 4.0), // 조금 더 작은 간격
           Text(
             content,
-            style: theme.textTheme.bodyMedium?.copyWith( // 한 단계 작은 사이즈
+            style: theme.textTheme.bodyMedium?.copyWith(
+              // 한 단계 작은 사이즈
               color: theme.colorScheme.onTertiary,
             ),
           ),

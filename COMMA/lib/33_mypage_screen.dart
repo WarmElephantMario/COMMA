@@ -87,7 +87,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
     );
   }
 
-   Future<void> deleteUser(BuildContext context) async {
+  Future<void> deleteUser(BuildContext context) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userKey = userProvider.user?.userKey;
 
@@ -324,10 +324,8 @@ class _MyPageScreenState extends State<MyPageScreen> {
                     builder: (context) => AccessibilitySettings()));
           }),
           _buildCard(context, '글씨 크기 조정', () {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => FontSizePage()));
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => FontSizePage()));
           }),
           _buildCard(context, '도움말', () {
             Navigator.push(context,
@@ -381,8 +379,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                     await _updateDisType(updatedDisType);
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(
-                          builder: (context) => SplashScreen()),
+                      MaterialPageRoute(builder: (context) => SplashScreen()),
                     );
                   },
                   activeTrackColor: Colors.teal,

@@ -32,97 +32,93 @@ void main() async {
 
 // ThemeData for Light Theme
 ThemeData lightTheme = ThemeData(
+  brightness: Brightness.light,
+  primaryColor: Color(0xFF36AE92),
+  colorScheme: ColorScheme.fromSwatch().copyWith(
+    surface: Colors.white,
+    surfaceBright: Color(0xFF0D5836),
+    surfaceContainer: Colors.white,
+    primaryContainer: Colors.white,
+    primary: Color(0xFF36AE92),
+    primaryFixed: Color(0x9CE4F0E7),
+    secondary: Color(0xFF005A38),
+    tertiary: Color(0xFFFFA17A),
+    tertiaryContainer: Color(0xFFE0F2F1),
+    onTertiary: Color(0xFF303030),
+    tertiaryFixed: const Color(0xFF4CAF50).withOpacity(0.05),
     brightness: Brightness.light,
-    primaryColor: Color(0xFF36AE92),
-    colorScheme: ColorScheme.fromSwatch().copyWith(
-      surface: Colors.white,
-      surfaceBright: Color(0xFF0D5836),
-      surfaceContainer: Colors.white,
-      primaryContainer: Colors.white,
-      primary: Color(0xFF36AE92),
-      primaryFixed: Color(0x9CE4F0E7),
-      secondary: Color(0xFF005A38),
-      tertiary: Color(0xFFFFA17A),
-      tertiaryContainer: Color(0xFFE0F2F1),
-      onTertiary: Color(0xFF303030),
-      tertiaryFixed: const Color(0xFF4CAF50).withOpacity(0.05),
-      brightness: Brightness.light,
-      onSecondary: Color(0xFF4C4C4C),
-    ),
-    scaffoldBackgroundColor: Colors.white, // Use scaffoldBackgroundColor
-    visualDensity: VisualDensity.adaptivePlatformDensity,
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor:
-            Colors.white, // Background color for BottomNavigationBar
-        selectedItemColor: Colors.teal,
-        unselectedItemColor: Colors.black),
-        
-      textTheme: TextTheme(
-        displayLarge: TextStyle(fontSize: 57.0), // headline1
-        displayMedium: TextStyle(fontSize: 45.0), // headline2
-        displaySmall: TextStyle(fontSize: 36.0), // headline3
-        headlineLarge: TextStyle(fontSize: 32.0), // headline4
-        headlineMedium: TextStyle(fontSize: 28.0), // headline5
-        headlineSmall: TextStyle(fontSize: 24.0), // headline6
-        titleLarge: TextStyle(fontSize: 22.0), // subtitle1
-        titleMedium: TextStyle(fontSize: 16.0), // subtitle2
-        titleSmall: TextStyle(fontSize: 14.0),
-        bodyLarge: TextStyle(fontSize: 16.0), // bodyText1
-        bodyMedium: TextStyle(fontSize: 14.0), // bodyText2
-        bodySmall: TextStyle(fontSize: 12.0),
-        labelLarge: TextStyle(fontSize: 14.0), // button
-        labelMedium: TextStyle(fontSize: 12.0), // caption
-        labelSmall: TextStyle(fontSize: 11.0), // overline
+    onSecondary: Color(0xFF4C4C4C),
   ),
+  scaffoldBackgroundColor: Colors.white, // Use scaffoldBackgroundColor
+  visualDensity: VisualDensity.adaptivePlatformDensity,
+  bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      backgroundColor: Colors.white, // Background color for BottomNavigationBar
+      selectedItemColor: Colors.teal,
+      unselectedItemColor: Colors.black),
 
-        );
+  textTheme: TextTheme(
+    displayLarge: TextStyle(fontSize: 57.0), // headline1
+    displayMedium: TextStyle(fontSize: 45.0), // headline2
+    displaySmall: TextStyle(fontSize: 36.0), // headline3
+    headlineLarge: TextStyle(fontSize: 32.0), // headline4
+    headlineMedium: TextStyle(fontSize: 28.0), // headline5
+    headlineSmall: TextStyle(fontSize: 24.0), // headline6
+    titleLarge: TextStyle(fontSize: 22.0), // subtitle1
+    titleMedium: TextStyle(fontSize: 16.0), // subtitle2
+    titleSmall: TextStyle(fontSize: 14.0),
+    bodyLarge: TextStyle(fontSize: 16.0), // bodyText1
+    bodyMedium: TextStyle(fontSize: 14.0), // bodyText2
+    bodySmall: TextStyle(fontSize: 12.0),
+    labelLarge: TextStyle(fontSize: 14.0), // button
+    labelMedium: TextStyle(fontSize: 12.0), // caption
+    labelSmall: TextStyle(fontSize: 11.0), // overline
+  ),
+);
 
 // ThemeData for Dark Theme
 ThemeData darkTheme = ThemeData(
+  brightness: Brightness.dark,
+  primaryColor: Color(0xFF3BBFA0),
+  colorScheme: ColorScheme.fromSwatch().copyWith(
+    surface: Color(0xFF2B2B2B),
+    surfaceBright: Color(0xFF15B06A),
+    surfaceContainer: Color(0xFF383838),
+    primaryContainer: Color(0xFF1E1E1E),
+    primary: Color(0xFF36AE92),
+    primaryFixed: Color.fromARGB(189, 228, 240, 231),
+    secondary: Color.fromARGB(255, 3, 159, 99),
+    tertiary: Color(0xFFFFA17A),
+    tertiaryFixed: Color.fromARGB(255, 61, 61, 61),
+    tertiaryContainer: Color(0xFF626968),
+    onTertiary: Color(0xD2FFFFFF),
     brightness: Brightness.dark,
-    primaryColor: Color(0xFF3BBFA0),
-    colorScheme: ColorScheme.fromSwatch().copyWith(
-      surface: Color(0xFF2B2B2B),
-      surfaceBright: Color(0xFF15B06A),
-      surfaceContainer: Color(0xFF383838),
-      primaryContainer: Color(0xFF1E1E1E),
-      primary: Color(0xFF36AE92),
-      primaryFixed: Color.fromARGB(189, 228, 240, 231),
-      secondary: Color.fromARGB(255, 3, 159, 99),
-      tertiary: Color(0xFFFFA17A),
-      tertiaryFixed: Color.fromARGB(255, 61, 61, 61),
-      tertiaryContainer: Color(0xFF626968),
-      onTertiary: Color(0xD2FFFFFF),
-      brightness: Brightness.dark,
-      onSecondary: Color(0xD2FFFFFF),
-    ),
-    scaffoldBackgroundColor: Color(0xFF121212), // Use scaffoldBackgroundColor
-    visualDensity: VisualDensity.adaptivePlatformDensity,
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor:
-            Color(0xFF121212), // Background color for BottomNavigationBar
-        selectedItemColor: Colors.teal,
-        unselectedItemColor: Colors.grey),
-    textTheme: TextTheme(
-      displayLarge: TextStyle(fontSize: 57.0), // headline1
-      displayMedium: TextStyle(fontSize: 45.0), // headline2
-      displaySmall: TextStyle(fontSize: 36.0), // headline3
-      headlineLarge: TextStyle(fontSize: 32.0), // headline4
-      headlineMedium: TextStyle(fontSize: 28.0), // headline5
-      headlineSmall: TextStyle(fontSize: 24.0), // headline6
-      titleLarge: TextStyle(fontSize: 22.0), // subtitle1
-      titleMedium: TextStyle(fontSize: 16.0), // subtitle2
-      titleSmall: TextStyle(fontSize: 14.0),
-      bodyLarge: TextStyle(fontSize: 16.0), // bodyText1
-      bodyMedium: TextStyle(fontSize: 14.0), // bodyText2
-      bodySmall: TextStyle(fontSize: 12.0),
-      labelLarge: TextStyle(fontSize: 14.0), // button
-      labelMedium: TextStyle(fontSize: 12.0), // caption
-      labelSmall: TextStyle(fontSize: 11.0), // overline
+    onSecondary: Color(0xD2FFFFFF),
   ),
-        );
-
-    
+  scaffoldBackgroundColor: Color(0xFF121212), // Use scaffoldBackgroundColor
+  visualDensity: VisualDensity.adaptivePlatformDensity,
+  bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      backgroundColor:
+          Color(0xFF121212), // Background color for BottomNavigationBar
+      selectedItemColor: Colors.teal,
+      unselectedItemColor: Colors.grey),
+  textTheme: TextTheme(
+    displayLarge: TextStyle(fontSize: 57.0), // headline1
+    displayMedium: TextStyle(fontSize: 45.0), // headline2
+    displaySmall: TextStyle(fontSize: 36.0), // headline3
+    headlineLarge: TextStyle(fontSize: 32.0), // headline4
+    headlineMedium: TextStyle(fontSize: 28.0), // headline5
+    headlineSmall: TextStyle(fontSize: 24.0), // headline6
+    titleLarge: TextStyle(fontSize: 22.0), // subtitle1
+    titleMedium: TextStyle(fontSize: 16.0), // subtitle2
+    titleSmall: TextStyle(fontSize: 14.0),
+    bodyLarge: TextStyle(fontSize: 16.0), // bodyText1
+    bodyMedium: TextStyle(fontSize: 14.0), // bodyText2
+    bodySmall: TextStyle(fontSize: 12.0),
+    labelLarge: TextStyle(fontSize: 14.0), // button
+    labelMedium: TextStyle(fontSize: 12.0), // caption
+    labelSmall: TextStyle(fontSize: 11.0), // overline
+  ),
+);
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -141,14 +137,16 @@ class MyApp extends StatelessWidget {
       theme: lightTheme.copyWith(
         // 라이트 테마에 사용자 지정 폰트 크기 비율 적용
         textTheme: lightTheme.textTheme.apply(
-          fontSizeFactor: fontSizeProvider.scaleFactor * (screenWidth / 400), // 화면 크기에 따른 조정
+          fontSizeFactor: fontSizeProvider.scaleFactor *
+              (screenWidth / 400), // 화면 크기에 따른 조정
           fontSizeDelta: 0.0,
         ),
       ),
       darkTheme: darkTheme.copyWith(
         // 다크 테마에 사용자 지정 폰트 크기 비율 적용
         textTheme: darkTheme.textTheme.apply(
-          fontSizeFactor: fontSizeProvider.scaleFactor * (screenWidth / 400), // 화면 크기에 따른 조정
+          fontSizeFactor: fontSizeProvider.scaleFactor *
+              (screenWidth / 400), // 화면 크기에 따른 조정
           fontSizeDelta: 0.0,
         ),
       ),
@@ -157,8 +155,7 @@ class MyApp extends StatelessWidget {
 
       home: const SplashScreen(), // 앱 시작 시 SplashScreen으로 이동
     );
-      }
-
+  }
 }
 
 class MyNavigatorObserver extends NavigatorObserver {
