@@ -334,7 +334,7 @@ class _RecordPageState extends State<RecordPage> {
   Future<void> _loadPageTexts() async {
     try {
       final response = await http.get(Uri.parse(
-          '${API.baseUrl}/api/get-alternative-text-url?lecturefileId=${widget.lecturefileId}'));
+          '${API.baseUrl}/api/get-alternative-text-urls?lecturefileId=${widget.lecturefileId}'));
 
       if (response.statusCode == 200) {
         print('Response body: ${response.body}');

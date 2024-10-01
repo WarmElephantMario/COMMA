@@ -442,6 +442,8 @@ app.put('/api/:fileType-files/:id', (req, res) => {
     });
 });
 
+//파일 삭제
+//colon 파일 삭제 시, 연관 lecturefile의 existcolon 값을 변경
 app.delete('/api/:fileType-files/:id', (req, res) => {
     const fileType = req.params.fileType;
     const id = req.params.id;
@@ -603,7 +605,7 @@ app.post('/api/create-colon', (req, res) => {
             const insertFileQuery = 'INSERT INTO ColonFiles (folder_id, file_name, file_url, lecture_name, created_at, type) VALUES (?, ?, ?, ?, NOW(), ?)';
             db.query(insertFileQuery, [folderId, noteName, fileUrl, lectureName, type], (err, result) => {
                 if (err) {
-                    console.error('Failed to add file to folder:', err);
+                    console.error('Failed to add file to folder:', err.message);
                     return res.status(500).json({ error: 'Failed to add file to folder' });
                 }
                 const colonFileId = result.insertId;
@@ -634,6 +636,7 @@ app.post('/api/create-colon', (req, res) => {
         }
     });
 });
+
 //existColon에 삽입
 app.post('/api/update-lecture-file', (req, res) => {
     const { lectureFileId, colonFileId } = req.body;
@@ -809,31 +812,31 @@ app.get('/api/get-folder-name', (req, res) => {
 });
 
 
-// 대체 텍스트 URL 가져오기
-app.get('/api/get-alternative-text-url', (req, res) => {
-    const { lecturefileId } = req.query;
-    console.log(`Received lecturefileId: ${lecturefileId}`);
+// // 대체 텍스트 URL 가져오기
+// app.get('/api/get-alternative-text-url', (req, res) => {
+//     const { lecturefileId } = req.query;
+//     console.log(`Received lecturefileId: ${lecturefileId}`);
 
-    const sql = `
-        SELECT alternative_text_url
-        FROM Alt_table2
-        WHERE lecturefile_id = ?
-    `;
+//     const sql = `
+//         SELECT alternative_text_url
+//         FROM Alt_table2
+//         WHERE lecturefile_id = ?
+//     `;
 
-    db.query(sql, [lecturefileId], (err, results) => {
-        if (err) {
-            return res.status(500).json({ success: false, error: err.message });
-        }
+//     db.query(sql, [lecturefileId], (err, results) => {
+//         if (err) {
+//             return res.status(500).json({ success: false, error: err.message });
+//         }
 
-        console.log(`Query results: ${JSON.stringify(results)}`);
+//         console.log(`Query results: ${JSON.stringify(results)}`);
 
-        if (results.length > 0) {
-            res.status(200).json({ alternative_text_url: results[0].alternative_text_url });
-        } else {
-            res.status(404).json({ success: false, message: 'No matching record found' });
-        }
-    });
-});
+//         if (results.length > 0) {
+//             res.status(200).json({ alternative_text_url: results[0].alternative_text_url });
+//         } else {
+//             res.status(404).json({ success: false, message: 'No matching record found' });
+//         }
+//     });
+// });
 
 // 분리된 대체텍스트 URL을 가져오기
 app.get('/api/get-alternative-text-urls', (req, res) => {
