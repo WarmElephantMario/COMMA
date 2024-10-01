@@ -143,7 +143,6 @@ class _FullFolderListScreenState extends State<FullFolderListScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      resizeToAvoidBottomInset: true,
       appBar: AppBar(
           backgroundColor: theme.scaffoldBackgroundColor,
           title: Text(

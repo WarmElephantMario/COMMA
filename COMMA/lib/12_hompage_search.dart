@@ -109,7 +109,6 @@ class _MainToSearchPageState extends State<MainToSearchPage> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      resizeToAvoidBottomInset: true,
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
           backgroundColor: theme.scaffoldBackgroundColor,

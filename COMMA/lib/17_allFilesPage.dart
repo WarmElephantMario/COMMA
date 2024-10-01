@@ -489,7 +489,6 @@ class _AllFilesPageState extends State<AllFilesPage> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      resizeToAvoidBottomInset: true,
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         iconTheme: IconThemeData(color: theme.colorScheme.onTertiary),
