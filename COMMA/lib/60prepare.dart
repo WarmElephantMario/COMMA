@@ -980,7 +980,6 @@ class _LearningPreparationState extends State<LearningPreparation> {
     // 학습 유형에 따라 제목 설정
     String titleText = ' 학습 준비하기';
     return Scaffold(
-      resizeToAvoidBottomInset: true,
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(toolbarHeight: 0),
       body: ListView(

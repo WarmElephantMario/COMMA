@@ -308,7 +308,6 @@ class _ColonPageState extends State<ColonPage> {
         }
       },
       child: Scaffold(
-        resizeToAvoidBottomInset: true,
         backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
           toolbarHeight: 0,

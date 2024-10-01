@@ -296,7 +296,6 @@ class _MyPageScreenState extends State<MyPageScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      resizeToAvoidBottomInset: true,
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: theme.scaffoldBackgroundColor,
