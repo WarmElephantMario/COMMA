@@ -791,31 +791,31 @@ app.get('/api/get-folder-name', (req, res) => {
 });
 
 
-// 대체 텍스트 URL 가져오기
-// app.get('/api/get-alternative-text-url', (req, res) => {
-//     const { lecturefileId } = req.query;
-//     console.log(`Received lecturefileId: ${lecturefileId}`);
+//대체 텍스트 URL 가져오기
+app.get('/api/get-alternative-text-url', (req, res) => {
+    const { lecturefileId } = req.query;
+    console.log(`Received lecturefileId: ${lecturefileId}`);
 
-//     const sql = `
-//         SELECT alternative_text_url
-//         FROM Alt_table2
-//         WHERE lecturefile_id = ?
-//     `;
+    const sql = `
+        SELECT alternative_text_url
+        FROM Alt_table2
+        WHERE lecturefile_id = ?
+    `;
 
-//     db.query(sql, [lecturefileId], (err, results) => {
-//         if (err) {
-//             return res.status(500).json({ success: false, error: err.message });
-//         }
+    db.query(sql, [lecturefileId], (err, results) => {
+        if (err) {
+            return res.status(500).json({ success: false, error: err.message });
+        }
 
-//         console.log(`Query results: ${JSON.stringify(results)}`);
+        console.log(`Query results: ${JSON.stringify(results)}`);
 
-//         if (results.length > 0) {
-//             res.status(200).json({ alternative_text_url: results[0].alternative_text_url });
-//         } else {
-//             res.status(404).json({ success: false, message: 'No matching record found' });
-//         }
-//     });
-// });
+        if (results.length > 0) {
+            res.status(200).json({ alternative_text_url: results[0].alternative_text_url });
+        } else {
+            res.status(404).json({ success: false, message: 'No matching record found' });
+        }
+    });
+});
 
 // 분리된 대체텍스트 URL을 가져오기
 app.get('/api/get-alternative-text-urls', (req, res) => {
@@ -834,7 +834,7 @@ app.get('/api/get-alternative-text-urls', (req, res) => {
         }
 
         const alternativeTextUrls = results.map(record => record.alternative_text_url);
-        console.log('Returning alternative text URLs:', alternativeTextUrls);
+        // console.log('Returning alternative text URLs:', alternativeTextUrls);
         res.status(200).json({ alternative_text_urls: alternativeTextUrls });
     });
 });
@@ -989,7 +989,7 @@ app.post('/api/update-alt-table', (req, res) => {
         return res.status(400).send({ error: 'Missing required fields' });
     }
 
-    const sql = 'UPDATE Alt_table SET colonfile_id = ? WHERE lecturefile_id = ?';
+    const sql = 'UPDATE Alt_table2 SET colonfile_id = ? WHERE lecturefile_id = ?';
     db.query(sql, [colonFileId, lecturefileId], (err, results) => {
         if (err) {
             console.error('Database query error:', err); // 로그 추가
@@ -1006,28 +1006,32 @@ app.post('/api/update-alt-table', (req, res) => {
     });
 });
 
-// Alt_table의 특정 colonfile_id 행에서 URL 가져오기
+// Alt_table2의 특정 colonfile_id 행에서 여러 URL 가져오기
 app.get('/api/get-alt-url/:colonfile_id', (req, res) => {
     const colonfile_id = req.params.colonfile_id;
     console.log(`Received request for colonfile_id: ${colonfile_id}`); // 로그 추가
-    const sql = 'SELECT alternative_text_url FROM Alt_table WHERE colonfile_id = ?';
+
+    const sql = 'SELECT alternative_text_url FROM Alt_table2 WHERE colonfile_id = ?';
 
     db.query(sql, [colonfile_id], (err, results) => {
         if (err) {
-            console.error('Failed to fetch alternative text URL:', err);
-            res.status(500).send('Failed to fetch alternative text URL');
+            console.error('Failed to fetch alternative text URLs:', err);
+            return res.status(500).send('Failed to fetch alternative text URLs');
+        }
+
+        console.log('Query results:', results); // 로그 추가
+
+        if (results.length > 0) {
+            const alternativeTextUrls = results.map(record => record.alternative_text_url);
+            console.log('Returning alternative text URLs:', alternativeTextUrls); // 로그 추가
+            res.status(200).json({ alternative_text_urls: alternativeTextUrls });
         } else {
-            console.log('Query results:', results); // 로그 추가
-            if (results.length > 0) {
-                console.log(`Found URL: ${results[0].alternative_text_url}`); // 로그 추가
-                res.json({ alternative_text_url: results[0].alternative_text_url });
-            } else {
-                console.log('No URL found for the given colonfile_id'); // 로그 추가
-                res.status(404).send('No URL found for the given colonfile_id');
-            }
+            console.log('No URLs found for the given colonfile_id'); // 로그 추가
+            res.status(404).send('No URLs found for the given colonfile_id');
         }
     });
 });
+
 
 //쪼개 대체 삽입
 app.post('/api/alt-table2', (req, res) => {

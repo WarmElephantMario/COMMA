@@ -106,7 +106,9 @@ class _RecordPageState extends State<RecordPage> {
     _checkFileType();
     if (widget.type == 0) {
       // 대체 텍스트인 경우에만 호출
-      _loadPageTexts();
+    WidgetsBinding.instance?.addPostFrameCallback((_) async {
+      await loadPageTexts(lectureFileId: widget.lecturefileId); // 비동기 함수 호출
+    });
 
     }
     WidgetsBinding.instance?.addPostFrameCallback((_) {
@@ -332,54 +334,100 @@ class _RecordPageState extends State<RecordPage> {
     }
   }
 
-  Future<void> _loadPageTexts() async {
+  // 페이지 텍스트를 로드하는 함수
+// lecturefileId와 colonFileId를 구분하여 처리
+Future<void> loadPageTexts({int? lectureFileId, int? colonFileId}) async {
   try {
-    // API 호출하여 alternative text URL 리스트 가져오기
-    final response = await http.get(Uri.parse(
-        '${API.baseUrl}/api/get-alternative-text-urls?lecturefileId=${widget.lecturefileId}'));
+    // 1. lectureFileId가 있는 경우 먼저 처리
+    if (lectureFileId != null) {
+      print('Using lectureFileId to fetch alternative text URLs');
+      
+      // lectureFileId로 대체 텍스트 URL 리스트 가져오기
+      final response = await http.get(Uri.parse(
+          '${API.baseUrl}/api/get-alternative-text-urls?lecturefileId=$lectureFileId'));
 
-    if (response.statusCode == 200) {
-      print('Response body: ${response.body}');
+      if (response.statusCode == 200) {
+        // JSON 응답을 디코딩하여 alternative_text_urls 리스트 추출
+        final fileData = jsonDecode(response.body);
+        final List<dynamic> alternativeTextUrls = fileData['alternative_text_urls'];
 
-      // JSON 응답을 디코딩하여 alternative_text_urls 리스트 추출
-      final fileData = jsonDecode(response.body);
-      final List<dynamic> alternativeTextUrls = fileData['alternative_text_urls'];
+        if (alternativeTextUrls.isNotEmpty) {
+          Map<int, String> allTexts = {};
+          
+          // 각 URL에서 텍스트 데이터를 가져와 페이지별로 저장
+          for (int urlIndex = 0; urlIndex < alternativeTextUrls.length; urlIndex++) {
+            final textResponse = await http.get(Uri.parse(alternativeTextUrls[urlIndex]));
 
-      if (alternativeTextUrls != null && alternativeTextUrls.isNotEmpty) {
-        // 텍스트 데이터를 여러 URL에서 순차적으로 가져오기
-        Map<int, String> allTexts = {};
-
-        for (int urlIndex = 0; urlIndex < alternativeTextUrls.length; urlIndex++) {
-          final textResponse = await http.get(Uri.parse(alternativeTextUrls[urlIndex]));
-
-          if (textResponse.statusCode == 200) {
-            // 텍스트 데이터를 불러와서 UTF-8로 디코딩하고 줄로 분리
-            final textLines = utf8.decode(textResponse.bodyBytes).split('//');
-
-            // 페이지 텍스트를 allTexts에 저장 (페이지 번호는 계속 증가)
-            for (int i = 0; i < textLines.length; i++) {
-              allTexts[allTexts.length + 1] = textLines[i];
+            if (textResponse.statusCode == 200) {
+              // URL에서 받은 텍스트를 페이지에 대응하여 저장
+              final text = utf8.decode(textResponse.bodyBytes);
+              allTexts[urlIndex + 1] = text;
+            } else {
+              print('Failed to fetch text file from URL $urlIndex');
             }
-          } else {
-            print('Failed to fetch text file: ${textResponse.statusCode}');
           }
-        }
 
-        // 모든 텍스트 데이터를 setState로 업데이트
-        setState(() {
-          pageTexts = allTexts;
-        });
+          // 모든 텍스트 데이터를 setState로 업데이트
+          setState(() {
+            pageTexts = allTexts;
+          });
+        } else {
+          print('Alternative text URLs list is empty');
+        }
       } else {
-        print('Alternative text URLs list is null or empty');
+        print('Failed to fetch alternative text URLs: ${response.statusCode}');
+      }
+    } 
+    // 2. lectureFileId가 없고 colonFileId가 제공된 경우 처리
+    else if (colonFileId != null) {
+      print('Using colonFileId to fetch alternative text URLs');
+      
+      // colonFileId로 대체 텍스트 URL 리스트 가져오기
+      var url = '${API.baseUrl}/api/get-alt-url/$colonFileId';
+      var response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        // JSON 응답을 디코딩하여 alternative_text_urls 리스트 추출
+        var jsonResponse = jsonDecode(response.body);
+        final List<dynamic> alternativeTextUrls = jsonResponse['alternative_text_urls'];
+
+        if (alternativeTextUrls.isNotEmpty) {
+          Map<int, String> allTexts = {};
+
+          // 각 URL에서 텍스트 데이터를 가져와 페이지별로 저장
+          for (int urlIndex = 0; urlIndex < alternativeTextUrls.length; urlIndex++) {
+            final textResponse = await http.get(Uri.parse(alternativeTextUrls[urlIndex]));
+
+            if (textResponse.statusCode == 200) {
+              // URL에서 받은 텍스트를 페이지에 대응하여 저장
+              final text = utf8.decode(textResponse.bodyBytes);
+              allTexts[urlIndex + 1] = text;
+            } else {
+              print('Failed to fetch text file from URL $urlIndex');
+            }
+          }
+
+          // 모든 텍스트 데이터를 setState로 업데이트
+          setState(() {
+            pageTexts = allTexts;
+          });
+        } else {
+          print('Alternative text URLs list is empty');
+        }
+      } else {
+        print('Failed to fetch alternative text URLs using colonFileId');
       }
     } else {
-      print('Failed to fetch alternative text URLs: ${response.statusCode}');
-      print('Response body: ${response.body}');
+      // lectureFileId와 colonFileId가 둘 다 제공되지 않은 경우 처리
+      print('Neither lectureFileId nor colonFileId is provided');
     }
   } catch (e) {
     print('Error occurred: $e');
   }
 }
+
+
+
   // Future<String> fetchRecordUrl(int colonFileId) async {
   //   try {
   //     final response = await http.get(Uri.parse(
@@ -843,7 +891,7 @@ void showColonCreatedDialog(
 
   Future<void> _insertColonFileIdToAltTable(
       int lecturefileId, int colonFileId) async {
-    print('Alt_table에 colonfile_id 저장하겠습니다');
+    print('Alt_table2에 colonfile_id 저장하겠습니다');
 
     var altTableUrl = '${API.baseUrl}/api/update-alt-table';
     var altTableBody = {
@@ -858,7 +906,7 @@ void showColonCreatedDialog(
     );
 
     if (altTableResponse.statusCode == 200) {
-      print('Alt_table에 colonfile_id 저장 완료');
+      print('Alt_table2에 colonfile_id 저장 완료');
     } else {
       print(
           'Failed to add colonfile_id to alt table: ${altTableResponse.statusCode}');
@@ -1072,8 +1120,6 @@ void showColonCreatedDialog(
 
   @override
   Widget build(BuildContext context) {
-    // print("-----------------------------");
-    // fetchAlternativeTextUrls(widget.lectureFolderId);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userKey = userProvider.user?.userKey;
     final theme = Theme.of(context);
@@ -1381,6 +1427,7 @@ void showColonCreatedDialog(
                               onPageChanged: (page) {
                                 setState(() {
                                   _currentPage = page;
+                                  print('Current Page: $_currentPage'); // 페이지 전환 시 로그
                                 });
                               },
                             ),
