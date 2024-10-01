@@ -530,7 +530,9 @@ class _AllFilesPageState extends State<AllFilesPage> {
                     lectureName: file['file_name'] ?? 'Unknown',
                     date:
                         formatDateTimeToKorean(file['created_at'] ?? 'Unknown'),
-                    onRename: () => showRenameDialog(
+                        
+                    onRename: () => showRenameDialog
+                    (
                       context,
                       colonFiles.indexOf(file),
                       colonFiles,
