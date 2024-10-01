@@ -55,6 +55,7 @@ class DisabilitySelectionPage extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: theme.scaffoldBackgroundColor,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -64,7 +65,7 @@ class DisabilitySelectionPage extends StatelessWidget {
             Text(
               '사용자 학습 유형을 선택해주세요',
               style: TextStyle(
-                fontSize: 20 ,
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: theme.colorScheme.onTertiary,
               ),
@@ -117,7 +118,7 @@ class DisabilitySelectionPage extends StatelessWidget {
                     '시각 장애인용 모드 (대체 텍스트)',
                     style: TextStyle(
                       color: theme.colorScheme.surface,
-                      fontSize: 14 ,
+                      fontSize: 14,
                       fontFamily: 'DM Sans',
                       fontWeight: FontWeight.w700,
                     ),
@@ -161,7 +162,7 @@ class DisabilitySelectionPage extends StatelessWidget {
                     '청각 장애인용 모드 (실시간 자막)',
                     style: TextStyle(
                       color: theme.colorScheme.surface,
-                      fontSize: 14 ,
+                      fontSize: 14,
                       fontFamily: 'DM Sans',
                       fontWeight: FontWeight.w700,
                     ),

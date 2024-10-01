@@ -150,6 +150,7 @@ class _FolderScreenState extends State<FolderScreen> {
     final fontSizeProvider = Provider.of<FontSizeProvider>(context);
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(toolbarHeight: 0),
       body: LayoutBuilder(
@@ -281,4 +282,3 @@ class _FolderScreenState extends State<FolderScreen> {
     );
   }
 }
-
