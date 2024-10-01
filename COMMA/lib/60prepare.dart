@@ -640,7 +640,7 @@ class _LearningPreparationState extends State<LearningPreparation> {
           print('GPT-4 response content for image URL: $url');
           print(gptResponse);
           String pageResponse =
-              '[${i + 1} 페이지 설명 시작]\n$gptResponse\n[${i + 1} 페이지 설명 끝] // \n';
+              '[${i + 1} 페이지 설명 시작]\n$gptResponse\n[${i + 1} 페이지 설명 끝] \n';
           allResponses.add(pageResponse);
 
           // Create a temporary text file for each page
