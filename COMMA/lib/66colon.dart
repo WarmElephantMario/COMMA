@@ -334,7 +334,7 @@ class _ColonPageState extends State<ColonPage> {
                                   } else {
                                     print('Error: colonFileId is null.');
                                   }
-
+                           
                                   Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
