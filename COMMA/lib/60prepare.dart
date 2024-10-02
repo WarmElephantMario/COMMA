@@ -72,6 +72,12 @@ class _LearningPreparationState extends State<LearningPreparation> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userDisType = userProvider.user?.dis_type; // 유저의 dis_type 가져오기
 
+      // 유저의 dis_type이 null인 경우 안전 처리
+    if (userDisType == null) {
+      print("User dis_type is null");
+      return;
+    }
+
     if (userDisType == 0) {
       // 시각장애인용 모드 (대체텍스트)
       isAlternativeTextEnabled = true;
@@ -413,6 +419,15 @@ class _LearningPreparationState extends State<LearningPreparation> {
 
   Future<void> _pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+    // 파일 선택이 취소된 경우
+    if (result == null) {
+      print("User cancelled the picker request");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("파일 선택을 취소하였습니다.")),
+      );
+     return; // 더 이상의 처리를 하지 않도록 리턴
+    }
 
     if (result != null) {
       Uint8List? fileBytes = result.files.first.bytes;
@@ -912,6 +927,31 @@ class _LearningPreparationState extends State<LearningPreparation> {
     }
   }
 
+  Future<void> _processFile() async {
+  // 특정 값이 null인 경우 상태 초기화 및 리셋
+  if (_selectedFileName == null || _downloadURL == null || lecturefileId == null) {
+    print("Error: File name, URL, or lecture file ID is null. Please upload the lecture material first.");
+    
+    // 상태 초기화
+    setState(() {
+      _isMaterialEmbedded = false;
+      _selectedFileName = null;
+      _downloadURL = null;
+      _fileBytes = null;
+      _isIconVisible = true;
+      _isPDF = false;
+      lecturefileId = null;
+
+    });
+
+    // 초기화 후 안내 메시지 출력
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("파일을 다시 선택해주세요.")),
+    );
+    return;
+  }
+}
+
   @override
 Widget build(BuildContext context) {
   final theme = Theme.of(context);
@@ -919,6 +959,16 @@ Widget build(BuildContext context) {
     // 유저의 dis_type 가져오기
   final userProvider = Provider.of<UserProvider>(context);
   final userDisType = userProvider.user?.dis_type;
+
+   // userDisType이 null인 경우 처리
+  if (userDisType == null) {
+    return Center(
+      child: Text(
+        "유저 정보가 없습니다. 다시 시도해 주세요.",
+        style: theme.textTheme.bodySmall,
+      ),
+    );
+  }
 
   // 학습 유형에 따라 제목 설정
   String titleText = ' 학습 준비하기';
@@ -1052,10 +1102,10 @@ Widget build(BuildContext context) {
                   );
                   print("Lecture file saved with ID: $lecturefileId");
                   await _pickFile(); // 파일 선택 후 업로드
-
-                  setState(() {
-                    _isMaterialEmbedded = true;
-                  });
+                  // null check - 파일이 임베드 되었을때만 true가 되도록 변경
+                  // setState(() {
+                  //   _isMaterialEmbedded = true;
+                  // });
                 } catch (e) {
                   print('Error: $e');
                 }
@@ -1063,6 +1113,12 @@ Widget build(BuildContext context) {
                 print("Starting learning with file: $_selectedFileName");
                 print("대체텍스트 선택 여부: $isAlternativeTextEnabled");
                 print("실시간자막 선택 여부: $isRealTimeSttEnabled");
+
+               if (_selectedFileName == null || _downloadURL == null || lecturefileId == null) {
+              _processFile();
+  
+                return;
+              }
 
                 if (_selectedFileName != null &&
                     _downloadURL != null &&
@@ -1111,7 +1167,7 @@ Widget build(BuildContext context) {
             iconPath: _isIconVisible ? 'assets/Vector.png' : null,
           ),
         ),
-        if (_isMaterialEmbedded)
+        if (_isMaterialEmbedded && _selectedFileName != null)
           Column(
             children: [
               const SizedBox(height: 20),

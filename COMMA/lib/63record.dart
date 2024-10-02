@@ -930,7 +930,8 @@ class _RecordPageState extends State<RecordPage> {
       String lectureName,
       String createdAt,
       String fileUrl,
-      int colonFileId) {
+      int colonFileId,
+      int colonFolderId) {
     try {
       print('Navigating to ColonPage'); // 로그 추가
       Navigator.of(context).push(
@@ -941,7 +942,8 @@ class _RecordPageState extends State<RecordPage> {
               lectureName: lectureName,
               createdAt: createdAt,
               fileUrl: fileUrl,
-              colonFileId: colonFileId),
+              colonFileId: colonFileId,
+              folderId: colonFolderId,),
         ),
       );
     } catch (e) {
@@ -1046,6 +1048,8 @@ class _RecordPageState extends State<RecordPage> {
                               colonDetails['created_at'],
                               colonDetails['file_url'],
                               colonFileId,
+                              colonDetails['folder_id']
+                              
                             );
                           });
                         },
