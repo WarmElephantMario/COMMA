@@ -793,14 +793,14 @@ void showMypageDialog(BuildContext context, String title, String message,
 
 // 이름 바꾸기1 : 폴더&파일
 Future<void> showRenameDialog(
-    BuildContext context,
-    int index,
-    List<Map<String, dynamic>> items,
-    Function renameItem,
-    Function setState,
-    String title,
-    String itemType // 'file_name' 또는 'folder_name'
-    ) async {
+  BuildContext context,
+  int index,
+  List<Map<String, dynamic>> items,
+  Function renameItem,
+  Function setState,
+  String title,
+  String itemType, // 'file_name' 또는 'folder_name'
+) async {
   final TextEditingController nameController =
       TextEditingController(text: items[index][itemType]);
   final theme = Theme.of(context);
@@ -845,6 +845,7 @@ Future<void> showRenameDialog(
             },
           ),
         ],
+
       );
     },
   );
