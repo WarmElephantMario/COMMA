@@ -344,6 +344,44 @@ app.post('/api/signup_info', (req, res) => {
                         console.error('Error details:', err);
                     } else {
                         console.log('Default colon file copied successfully. Affected Rows:', result.affectedRows);
+                        
+                        // 새로 복사된 ColonFile의 ID를 가져옴
+                        const newColonFileId = result.insertId;
+                        console.log('New Colon File ID:', newColonFileId);
+
+                        // Record_table2에서 defaultColonFileId와 동일한 colonfile_id를 가진 레코드를 복사
+                        const copyRecordTableQuery = `
+                            INSERT INTO Record_table2 (lecturefile_id, colonfile_id, record_url, page)
+                            SELECT lecturefile_id, ?, record_url, page
+                            FROM Record_table2
+                            WHERE colonfile_id = ?`;
+
+                        console.log('Executing copyRecordTableQuery with new colonfile_id:', newColonFileId);
+
+                        db.query(copyRecordTableQuery, [newColonFileId, defaultColonFileId], (err, result) => {
+                            if (err) {
+                                console.error('Failed to copy records from Record_table2:', err);
+                            } else {
+                                console.log('Records from Record_table2 copied successfully. Affected Rows:', result.affectedRows);
+                            }
+                        });
+
+                        // Alt_table2에서 defaultColonFileId와 동일한 colonfile_id를 가진 레코드를 복사
+                        const copyAltTableQuery = `
+                            INSERT INTO Alt_table2 (lecturefile_id, colonfile_id, alternative_text_url, page)
+                            SELECT lecturefile_id, ?, alternative_text_url, page
+                            FROM Alt_table2
+                            WHERE colonfile_id = ?`;
+
+                        console.log('Executing copyAltTableQuery with new colonfile_id:', newColonFileId);
+
+                        db.query(copyAltTableQuery, [newColonFileId, defaultColonFileId], (err, result) => {
+                            if (err) {
+                                console.error('Failed to copy records from Alt_table2:', err);
+                            } else {
+                                console.log('Records from Alt_table2 copied successfully. Affected Rows:', result.affectedRows);
+                            }
+                        });
                     }
                 });
             }
@@ -352,6 +390,7 @@ app.post('/api/signup_info', (req, res) => {
         return res.status(200).json({ success: true, userKey: userKey });
     });
 });
+
 
 
 
