@@ -71,8 +71,9 @@ class _LearningPreparationState extends State<LearningPreparation> {
     // 유저의 타입에 따라 학습 유형 자동 설정
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userDisType = userProvider.user?.dis_type; // 유저의 dis_type 가져오기
+    print(userDisType);
 
-      // 유저의 dis_type이 null인 경우 안전 처리
+      //유저의 dis_type이 null인 경우 안전 처리
     if (userDisType == null) {
       print("User dis_type is null");
       return;
