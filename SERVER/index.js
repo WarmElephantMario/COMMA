@@ -432,7 +432,7 @@ app.post('/api/signup_info', (req, res) => {
 
                         // Record_table에서 새로 복사된 lecturefile_id에 해당하는 colonfile_id 업데이트
                         const updateRecordTableQuery = `
-                            UPDATE Record_table
+                            UPDATE Record_table2
                             SET colonfile_id = ?
                             WHERE lecturefile_id = ?`;
 
