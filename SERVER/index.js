@@ -309,6 +309,7 @@ app.post('/api/signup_info', (req, res) => {
         const lectureFolderQuery = 'INSERT INTO LectureFolders (folder_name, userKey) VALUES (?, ?)';
         const colonFolderQuery = 'INSERT INTO ColonFolders (folder_name, userKey) VALUES (?, ?)';
 
+        // Lecture 폴더 생성
         db.query(lectureFolderQuery, ['기본 폴더', userKey], (err, result) => {
             if (err) {
                 console.error('Failed to create lecture folder:', err);
@@ -317,17 +318,41 @@ app.post('/api/signup_info', (req, res) => {
             }
         });
 
-        db.query(colonFolderQuery, ['기본 폴더 (:)', userKey], (err, result) => {
+        // Colon 폴더 생성 후 특정 Colon 파일 복사
+        db.query(colonFolderQuery, ['기본 폴더 (:)', userKey], (err, colonResult) => {
             if (err) {
                 console.error('Failed to create colon folder:', err);
             } else {
                 console.log('Default colon folder created');
+                
+                const defaultColonFileId = 100; // 기본으로 복사할 ColonFile ID
+                const newFolderId = colonResult.insertId; // 방금 생성된 ColonFolders의 ID (folder_id)
+                console.log('New Colon Folder ID:', newFolderId);
+
+                // ColonFiles에서 특정 ID를 가져와 복사
+                const copyColonFileQuery = `
+                    INSERT INTO ColonFiles (folder_id, file_name, file_url, lecture_name, created_at, type)
+                    SELECT ?, file_name, file_url, lecture_name, NOW(), type
+                    FROM ColonFiles
+                    WHERE id = ?`;
+
+                console.log('Executing copyColonFileQuery with folder_id:', newFolderId, 'and colonFileId:', defaultColonFileId);
+
+                db.query(copyColonFileQuery, [newFolderId, defaultColonFileId], (err, result) => {
+                    if (err) {
+                        console.error('Failed to copy default colon file:', err);
+                        console.error('Error details:', err);
+                    } else {
+                        console.log('Default colon file copied successfully. Affected Rows:', result.affectedRows);
+                    }
+                });
             }
         });
 
         return res.status(200).json({ success: true, userKey: userKey });
     });
 });
+
 
 
 // 회원 탈퇴

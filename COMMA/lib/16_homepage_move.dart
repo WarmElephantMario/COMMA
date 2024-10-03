@@ -596,7 +596,7 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
 
   @override
   Widget build(BuildContext context) {
-    // final size = MediaQuery.of(context).size;
+    // final size = MediaQuery.sizeOf(context);
     final userProvider = Provider.of<UserProvider>(context);
     final theme = Theme.of(context);
 
