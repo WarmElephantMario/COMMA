@@ -434,13 +434,15 @@ class _MainPageState extends State<MainPage> {
   }
 
   // 강의 파일 클릭 이벤트에서 폴더 이름 조회 및 existLecture 확인
-  void fetchFolderAndNavigate(BuildContext context, int folderId,
-      String fileType, Map<String, dynamic> file) async {
-    try {
-      final lectureFileId = file['id']; // lectureFileId 가져오기
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final userDisType = userProvider.user?.dis_type; // 유저의 dis_type 가져오기
+void fetchFolderAndNavigate(BuildContext context, int folderId,
+    String fileType, Map<String, dynamic> file) async {
+  try {
+    final lectureFileId = file['id']; // lectureFileId 가져오기
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userDisType = userProvider.user?.dis_type; // 유저의 dis_type 가져오기
 
+    // fileType이 "lecture"일 경우
+    if (fileType == "lecture") {
       // 1. 먼저 lecturefileId로 existLecture 값을 확인하는 API 요청
       final existLectureResponse = await http.get(
           Uri.parse('${API.baseUrl}/api/checkExistLecture/$lectureFileId'));
@@ -495,11 +497,34 @@ class _MainPageState extends State<MainPage> {
         print(
             'Failed to check existLecture: ${existLectureResponse.statusCode}');
       }
-    } catch (e) {
-      print('Error fetching folder name or existLecture: $e');
-      navigateToPage(context, 'Unknown Folder', file, fileType);
+    } 
+    // fileType이 "colon"일 경우
+    else if (fileType == "colon") {
+      // colonFileId 가져오기 (필요한 경우)
+      final colonFileId = file['id'];
+
+      // 폴더 이름 가져오기
+        // ColonPage로 이동
+            final response = await http.get(Uri.parse(
+              '${API.baseUrl}/api/getFolderName/$fileType/$folderId'));
+          if (response.statusCode == 200) {
+            var data = jsonDecode(response.body);
+            navigateToPage(context, data['folder_name'] ?? 'Unknown Folder',
+                file, fileType);
+          } else {
+            print('Failed to load folder name: ${response.statusCode}');
+            navigateToPage(context, 'Unknown Folder', file, fileType);
+          }
+    } else {
+      print('The fileType is not "lecture" or "colon". Operation skipped.');
     }
+  } catch (e) {
+    print('Error fetching folder name or existLecture: $e');
+    navigateToPage(context, 'Unknown Folder', file, fileType);
   }
+}
+
+
 
   // 강의 파일 또는 콜론 파일 페이지로 네비게이션
   void navigateToPage(BuildContext context, String folderName,
@@ -712,6 +737,7 @@ class _MainPageState extends State<MainPage> {
                           sortKey: OrdinalSortKey(2),
                           child: GestureDetector(
                             onTap: () {
+                              print(colonFiles.indexOf(file));
                               print(
                                   'Lecture ${file['file_name'] ?? "N/A"} is clicked');
                               print('File details: $file');
@@ -821,6 +847,7 @@ class _MainPageState extends State<MainPage> {
                           sortKey: OrdinalSortKey(3),
                           child: GestureDetector(
                             onTap: () {
+                             //print(colonFiles.indexOf(file));
                               print(
                                   'Colon ${file['file_name'] ?? "N/A"} is clicked');
                               print('Colon file clicked: ${file['file_name']}');
