@@ -808,57 +808,48 @@ Future<void> showRenameDialog(
   showDialog(
     context: context,
     builder: (context) {
-      return StatefulBuilder(
-        builder: (BuildContext context, StateSetter dialogSetState) {
-          return AlertDialog(
-            backgroundColor: theme.colorScheme.surfaceContainer,
-            title: Text(
-              title,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onTertiary,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'DM Sans',
-              ),
-            ),
-            content: TextField(
-              controller: nameController,
-              style: TextStyle(color: theme.colorScheme.onSecondary),
-              decoration: InputDecoration(
-                hintText: items[index][itemType],
-                hintStyle: TextStyle(color: theme.colorScheme.onSecondary),
-              ),
-            ),
-            actions: <Widget>[
-              TextButton(
-                child: Text(
-                  '취소',
-                  style: TextStyle(color: theme.colorScheme.tertiary),
-                ),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-              TextButton(
-                child: Text(
-                  '저장',
-                  style: TextStyle(color: theme.colorScheme.onSecondary),
-                ),
-                onPressed: () async {
-                  await renameItem(items[index]['id'], nameController.text);
-                  setState(() {
-                    items[index][itemType] = nameController.text;
-                  });
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
+      return AlertDialog(
+        backgroundColor: theme.colorScheme.surfaceContainer,
+        title: Text(
+          title,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onTertiary,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'DM Sans',
+          ),
+        ),
+        content: TextField(
+          controller: nameController,
+          style: TextStyle(color: theme.colorScheme.onSecondary),
+          decoration: InputDecoration(
+              hintText: items[index][itemType],
+              hintStyle: TextStyle(color: theme.colorScheme.onSecondary)),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child:
+                Text('취소', style: TextStyle(color: theme.colorScheme.tertiary)),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          TextButton(
+            child: Text('저장',
+                style: TextStyle(color: theme.colorScheme.onSecondary)),
+            onPressed: () async {
+              await renameItem(items[index]['id'], nameController.text);
+              setState(() {
+                items[index][itemType] = nameController.text;
+              });
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+
       );
     },
   );
 }
-
 
 // 폴더 페이지 - 햄버거 - 이름바꾸기
 Future<void> showRenameDialogVer2(

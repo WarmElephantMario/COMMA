@@ -99,7 +99,6 @@ app.put('/api/update_dis_type', (req, res) => {
 
 
 
-
 // 사용자 ID 기반으로 강의 폴더 목록 가져오기
 app.get('/api/lecture-folders/:userKey', (req, res) => {
     const userKey = req.params.userKey;
@@ -442,17 +441,37 @@ app.put('/api/:fileType-files/:id', (req, res) => {
     });
 });
 
-// 파일 삭제하기
+//파일 삭제
+//colon 파일 삭제 시, 연관 lecturefile의 existcolon 값을 변경
 app.delete('/api/:fileType-files/:id', (req, res) => {
     const fileType = req.params.fileType;
     const id = req.params.id;
-    const table = fileType === 'lecture' ? 'LectureFiles' : 'ColonFiles';
-    const sql = `DELETE FROM ${table} WHERE id = ?`;
-    db.query(sql, [id], (err, result) => {
-        if (err) throw err;
-        res.status(200).send('File deleted');
-    });
+    
+    if (fileType === 'colon') {
+        // LectureFiles 테이블에서 existColon 값 NULL로 업데이트
+        const updateSql = `UPDATE LectureFiles SET existColon = NULL WHERE existColon = ?`;
+        db.query(updateSql, [id], (updateErr, updateResult) => {
+            if (updateErr) throw updateErr;
+
+            // ColonFiles 테이블에서 파일 삭제
+            const deleteSql = `DELETE FROM ColonFiles WHERE id = ?`;
+            db.query(deleteSql, [id], (deleteErr, deleteResult) => {
+                if (deleteErr) throw deleteErr;
+                res.status(200).send('Colon file deleted and LectureFiles updated');
+            });
+        });
+    } else if (fileType === 'lecture') {
+        // Lecture 파일 삭제
+        const sql = `DELETE FROM LectureFiles WHERE id = ?`;
+        db.query(sql, [id], (err, result) => {
+            if (err) throw err;
+            res.status(200).send('Lecture file deleted');
+        });
+    } else {
+        res.status(400).send('Invalid file type');
+    }
 });
+
 
 // 파일 이동하기
 app.put('/api/:fileType-files/move/:id', (req, res) => {
@@ -585,7 +604,7 @@ app.post('/api/create-colon', (req, res) => {
             const insertFileQuery = 'INSERT INTO ColonFiles (folder_id, file_name, file_url, lecture_name, created_at, type) VALUES (?, ?, ?, ?, NOW(), ?)';
             db.query(insertFileQuery, [folderId, noteName, fileUrl, lectureName, type], (err, result) => {
                 if (err) {
-                    console.error('Failed to add file to folder:', err);
+                    console.error('Failed to add file to folder:', err.message);
                     return res.status(500).json({ error: 'Failed to add file to folder' });
                 }
                 const colonFileId = result.insertId;
@@ -616,6 +635,7 @@ app.post('/api/create-colon', (req, res) => {
         }
     });
 });
+
 //existColon에 삽입
 app.post('/api/update-lecture-file', (req, res) => {
     const { lectureFileId, colonFileId } = req.body;
@@ -660,10 +680,6 @@ app.get('/api/check-exist-colon', (req, res) => {
         }
     });
 });
-
-
-
-
 
 
 //강의파일 created_at 가져오기
@@ -791,31 +807,31 @@ app.get('/api/get-folder-name', (req, res) => {
 });
 
 
-//대체 텍스트 URL 가져오기
-app.get('/api/get-alternative-text-url', (req, res) => {
-    const { lecturefileId } = req.query;
-    console.log(`Received lecturefileId: ${lecturefileId}`);
+// //대체 텍스트 URL 가져오기
+// app.get('/api/get-alternative-text-url', (req, res) => {
+//     const { lecturefileId } = req.query;
+//     console.log(`Received lecturefileId: ${lecturefileId}`);
 
-    const sql = `
-        SELECT alternative_text_url
-        FROM Alt_table2
-        WHERE lecturefile_id = ?
-    `;
+//     const sql = `
+//         SELECT alternative_text_url
+//         FROM Alt_table2
+//         WHERE lecturefile_id = ?
+//     `;
 
-    db.query(sql, [lecturefileId], (err, results) => {
-        if (err) {
-            return res.status(500).json({ success: false, error: err.message });
-        }
+//     db.query(sql, [lecturefileId], (err, results) => {
+//         if (err) {
+//             return res.status(500).json({ success: false, error: err.message });
+//         }
 
-        console.log(`Query results: ${JSON.stringify(results)}`);
+//         console.log(`Query results: ${JSON.stringify(results)}`);
 
-        if (results.length > 0) {
-            res.status(200).json({ alternative_text_url: results[0].alternative_text_url });
-        } else {
-            res.status(404).json({ success: false, message: 'No matching record found' });
-        }
-    });
-});
+//         if (results.length > 0) {
+//             res.status(200).json({ alternative_text_url: results[0].alternative_text_url });
+//         } else {
+//             res.status(404).json({ success: false, message: 'No matching record found' });
+//         }
+//     });
+// });
 
 // 분리된 대체텍스트 URL을 가져오기
 app.get('/api/get-alternative-text-urls', (req, res) => {
@@ -1247,9 +1263,6 @@ app.get('/api/getKeywords/:lecturefile_id', (req, res) => {
         res.json({ success: true, keywordsUrl });
     });
 });
-
-
-
 
 app.listen(port, () => {
     console.log(`Server started on port ${port}`);

@@ -209,7 +209,7 @@ class _LectureStartPageState extends State<LectureStartPage> {
                     ),
                   );
                 },
-                // width: MediaQuery.of(context).size.width * 0.5,
+                // width: MediaQuery.sizeOf(context).width * 0.5,
                 // height: 50.0,
               ),
             ),

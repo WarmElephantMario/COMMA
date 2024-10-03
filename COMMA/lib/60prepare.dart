@@ -240,7 +240,8 @@ class _LearningPreparationState extends State<LearningPreparation> {
           builder: (BuildContext context, StateSetter setState) {
             return Padding(
               padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+                bottom: MediaQuery.sizeOf(context).aspectRatio + 16,
+                //bottom: MediaQuery.of(context).viewInsets.bottom + 16,
                 left: 16,
                 right: 16,
                 top: 16,
@@ -1162,7 +1163,7 @@ Widget build(BuildContext context) {
                 }
               }
             },
-            // width: MediaQuery.of(context).size.width * 0.7,
+            // width: MediaQuery.sizeOf(context).width * 0.7,
             // height: 50.0,
             iconPath: _isIconVisible ? 'assets/Vector.png' : null,
           ),

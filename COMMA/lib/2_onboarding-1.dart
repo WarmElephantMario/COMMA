@@ -75,7 +75,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery.sizeOf(context);
     final theme = Theme.of(context);
 
     return WillPopScope(
@@ -290,7 +290,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 class Onboarding1 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery.sizeOf(context);
     final theme = Theme.of(context);
 
     return Container(

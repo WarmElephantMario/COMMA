@@ -128,7 +128,7 @@ class MyApp extends StatelessWidget {
     final fontSizeProvider = Provider.of<FontSizeProvider>(context);
     final themeNotifier = Provider.of<ThemeNotifier>(context);
 
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery.sizeOf(context).width;
 
     return MaterialApp(
       navigatorObservers: [MyNavigatorObserver()],
