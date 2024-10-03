@@ -17,20 +17,38 @@ class UserProvider with ChangeNotifier {
 
   // 닉네임 업데이트
   void updateUserNickname(String newNickname) {
+     if (_user == null) {
+    // 에러 처리 로직 추가 (예: 로그 출력 또는 디버그 메시지)
+    print('Error: _user is null');
+    return;
+  }
     if (_user != null) {
-      _user = User(_user!.userKey, _user!.userId, newNickname, null);
+      _user = User(_user!.userKey, _user!.userId, newNickname, _user!.dis_type);
       notifyListeners();
     }
   }
 
+
   // 타입 업데이트
-  void updateDisType(int disType) {
-    if (_user != null) {
-      _user =
-          User(_user!.userKey, _user!.userId, _user!.user_nickname, disType);
-      notifyListeners();
-    }
+void updateDisType(int disType) {
+  if (_user == null) {
+    // 에러 처리 로직 추가 (예: 로그 출력 또는 디버그 메시지)
+    print('Error: _user is null');
+    return;
   }
+
+  // _user가 null이 아니라면 업데이트
+  _user = User(
+    _user!.userKey, 
+    _user!.userId, 
+    _user!.user_nickname, 
+    disType
+  );
+
+  // 상태 변화 알리기
+  notifyListeners();
+}
+
 
 //  // 회원탈퇴 시 UserKey 기록을 Provider에서 삭제
 //   void setUserKeytoNULL() {
