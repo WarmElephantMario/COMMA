@@ -165,10 +165,10 @@ packages:
     dependency: "direct main"
     description:
       name: charset_converter
-      sha256: eebf818b83552a84fc9f0d2ee7bdd151b36d10548be1c8205bb65295107c5c89
+      sha256: "46006a8753d2cc4f57f4e42b14f9b049f63395818312c1d225f66b20b0233be1"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.0"
+    version: "2.2.1"
   checked_yaml:
     dependency: transitive
     description:
@@ -1096,12 +1096,11 @@ packages:
   sound_stream:
     dependency: "direct main"
     description:
-      path: "."
-      ref: main
-      resolved-ref: fd446a3953a506aa776a81f66ce2a04606f2be1e
-      url: "https://github.com/GregHolmes/flutter-sound-stream.git"
-    source: git
-    version: "0.3.0"
+      name: sound_stream
+      sha256: "66e68cc6be9423c6ebbe40bcf177c61ae6b75fce8189c51fbf9db7f54d4ef23d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.1"
   source_gen:
     dependency: transitive
     description:

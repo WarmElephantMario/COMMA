@@ -357,7 +357,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(width: MediaQuery.of(context).size.width * 0.075),
+              SizedBox(width: MediaQuery.sizeOf(context).width * 0.075),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.only(right: 8.0),
@@ -369,7 +369,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                   ),
                 ),
               ),
-              SizedBox(width: MediaQuery.of(context).size.width * 0.0375),
+              SizedBox(width: MediaQuery.sizeOf(context).width * 0.0375),
               Transform.scale(
                 scale: 1.5,
                 child: Switch(
@@ -388,7 +388,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                   inactiveThumbColor: Colors.white,
                 ),
               ),
-              SizedBox(width: MediaQuery.of(context).size.width * 0.0375),
+              SizedBox(width: MediaQuery.sizeOf(context).width * 0.0375),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.only(left: 8.0),
