@@ -192,7 +192,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
     }
   }
 
-  void _showEditNameDialog() {
+void _showEditNameDialog() {
     final TextEditingController nicknameController =
         TextEditingController(text: nickname);
 
@@ -287,6 +287,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
       FocusScope.of(context).requestFocus(titleFocusNode);
     });
   }
+
 
   @override
   Widget build(BuildContext context) {

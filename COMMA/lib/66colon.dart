@@ -334,7 +334,7 @@ class _ColonPageState extends State<ColonPage> {
                                   } else {
                                     print('Error: colonFileId is null.');
                                   }
-
+                           
                                   Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
@@ -404,7 +404,6 @@ class _ColonPageState extends State<ColonPage> {
                           //     ClickButton(
                           //       text: '콜론(:) 다운하기',
                           //       onPressed: () {},
-                          //       // width: MediaQuery.sizeOf(context).width * 0.3,
                           //       // height: 40.0,
                           //     ),
                           //   ],
