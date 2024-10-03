@@ -35,6 +35,8 @@ class _AllFilesPageState extends State<AllFilesPage> {
   void initState() {
     super.initState();
     fetchFiles();
+    fetchLectureFiles();
+    fetchColonFiles();
   }
 
   Future<void> fetchFiles() async {
@@ -58,11 +60,22 @@ class _AllFilesPageState extends State<AllFilesPage> {
     }
   }
 
-  String formatDateTimeToKorean(String? dateTime) {
-    if (dateTime == null || dateTime.isEmpty) return 'Unknown';
-    final DateTime utcDateTime = DateTime.parse(dateTime);
-    final DateTime koreanDateTime = utcDateTime.add(const Duration(hours: 9));
-    return DateFormat('yyyy/MM/dd HH:mm').format(koreanDateTime);
+  // String formatDateTimeToKorean(String? dateTime) {
+  //   if (dateTime == null || dateTime.isEmpty) return 'Unknown';
+  //   final DateTime utcDateTime = DateTime.parse(dateTime);
+  //   final DateTime koreanDateTime = utcDateTime.add(const Duration(hours: 9));
+  //   return DateFormat('yyyy/MM/dd HH:mm').format(koreanDateTime);
+  // }
+
+  String formatDate(String dateString) {
+    try {
+      DateTime dateTime = DateTime.parse(dateString);
+      DateTime koreaTime = dateTime.add(const Duration(hours: 9)); // UTC+9로 변환
+      return DateFormat('yyyy-MM-dd HH:mm:ss').format(koreaTime);
+    } catch (e) {
+      print('Error parsing date: $e');
+      return dateString; // 오류 발생 시 원래 문자열 반환
+    }
   }
 
   Future<List<String>> fetchKeywords(int lecturefileId) async {
@@ -108,21 +121,27 @@ class _AllFilesPageState extends State<AllFilesPage> {
   }
 
   void fetchFolderAndNavigate(BuildContext context, int folderId,
-      String fileType, Map<String, dynamic> file) async {
-    try {
-      final lectureFileId = file['id'];
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final userDisType = userProvider.user?.dis_type;
+    String fileType, Map<String, dynamic> file) async {
+  try {
+    final lectureFileId = file['id']; // lectureFileId 가져오기
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userDisType = userProvider.user?.dis_type; // 유저의 dis_type 가져오기
 
+    // fileType이 "lecture"일 경우
+    if (fileType == "lecture") {
+      // 1. 먼저 lecturefileId로 existLecture 값을 확인하는 API 요청
       final existLectureResponse = await http.get(
           Uri.parse('${API.baseUrl}/api/checkExistLecture/$lectureFileId'));
 
       if (existLectureResponse.statusCode == 200) {
         var existLectureData = jsonDecode(existLectureResponse.body);
 
+        // 2. existLecture가 0이면 LectureStartPage로 이동
         if (existLectureData['existLecture'] == 0) {
+          // 키워드 fetch 후 LectureStartPage로 이동
           List<String> keywords = await fetchKeywords(lectureFileId);
 
+          // 폴더 이름 가져오기
           final response = await http.get(Uri.parse(
               '${API.baseUrl}/api/getFolderName/$fileType/$folderId'));
           if (response.statusCode == 200) {
@@ -137,17 +156,18 @@ class _AllFilesPageState extends State<AllFilesPage> {
                   lectureName: file['lecture_name'] ?? 'Unknown Lecture',
                   fileURL: file['file_url'] ??
                       'https://defaulturl.com/defaultfile.txt',
-                  type: userDisType!,
-                  selectedFolder: data['folder_name'],
+                  type: userDisType!, // 수정
+                  selectedFolder: data['folder_name'], // 폴더 이름
                   noteName: file['file_name'] ?? 'Unknown Note',
                   responseUrl: file['alternative_text_url'] ??
-                      'https://defaulturl.com/defaultfile.txt',
-                  keywords: keywords,
+                      'https://defaulturl.com/defaultfile.txt', // null 또는 실제 값
+                  keywords: keywords, // 키워드 목록
                 ),
               ),
             );
           }
         } else if (existLectureData['existLecture'] == 1) {
+          // existLecture가 1이면 기존 페이지로 이동
           final response = await http.get(Uri.parse(
               '${API.baseUrl}/api/getFolderName/$fileType/$folderId'));
           if (response.statusCode == 200) {
@@ -163,11 +183,32 @@ class _AllFilesPageState extends State<AllFilesPage> {
         print(
             'Failed to check existLecture: ${existLectureResponse.statusCode}');
       }
-    } catch (e) {
-      print('Error fetching folder name or existLecture: $e');
-      navigateToPage(context, 'Unknown Folder', file, fileType);
+    } 
+    // fileType이 "colon"일 경우
+    else if (fileType == "colon") {
+      // colonFileId 가져오기 (필요한 경우)
+      final colonFileId = file['id'];
+
+      // 폴더 이름 가져오기
+        // ColonPage로 이동
+            final response = await http.get(Uri.parse(
+              '${API.baseUrl}/api/getFolderName/$fileType/$folderId'));
+          if (response.statusCode == 200) {
+            var data = jsonDecode(response.body);
+            navigateToPage(context, data['folder_name'] ?? 'Unknown Folder',
+                file, fileType);
+          } else {
+            print('Failed to load folder name: ${response.statusCode}');
+            navigateToPage(context, 'Unknown Folder', file, fileType);
+          }
+    } else {
+      print('The fileType is not "lecture" or "colon". Operation skipped.');
     }
+  } catch (e) {
+    print('Error fetching folder name or existLecture: $e');
+    navigateToPage(context, 'Unknown Folder', file, fileType);
   }
+}
 
   void navigateToPage(BuildContext context, String folderName,
       Map<String, dynamic> file, String fileType) {
@@ -260,6 +301,7 @@ class _AllFilesPageState extends State<AllFilesPage> {
     }
   }
 
+
   Future<void> deleteItem(int fileId, String fileType) async {
     try {
       final response = await http.delete(
@@ -315,6 +357,67 @@ class _AllFilesPageState extends State<AllFilesPage> {
     } catch (error) {
       print('Error moving file: $error');
       rethrow;
+    }
+  }
+
+  Future<void> fetchLectureFiles() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userKey = userProvider.user?.userKey;
+    final disType = userProvider.user?.dis_type; // dis_type 값 가져오기
+
+    if (userKey != null && disType != null) {
+      try {
+        print(
+            'Fetching lecture files for userKey: $userKey and disType: $disType');
+
+        final response = await http.get(Uri.parse(
+          '${API.baseUrl}/api/getLectureFiles/$userKey?disType=$disType', // dis_type 파라미터 추가
+        ));
+
+        print('Response status code: ${response.statusCode}'); // 상태 코드 로그
+
+        if (response.statusCode == 200) {
+          print('Lecture files fetched successfully'); // 성공 로그
+          final List<Map<String, dynamic>> fileData =
+              List<Map<String, dynamic>>.from(
+                  jsonDecode(response.body)['files']);
+          setState(() {
+            lectureFiles = fileData;
+          });
+        } else {
+          print(
+              'Failed to load lecture files. Status code: ${response.statusCode}');
+          print('Response body: ${response.body}'); // 응답 본문 로그
+          throw Exception('Failed to load lecture files');
+        }
+      } catch (e, stacktrace) {
+        print('Error occurred while fetching lecture files: $e');
+        print('Stacktrace: $stacktrace'); // 스택 트레이스 로그
+        throw Exception('Failed to fetch lecture files: $e');
+      }
+    } else {
+      print('UserKey or disType is null');
+    }
+  }
+
+  Future<void> fetchColonFiles() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userKey = userProvider.user?.userKey;
+    final disType = userProvider.user?.dis_type; // dis_type 값 가져오기
+
+    if (userKey != null && disType != null) {
+      final response = await http.get(Uri.parse(
+        '${API.baseUrl}/api/getColonFiles/$userKey?disType=$disType', // dis_type 파라미터 추가
+      ));
+
+      if (response.statusCode == 200) {
+        setState(() {
+          colonFiles = List<Map<String, dynamic>>.from(
+              jsonDecode(response.body)['files']);
+        });
+      } else {
+        throw Exception('Failed to load colon files');
+      }
     }
   }
 
@@ -486,88 +589,109 @@ class _AllFilesPageState extends State<AllFilesPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+  final theme = Theme.of(context);
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        iconTheme: IconThemeData(color: theme.colorScheme.onTertiary),
-        title: Text(
-          widget.fileType == 'lecture' ? '전체 강의 파일' : '전체 콜론 파일',
-          style: theme.textTheme.titleLarge?.copyWith(
-              color: theme.colorScheme.onTertiary, fontWeight: FontWeight.w600),
-        ),
-        backgroundColor: theme.scaffoldBackgroundColor,
+  return Scaffold(
+    backgroundColor: theme.scaffoldBackgroundColor,
+    appBar: AppBar(
+      iconTheme: IconThemeData(color: theme.colorScheme.onTertiary),
+      title: Text(
+        widget.fileType == 'lecture' ? '전체 강의 파일' : '전체 콜론 파일',
+        style: theme.textTheme.titleLarge?.copyWith(
+            color: theme.colorScheme.onTertiary, fontWeight: FontWeight.w600),
       ),
-      body: files.isEmpty
-          ? Center(
-              child: Text(
-              '파일이 없습니다.',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSecondary,
-              ),
-            ))
-          : ListView.builder(
-              itemCount: files.length,
-              itemBuilder: (context, index) {
-                final file = files[index];
-
-                final fileName = file['file_name'] ?? 'Unknown Note';
-                final fileUrl = file['file_url'] ??
-                    'https://defaulturl.com/defaultfile.txt';
-                final lectureName = file['lecture_name'] ?? 'Unknown Lecture';
-                final createdAt = file['created_at'] ?? 'Unknown Date';
-                final folderId = file['folder_id'] ?? 0;
-                final fileType = widget.fileType;
-
-                return GestureDetector(
-                  onTap: () {
-                    print('File $fileName is clicked');
-                    fetchFolderAndNavigate(
-                        context, file['folder_id'], 'lecture', file);
-                  },
-                  child: LectureExample(
-                    lectureName: file['file_name'] ?? 'Unknown',
-                    date:
-                        formatDateTimeToKorean(file['created_at'] ?? 'Unknown'),
-                        
-                    onRename: () => showRenameDialog
-                    (
-                      context,
-                      colonFiles.indexOf(file),
-                      colonFiles,
-                      (id, name) => renameItem(id, name, 'colon'),
-                      setState,
-                      '이름 바꾸기',
-                      'file_name',
-                    ),
-                    onDelete: () async {
-                      await deleteItem(file['id'], 'colon');
-                      setState(() {
-                        colonFiles.remove(file);
-                      });
-                    },
-                    onMove: () async {
-                      await fetchOtherFolders('colon', file['folder_id']);
-                      showQuickMenu(
-                        context,
-                        file['id'],
-                        'colon',
-                        file['folder_id'],
-                        moveItem,
-                        () => fetchOtherFolders('colon', file['folder_id']),
-                        folderList,
-                        (selectedFolder) {
-                          setState(() {
-                            file['folder_id'] = selectedFolder;
-                          });
-                        },
-                      );
-                    },
-                  ),
-                );
-              },
+      backgroundColor: theme.scaffoldBackgroundColor,
+    ),
+    body: files.isEmpty
+        ? Center(
+            child: Text(
+            '파일이 없습니다.',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSecondary,
             ),
-    );
-  }
+          ))
+        : ListView.builder(
+            itemCount: files.length,
+            itemBuilder: (context, index) {
+              final file = files[index];
+
+              final fileName = file['file_name'] ?? 'Unknown Note';
+              final fileUrl = file['file_url'] ??
+                  'https://defaulturl.com/defaultfile.txt';
+              final lectureName = file['lecture_name'] ?? 'Unknown Lecture';
+              final createdAt = file['created_at'] ?? 'Unknown Date';
+              final folderId = file['folder_id'] ?? 0;
+              final fileType = widget.fileType; // fileType을 가져옴
+
+              return GestureDetector(
+                onTap: () {
+                  print('${fileType.toUpperCase()} ${file['file_name'] ?? "N/A"} is clicked');
+                  print('File details: $file');
+                  
+                  // fileType에 따라 다른 동작을 수행
+                  if (fileType == 'lecture') {
+                    fetchFolderAndNavigate(
+                        context, folderId, 'lecture', file);
+                  } else if (fileType == 'colon') {
+                    fetchFolderAndNavigate(
+                        context, folderId, 'colon', file);
+                  }
+                },
+                child: LectureExample(
+                  lectureName: fileName,
+                  date: formatDate(file['created_at'] ?? 'Unknown'),
+                  
+                 onRename: () {
+                  print('Rename tapped for file: ${file['file_name']}');
+                  
+
+                  showRenameDialog(
+                    context,
+                    index,
+                    fileType == 'lecture' ? lectureFiles : colonFiles, // Lecture와 Colon 파일 리스트 구분
+                    (id, newName) async {
+                      print('Renaming file with id: $id to new name: $newName');
+                      await renameItem(id, newName, fileType); // renameItem 호출
+                    },
+                    setState,
+                    '이름 바꾸기',
+                    'file_name',
+                  );
+                },
+
+
+                  onDelete: () async {
+                    await deleteItem(file['id'], fileType);
+                    setState(() {
+                      if (fileType == 'lecture') {
+                        lectureFiles.remove(file);
+                      } else if (fileType == 'colon') {
+                        colonFiles.remove(file);
+                      }
+                    });
+                  },
+                  
+                  onMove: () async {
+                    await fetchOtherFolders(fileType, folderId);
+                    showQuickMenu(
+                      context,
+                      file['id'],
+                      fileType,
+                      folderId,
+                      moveItem,
+                      () => fetchOtherFolders(fileType, folderId),
+                      folderList,
+                      (selectedFolder) {
+                        setState(() {
+                          file['folder_id'] = selectedFolder;
+                        });
+                      },
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+  );
+}
 }

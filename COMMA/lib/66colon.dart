@@ -300,7 +300,7 @@ class _ColonPageState extends State<ColonPage> {
                 builder: (context) => FolderFilesScreen(
                   folderName: widget.folderName,
                   folderId: widget.folderId!,
-                  folderType: 'Colon',
+                  folderType: 'colon',
                 ),
               ),
             );
@@ -344,7 +344,7 @@ class _ColonPageState extends State<ColonPage> {
                                         folderId:
                                             widget.folderId!, // 현재 콜론 파일의 폴더 ID
                                         folderType:
-                                            'Colon', // 폴더 타입은 'colon'으로 지정
+                                            'colon', // 폴더 타입은 'colon'으로 지정
                                       ),
                                     ),
                                   );
