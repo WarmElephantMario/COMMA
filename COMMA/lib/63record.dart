@@ -1510,6 +1510,7 @@ class _RecordPageState extends State<RecordPage> {
                                             colonDetails['lecture_name'],
                                         createdAt: colonDetails['created_at'],
                                         fileUrl: colonDetails['file_url'],
+                                        colonFileId : _existColon,
                                       ),
                                     ),
                                   );
