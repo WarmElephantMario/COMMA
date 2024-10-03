@@ -358,7 +358,7 @@ void _showEditNameDialog() {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(width: MediaQuery.of(context).size.width * 0.075),
+              SizedBox(width: MediaQuery.sizeOf(context).width * 0.075),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.only(right: 8.0),
@@ -370,7 +370,7 @@ void _showEditNameDialog() {
                   ),
                 ),
               ),
-              SizedBox(width: MediaQuery.of(context).size.width * 0.0375),
+              SizedBox(width: MediaQuery.sizeOf(context).width * 0.0375),
               Transform.scale(
                 scale: 1.5,
                 child: Switch(
@@ -389,7 +389,7 @@ void _showEditNameDialog() {
                   inactiveThumbColor: Colors.white,
                 ),
               ),
-              SizedBox(width: MediaQuery.of(context).size.width * 0.0375),
+              SizedBox(width: MediaQuery.sizeOf(context).width * 0.0375),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.only(left: 8.0),

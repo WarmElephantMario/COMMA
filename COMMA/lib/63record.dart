@@ -553,7 +553,6 @@ class _RecordPageState extends State<RecordPage> {
       // 2. lectureFileId가 없고 colonFileId가 제공된 경우 처리
       else if (colonFileId != null) {
         print('Using colonFileId to fetch alternative text URLs');
-
         // colonFileId로 대체 텍스트 URL 리스트 가져오기
         var url = '${API.baseUrl}/api/get-alt-url/$colonFileId';
         var response = await http.get(Uri.parse(url));

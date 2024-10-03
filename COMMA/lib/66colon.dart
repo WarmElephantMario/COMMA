@@ -404,7 +404,6 @@ class _ColonPageState extends State<ColonPage> {
                           //     ClickButton(
                           //       text: '콜론(:) 다운하기',
                           //       onPressed: () {},
-                          //       // width: MediaQuery.of(context).size.width * 0.3,
                           //       // height: 40.0,
                           //     ),
                           //   ],
@@ -433,7 +432,7 @@ class _ColonPageState extends State<ColonPage> {
                                 children: [
                                   Container(
                                     width: double.infinity,
-                                    height: MediaQuery.of(context).size.height -
+                                    height: MediaQuery.sizeOf(context).height -
                                         200, // 화면 높이에 맞춤
                                     child: Image.memory(
                                       pageImage.bytes,
@@ -446,7 +445,7 @@ class _ColonPageState extends State<ColonPage> {
                                     Container(
                                       width: double.infinity,
                                       height:
-                                          MediaQuery.of(context).size.height -
+                                          MediaQuery.sizeOf(context).height -
                                               200, // 화면 높이에 맞춤
                                       color: Colors.black.withOpacity(0.5),
                                       child: Center(
@@ -529,7 +528,7 @@ class _ColonPageState extends State<ColonPage> {
                                 if (_blurredPages.contains(1) && type == 0)
                                   Container(
                                     width: double.infinity,
-                                    height: MediaQuery.of(context).size.height -
+                                    height: MediaQuery.sizeOf(context).height -
                                         200, // 화면 높이에 맞춤
                                     color: Colors.black.withOpacity(0.5),
                                     child: Center(
