@@ -531,26 +531,12 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
       Map<String, dynamic> file, String fileType) {
     try {
       Widget page;
-
-      int lectureFolderId;
-      int colonFileId;
-
-      // folder_id가 문자열일 경우 int로 변환
-
-      lectureFolderId = file['folder_id'];
-
-      // id가 문자열일 경우 int로 변환
-
-      colonFileId = file['id'];
-
-      //print('Navigating to page with folderName: $folderName, lectureFolderId: $lectureFolderId, colonFileId: $colonFileId');
-
       if (fileType == 'lecture') {
         if (file['type'] == 0) {
           // 강의 파일 + 대체텍스트인 경우
           page = RecordPage(
             lecturefileId: file['id'] ?? 'Unknown id',
-            lectureFolderId: lectureFolderId,
+            lectureFolderId: file['folder_id'],
             noteName: file['file_name'] ?? 'Unknown Note',
             fileUrl:
                 file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
@@ -565,7 +551,7 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
           // 강의 파일 + 실시간 자막인 경우
           page = RecordPage(
             lecturefileId: file['id'] ?? 'Unknown id',
-            lectureFolderId: lectureFolderId,
+            lectureFolderId: file['folder_id'],
             noteName: file['file_name'] ?? 'Unknown Note',
             fileUrl:
                 file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
@@ -583,7 +569,7 @@ void fetchFolderAndNavigate(BuildContext context, int folderId,
           lectureName: file['lecture_name'] ?? 'Unknown Lecture',
           createdAt: file['created_at'] ?? 'Unknown Date',
           fileUrl: file['file_url'] ?? 'Unknown fileUrl',
-          colonFileId: colonFileId,
+          colonFileId: file['id'],
           folderId: file['folder_id'] ?? 'Unknown folderId',
         );
       }

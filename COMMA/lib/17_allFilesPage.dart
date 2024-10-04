@@ -120,7 +120,8 @@ class _AllFilesPageState extends State<AllFilesPage> {
     }
   }
 
-  void fetchFolderAndNavigate(BuildContext context, int folderId,
+  // 강의 파일 클릭 이벤트에서 폴더 이름 조회 및 existLecture 확인
+void fetchFolderAndNavigate(BuildContext context, int folderId,
     String fileType, Map<String, dynamic> file) async {
   try {
     final lectureFileId = file['id']; // lectureFileId 가져오기
@@ -210,61 +211,58 @@ class _AllFilesPageState extends State<AllFilesPage> {
   }
 }
 
+
+
   void navigateToPage(BuildContext context, String folderName,
-      Map<String, dynamic> file, String fileType) {
-    try {
-      Widget page;
-
-      int lectureFolderId;
-      int colonFileId;
-
-      lectureFolderId = file['folder_id'];
-      colonFileId = file['id'];
-
-      if (fileType == 'lecture') {
-        if (file['type'] == 0) {
-          page = RecordPage(
-            lecturefileId: file['id'] ?? 'Unknown id',
-            lectureFolderId: lectureFolderId,
-            noteName: file['file_name'] ?? 'Unknown Note',
-            fileUrl:
-                file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
-            folderName: folderName,
-            recordingState: RecordingState.recorded,
-            lectureName: file['lecture_name'] ?? 'Unknown Lecture',
-            responseUrl: file['alternative_text_url'] ??
-                'https://defaulturl.com/defaultfile.txt',
-            type: file['type'] ?? 'Unknown Type',
-          );
-        } else {
-          page = RecordPage(
-            lecturefileId: file['id'] ?? 'Unknown id',
-            lectureFolderId: lectureFolderId,
-            noteName: file['file_name'] ?? 'Unknown Note',
-            fileUrl:
-                file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
-            folderName: folderName,
-            recordingState: RecordingState.recorded,
-            lectureName: file['lecture_name'] ?? 'Unknown Lecture',
-            type: file['type'] ?? 'Unknown Type',
-          );
-        }
-      } else {
-        page = ColonPage(
-          folderName: folderName,
+    Map<String, dynamic> file, String fileType) {
+  try {
+    Widget page;
+    if (fileType == 'lecture') {
+      if (file['type'] == 0) {
+        // 강의 파일 + 대체텍스트인 경우
+        page = RecordPage(
+          lecturefileId: file['id'],
+          lectureFolderId: file['folder_id'],
           noteName: file['file_name'] ?? 'Unknown Note',
+          fileUrl: file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
+          folderName: folderName,
+          recordingState: RecordingState.recorded,
           lectureName: file['lecture_name'] ?? 'Unknown Lecture',
-          createdAt: file['created_at'] ?? 'Unknown Date',
-          fileUrl: file['file_url'] ?? 'Unknown fileUrl',
-          colonFileId: colonFileId,
+          responseUrl: file['alternative_text_url'] ??
+              'https://defaulturl.com/defaultfile.txt',
+          type: file['type'] ?? 'Unknown Type',
+        );
+      } else {
+        // 강의 파일 + 실시간 자막인 경우
+        page = RecordPage(
+          lecturefileId: file['id'],
+          lectureFolderId: file['folder_id'],
+          noteName: file['file_name'] ?? 'Unknown Note',
+          fileUrl: file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
+          folderName: folderName,
+          recordingState: RecordingState.recorded,
+          lectureName: file['lecture_name'] ?? 'Unknown Lecture',
+          type: file['type'] ?? 'Unknown Type',
         );
       }
-
-      Navigator.push(context, MaterialPageRoute(builder: (context) => page));
-    } catch (e) {
-      print('Error in navigateToPage: $e');
+    } else {
+      // 콜론 파일인 경우
+      page = ColonPage(
+        folderName: folderName,
+        noteName: file['file_name'] ?? 'Unknown Note',
+        lectureName: file['lecture_name'] ?? 'Unknown Lecture',
+        createdAt: file['created_at'] ?? 'Unknown Date',
+        fileUrl: file['file_url'] ?? 'Unknown fileUrl',
+        colonFileId: file['id'],
+        folderId: file['folder_id'],
+      );
     }
+
+    Navigator.push(context, MaterialPageRoute(builder: (context) => page));
+  } catch (e) {
+    print('Error in navigateToPage: $e');
   }
+}
 
   Future<void> renameItem(int fileId, String newName, String fileType) async {
     try {

@@ -1100,7 +1100,7 @@ app.get('/api/get-colon-details', (req, res) => {
     }
     const parsedColonId = parseInt(colonId, 10);
 
-    const query = 'SELECT folder_id, file_name, file_url, lecture_name, created_at, type FROM ColonFiles WHERE id = ?';
+    const query = 'SELECT ,folder_id, file_name, file_url, lecture_name, created_at, type FROM ColonFiles WHERE id = ?';
     console.log(`Executing query: ${query} with colonId: ${parsedColonId}`);
 
     db.query(query, [parsedColonId], (err, results) => {

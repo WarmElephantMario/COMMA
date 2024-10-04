@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_plugin/16_homepage_move.dart';
 import 'dart:convert';
@@ -66,6 +68,9 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
               'id': file['id'],
               'folder_id': file['folder_id'] ?? 0,
               'lecture_name': file['lecture_name'] ?? 'Unknown Lecture',
+              'type':file['type'] ?? -1,
+              'existColon' : file['existColon'] ?? -1,
+              'existLecture' : file['existLecture'] ?? -1,
             };
           }).toList();
         });
@@ -164,13 +169,13 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
     }
   }
 
- void fetchFolderAndNavigate(BuildContext context, int folderId,
+ // 강의 파일 클릭 이벤트에서 폴더 이름 조회 및 existLecture 확인
+void fetchFolderAndNavigate(BuildContext context, int folderId,
     String fileType, Map<String, dynamic> file) async {
   try {
     final lectureFileId = file['id']; // lectureFileId 가져오기
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userDisType = userProvider.user?.dis_type; // 유저의 dis_type 가져오기
-    print(fileType);
 
     // fileType이 "lecture"일 경우
     if (fileType == "lecture") {
@@ -257,77 +262,62 @@ class _FolderFilesScreenState extends State<FolderFilesScreen> {
 
 
 
-  // 강의 파일 또는 콜론 파일 페이지로 네비게이션
   void navigateToPage(BuildContext context, String folderName,
-      Map<String, dynamic> file, String fileType) {
-    try {
-      Widget page;
-
-      int lectureFolderId;
-      int colonFileId;
-
-      // folder_id가 문자열일 경우 int로 변환
-
-      lectureFolderId = file['folder_id'];
-
-      // id가 문자열일 경우 int로 변환
-
-      colonFileId = file['id'];
-
-      //print('Navigating to page with folderName: $folderName, lectureFolderId: $lectureFolderId, colonFileId: $colonFileId');
-
-      if (fileType == 'lecture') {
-        if (file['type'] == 0) {
-          // 강의 파일 + 대체텍스트인 경우
-          page = RecordPage(
-            lecturefileId: file['id'] ?? 'Unknown id',
-            lectureFolderId: lectureFolderId,
-            noteName: file['file_name'] ?? 'Unknown Note',
-            fileUrl:
-                file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
-            folderName: folderName,
-            recordingState: RecordingState.recorded,
-            lectureName: file['lecture_name'] ?? 'Unknown Lecture',
-            responseUrl: file['alternative_text_url'] ??
-                'https://defaulturl.com/defaultfile.txt',
-            type: file['type'] ?? 'Unknown Type',
-          );
-        } else {
-          // 강의 파일 + 실시간 자막인 경우
-          page = RecordPage(
-            lecturefileId: file['id'] ?? 'Unknown id',
-            lectureFolderId: lectureFolderId,
-            noteName: file['file_name'] ?? 'Unknown Note',
-            fileUrl:
-                file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
-            folderName: folderName,
-            recordingState: RecordingState.recorded,
-            lectureName: file['lecture_name'] ?? 'Unknown Lecture',
-            type: file['type'] ?? 'Unknown Type',
-          );
-        }
-      } else {
-        // 콜론 파일인 경우
-        page = ColonPage(
-          folderName: folderName,
+    Map<String, dynamic> file, String fileType) {
+  try {
+    Widget page;
+    if (fileType == 'lecture') {
+      if (file['type'] == 0) {
+        // 강의 파일 + 대체텍스트인 경우
+        page = RecordPage(
+          lecturefileId: file['id'],
+          lectureFolderId: file['folder_id'],
           noteName: file['file_name'] ?? 'Unknown Note',
+          fileUrl: file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
+          folderName: folderName,
+          recordingState: RecordingState.recorded,
           lectureName: file['lecture_name'] ?? 'Unknown Lecture',
-          createdAt: file['created_at'] ?? 'Unknown Date',
-          fileUrl: file['file_url'] ?? 'Unknown fileUrl',
-          colonFileId: colonFileId,
-          folderId: file['folder_id'] ?? 'Unknown folderId',
+          responseUrl: file['alternative_text_url'] ??
+              'https://defaulturl.com/defaultfile.txt',
+          type: file['type'] ?? 'Unknown Type',
+        );
+      } else {
+        // 강의 파일 + 실시간 자막인 경우
+        page = RecordPage(
+          lecturefileId: file['id'],
+          lectureFolderId: file['folder_id'],
+          noteName: file['file_name'] ?? 'Unknown Note',
+          fileUrl: file['file_url'] ?? 'https://defaulturl.com/defaultfile.txt',
+          folderName: folderName,
+          recordingState: RecordingState.recorded,
+          lectureName: file['lecture_name'] ?? 'Unknown Lecture',
+          type: file['type'] ?? 'Unknown Type',
         );
       }
-
-      Navigator.push(context, MaterialPageRoute(builder: (context) => page));
-    } catch (e) {
-      print('Error in navigateToPage: $e');
+    } else {
+      // 콜론 파일인 경우
+      page = ColonPage(
+        folderName: folderName,
+        noteName: file['file_name'] ?? 'Unknown Note',
+        lectureName: file['lecture_name'] ?? 'Unknown Lecture',
+        createdAt: file['created_at'] ?? 'Unknown Date',
+        fileUrl: file['file_url'] ?? 'Unknown fileUrl',
+        colonFileId: file['id'],
+        folderId: file['folder_id'],
+      );
     }
+
+    Navigator.push(context, MaterialPageRoute(builder: (context) => page));
+  } catch (e) {
+    print('Error in navigateToPage: $e');
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    print("37입장");
 
     return PopScope(
       canPop: true,
