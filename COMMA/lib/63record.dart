@@ -1029,7 +1029,9 @@ class _RecordPageState extends State<RecordPage> {
                           // `ColonPage`로 이동전 콜론 정보 가져오기
                           var colonDetails =
                               await _fetchColonDetails(colonFileId);
-
+                          print("대체저장시 ");
+                          print(widget.lecturefileId);
+                          print(colonFileId);
                           await _insertColonFileIdToAltTable(
                               widget.lecturefileId ?? -1, colonFileId);
 
@@ -1587,15 +1589,14 @@ class _RecordPageState extends State<RecordPage> {
                                         //var colonFolderName = await _fetchColonFolderName(colonDetails['folder_id']);
                                         List<String> keywords = await fetchKeywords(widget.lecturefileId!);
 
-                                        showColonCreatedDialog(
+                                        showColonCreatingDialog(
                                             context,
-                                            widget.folderName,
-                                            widget.noteName,
-                                            widget.lectureName,
-                                            widget.fileUrl,
-                                            widget.lecturefileId ?? -1,
-                                            colonFileId);
+                                            colonDetails['file_name'],
+                                            colonDetails['file_url'],
+                                            progressNotifier);
+
                                       print(keywords);
+                                      print(widget.lecturefileId);
                                       
                                       // 자막 업그레이드 시작
                                       if (keywords != null &&
