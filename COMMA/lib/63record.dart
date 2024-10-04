@@ -1511,6 +1511,7 @@ class _RecordPageState extends State<RecordPage> {
                                         createdAt: colonDetails['created_at'],
                                         fileUrl: colonDetails['file_url'],
                                         colonFileId : _existColon,
+                                        folderId: colonDetails['folder_id'],
                                       ),
                                     ),
                                   );
@@ -1637,22 +1638,23 @@ class _RecordPageState extends State<RecordPage> {
                         if (!_isPDF && _fileBytes != null)
                           Image.memory(_fileBytes!),
                         if (_blurredPages.contains(_currentPage))
-                          Container(
-                            height: 600,
-                            color: Colors.black.withOpacity(0.5),
-                            child: Center(
-                              child: Text(
-                                pageTexts.isNotEmpty
-                                    ? pageTexts[_currentPage] ??
-                                        '페이지 $_currentPage의 텍스트가 없습니다.'
-                                    : '텍스트가 없습니다.',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.normal,
-                                ),
-                              ),
-                            ),
-                          ),
+  Container(
+    width: double.infinity,
+    color: Colors.black.withOpacity(0.5),
+    padding: const EdgeInsets.all(16.0),
+    child: Center(
+      child: Text(
+        pageTexts.isNotEmpty
+            ? pageTexts[_currentPage] ?? '페이지 $_currentPage의 텍스트가 없습니다.'
+            : '텍스트가 없습니다.',
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.normal,
+        ),
+      ),
+    ),
+  ),
+
                       ],
                     ),
                   ),

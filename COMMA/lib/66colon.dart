@@ -288,7 +288,7 @@ class _ColonPageState extends State<ColonPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
+    print(colonFileId);
     return PopScope(
       canPop: true,
       onPopInvokedWithResult: (didPop, result) {
@@ -440,25 +440,22 @@ class _ColonPageState extends State<ColonPage> {
                                       //fit: BoxFit.cover, // 이미지를 전체 화면에 맞춤
                                     ),
                                   ),
-                                  if (_blurredPages.contains(pageIndex + 1) &&
-                                      type == 0)
-                                    Container(
-                                      width: double.infinity,
-                                      height:
-                                          MediaQuery.sizeOf(context).height -
-                                              200, // 화면 높이에 맞춤
-                                      color: Colors.black.withOpacity(0.5),
-                                      child: Center(
-                                        child: Text(
-                                          pageTexts[pageIndex + 1] ??
-                                              '텍스트가 없습니다.',
-                                          style: theme.textTheme.bodyMedium
-                                              ?.copyWith(
-                                            color: Colors.white,
-                                          ),
-                                        ),
+                                  // Widget build의 부분 수정
+                                if (_blurredPages.contains(pageIndex + 1) && type == 0)
+                                  Container(
+                                    width: double.infinity,
+                                    constraints: BoxConstraints(
+                                      minHeight: MediaQuery.sizeOf(context).height - 200,
+                                    ), // 높이를 화면에 맞춰 조정
+                                    color: Colors.black.withOpacity(0.5),
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Text(
+                                      pageTexts[pageIndex + 1] ?? '텍스트가 없습니다.',
+                                      style: theme.textTheme.bodyMedium?.copyWith(
+                                        color: Colors.white,
                                       ),
                                     ),
+                                  ),
                                 ],
                               ),
                             );
