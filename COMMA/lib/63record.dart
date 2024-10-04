@@ -1302,6 +1302,49 @@ class _RecordPageState extends State<RecordPage> {
     });
   }
 
+  Future<List<String>> fetchKeywords(int lecturefileId) async {
+    try {
+      final response = await http
+          .get(Uri.parse('${API.baseUrl}/api/getKeywords/$lecturefileId'));
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+
+        if (responseData['success'] == true) {
+          final String keywordsUrl = responseData['keywordsUrl'];
+
+          return await fetchKeywordsFromUrl(keywordsUrl);
+        } else {
+          print('Error fetching keywords: ${responseData['error']}');
+          return [];
+        }
+      } else {
+        print('Failed to fetch keywords with status: ${response.statusCode}');
+        return [];
+      }
+    } catch (e) {
+      print('Error: $e');
+      return [];
+    }
+  }
+
+  Future<List<String>> fetchKeywordsFromUrl(String keywordsUrl) async {
+    try {
+      final response = await http.get(Uri.parse(keywordsUrl));
+
+      if (response.statusCode == 200) {
+        final String content = utf8.decode(response.bodyBytes);
+        return content.split(',');
+      } else {
+        print('Failed to fetch keywords from URL');
+        return [];
+      }
+    } catch (e) {
+      print('Error fetching keywords from URL: $e');
+      return [];
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
@@ -1527,7 +1570,7 @@ class _RecordPageState extends State<RecordPage> {
                                   var existColon = jsonResponse['existColon'];
 
                                   if (existColon == null) {
-                                    print("콜론 없음");
+                                    print("콜론 없음"); 
 
                                     int colonFileId = await createColonFolder(
                                         "${widget.folderName} (:)",
@@ -1536,30 +1579,32 @@ class _RecordPageState extends State<RecordPage> {
                                         widget.lectureName,
                                         widget.type,
                                         userKey);
-
                                     if (colonFileId != -1) {
                                       await updateLectureFileWithColonId(
                                           widget.lecturefileId, colonFileId);
-                                      var colonDetails =
-                                          await _fetchColonDetails(colonFileId);
-                                      var colonFolderName =
-                                          await _fetchColonFolderName(
-                                              colonDetails['folder_id']);
+                                    
+                                        var colonDetails = await _fetchColonDetails(colonFileId);
+                                        //var colonFolderName = await _fetchColonFolderName(colonDetails['folder_id']);
+                                        List<String> keywords = await fetchKeywords(widget.lecturefileId!);
 
-                                      showColonCreatingDialog(
-                                          context,
-                                          colonDetails['file_name'],
-                                          colonDetails['file_url'],
-                                          progressNotifier);
-
+                                        showColonCreatedDialog(
+                                            context,
+                                            widget.folderName,
+                                            widget.noteName,
+                                            widget.lectureName,
+                                            widget.fileUrl,
+                                            widget.lecturefileId ?? -1,
+                                            colonFileId);
+                                      print(keywords);
+                                      
                                       // 자막 업그레이드 시작
-                                      if (widget.keywords != null &&
-                                          widget.keywords!.isNotEmpty) {
+                                      if (keywords != null &&
+                                          keywords!.isNotEmpty) {
                                         print("자막 업그레이드 시작");
 
                                         await processTranscripts(
                                             widget.lecturefileId!,
-                                            widget.keywords!);
+                                            keywords!);
                                       } else {
                                         print('오류 : 키워드가 안 들어옴');
                                       }
