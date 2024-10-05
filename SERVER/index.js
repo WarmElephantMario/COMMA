@@ -311,9 +311,8 @@ app.post('/api/signup_info', (req, res) => {
 
         let newLectureFileIds = []; // 새로 생성된 LectureFile들의 ID를 저장할 배열
 
-        // 여러개의 defaultLectureFileId 처리
-        const defaultLectureFileIds = [188,282,279,283]; // 복사할 여러 LectureFile의 ID 배열로 변경
-        const defaultColonFileIds = [99,185,182,186];
+        const defaultLectureFileIds = [214, 290, 333, 292, 291, 334]; // 복사할 여러 LectureFile의 ID 배열
+        const defaultColonFileIds = [99, 182, 231, 185, 186, 232]; // 복사할 여러 ColonFile의 ID 배열
 
         // Lecture 폴더 생성
         db.query(lectureFolderQuery, ['기본 폴더', userKey], (err, lectureResult) => {
@@ -325,8 +324,10 @@ app.post('/api/signup_info', (req, res) => {
                 const newFolderId = lectureResult.insertId; // 방금 생성된 LectureFolders의 ID (folder_id)
                 console.log('New Lecture Folder ID:', newFolderId);
 
-                // 각 LectureFile을 복사 후, newLectureFileId로 업데이트
-                defaultLectureFileIds.forEach((defaultLectureFileId) => {
+                // 각 LectureFile과 ColonFile을 순차적으로 복사하고 새로운 ID를 업데이트
+                defaultLectureFileIds.forEach((defaultLectureFileId, index) => {
+                    const defaultColonFileId = defaultColonFileIds[index]; // 현재 인덱스에 맞는 colonFileId
+
                     const copyLectureFileQuery = `
                         INSERT INTO LectureFiles (folder_id, file_name, file_url, lecture_name, created_at, type, existColon, existLecture)
                         SELECT ?, file_name, file_url, lecture_name, NOW(), type, existColon, existLecture
@@ -343,7 +344,7 @@ app.post('/api/signup_info', (req, res) => {
                             newLectureFileIds.push(newLectureFileId); // 새로 생성된 LectureFile ID를 배열에 추가
                             console.log('New Lecture File ID:', newLectureFileId);
 
-                            // Record_table과 Record_table2에서 defaultLectureFileId와 동일한 레코드를 복사하고 새로 생성된 lecturefile_id로 업데이트
+                            // Record_table과 Record_table2에서 lecturefile_id를 새로 생성된 값으로 업데이트
                             const copyRecordTableQuery = `
                                 INSERT INTO Record_table (lecturefile_id, colonfile_id, record_url, page)
                                 SELECT ?, colonfile_id, record_url, page
@@ -357,7 +358,7 @@ app.post('/api/signup_info', (req, res) => {
                                 WHERE lecturefile_id = ?`;
 
                             // Record_table 복사 및 업데이트
-                            db.query(copyRecordTableQuery, [newLectureFileId,defaultLectureFileId], (err, result) => {
+                            db.query(copyRecordTableQuery, [newLectureFileId, defaultLectureFileId], (err, result) => {
                                 if (err) {
                                     console.error('Failed to copy records from Record_table:', err);
                                 } else {
@@ -366,7 +367,7 @@ app.post('/api/signup_info', (req, res) => {
                             });
 
                             // Record_table2 복사 및 업데이트
-                            db.query(copyRecordTable2Query, [newLectureFileId,defaultLectureFileId], (err, result) => {
+                            db.query(copyRecordTable2Query, [newLectureFileId, defaultLectureFileId], (err, result) => {
                                 if (err) {
                                     console.error('Failed to copy records from Record_table2:', err);
                                 } else {
@@ -406,8 +407,10 @@ app.post('/api/signup_info', (req, res) => {
                 const newFolderId = colonResult.insertId; // 방금 생성된 ColonFolders의 ID (folder_id)
                 console.log('New Colon Folder ID:', newFolderId);
 
-                // 각 ColonFile 복사
+                // ColonFile 복사 및 순차적으로 colonfile_id 업데이트
                 defaultColonFileIds.forEach((defaultColonFileId, index) => {
+                    const newLectureFileId = newLectureFileIds[index]; // 대응하는 LectureFile ID
+
                     const copyColonFileQuery = `
                         INSERT INTO ColonFiles (folder_id, file_name, file_url, lecture_name, created_at, type)
                         SELECT ?, file_name, file_url, lecture_name, NOW(), type
@@ -422,8 +425,6 @@ app.post('/api/signup_info', (req, res) => {
                         } else {
                             const newColonFileId = result.insertId;
                             console.log('New Colon File ID:', newColonFileId);
-
-                            const newLectureFileId = newLectureFileIds[index]; // 대응하는 LectureFile ID
 
                             // Record_table2와 Alt_table2에서 colonfile_id 업데이트
                             const updateRecordTable2Query = `
