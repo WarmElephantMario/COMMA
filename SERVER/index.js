@@ -309,7 +309,11 @@ app.post('/api/signup_info', (req, res) => {
         const lectureFolderQuery = 'INSERT INTO LectureFolders (folder_name, userKey) VALUES (?, ?)';
         const colonFolderQuery = 'INSERT INTO ColonFolders (folder_name, userKey) VALUES (?, ?)';
 
-        let newLectureFileId;
+        let newLectureFileIds = []; // 새로 생성된 LectureFile들의 ID를 저장할 배열
+
+        // 여러개의 defaultLectureFileId 처리
+        const defaultLectureFileIds = [188,282,279,283]; // 복사할 여러 LectureFile의 ID 배열로 변경
+        const defaultColonFileIds = [99,185,182,186];
 
         // Lecture 폴더 생성
         db.query(lectureFolderQuery, ['기본 폴더', userKey], (err, lectureResult) => {
@@ -318,176 +322,151 @@ app.post('/api/signup_info', (req, res) => {
             } else {
                 console.log('Default lecture folder created');
 
-                const defaultLectureFileId = 188; // 기본으로 복사할 LectureFile의 ID  !!!!!!! 뒤에서 복사할 ColonFile의 ID랑 pair가 맞아야함!!!!
                 const newFolderId = lectureResult.insertId; // 방금 생성된 LectureFolders의 ID (folder_id)
                 console.log('New Lecture Folder ID:', newFolderId);
 
-                //LectureFiles에서 특정 ID를 가져와 복사
-                const copyLectureFileQuery = `
-                    INSERT INTO LectureFiles (folder_id, file_name, file_url, lecture_name, created_at, type, existColon, existLecture)
-                    SELECT ?, file_name, file_url, lecture_name, NOW(), type, existColon, existLecture
-                    FROM LectureFiles
-                    WHERE id = ?`;
+                // 각 LectureFile을 복사 후, newLectureFileId로 업데이트
+                defaultLectureFileIds.forEach((defaultLectureFileId) => {
+                    const copyLectureFileQuery = `
+                        INSERT INTO LectureFiles (folder_id, file_name, file_url, lecture_name, created_at, type, existColon, existLecture)
+                        SELECT ?, file_name, file_url, lecture_name, NOW(), type, existColon, existLecture
+                        FROM LectureFiles
+                        WHERE id = ?`;
 
-                console.log('Executing copyLectureFileQuery with folder_id:', newFolderId, 'and lectureFileId:', defaultLectureFileId);
+                    console.log('Executing copyLectureFileQuery with folder_id:', newFolderId, 'and lectureFileId:', defaultLectureFileId);
 
-                db.query(copyLectureFileQuery, [newFolderId, defaultLectureFileId], (err, result) => {
-                    if (err) {
-                        console.error('Failed to copy default lecture file:', err);
-                        console.error('Error details:', err);
-                    } else {
-                        console.log('Default lecture file copied successfully. Affected Rows:', result.affectedRows);
-                        
-                        // 새로 복사된 LectureFile ID를 가져옴
-                        newLectureFileId = result.insertId;
-                        console.log('New Lecture File ID:', newLectureFileId);
+                    db.query(copyLectureFileQuery, [newFolderId, defaultLectureFileId], (err, result) => {
+                        if (err) {
+                            console.error('Failed to copy default lecture file:', err);
+                        } else {
+                            const newLectureFileId = result.insertId;
+                            newLectureFileIds.push(newLectureFileId); // 새로 생성된 LectureFile ID를 배열에 추가
+                            console.log('New Lecture File ID:', newLectureFileId);
 
-                        // Record_table에서 defaultLectureFileId와 동일한 lecturefile_id를 가진 레코드를 복사하고 lecturefile_id를 newLectureFileId로 수정
-                        const copyRecordTableQuery = `
-                            INSERT INTO Record_table (lecturefile_id, colonfile_id, record_url, page)
-                            SELECT ?, colonfile_id, record_url, page
-                            FROM Record_table
-                            WHERE lecturefile_id = ?`;
+                            // Record_table과 Record_table2에서 defaultLectureFileId와 동일한 레코드를 복사하고 새로 생성된 lecturefile_id로 업데이트
+                            const copyRecordTableQuery = `
+                                INSERT INTO Record_table (lecturefile_id, colonfile_id, record_url, page)
+                                SELECT ?, colonfile_id, record_url, page
+                                FROM Record_table
+                                WHERE lecturefile_id = ?`;
 
-                        console.log('Executing copyRecordTableQuery with new lecturefile_id:', newLectureFileId);
+                            const copyRecordTable2Query = `
+                                INSERT INTO Record_table2 (lecturefile_id, colonfile_id, record_url, page)
+                                SELECT ?, colonfile_id, record_url, page
+                                FROM Record_table2
+                                WHERE lecturefile_id = ?`;
 
-                        db.query(copyRecordTableQuery, [newLectureFileId, defaultLectureFileId], (err, result) => {
-                            if (err) {
-                                console.error('Failed to copy records from Record_table:', err);
-                            } else {
-                                console.log('Records from Record_table copied successfully. Affected Rows:', result.affectedRows);
-                            }
-                        }); 
+                            // Record_table 복사 및 업데이트
+                            db.query(copyRecordTableQuery, [newLectureFileId,defaultLectureFileId], (err, result) => {
+                                if (err) {
+                                    console.error('Failed to copy records from Record_table:', err);
+                                } else {
+                                    console.log('Records from Record_table copied successfully.');
+                                }
+                            });
 
-                        // Record_table2에서 defaultLectureFileId와 동일한 lecturefile_id를 가진 레코드를 복사하고 lecturefile_id를 newLectureFileId로 수정
-                        const copyRecordTable2Query = `
-                            INSERT INTO Record_table2 (lecturefile_id, colonfile_id, record_url, page)
-                            SELECT ?, colonfile_id, record_url, page
-                            FROM Record_table2
-                            WHERE lecturefile_id = ?`;
+                            // Record_table2 복사 및 업데이트
+                            db.query(copyRecordTable2Query, [newLectureFileId,defaultLectureFileId], (err, result) => {
+                                if (err) {
+                                    console.error('Failed to copy records from Record_table2:', err);
+                                } else {
+                                    console.log('Records from Record_table2 copied successfully.');
+                                }
+                            });
 
-                        console.log('Executing copyRecordTable2Query with new lecturefile_id:', newLectureFileId);
+                            // Alt_table2 복사 및 lecturefile_id 업데이트 없이 바로 newLectureFileId로 수정하여 삽입
+                            const copyAltTableQuery = `
+                                INSERT INTO Alt_table2 (lecturefile_id, colonfile_id, alternative_text_url, page)
+                                SELECT ?, colonfile_id, alternative_text_url, page
+                                FROM Alt_table2
+                                WHERE lecturefile_id = ?`;
 
-                        db.query(copyRecordTable2Query, [newLectureFileId, defaultLectureFileId], (err, result) => {
-                            if (err) {
-                                console.error('Failed to copy records from Record_table2:', err);
-                            } else {
-                                console.log('Records from Record_table2 copied successfully. Affected Rows:', result.affectedRows);
-                            }
-                        });
+                            console.log('Executing copyAltTableQuery with new lecturefile_id:', newLectureFileId);
 
-                        // Alt_table2에서 defaultLectureFileId와 동일한 lecturefile_id를 가진 레코드를 복사하고 lecturefile_id를 newLectureFileId로 수정
-                        const copyAltTableQuery = `
-                            INSERT INTO Alt_table2 (lecturefile_id, colonfile_id, alternative_text_url, page)
-                            SELECT ?, colonfile_id, alternative_text_url, page
-                            FROM Alt_table2
-                            WHERE lecturefile_id = ?`;
-
-                        console.log('Executing copyAltTableQuery with new lecturefile_id:', newLectureFileId);
-
-                        db.query(copyAltTableQuery, [newLectureFileId, defaultLectureFileId], (err, result) => {
-                            if (err) {
-                                console.error('Failed to copy records from Alt_table2:', err);
-                            } else {
-                                console.log('Records from Alt_table2 copied successfully. Affected Rows:', result.affectedRows);
-                            }
-                        });
-                        
-                    }
+                            db.query(copyAltTableQuery, [newLectureFileId, defaultLectureFileId], (err, result) => {
+                                if (err) {
+                                    console.error('Failed to copy records from Alt_table2:', err);
+                                } else {
+                                    console.log('Records from Alt_table2 copied successfully.');
+                                }
+                            });
+                        }
+                    });
                 });
-                
             }
         });
 
-        // Colon 폴더 생성 후 특정 Colon 파일 복사
+        // Colon 폴더 생성 및 여러 ColonFile 복사
         db.query(colonFolderQuery, ['기본 폴더 (:)', userKey], (err, colonResult) => {
             if (err) {
                 console.error('Failed to create colon folder:', err);
             } else {
                 console.log('Default colon folder created');
                 
-                const defaultColonFileId = 99; // 기본으로 복사할 ColonFile ID   !!!!!!! 앞에서 복사한 LectureFile의 ID랑 pair가 맞아야함!!!!
                 const newFolderId = colonResult.insertId; // 방금 생성된 ColonFolders의 ID (folder_id)
                 console.log('New Colon Folder ID:', newFolderId);
 
-                // ColonFiles에서 특정 ID를 가져와 복사
-                const copyColonFileQuery = `
-                    INSERT INTO ColonFiles (folder_id, file_name, file_url, lecture_name, created_at, type)
-                    SELECT ?, file_name, file_url, lecture_name, NOW(), type
-                    FROM ColonFiles
-                    WHERE id = ?`;
-
-                console.log('Executing copyColonFileQuery with folder_id:', newFolderId, 'and colonFileId:', defaultColonFileId);
-
-                db.query(copyColonFileQuery, [newFolderId, defaultColonFileId], (err, result) => {
-                    if (err) {
-                        console.error('Failed to copy default colon file:', err);
-                        console.error('Error details:', err);
-                    } else {
-                        console.log('Default colon file copied successfully. Affected Rows:', result.affectedRows);
-                        
-                        // 새로 복사된 ColonFile의 ID를 가져옴
-                        const newColonFileId = result.insertId;
-                        console.log('New Colon File ID:', newColonFileId);
-
-                        // Record_table에서 새로 복사된 lecturefile_id에 해당하는 colonfile_id 업데이트
-                        const updateRecordTableQuery = `
-                            UPDATE Record_table2
-                            SET colonfile_id = ?
-                            WHERE lecturefile_id = ?`;
-
-                        db.query(updateRecordTableQuery, [newColonFileId, newLectureFileId], (err, result) => {
-                            if (err) {
-                                console.error('Failed to update Record_table:', err);
-                            } else {
-                                console.log('Updated Record_table successfully.');
-                            }
-                        });
-
-                        // Record_table2에서 새로 복사된 lecturefile_id에 해당하는 colonfile_id 업데이트
-                        const updateRecordTable2Query = `
-                            UPDATE Record_table2
-                            SET colonfile_id = ?
-                            WHERE lecturefile_id = ?`;
-
-                        db.query(updateRecordTable2Query, [newColonFileId, newLectureFileId], (err, result) => {
-                            if (err) {
-                                console.error('Failed to update Record_table2:', err);
-                            } else {
-                                console.log('Updated Record_table2 successfully.');
-                            }
-                        });
-
-                        // Alt_table2에서 새로 복사된 lecturefile_id에 해당하는 colonfile_id 업데이트
-                        const updateAltTable2Query = `
-                            UPDATE Alt_table2
-                            SET colonfile_id = ?
-                            WHERE lecturefile_id = ?`;
-
-                        db.query(updateAltTable2Query, [newColonFileId, newLectureFileId], (err, result) => {
-                            if (err) {
-                                console.error('Failed to update Alt_table2:', err);
-                            } else {
-                                console.log('Updated Alt_table2 successfully.');
-                            }
-                        });
-
-                        //Lecturefile 테이블에서 newLectureFileId의 existColon 값을 newColonFileId로 업데이트
-                        const updateLectureFileQuery = `
-                        UPDATE LectureFiles
-                        SET existColon = ?
+                // 각 ColonFile 복사
+                defaultColonFileIds.forEach((defaultColonFileId, index) => {
+                    const copyColonFileQuery = `
+                        INSERT INTO ColonFiles (folder_id, file_name, file_url, lecture_name, created_at, type)
+                        SELECT ?, file_name, file_url, lecture_name, NOW(), type
+                        FROM ColonFiles
                         WHERE id = ?`;
 
-                        db.query(updateLectureFileQuery, [newColonFileId, newLectureFileId], (err, result) => {
+                    console.log('Executing copyColonFileQuery with folder_id:', newFolderId, 'and colonFileId:', defaultColonFileId);
+
+                    db.query(copyColonFileQuery, [newFolderId, defaultColonFileId], (err, result) => {
                         if (err) {
-                            console.error('Failed to update LectureFiles table:', err);
+                            console.error('Failed to copy default colon file:', err);
                         } else {
-                            console.log('Updated LectureFiles table successfully. Affected Rows:', result.affectedRows);
+                            const newColonFileId = result.insertId;
+                            console.log('New Colon File ID:', newColonFileId);
+
+                            const newLectureFileId = newLectureFileIds[index]; // 대응하는 LectureFile ID
+
+                            // Record_table2와 Alt_table2에서 colonfile_id 업데이트
+                            const updateRecordTable2Query = `
+                                UPDATE Record_table2
+                                SET colonfile_id = ?
+                                WHERE lecturefile_id = ?`;
+
+                            const updateAltTable2Query = `
+                                UPDATE Alt_table2
+                                SET colonfile_id = ?
+                                WHERE lecturefile_id = ?`;
+
+                            db.query(updateRecordTable2Query, [newColonFileId, newLectureFileId], (err, result) => {
+                                if (err) {
+                                    console.error('Failed to update colonfile_id in Record_table2:', err);
+                                } else {
+                                    console.log('Updated colonfile_id in Record_table2 successfully.');
+                                }
+                            });
+
+                            db.query(updateAltTable2Query, [newColonFileId, newLectureFileId], (err, result) => {
+                                if (err) {
+                                    console.error('Failed to update colonfile_id in Alt_table2:', err);
+                                } else {
+                                    console.log('Updated colonfile_id in Alt_table2 successfully.');
+                                }
+                            });
+
+                            // LectureFiles 테이블의 existColon 업데이트
+                            const updateLectureFileQuery = `
+                                UPDATE LectureFiles
+                                SET existColon = ?
+                                WHERE id = ?`;
+
+                            db.query(updateLectureFileQuery, [newColonFileId, newLectureFileId], (err, result) => {
+                                if (err) {
+                                    console.error('Failed to update LectureFiles table:', err);
+                                } else {
+                                    console.log('Updated LectureFiles table successfully.');
+                                }
+                            });
                         }
-                        });
-
-
-                    }
+                    });
                 });
             }
         });
@@ -495,8 +474,6 @@ app.post('/api/signup_info', (req, res) => {
         return res.status(200).json({ success: true, userKey: userKey });
     });
 });
-
-
 
 
 // 회원 탈퇴
