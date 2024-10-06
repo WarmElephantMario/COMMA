@@ -52,6 +52,7 @@ class _FolderScreenState extends State<FolderScreen> {
   Future<void> fetchFolders() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userKey = userProvider.user?.userKey;
+   
 
     if (userKey != null) {
       try {
