@@ -30,7 +30,6 @@ class DisabilitySelectionPage extends StatelessWidget {
           'type': type,
         }),
       );
-
       // 상태 코드와 응답 내용 로그 출력
       print('Response Status Code: ${response.statusCode}');
       print('Response Body: ${response.body}');

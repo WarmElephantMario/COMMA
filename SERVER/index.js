@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
+const mysqlPromise = require('mysql2/promise');
 
 const app = express();
 const port = 3000;
@@ -13,6 +14,14 @@ app.use(bodyParser.json());
 app.use(cors());
 
 const db = mysql.createPool({
+    host: 'wem-comma-db.c724coieckpw.ap-northeast-2.rds.amazonaws.com',
+    user: 'admin',
+    password: 'comma0812!',
+    database: 'comma'
+});
+
+// Promise 기반 풀
+const dbPromise = mysqlPromise.createPool({
     host: 'wem-comma-db.c724coieckpw.ap-northeast-2.rds.amazonaws.com',
     user: 'admin',
     password: 'comma0812!',
@@ -176,10 +185,14 @@ app.get('/api/lecture-folders', (req, res) => {
             LectureFolders.id, 
             LectureFolders.folder_name, 
             COUNT(LectureFiles.id) AS file_count 
-        FROM LectureFolders 
-        LEFT JOIN LectureFiles ON LectureFolders.id = LectureFiles.folder_id 
-        WHERE LectureFolders.userKey = ? 
-        GROUP BY LectureFolders.id
+        FROM LectureFolders
+        LEFT JOIN LectureFiles 
+            ON LectureFolders.id = LectureFiles.folder_id 
+        JOIN user_table 
+            ON user_table.userKey = LectureFolders.userKey
+        WHERE LectureFolders.userKey = ?
+            AND LectureFiles.type = user_table.dis_type
+        GROUP BY LectureFolders.id;
     `;
     db.query(sql, [userKey], (err, result) => {
         if (err) throw err;
@@ -195,10 +208,14 @@ app.get('/api/colon-folders', (req, res) => {
             ColonFolders.id, 
             ColonFolders.folder_name, 
             COUNT(ColonFiles.id) AS file_count 
-        FROM ColonFolders 
-        LEFT JOIN ColonFiles ON ColonFolders.id = ColonFiles.folder_id 
-        WHERE ColonFolders.userKey = ? 
-        GROUP BY ColonFolders.id
+        FROM ColonFolders
+        LEFT JOIN ColonFiles 
+            ON ColonFolders.id = ColonFiles.folder_id
+        JOIN user_table 
+            ON user_table.userKey = ColonFolders.userKey
+        WHERE ColonFolders.userKey = ?
+            AND ColonFiles.type = user_table.dis_type
+        GROUP BY ColonFolders.id;
     `;
     db.query(sql, [userKey], (err, result) => {
         if (err) throw err;
@@ -282,220 +299,128 @@ app.get('/api/:fileType-files/:folderId', (req, res) => {
 
 
 // 회원가입 (해당 userId로 최초접속 시 회원 등록하면서 userKey 반환)
-app.post('/api/signup_info', (req, res) => {
-    console.log('API 요청 수신: /api/signup_info');
+app.post('/api/signup_info', async (req, res) => {
+    try {
+        const userId = req.body.user_id;
+        const usernickname = req.body.user_nickname;
 
-    const userId = req.body.user_id;
-    const usernickname = req.body.user_nickname;
-
-    console.log('전달된 유저아이디:', userId);
-    console.log('생성된 닉네임:', usernickname);
-
-    if (!userId || !usernickname) {
-        return res.status(400).json({ success: false, error: 'User ID and nickname are required.' });
-    }
-
-    const sqlQuery = `INSERT INTO user_table (user_id, user_nickname) VALUES (?, ?)`;
-    db.query(sqlQuery, [userId, usernickname], (err, result) => {
-        if (err) {
-            console.error('Error inserting into user_table:', err); // 에러 로그 출력
-            return res.status(500).json({ success: false, error: err.message });
+        console.log('전달된 유저아이디:', userId);
+        console.log('생성된 닉네임:', usernickname);
+        
+        if (!userId || !usernickname) {
+            return res.status(400).json({ success: false, error: 'User ID and nickname are required.' });
         }
 
+        const sqlQuery = 'INSERT INTO user_table (user_id, user_nickname) VALUES (?, ?);';
+
+        // dbPromise.query에 await을 사용하여 결과를 받아옵니다.
+        const [result] = await dbPromise.query(sqlQuery, [userId, usernickname]);
         const userKey = result.insertId; // 삽입된 사용자의 ID를 가져옴
         console.log('Generated userKey:', userKey);
 
-        // 기본 폴더 생성
-        const lectureFolderQuery = 'INSERT INTO LectureFolders (folder_name, userKey) VALUES (?, ?)';
-        const colonFolderQuery = 'INSERT INTO ColonFolders (folder_name, userKey) VALUES (?, ?)';
-
-        let newLectureFileId;
-
         // Lecture 폴더 생성
-        db.query(lectureFolderQuery, ['기본 폴더', userKey], (err, lectureResult) => {
-            if (err) {
-                console.error('Failed to create lecture folder:', err);
-            } else {
-                console.log('Default lecture folder created');
+        const lectureFolderQuery = 'INSERT INTO LectureFolders (folder_name, userKey) VALUES (?, ?)';
+        const [lectureResult] = await dbPromise.query(lectureFolderQuery, ['기본 폴더', userKey]);
+        const newFolderId = lectureResult.insertId;
+        console.log('New Lecture Folder ID:', newFolderId);
 
-                const defaultLectureFileId = 188; // 기본으로 복사할 LectureFile의 ID  !!!!!!! 뒤에서 복사할 ColonFile의 ID랑 pair가 맞아야함!!!!
-                const newFolderId = lectureResult.insertId; // 방금 생성된 LectureFolders의 ID (folder_id)
-                console.log('New Lecture Folder ID:', newFolderId);
+        const newLectureFileIds = [];
+        const defaultLectureFileIds = [214,290,339,292,291,340]; // 복사할 여러 LectureFile의 ID 배열로 변경
+        const defaultColonFileIds = [99,182,237,185,186,238];
 
-                //LectureFiles에서 특정 ID를 가져와 복사
-                const copyLectureFileQuery = `
-                    INSERT INTO LectureFiles (folder_id, file_name, file_url, lecture_name, created_at, type, existColon, existLecture)
-                    SELECT ?, file_name, file_url, lecture_name, NOW(), type, existColon, existLecture
-                    FROM LectureFiles
-                    WHERE id = ?`;
+        // LectureFile 복사
+        for (let i = 0; i < defaultLectureFileIds.length; i++) {
+            const defaultLectureFileId = defaultLectureFileIds[i];
+            const copyLectureFileQuery = `
+                INSERT INTO LectureFiles (folder_id, file_name, file_url, lecture_name, created_at, type, existColon, existLecture)
+                SELECT ?, file_name, file_url, lecture_name, NOW(), type, existColon, existLecture
+                FROM LectureFiles
+                WHERE id = ?`;
 
-                console.log('Executing copyLectureFileQuery with folder_id:', newFolderId, 'and lectureFileId:', defaultLectureFileId);
+            const [lectureFileResult] = await dbPromise.query(copyLectureFileQuery, [newFolderId, defaultLectureFileId]);
+            const newLectureFileId = lectureFileResult.insertId;
+            newLectureFileIds.push(newLectureFileId);
+            console.log('New Lecture File ID:', newLectureFileId);
 
-                db.query(copyLectureFileQuery, [newFolderId, defaultLectureFileId], (err, result) => {
-                    if (err) {
-                        console.error('Failed to copy default lecture file:', err);
-                        console.error('Error details:', err);
-                    } else {
-                        console.log('Default lecture file copied successfully. Affected Rows:', result.affectedRows);
-                        
-                        // 새로 복사된 LectureFile ID를 가져옴
-                        newLectureFileId = result.insertId;
-                        console.log('New Lecture File ID:', newLectureFileId);
+            // Record_table 복사
+            const copyRecordTableQuery = `
+                INSERT INTO Record_table (lecturefile_id, colonfile_id, record_url, page)
+                SELECT ?, colonfile_id, record_url, page
+                FROM Record_table
+                WHERE lecturefile_id = ?`;
+            await dbPromise.query(copyRecordTableQuery, [newLectureFileId, defaultLectureFileId]);
+            console.log('Records from Record_table copied successfully.');
 
-                        // Record_table에서 defaultLectureFileId와 동일한 lecturefile_id를 가진 레코드를 복사하고 lecturefile_id를 newLectureFileId로 수정
-                        const copyRecordTableQuery = `
-                            INSERT INTO Record_table (lecturefile_id, colonfile_id, record_url, page)
-                            SELECT ?, colonfile_id, record_url, page
-                            FROM Record_table
-                            WHERE lecturefile_id = ?`;
+            // Record_table2 복사
+            const copyRecordTable2Query = `
+                INSERT INTO Record_table2 (lecturefile_id, colonfile_id, record_url, page)
+                SELECT ?, colonfile_id, record_url, page
+                FROM Record_table2
+                WHERE lecturefile_id = ? AND colonfile_id = ?`;
+            await dbPromise.query(copyRecordTable2Query, [newLectureFileId, defaultLectureFileId, defaultColonFileIds[i]]);
+            console.log('Records from Record_table2 copied successfully.');
 
-                        console.log('Executing copyRecordTableQuery with new lecturefile_id:', newLectureFileId);
+            // Alt_table2 복사
+            const copyAltTableQuery = `
+                INSERT INTO Alt_table2 (lecturefile_id, colonfile_id, alternative_text_url, page)
+                SELECT ?, colonfile_id, alternative_text_url, page
+                FROM Alt_table2
+                WHERE lecturefile_id = ?`;
+            await dbPromise.query(copyAltTableQuery, [newLectureFileId, defaultLectureFileId]);
+            console.log('Records from Alt_table2 copied successfully.');
+        }
 
-                        db.query(copyRecordTableQuery, [newLectureFileId, defaultLectureFileId], (err, result) => {
-                            if (err) {
-                                console.error('Failed to copy records from Record_table:', err);
-                            } else {
-                                console.log('Records from Record_table copied successfully. Affected Rows:', result.affectedRows);
-                            }
-                        }); 
+        // Colon 폴더 생성
+        const colonFolderQuery = 'INSERT INTO ColonFolders (folder_name, userKey) VALUES (?, ?)';
+        const [colonResult] = await dbPromise.query(colonFolderQuery, ['기본 폴더 (:)', userKey]);
+        const newColonFolderId = colonResult.insertId;
+        console.log('New Colon Folder ID:', newColonFolderId);
 
-                        // Record_table2에서 defaultLectureFileId와 동일한 lecturefile_id를 가진 레코드를 복사하고 lecturefile_id를 newLectureFileId로 수정
-                        const copyRecordTable2Query = `
-                            INSERT INTO Record_table2 (lecturefile_id, colonfile_id, record_url, page)
-                            SELECT ?, colonfile_id, record_url, page
-                            FROM Record_table2
-                            WHERE lecturefile_id = ?`;
+        // ColonFile 복사 및 업데이트
+        for (let i = 0; i < defaultColonFileIds.length; i++) {
+            const defaultColonFileId = defaultColonFileIds[i];
+            const newLectureFileId = newLectureFileIds[i];
 
-                        console.log('Executing copyRecordTable2Query with new lecturefile_id:', newLectureFileId);
+            const copyColonFileQuery = `
+                INSERT INTO ColonFiles (folder_id, file_name, file_url, lecture_name, created_at, type)
+                SELECT ?, file_name, file_url, lecture_name, NOW(), type
+                FROM ColonFiles
+                WHERE id = ?`;
+            const [colonFileResult] = await dbPromise.query(copyColonFileQuery, [newColonFolderId, defaultColonFileId]);
+            const newColonFileId = colonFileResult.insertId;
+            console.log('New Colon File ID:', newColonFileId);
 
-                        db.query(copyRecordTable2Query, [newLectureFileId, defaultLectureFileId], (err, result) => {
-                            if (err) {
-                                console.error('Failed to copy records from Record_table2:', err);
-                            } else {
-                                console.log('Records from Record_table2 copied successfully. Affected Rows:', result.affectedRows);
-                            }
-                        });
+            // Record_table2 업데이트
+            const updateRecordTable2Query = `
+                UPDATE Record_table2
+                SET colonfile_id = ?
+                WHERE lecturefile_id = ?`;
+            await dbPromise.query(updateRecordTable2Query, [newColonFileId, newLectureFileId]);
+            console.log('Updated colonfile_id in Record_table2 successfully.');
 
-                        // Alt_table2에서 defaultLectureFileId와 동일한 lecturefile_id를 가진 레코드를 복사하고 lecturefile_id를 newLectureFileId로 수정
-                        const copyAltTableQuery = `
-                            INSERT INTO Alt_table2 (lecturefile_id, colonfile_id, alternative_text_url, page)
-                            SELECT ?, colonfile_id, alternative_text_url, page
-                            FROM Alt_table2
-                            WHERE lecturefile_id = ?`;
+            // Alt_table2 업데이트
+            const updateAltTable2Query = `
+                UPDATE Alt_table2
+                SET colonfile_id = ?
+                WHERE lecturefile_id = ?`;
+            await dbPromise.query(updateAltTable2Query, [newColonFileId, newLectureFileId]);
+            console.log('Updated colonfile_id in Alt_table2 successfully.');
 
-                        console.log('Executing copyAltTableQuery with new lecturefile_id:', newLectureFileId);
-
-                        db.query(copyAltTableQuery, [newLectureFileId, defaultLectureFileId], (err, result) => {
-                            if (err) {
-                                console.error('Failed to copy records from Alt_table2:', err);
-                            } else {
-                                console.log('Records from Alt_table2 copied successfully. Affected Rows:', result.affectedRows);
-                            }
-                        });
-                        
-                    }
-                });
-                
-            }
-        });
-
-        // Colon 폴더 생성 후 특정 Colon 파일 복사
-        db.query(colonFolderQuery, ['기본 폴더 (:)', userKey], (err, colonResult) => {
-            if (err) {
-                console.error('Failed to create colon folder:', err);
-            } else {
-                console.log('Default colon folder created');
-                
-                const defaultColonFileId = 99; // 기본으로 복사할 ColonFile ID   !!!!!!! 앞에서 복사한 LectureFile의 ID랑 pair가 맞아야함!!!!
-                const newFolderId = colonResult.insertId; // 방금 생성된 ColonFolders의 ID (folder_id)
-                console.log('New Colon Folder ID:', newFolderId);
-
-                // ColonFiles에서 특정 ID를 가져와 복사
-                const copyColonFileQuery = `
-                    INSERT INTO ColonFiles (folder_id, file_name, file_url, lecture_name, created_at, type)
-                    SELECT ?, file_name, file_url, lecture_name, NOW(), type
-                    FROM ColonFiles
-                    WHERE id = ?`;
-
-                console.log('Executing copyColonFileQuery with folder_id:', newFolderId, 'and colonFileId:', defaultColonFileId);
-
-                db.query(copyColonFileQuery, [newFolderId, defaultColonFileId], (err, result) => {
-                    if (err) {
-                        console.error('Failed to copy default colon file:', err);
-                        console.error('Error details:', err);
-                    } else {
-                        console.log('Default colon file copied successfully. Affected Rows:', result.affectedRows);
-                        
-                        // 새로 복사된 ColonFile의 ID를 가져옴
-                        const newColonFileId = result.insertId;
-                        console.log('New Colon File ID:', newColonFileId);
-
-                        // Record_table에서 새로 복사된 lecturefile_id에 해당하는 colonfile_id 업데이트
-                        const updateRecordTableQuery = `
-                            UPDATE Record_table2
-                            SET colonfile_id = ?
-                            WHERE lecturefile_id = ?`;
-
-                        db.query(updateRecordTableQuery, [newColonFileId, newLectureFileId], (err, result) => {
-                            if (err) {
-                                console.error('Failed to update Record_table:', err);
-                            } else {
-                                console.log('Updated Record_table successfully.');
-                            }
-                        });
-
-                        // Record_table2에서 새로 복사된 lecturefile_id에 해당하는 colonfile_id 업데이트
-                        const updateRecordTable2Query = `
-                            UPDATE Record_table2
-                            SET colonfile_id = ?
-                            WHERE lecturefile_id = ?`;
-
-                        db.query(updateRecordTable2Query, [newColonFileId, newLectureFileId], (err, result) => {
-                            if (err) {
-                                console.error('Failed to update Record_table2:', err);
-                            } else {
-                                console.log('Updated Record_table2 successfully.');
-                            }
-                        });
-
-                        // Alt_table2에서 새로 복사된 lecturefile_id에 해당하는 colonfile_id 업데이트
-                        const updateAltTable2Query = `
-                            UPDATE Alt_table2
-                            SET colonfile_id = ?
-                            WHERE lecturefile_id = ?`;
-
-                        db.query(updateAltTable2Query, [newColonFileId, newLectureFileId], (err, result) => {
-                            if (err) {
-                                console.error('Failed to update Alt_table2:', err);
-                            } else {
-                                console.log('Updated Alt_table2 successfully.');
-                            }
-                        });
-
-                        //Lecturefile 테이블에서 newLectureFileId의 existColon 값을 newColonFileId로 업데이트
-                        const updateLectureFileQuery = `
-                        UPDATE LectureFiles
-                        SET existColon = ?
-                        WHERE id = ?`;
-
-                        db.query(updateLectureFileQuery, [newColonFileId, newLectureFileId], (err, result) => {
-                        if (err) {
-                            console.error('Failed to update LectureFiles table:', err);
-                        } else {
-                            console.log('Updated LectureFiles table successfully. Affected Rows:', result.affectedRows);
-                        }
-                        });
-
-
-                    }
-                });
-            }
-        });
+            // LectureFiles 테이블의 existColon 업데이트
+            const updateLectureFileQuery = `
+                UPDATE LectureFiles
+                SET existColon = ?
+                WHERE id = ?`;
+            await dbPromise.query(updateLectureFileQuery, [newColonFileId, newLectureFileId]);
+            console.log('Updated LectureFiles table with existcolon successfully.');
+        }
 
         return res.status(200).json({ success: true, userKey: userKey });
-    });
+    } catch (err) {
+        console.error('Error processing signup:', err);
+        return res.status(500).json({ success: false, error: err.message });
+    }
 });
-
 
 
 
@@ -1312,9 +1237,10 @@ app.post('/api/alt-table2', (req, res) => {
 
 // 사용자 학습 유형(장애 타입) 업데이트 API
 app.post('/api/user/:userKey/update-type', (req, res) => {
+    console.log('1');
     const userKey = req.params.userKey;
     const { type } = req.body;
-
+    console.log(userKey);
     const sql = 'UPDATE user_table SET dis_type = ? WHERE userKey = ?';
 
     // 콜백 방식으로 쿼리 실행

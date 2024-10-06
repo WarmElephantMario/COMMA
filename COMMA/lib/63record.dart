@@ -1256,6 +1256,8 @@ class _RecordPageState extends State<RecordPage> {
   Future<void> loadAndProcessLectureData(int? lecturefileId) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userKey = userProvider.user?.userKey;
+    // progressNotifier 초기화
+  progressNotifier.value = 0.0;
 
     // 대체텍스트 파일 불러오기
     List<String> pageTexts = [];
@@ -1264,12 +1266,18 @@ class _RecordPageState extends State<RecordPage> {
         await fetchAlternativeTextUrls(lecturefileId);
     print('대체텍스트 로드 다 됐습니다');
 
+      // 전체 파일 개수
+  int totalFiles = alternativeTextUrls.length + (await fetchRecordUrls(lecturefileId)).length;
+  double step = 1.0 / totalFiles; // progress 증가 단위 계산
+
     for (String url in alternativeTextUrls) {
       try {
         String pageText = await http
             .get(Uri.parse(url))
             .then((response) => utf8.decode(response.bodyBytes));
         pageTexts.add(pageText);
+         progressNotifier.value += step; // progress 값 증가
+    
       } catch (e) {
         print('Error loading alternative text: $e');
       }
@@ -1280,11 +1288,14 @@ class _RecordPageState extends State<RecordPage> {
     List<String> scriptTexts = [];
     List<String> scriptUrls = await fetchRecordUrls(lecturefileId);
 
+
     for (String url in scriptUrls) {
       try {
         String scriptText =
             await http.get(Uri.parse(url)).then((response) => response.body);
         scriptTexts.add(scriptText);
+       progressNotifier.value += step; // progress 값 증가
+
       } catch (e) {
         print('Error loading script text: $e');
       }
@@ -1294,6 +1305,7 @@ class _RecordPageState extends State<RecordPage> {
     // 각 페이지별 스크립트 분할 작업
     Map<String, List<String>> pageScripts =
         await divideScriptsByPages(pageTexts, scriptTexts, scriptUrls);
+     progressNotifier.value = 1; // 작업 완료 시 progress 100 설정
 
     // 결과 출력 (또는 필요한 처리) - TODO
     pageScripts.forEach((page, scripts) {
