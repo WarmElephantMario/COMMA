@@ -1680,7 +1680,9 @@ class _RecordPageState extends State<RecordPage> {
                         if (_isPDF &&
                             _pdfController != null &&
                             widget.type != 1)
-                          SizedBox(
+                          Semantics(
+                            label: 'PDF 페이지 $_currentPage',
+                          child :SizedBox(
                             height: 600,
                             child: PdfView(
                               controller: _pdfController!,
@@ -1693,26 +1695,29 @@ class _RecordPageState extends State<RecordPage> {
                               },
                             ),
                           ),
+                          ), 
                         if (!_isPDF && _fileBytes != null)
-                          Image.memory(_fileBytes!),
+                        Semantics(
+                        label: 'PDF 페이지 $_currentPage', // 이미지 파일에 대한 설명 추가
+                          child : Image.memory(_fileBytes!),
+                        ),
                         if (_blurredPages.contains(_currentPage))
-  Container(
-    width: double.infinity,
-    color: Colors.black.withOpacity(0.5),
-    padding: const EdgeInsets.all(16.0),
-    child: Center(
-      child: Text(
-        pageTexts.isNotEmpty
-            ? pageTexts[_currentPage] ?? '페이지 $_currentPage의 텍스트가 없습니다.'
-            : '텍스트가 없습니다.',
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: Colors.white,
-          fontWeight: FontWeight.normal,
-        ),
-      ),
-    ),
-  ),
-
+                        Container(
+                          width: double.infinity,
+                          color: Colors.black.withOpacity(0.5),
+                          padding: const EdgeInsets.all(16.0),
+                          child: Center(
+                            child: Text(
+                              pageTexts.isNotEmpty
+                                  ? pageTexts[_currentPage] ?? '페이지 $_currentPage의 텍스트가 없습니다.'
+                                  : '텍스트가 없습니다.',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.normal,
+                              ),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
