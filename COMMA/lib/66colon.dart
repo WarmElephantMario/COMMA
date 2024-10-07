@@ -412,6 +412,7 @@ class _ColonPageState extends State<ColonPage> {
                         ],
                       ),
                     ),
+                  
                     if (widget.lectureName.endsWith('.pdf') &&
                         widget.fileUrl != null)
                       ListView.builder(
@@ -428,6 +429,8 @@ class _ColonPageState extends State<ColonPage> {
                                   _toggleBlur(pageIndex + 1);
                                 }
                               },
+                              child: Semantics(
+                                label: 'PDF 페이지 ${pageIndex + 1}', // PDF 페이지에 대한 설명 추가
                               child: Stack(
                                 children: [
                                   Container(
@@ -457,6 +460,7 @@ class _ColonPageState extends State<ColonPage> {
                                     ),
                                   ),
                                 ],
+                              ),
                               ),
                             );
                           } else {
@@ -578,6 +582,7 @@ class _ColonPageState extends State<ColonPage> {
                         ],
                       ),
                   ],
+                
                 ),
               ),
         bottomNavigationBar:
